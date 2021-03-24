@@ -1,0 +1,35 @@
+server:
+  port: 7701
+  error:
+    whitelabel:
+      enabled: true
+    include-stacktrace: never
+
+spring:
+  application:
+  name: Freeton League Core - the system for manage FreeTon League Game Tournaments
+  datasource: #JPA / HIBERNATE
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/core_tournament
+    password: postgres
+    username: postgres
+
+
+#LOGGING CONFIG
+logging:
+  level:
+    root: INFO
+    org:
+      apache:
+        http:
+          wire: INFO
+      springframework: WARN
+      hibernate:
+        SQL: DEBUG
+        type:
+          descriptor:
+            sql:
+              BasicBinder: TRACE
+    com: DEBUG
+  file:
+    name: \Users\Khsa\FreetonLeague\logs\League_Core_Tournament.log

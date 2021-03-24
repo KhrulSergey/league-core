@@ -1,0 +1,6 @@
+CREATE DATABASE leagueid;
+CREATE DATABASE core_tournament;
+CREATE DATABASE core_team;
+GRANT ALL PRIVILEGES ON DATABASE leagueid TO docker;
+GRANT ALL PRIVILEGES ON DATABASE core_tournament TO docker;
+GRANT ALL PRIVILEGES ON DATABASE core_team TO docker;
