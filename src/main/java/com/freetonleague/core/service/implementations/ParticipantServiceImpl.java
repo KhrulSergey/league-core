@@ -8,14 +8,18 @@ import com.freetonleague.core.repository.ParticipantRepository;
 import com.freetonleague.core.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.util.Objects.isNull;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
@@ -76,5 +80,18 @@ public class ParticipantServiceImpl implements ParticipantService {
         } else {
             throw new RuntimeException(DELETE_FAIL);
         }
+    }
+
+
+    /**
+     * Get all participation info for requested user
+     */
+    @Override
+    public List<Participant> getAllParticipation(User user) {
+        if(isNull(user)){
+            //TODO change Exc
+            throw new UsernameNotFoundException("to token in request");
+        }
+        return participantRepository.findAllByUser(user);
     }
 }
