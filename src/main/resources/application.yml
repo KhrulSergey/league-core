@@ -10,10 +10,16 @@ spring:
   name: Freeton League Core - the system for manage FreeTon League Game Tournaments
   datasource: #JPA / HIBERNATE
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/core_tournament
+    url: jdbc:postgresql://localhost:5432/league_core
     password: postgres
     username: postgres
+  session:
+    token-name: X-Auth-Token
 
+freetonleague:
+  service:
+    leagueId:
+      url: http://localhost:7700/api
 
 #LOGGING CONFIG
 logging:
@@ -23,13 +29,14 @@ logging:
       apache:
         http:
           wire: INFO
-      springframework: WARN
+      springframework: WARN #for detailed debug set DEBUG
       hibernate:
         SQL: DEBUG
         type:
           descriptor:
             sql:
               BasicBinder: TRACE
-    com: DEBUG
+    com:
+      freetonleague: DEBUG
   file:
     name: \Users\Khsa\FreetonLeague\logs\League_Core_Tournament.log

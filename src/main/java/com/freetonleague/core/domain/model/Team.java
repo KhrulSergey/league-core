@@ -34,8 +34,4 @@ public class Team extends BaseEntity {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private TeamStateType status;
-
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private TeamStateType status;
 }

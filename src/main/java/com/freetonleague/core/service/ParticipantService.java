@@ -4,6 +4,8 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.Participant;
 import com.freetonleague.core.domain.model.Team;
 
+import java.util.List;
+
 public interface ParticipantService {
     /**
      * Add participant to team by his id and team id.
@@ -21,4 +23,12 @@ public interface ParticipantService {
      * @return deleted participant
      */
     Participant deleteFromTeam(Participant participant);
+
+    /**
+     * Get all participation info for requested user
+     *
+     * @param user requested user data
+     * @return list of participant-info
+     */
+    List<Participant> getAllParticipation(User user);
 }
