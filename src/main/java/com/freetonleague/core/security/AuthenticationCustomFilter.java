@@ -3,7 +3,7 @@ package com.freetonleague.core.security;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.model.Session;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.restclient.SessionCloudClient;
+import com.freetonleague.core.restclient.SessionClientCloud;
 import com.freetonleague.core.service.SessionService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
     private final SessionService sessionService;
     private final UserService userService;
 
-    private final SessionCloudClient sessionCloudClient;
+    private final SessionClientCloud sessionClientCloud;
 
     @Value("${spring.session.token-name:token}")
     private String headerTokenName;
@@ -54,7 +54,8 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
                 : headerToken;
 
         if(!isBlank(token)) {
-            UserDto userInfo = sessionCloudClient.account(token);
+            Session sessionFromLeagueId = sessionClientCloud.session(token);
+            UserDto userInfo = sessionClientCloud.account(token);
         }
 
         if (nonNull(token)) {
