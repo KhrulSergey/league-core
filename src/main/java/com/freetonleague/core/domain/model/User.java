@@ -2,12 +2,15 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.UserStatusType;
 import com.sun.istack.NotNull;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -25,12 +28,12 @@ public class User extends BaseEntity  implements UserDetails {
     private static final long serialVersionUID = -6645357330555137758L;
 
     //Properties
-    @Setter(AccessLevel.NONE)
+    @NotNull
     @Column(name = "league_id", nullable = false)
     private UUID leagueId;
 
-    @NotNull
-    @Column(name = "login", unique = true)
+    @NotBlank
+    @Column(name = "username", unique = true)
     private String username;
 
     //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
@@ -39,7 +42,7 @@ public class User extends BaseEntity  implements UserDetails {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private UserStatusType status;
+    private UserStatusType status = UserStatusType.ACTIVE;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.

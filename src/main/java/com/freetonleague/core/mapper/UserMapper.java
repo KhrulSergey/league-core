@@ -1,6 +1,5 @@
 package com.freetonleague.core.mapper;
 
-
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.model.User;
 import org.mapstruct.InjectionStrategy;

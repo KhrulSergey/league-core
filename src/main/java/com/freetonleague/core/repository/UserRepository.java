@@ -3,7 +3,6 @@ package com.freetonleague.core.repository;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -22,4 +21,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     /** Return user found by username */
     User findByUsername(String username);
+
+    /** Check if user already existed on platform*/
+    boolean existsByUsername(String username);
 }

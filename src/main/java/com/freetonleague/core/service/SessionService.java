@@ -8,10 +8,11 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface SessionService {
 
-    /**
-     * Save user session by OAuth info. Returns null is the session wasn't created
-     */
+
     Session get(String id);
+
+    /** Returns session if it was found in DB or imported from LeagueId-module*/
+    Session loadByToken(String token);
 
     Session getByUser(User user);
 
