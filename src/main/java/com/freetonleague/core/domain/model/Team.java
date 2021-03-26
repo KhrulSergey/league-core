@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.persistence.*;
-import java.util.List;
+import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -25,7 +25,7 @@ public class Team extends BaseEntity {
     private Participant captain;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.REFRESH, orphanRemoval = false, fetch = FetchType.EAGER)
-    private List<Participant> participantList;
+    private Set<Participant> participantList;
 
     //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
     @Column(name = "team_logo_file_name")

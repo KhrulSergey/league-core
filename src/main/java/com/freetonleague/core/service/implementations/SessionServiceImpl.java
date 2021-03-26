@@ -7,7 +7,7 @@ import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.mapper.SessionMapper;
 import com.freetonleague.core.repository.SessionRepository;
-import com.freetonleague.core.restclient.LeagueIdClientService;
+import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.service.SessionService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;

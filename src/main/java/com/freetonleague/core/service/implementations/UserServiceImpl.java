@@ -6,7 +6,7 @@ import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.repository.UserRepository;
-import com.freetonleague.core.restclient.LeagueIdClientService;
+import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,4 +1,4 @@
-package com.freetonleague.core.restclient.util;
+package com.freetonleague.core.cloudclient.util;
 
 import com.freetonleague.core.exception.BadRequestException;
 import com.freetonleague.core.exception.NotFoundException;

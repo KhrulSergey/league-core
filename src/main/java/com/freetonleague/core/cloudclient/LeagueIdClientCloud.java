@@ -1,4 +1,4 @@
-package com.freetonleague.core.restclient;
+package com.freetonleague.core.cloudclient;
 
 import com.freetonleague.core.domain.dto.SessionDto;
 import com.freetonleague.core.domain.dto.UserDto;
