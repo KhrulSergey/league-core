@@ -1,11 +1,15 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.UserManageException;
+import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.repository.UserRepository;
+import com.freetonleague.core.restclient.LeagueIdClientService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,22 +21,26 @@ import javax.validation.Validator;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
+/**
+ * Implementation of the service for accessing User data from the repository.
+ */
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
 @RequiredArgsConstructor
 @Slf4j
-/**
- * Implementation of the service for accessing User data from the repository.
- */
 public class UserServiceImpl implements UserService {
+
     private final UserRepository userRepository;
+    private final UserMapper mapper;
+    private final LeagueIdClientService leagueIdClientService;
     private final Validator validator;
 
     /**
      * Adding a new user to DB.
-     *
-     * @param user User to add
-     * @return Added User
      */
     @Override
     public User add(User user) {
@@ -48,9 +56,6 @@ public class UserServiceImpl implements UserService {
 
     /**
      * Getting User by LeagueID from DB.
-     *
-     * @param leagueId User's leagueID to search
-     * @return User with a specific LeagueID, null - if the user is not found.
      */
     @Override
     public User get(UUID leagueId) {
@@ -60,10 +65,26 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Loading user from DB or import from LeagueId-module.
+     */
+    @Override
+    public User loadWithLeagueId(String leagueId, String sessionToken) {
+        log.debug("^ trying to find user on Platform with leagueId {}", leagueId);
+        User user = this.get(UUID.fromString(leagueId));
+        if(isNull(user)){
+            UserDto userDto = leagueIdClientService.getUser(sessionToken);
+            if (nonNull(userDto)){
+                user = this.add(userDto);
+            }
+            else{
+                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+            }
+        }
+        return user;
+    }
+
+    /**
      * Edit an existing user in DB.
-     *
-     * @param user Updated User's data to be added to the database
-     * @return Edited user
      */
     @Override
     public User edit(User user) {
@@ -101,5 +122,26 @@ public class UserServiceImpl implements UserService {
         }
 
         return user;
+    }
+
+    /** Add user to DB from LeagueId source data*/
+    private User add(UserDto userDto){
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+        if (violations.isEmpty()) {
+            if (!isBlank(userDto.getUsername()) && this.isUserExistedByUserName(userDto.getUsername())) {
+                log.error("^ user with username already exists on core module: {} but with DIFFERENT guid. Check data!", userDto.getUsername());
+                throw new UserManageException(ExceptionMessages.USER_DUPLICATE_FOUND_ERROR,
+                        String.format("Found duplicates by username '%s' on auth and data modules", userDto.getUsername()));
+            }
+            return this.add(mapper.fromDto(userDto));
+        } else {
+            log.warn("~ user: {} have constraint violations: {}", userDto, violations);
+            throw new ConstraintViolationException(violations);
+        }
+    }
+
+    /** Check if user already existed on platform*/
+    public boolean isUserExistedByUserName(String username) {
+        return userRepository.existsByUsername(username);
     }
 }

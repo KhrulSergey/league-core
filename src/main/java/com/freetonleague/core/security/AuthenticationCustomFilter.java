@@ -1,16 +1,13 @@
 package com.freetonleague.core.security;
 
-import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.model.Session;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.restclient.SessionClientCloud;
 import com.freetonleague.core.service.SessionService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -22,10 +19,8 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.UUID;
 
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Class for pre filtering request and search for token in header or JSESSIONID
@@ -36,8 +31,6 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
 
     private final SessionService sessionService;
     private final UserService userService;
-
-    private final SessionClientCloud sessionClientCloud;
 
     @Value("${spring.session.token-name:token}")
     private String headerTokenName;
@@ -53,13 +46,9 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
                 ? paramToken
                 : headerToken;
 
-        if(!isBlank(token)) {
-            Session sessionFromLeagueId = sessionClientCloud.session(token);
-            UserDto userInfo = sessionClientCloud.account(token);
-        }
 
         if (nonNull(token)) {
-            Session session = sessionService.get(token);
+            Session session = sessionService.loadByToken(token);
             if (nonNull(session) && !session.isExpired()) {
                 User user = session.getUser();
                 if (nonNull(user)) {
@@ -68,15 +57,6 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
             }
         }
         chain.doFilter(req, res);
-    }
-
-    private User getAuthorizedUserById(String leagueId, HttpServletRequest request) {
-        try {
-            return userService.get(UUID.fromString(leagueId));
-        } catch (AuthenticationException e) {
-            request.setAttribute("errorMessage", e.getMessage());
-            return null;
-        }
     }
 
     private void setUserToContext(User user, Session session) {

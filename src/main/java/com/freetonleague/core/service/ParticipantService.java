@@ -1,8 +1,8 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.Participant;
 import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.User;
 
 import java.util.List;
 

@@ -1,6 +1,5 @@
 package com.freetonleague.core.config;
 
-import com.freetonleague.core.restclient.SessionClientCloud;
 import com.freetonleague.core.security.AuthenticationCustomFilter;
 import com.freetonleague.core.service.SessionService;
 import com.freetonleague.core.service.UserService;
@@ -21,7 +20,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
     private final SessionService sessionService;
-    private final SessionClientCloud sessionClientCloud;
 
     @Value("${spring.session.token-name}")
     private final String headerAuthTokenName = "token";
@@ -29,7 +27,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     //Initialization of request filtering component
     @Bean
     public AuthenticationCustomFilter authenticationTokenFilterBean() throws Exception {
-        AuthenticationCustomFilter authenticationTokenFilter = new AuthenticationCustomFilter(sessionService, userService, sessionClientCloud);
+        AuthenticationCustomFilter authenticationTokenFilter = new AuthenticationCustomFilter(sessionService, userService);
         authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
         return authenticationTokenFilter;
     }

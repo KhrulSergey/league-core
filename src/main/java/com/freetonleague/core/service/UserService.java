@@ -24,6 +24,15 @@ public interface UserService extends UserDetailsService {
     User get(UUID leagueId);
 
     /**
+     * Loading user from DB or import from LeagueId-module.
+     *
+     * @param leagueId User's leagueID to search
+     * @param sessionToken Session token to request info from leagueID-module
+     * @return User with a specific LeagueID, null - if the user is not found.
+     */
+    User loadWithLeagueId(String leagueId, String sessionToken);
+
+    /**
      * Edit an existing user in DB.
      *
      * @param user Updated User's data to be added to the database

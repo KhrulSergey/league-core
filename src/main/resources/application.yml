@@ -40,3 +40,12 @@ logging:
       freetonleague: DEBUG
   file:
     name: \Users\Khsa\FreetonLeague\logs\League_Core_Tournament.log
+
+feign:
+  client:
+    config:
+      feignName:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: full
+        errorDecoder: com.freetonleague.core.restclient.util.FeignErrorDecoder

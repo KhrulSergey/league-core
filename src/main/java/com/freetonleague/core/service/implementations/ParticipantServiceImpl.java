@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.enums.ParticipantStatusType;
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.Participant;
 import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.ParticipantRepository;
 import com.freetonleague.core.service.ParticipantService;
 import lombok.RequiredArgsConstructor;
