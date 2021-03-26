@@ -7,11 +7,10 @@ import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
-public class TeamDto {
+public class TeamDto extends TeamBaseDto {
 
-    @NotNull(message = "name must be not null")
-    private String name;
-    private Participant captain;
-    private String teamLogoFileName;
-    private Set<Participant> participantList;
+    @NotNull
+    private Long captainId;
+
+    private ParticipantDto captain;
 }
