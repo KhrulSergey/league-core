@@ -27,6 +27,7 @@ public class TeamController {
     public static final String BASE_PATH = "/api/team";
     public static final String PATH_REGISTER = "/register";
     public static final String PATH_GET = "/{id}";
+    public static final String PATH_GET_LIST = "/list";
     public static final String PATH_EDIT = "/{id}";
     public static final String PATH_DISBAND = "/disband/{id}";
     public static final String PATH_EXPEL = "/{id}/expel/{participant_id}";
@@ -35,22 +36,29 @@ public class TeamController {
 
     @ApiOperation("Get team by id")
     @GetMapping(path = PATH_GET)
-    public ResponseEntity<TeamDto> getById(@PathVariable("id") long id) {
-        return new ResponseEntity<>(restTeamFacade.getByUd(id), HttpStatus.OK);
+    public ResponseEntity<TeamBaseDto> getById(@PathVariable("id") long id,
+                                               @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTeamFacade.getTeamById(id, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Get team list info")
+    @GetMapping(path = PATH_GET_LIST)
+    public ResponseEntity<List<TeamBaseDto>> getList(@ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTeamFacade.getTeamList(user), HttpStatus.OK);
     }
 
     @ApiOperation("Register new team on platform")
     @PostMapping(path = PATH_REGISTER)
-    public ResponseEntity<TeamDto> register(@RequestBody TeamDto teamDto,
+    public ResponseEntity<TeamDto> register(@RequestBody TeamBaseDto teamDto,
                                             @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTeamFacade.add(teamDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTeamFacade.addTeam(teamDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Edit team info")
     @PutMapping(path = PATH_EDIT)
     public ResponseEntity<TeamExtendedDto> edit(@PathVariable("id") long id, @RequestBody TeamBaseDto teamDto,
                              @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTeamFacade.edit(id, teamDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTeamFacade.editTeam(id, teamDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Expel participant from team")

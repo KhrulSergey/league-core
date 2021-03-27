@@ -42,7 +42,7 @@ public class User extends BaseEntity  implements UserDetails {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private UserStatusType status = UserStatusType.ACTIVE;
+    private UserStatusType status;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.

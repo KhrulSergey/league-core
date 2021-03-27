@@ -50,7 +50,7 @@ public class ParticipantServiceImpl implements ParticipantService {
             Participant participant = Participant.builder()
                     .team(team)
                     .user(user)
-                    .status(ParticipantStatusType.NEWBIE)
+                    .status(ParticipantStatusType.ACTIVE)
                     .build();
             Participant addedParticipant = participantRepository.saveAndFlush(participant);
             log.debug("User: {} is added to team: {}", user, team);
@@ -88,10 +88,22 @@ public class ParticipantServiceImpl implements ParticipantService {
      */
     @Override
     public List<Participant> getAllParticipation(User user) {
-        if(isNull(user)){
+        if (isNull(user)) {
             //TODO change Exc
             throw new UsernameNotFoundException("to token in request");
         }
         return participantRepository.findAllByUser(user);
+    }
+
+    /**
+     * Returns founded participant by id
+     *
+     * @param id of team to search
+     * @return team entity
+     */
+    @Override
+    public Participant getById(long id) {
+        log.debug("^ getting participant by id: {}", id);
+        return participantRepository.getOne(id);
     }
 }

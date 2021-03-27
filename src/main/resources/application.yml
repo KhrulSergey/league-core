@@ -22,6 +22,10 @@ freetonleague:
       url: http://localhost:7700/api
 
 #LOGGING CONFIG
+debug: false
+debug-rest: true
+stacktrace-rest: true
+
 logging:
   level:
     root: INFO

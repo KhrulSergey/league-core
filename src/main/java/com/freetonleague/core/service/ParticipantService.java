@@ -31,4 +31,12 @@ public interface ParticipantService {
      * @return list of participant-info
      */
     List<Participant> getAllParticipation(User user);
+
+    /**
+     * Returns founded participant by id
+     *
+     * @param id of team to search
+     * @return team entity
+     */
+    Participant getById(long id);
 }

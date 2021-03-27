@@ -4,11 +4,15 @@ import com.freetonleague.core.domain.enums.TeamStateType;
 import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
+@NoArgsConstructor
+@SuperBuilder
 @Data
 @Entity
 @Table(schema = "team_management", name = "teams")
@@ -34,4 +38,8 @@ public class Team extends BaseEntity {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private TeamStateType status;
+
+    public boolean isCapitan(User user) {
+        return captain.equals(user);
+    }
 }
