@@ -1,11 +1,11 @@
 package com.freetonleague.core.domain.dto;
 
-import com.freetonleague.core.domain.model.Participant;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
-import java.util.Set;
 
+@EqualsAndHashCode(callSuper = true)
 @Data
 public class TeamDto extends TeamBaseDto {
 

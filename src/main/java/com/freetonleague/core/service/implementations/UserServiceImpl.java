@@ -1,12 +1,13 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.enums.UserStatusType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.repository.UserRepository;
-import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -47,6 +48,7 @@ public class UserServiceImpl implements UserService {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         if (violations.isEmpty()) {
             log.debug("^ User [ {} ] binding is successful", user);
+            user.setStatus(UserStatusType.ACTIVE);
             return userRepository.saveAndFlush(user);
         } else {
             log.warn("~ User [ {} ] have constraint violations: {}", user, violations);
@@ -69,11 +71,13 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User loadWithLeagueId(String leagueId, String sessionToken) {
-        log.debug("^ trying to find user on Platform with leagueId {}", leagueId);
+        log.debug("^ trying to find user on BD with leagueId {}", leagueId);
         User user = this.get(UUID.fromString(leagueId));
         if(isNull(user)){
+            log.debug("^ trying to load user from LeagueId {}", leagueId);
             UserDto userDto = leagueIdClientService.getUser(sessionToken);
             if (nonNull(userDto)){
+                //create new user
                 user = this.add(userDto);
             }
             else{

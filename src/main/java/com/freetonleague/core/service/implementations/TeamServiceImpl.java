@@ -1,6 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.enums.ParticipantStatusType;
+import com.freetonleague.core.domain.model.Participant;
 import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TeamRepository;
 import com.freetonleague.core.service.TeamService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
+
+import static java.util.Objects.nonNull;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
@@ -27,9 +33,6 @@ public class TeamServiceImpl implements TeamService {
 
     /**
      * Add new team to DB.
-     *
-     * @param team Team to be added
-     * @return Added team
      */
     @Override
     public Team add(Team team) {
@@ -45,10 +48,6 @@ public class TeamServiceImpl implements TeamService {
 
     /**
      * Edit team in DB.
-     * Example - captain, logo, name
-     *
-     * @param team Team to be edited
-     * @return Edited team
      */
     @Override
     public Team edit(Team team) {
@@ -67,5 +66,67 @@ public class TeamServiceImpl implements TeamService {
             throw new ConstraintViolationException(violations);
         }
         return updatedTeam;
+    }
+
+    /**
+     * Returns founded team by id
+     */
+    @Override
+    public Team getById(long id) {
+        return null;
+    }
+
+    /**
+     * Returns list of all teams
+     */
+    @Override
+    public List<Team> getList() {
+        return null;
+    }
+
+    /**
+     * Get the list of teams for current user
+     */
+    @Override
+    public List<Team> getListByUser(User user) {
+        return null;
+    }
+
+    /**
+     * Expel (exclude) from requested team the specified participant.
+     * Accessible only for a capitan of the team
+     */
+    @Override
+    public Team expel(Team team, Participant participant) {
+        return null;
+    }
+
+    /**
+     * Delete (disband) all the band.
+     * Accessible only for a capitan of the team
+     */
+    @Override
+    public void delete(Team team) {
+
+    }
+
+    /**
+     * Returns sign of user participation in the specified team
+     */
+    @Override
+    public Participant getParticipantOfTeamByUser(Team team, User user) {
+        return team.getParticipantList().stream().filter(p -> p.getUser().equals(user)).findFirst().orElse(null);
+    }
+
+    /**
+     * Returns sign of user participation in the specified team
+     */
+    @Override
+    public ParticipantStatusType getUserParticipantStatusOfTeam(Team team, User user) {
+        Participant participant = team.getParticipantList().parallelStream()
+                .filter(p -> p.getUser().equals(user))
+                .findFirst()
+                .orElse(null);
+        return nonNull(participant) ? participant.getStatus() : null;
     }
 }
