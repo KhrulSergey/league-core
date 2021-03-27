@@ -1,11 +1,11 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.enums.ParticipantStatusType;
-import com.freetonleague.core.domain.model.Participant;
+import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.repository.ParticipantRepository;
-import com.freetonleague.core.service.ParticipantService;
+import com.freetonleague.core.repository.TeamParticipantRepository;
+import com.freetonleague.core.service.TeamParticipantService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,12 +28,17 @@ import static java.util.Objects.isNull;
 /**
  * Implementation of the service for accessing User data from the repository.
  */
-public class ParticipantServiceImpl implements ParticipantService {
-    private final ParticipantRepository participantRepository;
+public class TeamParticipantServiceImpl implements TeamParticipantService {
+    private final TeamParticipantRepository teamParticipantRepository;
     private final Validator validator;
 
     private final static String ADD_FAIL = "Something went wrong while add participant to team";
     private final static String DELETE_FAIL = "Something went wrong while delete participant to team";
+
+
+    public TeamParticipant save(TeamParticipant teamParticipant) {
+        return teamParticipantRepository.saveAndFlush(teamParticipant);
+    }
 
     /**
      * Add participant to team by his id and team id.
@@ -43,18 +48,18 @@ public class ParticipantServiceImpl implements ParticipantService {
      * @return added participant
      */
     @Override
-    public Participant addToTeam(User user, Team team) {
+    public TeamParticipant addToTeam(User user, Team team) {
         Set<ConstraintViolation<User>> userViolations = validator.validate(user);
         Set<ConstraintViolation<Team>> teamViolations = validator.validate(team);
         if (userViolations.isEmpty() && teamViolations.isEmpty()) {
-            Participant participant = Participant.builder()
+            TeamParticipant teamParticipant = TeamParticipant.builder()
                     .team(team)
                     .user(user)
-                    .status(ParticipantStatusType.ACTIVE)
+                    .status(TeamParticipantStatusType.ACTIVE)
                     .build();
-            Participant addedParticipant = participantRepository.saveAndFlush(participant);
+            TeamParticipant addedTeamParticipant = teamParticipantRepository.saveAndFlush(teamParticipant);
             log.debug("User: {} is added to team: {}", user, team);
-            return addedParticipant;
+            return addedTeamParticipant;
         } else {
             log.warn("Something went wrong, check user: {} or team: {}", user, team);
             throw new RuntimeException(ADD_FAIL);
@@ -64,14 +69,14 @@ public class ParticipantServiceImpl implements ParticipantService {
     /**
      * Delete participant from team.
      *
-     * @param participant participant what will be deleted
+     * @param teamParticipant participant what will be deleted
      * @return deleted participant
      */
     @Override
-    public Participant deleteFromTeam(Participant participant) {
-        Set<ConstraintViolation<Participant>> participantViolations = validator.validate(participant);
+    public TeamParticipant deleteFromTeam(TeamParticipant teamParticipant) {
+        Set<ConstraintViolation<TeamParticipant>> participantViolations = validator.validate(teamParticipant);
         if (participantViolations.isEmpty()) {
-            Optional<Participant> deletedParticipant = participantRepository.delete(participant.getId());
+            Optional<TeamParticipant> deletedParticipant = teamParticipantRepository.expel(teamParticipant);
             if (deletedParticipant.isPresent()) {
                 return deletedParticipant.get();
             } else {
@@ -87,12 +92,12 @@ public class ParticipantServiceImpl implements ParticipantService {
      * Get all participation info for requested user
      */
     @Override
-    public List<Participant> getAllParticipation(User user) {
+    public List<TeamParticipant> getAllParticipation(User user) {
         if (isNull(user)) {
             //TODO change Exc
             throw new UsernameNotFoundException("to token in request");
         }
-        return participantRepository.findAllByUser(user);
+        return teamParticipantRepository.findAllByUser(user);
     }
 
     /**
@@ -102,8 +107,24 @@ public class ParticipantServiceImpl implements ParticipantService {
      * @return team entity
      */
     @Override
-    public Participant getById(long id) {
+    public TeamParticipant getById(long id) {
         log.debug("^ getting participant by id: {}", id);
-        return participantRepository.getOne(id);
+        return teamParticipantRepository.getOne(id);
     }
+
+
+    /**
+     * Expel participant from his team.
+     * Changing status of participant to DELETED
+     */
+    public void expel(TeamParticipant teamParticipant) {
+        if (isNull(teamParticipant)) {
+            log.error("!> requesting expel for null participant. Check evoking clients");
+            return;
+        }
+//        participant.setStatus(ParticipantStatusType.DELETED);
+//        participant.setD(ParticipantStatusType.DELETED);
+        teamParticipantRepository.expel(teamParticipant);
+    }
+
 }

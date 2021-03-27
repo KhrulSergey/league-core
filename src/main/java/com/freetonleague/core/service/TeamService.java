@@ -1,8 +1,8 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.enums.ParticipantStatusType;
-import com.freetonleague.core.domain.model.Participant;
+import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 
 import java.util.List;
@@ -49,30 +49,29 @@ public interface TeamService {
 
     /**
      * Expel (exclude) from requested team the specified participant.
-     * Accessible only for a capitan of the team
+     * Accessible only for a captain of the team
      *
-     * @param team        goal team
-     * @param participant entity to be excluded
+     * @param team            goal team
+     * @param teamParticipant entity to be excluded
      * @return Edited team
      */
-    Team expel(Team team, Participant participant);
+    Team expelParticipant(Team team, TeamParticipant teamParticipant);
 
     /**
-     * Delete (disband) all the band.
-     * Accessible only for a capitan of the team
+     * Disband (delete) all the band.
+     * Accessible only for a captain of the team
      *
      * @param team entity to be deleted
      */
-    void delete(Team team);
-
+    void disband(Team team);
 
     /**
      * Returns participant entity by user in the specified team
      */
-    Participant getParticipantOfTeamByUser(Team team, User user);
+    TeamParticipant getParticipantOfTeamByUser(Team team, User user);
 
     /**
      * Returns sign of user participation in the specified team
      */
-    ParticipantStatusType getUserParticipantStatusOfTeam(Team team, User user);
+    TeamParticipantStatusType getUserParticipantStatusOfTeam(Team team, User user);
 }

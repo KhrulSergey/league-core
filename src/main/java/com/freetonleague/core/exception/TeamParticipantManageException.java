@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Getter
 @Setter
 @EqualsAndHashCode(callSuper = false)
-public class ParticipantManageException extends BaseDetailedException {
+public class TeamParticipantManageException extends BaseDetailedException {
 
-    public ParticipantManageException(String message, String detailedMessage) {
+    public TeamParticipantManageException(String message, String detailedMessage) {
         super(message, detailedMessage);
     }
 }

@@ -1,8 +1,8 @@
 package com.freetonleague.core.controller;
 
-import com.freetonleague.core.domain.model.Participant;
+import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.ParticipantService;
+import com.freetonleague.core.service.TeamParticipantService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -17,22 +17,20 @@ import springfox.documentation.annotations.ApiIgnore;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = ParticipantController.BASE_PATH)
+@RequestMapping(path = TeamParticipantController.BASE_PATH)
 @RequiredArgsConstructor
-@Api(value = "Participant Management Controller")
-public class ParticipantController {
+@Api(value = "Team participant management controller")
+public class TeamParticipantController {
 
-    private final ParticipantService participantService;
-
-    public static final String BASE_PATH = "/api/participant";
+    public static final String BASE_PATH = "/api/team-participant";
+    private final TeamParticipantService teamParticipantService;
     public static final String PATH_GET_ME = "/me";
     public static final String PATH_GET_CURRENT = "/current";
     public static final String PATH_REGISTER = "/register";
 
-
     @ApiOperation("Getting data about all participation for current user from session")
     @GetMapping(path = PATH_GET_CURRENT)
-    public ResponseEntity<List<Participant>> getCurrent(@ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(participantService.getAllParticipation(user), HttpStatus.OK);
+    public ResponseEntity<List<TeamParticipant>> getCurrent(@ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(teamParticipantService.getAllParticipation(user), HttpStatus.OK);
     }
 }

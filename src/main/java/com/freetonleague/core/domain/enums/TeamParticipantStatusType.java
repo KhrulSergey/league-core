@@ -1,8 +1,8 @@
 package com.freetonleague.core.domain.enums;
 
-public enum ParticipantStatusType {
+public enum TeamParticipantStatusType {
     INVITED,
     ACTIVE,
     DELETED,
-    CAPITAN
+    CAPTAIN
 }

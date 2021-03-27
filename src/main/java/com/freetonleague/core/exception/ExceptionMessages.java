@@ -24,10 +24,10 @@ public class ExceptionMessages {
 
     public static final String TEAM_CREATION_ERROR = "Team creation failed. Please try again";
     public static final String TEAM_MODIFY_ERROR = "Team modifying failed. Please try again";
-    public static final String TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Participant is not the team member. Please check request parameters";
-    public static final String TEAM_NOT_FOUND_ERROR = "User was not found. Please check request parameters";
+    public static final String TEAM_PARTICIPANT_MEMBERSHIP_ERROR = "Participant is not the team member. Please check request parameters";
+    public static final String TEAM_NOT_FOUND_ERROR = "Team was not found. Please check request parameters";
     public static final String TEAM_FORBIDDEN_ERROR = "Need proper team status to manage team settings. Please check your rights.";
     public static final String TEAM_EXPELLING_ERROR = "Need proper status to be excluded from team. Please check your rights.";
 
-    public static final String PARTICIPANT_NOT_FOUND_ERROR = "Participant was not found. Please check request parameters";
+    public static final String TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Participant was not found. Please check request parameters";
 }
