@@ -51,7 +51,7 @@ public interface RestTeamFacade {
 
     /**
      * Expel (exclude) from requested team the specified participant.
-     * Accessible only for a capitan of the team
+     * Accessible only for a captain of the team
      *
      * @param id            Identity of a team
      * @param participantId Identity of a participant
@@ -62,7 +62,7 @@ public interface RestTeamFacade {
 
     /**
      * Disband all the band.
-     * Accessible only for a capitan of the team
+     * Accessible only for a captain of the team
      *
      * @param id   Identity of a team
      * @param user current user from Session

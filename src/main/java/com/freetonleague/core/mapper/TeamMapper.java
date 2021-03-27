@@ -9,7 +9,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = TeamParticipantMapper.class)
 public interface TeamMapper {
 
     Team fromDto(TeamDto dto);
@@ -34,5 +34,5 @@ public interface TeamMapper {
     List<TeamBaseDto> toBaseDto(List<Team> entities);
 
     @IterableMapping(qualifiedByName = "toExtendedDto")
-    List<TeamExtendedDto> toExtendedDto(List<Team> entity);
+    List<TeamExtendedDto> toExtendedDto(List<Team> entities);
 }

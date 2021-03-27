@@ -3,15 +3,15 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
-import com.freetonleague.core.domain.enums.ParticipantStatusType;
-import com.freetonleague.core.domain.model.Participant;
+import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
+import com.freetonleague.core.domain.enums.TeamStateType;
 import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
-import com.freetonleague.core.mapper.ParticipantMapper;
 import com.freetonleague.core.mapper.TeamMapper;
-import com.freetonleague.core.service.ParticipantService;
 import com.freetonleague.core.service.RestTeamFacade;
+import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -33,9 +34,8 @@ import static java.util.Objects.nonNull;
 public class RestTeamFacadeImpl implements RestTeamFacade {
 
     private final TeamService teamService;
-    private final ParticipantService participantService;
+    private final TeamParticipantService teamParticipantService;
     private final TeamMapper teamMapper;
-    private final ParticipantMapper participantMapper;
     private final Validator validator;
 
     /**
@@ -86,15 +86,19 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         }
         teamDto.setId(null);
         Team newTeam = teamMapper.fromDto(teamDto);
-        Participant capitan = Participant.builder()
+        TeamParticipant captain = TeamParticipant.builder() // save current user as captain
                 .user(user)
                 .team(newTeam)
-                .status(ParticipantStatusType.CAPITAN)
+                .status(TeamParticipantStatusType.CAPTAIN)
+                .joinAt(LocalDateTime.now())
                 .build();
-        // save current user as capitan and 1st participant
-        newTeam.setCaptain(capitan);
-        newTeam.setParticipantList(Collections.singleton(capitan));
+        //set captain to team and  1st participant
+        newTeam.setCaptain(captain);
+        newTeam.setTeamParticipantList(Collections.singleton(captain));
+        newTeam.setStatus(TeamStateType.ACTIVE);
+        //save team and captain by Cascade persistence
         newTeam = teamService.add(newTeam);
+
         if (isNull(newTeam)) {
             log.error("!> error while creating team from dto {} for user {}.", teamDto, user);
             throw new TeamManageException(ExceptionMessages.TEAM_CREATION_ERROR, "Team was not saved on Portal. Check requested params.");
@@ -114,7 +118,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        if (!team.isCapitan(user)) {
+        if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for modifying team from dto {} for user {}.", teamDto, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
         }
@@ -130,20 +134,20 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
 
     /**
      * Expel from requested team the specified participant.
-     * Accessible only for a capitan of the team
+     * Accessible only for a captain of the team
      */
     @Override
     public TeamExtendedDto expel(long id, long participantId, User user) {
         Team team = this.getVerifiedTeamById(id, user);
-        if (!team.isCapitan(user)) {
+        if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for expelling participant id {} team from team {} for user {}.",
                     participantId, team, user);
-            throw new TeamManageException(ExceptionMessages.TEAM_FORBIDDEN_ERROR, "Only capitan can exclude participants from team.");
+            throw new TeamManageException(ExceptionMessages.TEAM_FORBIDDEN_ERROR, "Only captain can exclude participants from team.");
         }
-        Participant participant = this.getTeamParticipant(participantId, team);
-        TeamExtendedDto teamDto = teamMapper.toExtendedDto(teamService.expel(team, participant));
+        TeamParticipant teamParticipant = this.getTeamParticipant(participantId, team);
+        TeamExtendedDto teamDto = teamMapper.toExtendedDto(teamService.expelParticipant(team, teamParticipant));
         if (isNull(teamDto)) {
-            log.error("!> error while expelling participant {} from team {}.", participant, team);
+            log.error("!> error while expelling participant {} from team {}.", teamParticipant, team);
             throw new TeamManageException(ExceptionMessages.TEAM_MODIFY_ERROR, "Team was not modified on Portal. Check requested params.");
         }
         return teamDto;
@@ -152,16 +156,16 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
 
     /**
      * Disband all the band.
-     * Accessible only for a capitan of the team
+     * Accessible only for a captain of the team
      */
     @Override
     public void disband(long id, User user) {
         Team team = this.getVerifiedTeamById(id, user);
-        if (!team.isCapitan(user)) {
+        if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for disband team {} for user {}.", team, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
         }
-        teamService.delete(team);
+        teamService.disband(team);
     }
 
     /**
@@ -170,12 +174,12 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
     @Override
     public void quitUserFromTeam(long id, User user) {
         Team team = this.getVerifiedTeamById(id, user);
-        Participant participant = teamService.getParticipantOfTeamByUser(team, user);
-        if (isNull(participant) || participant.getStatus() != ParticipantStatusType.ACTIVE) {
+        TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, user);
+        if (isNull(teamParticipant) || teamParticipant.getStatus() != TeamParticipantStatusType.ACTIVE) {
             log.warn("~ forbiddenException for quitting user {} from team {}.", user, team);
-            throw new TeamManageException(ExceptionMessages.TEAM_EXPELLING_ERROR, "Only active members can be excluded from team: capitan, invited or deleted participant can't.");
+            throw new TeamManageException(ExceptionMessages.TEAM_EXPELLING_ERROR, "Only active members can be excluded from team: captain, invited or deleted participant can't.");
         }
-        teamService.expel(team, participant);
+        teamService.expelParticipant(team, teamParticipant);
     }
 
     /**
@@ -208,16 +212,16 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
     /**
      * Getting participant by id, verify team membering
      */
-    private Participant getTeamParticipant(long participantId, Team team) {
-        Participant participant = participantService.getById(participantId);
-        if (isNull(participant)) {
+    private TeamParticipant getTeamParticipant(long participantId, Team team) {
+        TeamParticipant teamParticipant = teamParticipantService.getById(participantId);
+        if (isNull(teamParticipant)) {
             log.debug("^ Participant with requested id {} was not found. 'getTeamParticipant' request denied", participantId);
-            throw new ParticipantManageException(ExceptionMessages.PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id" + participantId + "was not found");
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id" + participantId + "was not found");
         }
-        if (!team.getParticipantList().contains(participant)) {
+        if (!team.getTeamParticipantList().contains(teamParticipant)) {
             log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
-            throw new TeamManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id" + participantId + "is not a member of team id " + team.getId());
+            throw new TeamManageException(ExceptionMessages.TEAM_PARTICIPANT_MEMBERSHIP_ERROR, "Participant with requested id" + participantId + "is not a member of team id " + team.getId());
         }
-        return participant;
+        return teamParticipant;
     }
 }

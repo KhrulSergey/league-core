@@ -1,7 +1,7 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.ParticipantDto;
-import com.freetonleague.core.domain.model.Participant;
+import com.freetonleague.core.domain.dto.TeamParticipantDto;
+import com.freetonleague.core.domain.model.TeamParticipant;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -11,14 +11,14 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface ParticipantMapper {
+public interface TeamParticipantMapper {
 
-    Participant fromDto(ParticipantDto dto);
+    TeamParticipant fromDto(TeamParticipantDto dto);
 
     @Mapping(target = "teamId", source = "entity.team.id")
-    ParticipantDto toDto(Participant entity);
+    TeamParticipantDto toDto(TeamParticipant entity);
 
-    List<Participant> fromDto(List<ParticipantDto> dtoList);
+    List<TeamParticipant> fromDto(List<TeamParticipantDto> dtoList);
 
-    List<ParticipantDto> toDto(List<Participant> entities);
+    List<TeamParticipantDto> toDto(List<TeamParticipant> entities);
 }

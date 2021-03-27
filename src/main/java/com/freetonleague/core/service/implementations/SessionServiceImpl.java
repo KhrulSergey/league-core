@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.domain.dto.SessionDto;
 import com.freetonleague.core.domain.model.Session;
 import com.freetonleague.core.domain.model.User;
@@ -7,7 +8,6 @@ import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.mapper.SessionMapper;
 import com.freetonleague.core.repository.SessionRepository;
-import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.service.SessionService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -49,17 +49,22 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public Session loadByToken(String token) {
         if (isBlank(token)) {
+            log.debug("^ session token was Blank in loadByToken()");
             return null;
         }
+        log.debug("^ trying to find session by token: '{}'", token);
         Session session = sessionRepository.findByToken(token);
         if (isNull(session)) {
             // trying to find session in LeagueId-module
+            log.debug("^ session with token: '{}' wasn't found in DB. Trying to load session from LeagueId-module", token);
             SessionDto sessionDto = leagueIdSessionClient.getSession(token);
             if(nonNull(sessionDto)) {
+                log.debug("^ found session with token: '{}' in LeagueId-module", token);
                 //trying to find user in DB or import from LeagueId-module
                 User user = userService.loadWithLeagueId(sessionDto.getUserLeagueId(), token);
                 if(nonNull(user)){
                     // create new session
+                    log.debug("^ trying to save new session with token: '{}' for user: {}", token, user);
                     session = this.saveFromLeagueId(sessionDto, user);
                 }
             }

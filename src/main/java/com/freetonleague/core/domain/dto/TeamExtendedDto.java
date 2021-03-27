@@ -8,5 +8,5 @@ import java.util.Set;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class TeamExtendedDto extends TeamDto{
-    private Set<ParticipantDto> participantList;
+    private Set<TeamParticipantDto> participantList;
 }
