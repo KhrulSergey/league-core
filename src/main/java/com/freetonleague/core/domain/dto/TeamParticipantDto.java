@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 public class TeamParticipantDto {
     private Long id;
 
+    private String userLeagueId;
+
     private Long teamId;
 
     private TeamParticipantStatusType status;

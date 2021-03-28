@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.dto;
 
+import com.freetonleague.core.domain.enums.TeamStateType;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -14,4 +15,6 @@ public class TeamBaseDto {
 
     @NotBlank(message = "team logo must be not empty")
     private String teamLogoFileName;
+
+    private TeamStateType status;
 }

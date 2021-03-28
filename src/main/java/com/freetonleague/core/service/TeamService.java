@@ -34,6 +34,14 @@ public interface TeamService {
     Team getById(long id);
 
     /**
+     * Returns founded team by name
+     *
+     * @param teamName of team to search
+     * @return team entity
+     */
+    Team getByName(String teamName);
+
+    /**
      * Returns list of all teams
      *
      * @return list of team entities

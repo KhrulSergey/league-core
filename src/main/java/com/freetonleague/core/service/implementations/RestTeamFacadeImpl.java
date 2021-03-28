@@ -84,6 +84,11 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
+        if (nonNull(teamService.getByName(teamDto.getName()))) {
+            log.warn("~ parameter 'name' is not unique for addTeam");
+            throw new ValidationException(ExceptionMessages.TEAM_DUPLICATE_BY_NAME_ERROR, "name", "parameter name is not unique for addTeam");
+        }
+
         teamDto.setId(null);
         Team newTeam = teamMapper.fromDto(teamDto);
         TeamParticipant captain = TeamParticipant.builder() // save current user as captain
@@ -94,7 +99,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
                 .build();
         //set captain to team and  1st participant
         newTeam.setCaptain(captain);
-        newTeam.setTeamParticipantList(Collections.singleton(captain));
+        newTeam.setParticipantList(Collections.singleton(captain));
         newTeam.setStatus(TeamStateType.ACTIVE);
         //save team and captain by Cascade persistence
         newTeam = teamService.add(newTeam);
@@ -145,6 +150,12 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             throw new TeamManageException(ExceptionMessages.TEAM_FORBIDDEN_ERROR, "Only captain can exclude participants from team.");
         }
         TeamParticipant teamParticipant = this.getTeamParticipant(participantId, team);
+        if (teamParticipant.getStatus() != TeamParticipantStatusType.ACTIVE) {
+            log.debug("^ forbiddenException for expelling participant id {} team from team {} for user {}.",
+                    participantId, team, user);
+            throw new TeamManageException(ExceptionMessages.TEAM_EXPELLING_PARTICIPANT_ERROR,
+                    "Only active members can be excluded, participant status is " + teamParticipant.getStatus());
+        }
         TeamExtendedDto teamDto = teamMapper.toExtendedDto(teamService.expelParticipant(team, teamParticipant));
         if (isNull(teamDto)) {
             log.error("!> error while expelling participant {} from team {}.", teamParticipant, team);
@@ -204,7 +215,8 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         }
         Team team = teamService.getById(id);
         if (isNull(team)) {
-            throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR, "Team with requested id" + id + "was not found");
+            log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' request denied", id);
+            throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR, "Team with requested id " + id + " was not found");
         }
         return team;
     }
@@ -213,14 +225,14 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      * Getting participant by id, verify team membering
      */
     private TeamParticipant getTeamParticipant(long participantId, Team team) {
-        TeamParticipant teamParticipant = teamParticipantService.getById(participantId);
+        TeamParticipant teamParticipant = teamParticipantService.getParticipantById(participantId);
         if (isNull(teamParticipant)) {
             log.debug("^ Participant with requested id {} was not found. 'getTeamParticipant' request denied", participantId);
-            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id" + participantId + "was not found");
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id " + participantId + " was not found");
         }
-        if (!team.getTeamParticipantList().contains(teamParticipant)) {
+        if (!team.getParticipantList().contains(teamParticipant)) {
             log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
-            throw new TeamManageException(ExceptionMessages.TEAM_PARTICIPANT_MEMBERSHIP_ERROR, "Participant with requested id" + participantId + "is not a member of team id " + team.getId());
+            throw new TeamManageException(ExceptionMessages.TEAM_PARTICIPANT_MEMBERSHIP_ERROR, "Participant with requested id " + participantId + " is not a member of team id " + team.getId());
         }
         return teamParticipant;
     }

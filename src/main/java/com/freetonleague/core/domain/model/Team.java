@@ -34,7 +34,7 @@ public class Team extends BaseEntity {
     private TeamParticipant captain;
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<TeamParticipant> teamParticipantList;
+    private Set<TeamParticipant> participantList;
 
     //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
     @Column(name = "team_logo_file_name")
@@ -52,8 +52,8 @@ public class Team extends BaseEntity {
     @Override
     public String toString() {
 
-        String participantListString = (nonNull(teamParticipantList) && !teamParticipantList.isEmpty()) ?
-                ", participantList=" + teamParticipantList :
+        String participantListString = (nonNull(participantList) && !participantList.isEmpty()) ?
+                ", participantList=" + participantList :
                 "";
         String capitanString = nonNull(captain) ? ", captain=" + captain : "";
         return "Team{" +

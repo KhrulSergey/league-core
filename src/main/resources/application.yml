@@ -20,6 +20,9 @@ freetonleague:
   service:
     leagueId:
       url: http://localhost:7700/api
+  team:
+    invitation:
+      token-duration-in-sec: 432000
 
 #LOGGING CONFIG
 debug: false

@@ -54,7 +54,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team edit(Team team) {
         Set<ConstraintViolation<Team>> violations = validator.validate(team);
-        if (violations.isEmpty()) {
+        if (!violations.isEmpty()) {
             log.warn("edited team: {} have constraint violations: {}", team, violations);
             throw new ConstraintViolationException(violations);
         }
@@ -75,6 +75,15 @@ public class TeamServiceImpl implements TeamService {
     public Team getById(long id) {
         log.debug("^ trying to get team by id: {}", id);
         return teamRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Returns founded team by id
+     */
+    @Override
+    public Team getByName(String teamName) {
+        log.debug("^ trying to get team by name: {}", teamName);
+        return teamRepository.findByName(teamName);
     }
 
     /**
@@ -109,14 +118,14 @@ public class TeamServiceImpl implements TeamService {
             log.error("!> requesting expelParticipant for NULL team {} or NULL participant {}. Check evoking clients", team, teamParticipant);
             return null;
         }
-        if (!team.getTeamParticipantList().contains(teamParticipant)) {
+        if (!team.getParticipantList().contains(teamParticipant)) {
             log.error("!> requesting expelParticipant for exclude participant {} who isn't a member of the team {}. " +
                     "Check evoking clients", teamParticipant, team);
             return null;
         }
-        log.debug("^ trying to expel participant {} from team {}", teamParticipant, team);
-        teamParticipantService.expel(teamParticipant);
-        return teamRepository.getOne(team.getId());
+        log.debug("^ trying to expel participant {} from team {}", teamParticipant, team.getId());
+        teamParticipantService.expelParticipant(teamParticipant);
+        return teamRepository.findById(team.getId()).orElse(null);
     }
 
     /**
@@ -130,8 +139,8 @@ public class TeamServiceImpl implements TeamService {
             return;
         }
         log.debug("^ trying to disband the team  {}", team);
-        team.getTeamParticipantList().parallelStream() // expel all participants
-                .forEach(teamParticipantService::expel);
+        team.getParticipantList().parallelStream() // expel all participants
+                .forEach(teamParticipantService::expelParticipant);
         team.setStatus(TeamStateType.DELETED);
         teamRepository.saveAndFlush(team); // save changes to team
     }
@@ -141,8 +150,8 @@ public class TeamServiceImpl implements TeamService {
      */
     @Override
     public TeamParticipant getParticipantOfTeamByUser(Team team, User user) {
-        return team.getTeamParticipantList().stream()
-                .filter(p -> p.getUser().equals(user))
+        return team.getParticipantList().stream()
+                .filter(p -> p.getUser().getLeagueId().equals(user.getLeagueId()))
                 .findFirst().orElse(null);
     }
 
@@ -151,8 +160,8 @@ public class TeamServiceImpl implements TeamService {
      */
     @Override
     public TeamParticipantStatusType getUserParticipantStatusOfTeam(Team team, User user) {
-        TeamParticipant teamParticipant = team.getTeamParticipantList().parallelStream()
-                .filter(p -> p.getUser().equals(user))
+        TeamParticipant teamParticipant = team.getParticipantList().parallelStream()
+                .filter(p -> p.getUser().getLeagueId().equals(user.getLeagueId()))
                 .findFirst()
                 .orElse(null);
         return nonNull(teamParticipant) ? teamParticipant.getStatus() : null;

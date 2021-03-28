@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @EqualsAndHashCode(callSuper = false)
 public class ValidationException extends RuntimeException {
 
-    private String message;
+    private String detailedMessage;
     private List<ValidationError> validationErrors;
 
     public ValidationException(String message, List<ValidationError> validationErrors) {

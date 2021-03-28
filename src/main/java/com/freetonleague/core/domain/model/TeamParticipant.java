@@ -1,7 +1,10 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -38,7 +41,6 @@ public class TeamParticipant extends BaseEntity implements Serializable {
     @Column(name = "join_at")
     private LocalDateTime joinAt;
 
-    @Setter(AccessLevel.NONE)
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;
 
