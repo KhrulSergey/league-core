@@ -61,9 +61,10 @@ public interface TeamService {
      *
      * @param team            goal team
      * @param teamParticipant entity to be excluded
+     * @param isSelfQuit      sign of self quiting from team to be excluded
      * @return Edited team
      */
-    Team expelParticipant(Team team, TeamParticipant teamParticipant);
+    Team expelParticipant(Team team, TeamParticipant teamParticipant, boolean isSelfQuit);
 
     /**
      * Disband (delete) all the band.

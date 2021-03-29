@@ -21,14 +21,23 @@ public interface UserService extends UserDetailsService {
      * @param leagueId User's leagueID to search
      * @return User with a specific LeagueID, null - if the user is not found.
      */
-    User get(UUID leagueId);
+    User findByLeagueId(UUID leagueId);
+
+    /**
+     * Returns found user from DB by username.
+     * Searching ONLY in League-Core module
+     *
+     * @param username User's username to search
+     * @return user entity, null - if the user is not found.
+     */
+    User findByUsername(String username);
 
     /**
      * Loading user from DB or import from LeagueId-module.
      *
-     * @param leagueId User's leagueID to search
+     * @param leagueId     User's leagueID to search
      * @param sessionToken Session token to request info from leagueID-module
-     * @return User with a specific LeagueID, null - if the user is not found.
+     * @return user entity, null - if the user is not found.
      */
     User loadWithLeagueId(String leagueId, String sessionToken);
 

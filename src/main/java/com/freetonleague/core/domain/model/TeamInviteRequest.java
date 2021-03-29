@@ -29,6 +29,10 @@ public class TeamInviteRequest extends BaseEntity implements Serializable {
     private String inviteToken;
 
     @ManyToOne
+    @JoinColumn(name = "invited_user_league_id", referencedColumnName = "league_id", nullable = false)
+    private User invitedUser;
+
+    @ManyToOne
     @JoinColumn(name = "team_id")
     private Team team;
 
@@ -44,6 +48,10 @@ public class TeamInviteRequest extends BaseEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     private TeamInviteRequestStatusType status;
 
+    @NotNull
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @JoinColumn(name = "participant_applied_id")
+    private TeamParticipant participantApplied;
 
     @Override
     public String toString() {

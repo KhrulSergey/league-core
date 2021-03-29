@@ -60,10 +60,30 @@ public class UserServiceImpl implements UserService {
      * Getting User by LeagueID from DB.
      */
     @Override
-    public User get(UUID leagueId) {
+    public User findByLeagueId(UUID leagueId) {
+        if (isNull(leagueId)) {
+            log.error("!> requesting findByLeagueId for Blank leagueId. Check evoking clients");
+            return null;
+        }
         User user = userRepository.findByLeagueId(leagueId);
         log.debug("^ getting user: {}", user);
         return user;
+    }
+
+    /**
+     * Returns found user from DB by username.
+     * Searching ONLY in League-Core module
+     *
+     * @param username User's username to search
+     * @return user entity, null - if the user is not found.
+     */
+    @Override
+    public User findByUsername(String username) {
+        if (isBlank(username)) {
+            log.error("!> requesting findByUsername for Blank username. Check evoking clients");
+            return null;
+        }
+        return userRepository.findByUsername(username);
     }
 
     /**
@@ -72,15 +92,14 @@ public class UserServiceImpl implements UserService {
     @Override
     public User loadWithLeagueId(String leagueId, String sessionToken) {
         log.debug("^ trying to find user on BD with leagueId {}", leagueId);
-        User user = this.get(UUID.fromString(leagueId));
-        if(isNull(user)){
+        User user = this.findByLeagueId(UUID.fromString(leagueId));
+        if (isNull(user)) {
             log.debug("^ trying to load user from LeagueId {}", leagueId);
             UserDto userDto = leagueIdClientService.getUser(sessionToken);
-            if (nonNull(userDto)){
+            if (nonNull(userDto)) {
                 //create new user
                 user = this.add(userDto);
-            }
-            else{
+            } else {
                 log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
             }
         }

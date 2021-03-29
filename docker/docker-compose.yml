@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  postgres:
+    container_name: "postgres"
+    build:
+      context: ../
+      dockerfile: docker/db.Dockerfile
+    env_file:
+      - app-variables.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - league-net
+  league-core:
+    container_name: league-core
+    build:
+      context: ../
+      dockerfile: docker/app.Dockerfile
+    env_file:
+      - app-variables.env
+    ports:
+      - "7701:7701"
+    networks:
+      - league-net
+    restart: always
+    depends_on:
+      - postgres
+volumes:
+  postgres: { }
+
+networks:
+  league-net:
+    driver: bridge

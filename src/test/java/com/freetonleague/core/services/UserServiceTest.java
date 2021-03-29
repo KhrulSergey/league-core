@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.stereotype.Component;
 
-
 import static com.freetonleague.core.utils.MockDataGenerator.generateUser;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,7 +27,7 @@ public class UserServiceTest {
     private final User EXISTED = generateUser();
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         MockitoAnnotations.openMocks(this);
         when(userRepository.findByLeagueId(EXISTED.getLeagueId())).thenReturn(EXISTED);
         when(userRepository.findByUsername(any())).thenReturn(EXISTED);
@@ -36,7 +35,7 @@ public class UserServiceTest {
 
     @Test
     public void get() {
-        assertEquals(userService.get(EXISTED.getLeagueId()), EXISTED);
+        assertEquals(userService.findByLeagueId(EXISTED.getLeagueId()), EXISTED);
         verify(userRepository, times(1)).findByLeagueId(EXISTED.getLeagueId());
     }
 }

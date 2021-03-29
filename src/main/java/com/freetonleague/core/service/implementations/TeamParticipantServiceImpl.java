@@ -43,9 +43,6 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
 
     /**
      * Returns founded participant by id
-     *
-     * @param id of team to search
-     * @return team entity
      */
     @Override
     public TeamParticipant getParticipantById(long id) {
@@ -57,12 +54,12 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
      * Expel participant from his team.
      * Changing status of participant to DELETED
      */
-    public void expelParticipant(TeamParticipant teamParticipant) {
+    public void expelParticipant(TeamParticipant teamParticipant, boolean isSelfQuit) {
         if (isNull(teamParticipant)) {
             log.error("!> requesting expel for null participant. Check evoking clients");
             return;
         }
-        teamParticipant.setStatus(TeamParticipantStatusType.DELETED);
+        teamParticipant.setStatus(isSelfQuit ? TeamParticipantStatusType.QUIT : TeamParticipantStatusType.DELETED);
         teamParticipant.setDeletedAt(LocalDateTime.now());
         teamParticipantRepository.save(teamParticipant);
     }
@@ -84,7 +81,7 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
      * Returns new invite request for specified team.
      */
     @Override
-    public TeamInviteRequest createInviteRequest(Team team, TeamParticipant teamParticipant) {
+    public TeamInviteRequest createInviteRequest(Team team, TeamParticipant teamParticipant, User invitedUser) {
         if (isNull(team) || team.getStatus() != TeamStateType.ACTIVE
                 || isNull(teamParticipant) || !teamParticipant.getTeam().getId().equals(team.getId())) {
             log.error("!> requesting createInviteRequest for NULL team {} or DISABLED team " +
@@ -97,6 +94,7 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
                 .participantCreator(teamParticipant)
                 .status(TeamInviteRequestStatusType.OPENED)
                 .inviteToken(this.generateInviteToken(team, tokenExpiration))
+                .invitedUser(invitedUser)
                 .expiration(tokenExpiration)
                 .build();
         return teamInviteRequestRepository.save(teamInviteRequest);
@@ -104,9 +102,6 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
 
     /**
      * Returns all invite requests for specified team.
-     *
-     * @param team for filter invite requests
-     * @return list of invite requests
      */
     @Override
     public List<TeamInviteRequest> getInviteRequestList(Team team) {
@@ -118,11 +113,19 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
     }
 
     /**
+     * Returns all invite requests for specified user.
+     */
+    @Override
+    public List<TeamInviteRequest> getInviteRequestListForUser(User user) {
+        if (isNull(user)) {
+            log.error("!> requesting getInviteRequestListForUser for NULL user. Check evoking clients");
+            return null;
+        }
+        return teamInviteRequestRepository.findAllByInvitedUser(user);
+    }
+
+    /**
      * Returns new team participant by applying specified token
-     *
-     * @param inviteRequest specified Invite Request entity
-     * @param user          who apply to enter a team from Invite Request entity
-     * @return team participant of new team member
      */
     @Override
     public TeamParticipant applyInviteRequest(TeamInviteRequest inviteRequest, User user) {
@@ -142,25 +145,50 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
         //updating inviteRequest status to closed
         if (nonNull(teamParticipant)) {
             inviteRequest.setStatus(TeamInviteRequestStatusType.CLOSED);
+            inviteRequest.setParticipantApplied(teamParticipant);
             teamInviteRequestRepository.save(inviteRequest);
         }
         return teamParticipant;
     }
 
     /**
-     * Delete specified invite request in DB.
-     * Entity will be only marked as deleted
-     *
-     * @param inviteRequest entity to delete
+     * Cancel specified invite request in DB.
+     * Entity will be only marked as cancelled
      */
     @Override
-    public void deleteInviteRequest(TeamInviteRequest inviteRequest) {
+    public void cancelInviteRequest(TeamInviteRequest inviteRequest) {
         if (isNull(inviteRequest)) {
             log.error("!> requesting deleteInviteRequest for NULL TeamInviteRequest. Check evoking clients");
             return;
         }
-        inviteRequest.setStatus(TeamInviteRequestStatusType.DELETED);
+        inviteRequest.setStatus(TeamInviteRequestStatusType.CANCELLED);
         teamInviteRequestRepository.save(inviteRequest);
+    }
+
+    /**
+     * Reject specified invite request in DB.
+     * Entity will be only marked as rejected
+     */
+    @Override
+    public void rejectInviteRequest(TeamInviteRequest inviteRequest) {
+        if (isNull(inviteRequest)) {
+            log.error("!> requesting rejectInviteRequest for NULL TeamInviteRequest. Check evoking clients");
+            return;
+        }
+        inviteRequest.setStatus(TeamInviteRequestStatusType.REJECTED);
+        teamInviteRequestRepository.save(inviteRequest);
+    }
+
+    /**
+     * Returns sign of active invite request existence for specified user.
+     */
+    @Override
+    public boolean isExistsActiveInviteRequestByInvitedUser(User user) {
+        if (isNull(user)) {
+            log.error("!> requesting isExistsActiveInviteRequestByInvitedUser for NULL user. Check evoking clients");
+            return false;
+        }
+        return teamInviteRequestRepository.existsByInvitedUserAndStatus(user, TeamInviteRequestStatusType.OPENED);
     }
 
 

@@ -15,7 +15,7 @@ public interface TeamRepository extends JpaRepository<Team, Long>,
     /**
      * Find all teams with participation of specified user
      */
-    @Query(value = "select t from Team t where t.id in (select p from TeamParticipant p where p.user = :user)")
+    @Query(value = "select t from Team t where t in (select p.team from TeamParticipant p where p.user = :user)")
     List<Team> findAllByUserParticipation(@Param("user") User user);
 
     Team findByName(String name);
