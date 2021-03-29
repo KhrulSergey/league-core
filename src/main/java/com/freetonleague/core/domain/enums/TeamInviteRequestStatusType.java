@@ -4,5 +4,6 @@ public enum TeamInviteRequestStatusType {
     OPENED,
     EXPIRED,
     CLOSED,
-    DELETED
+    CANCELLED,
+    REJECTED
 }

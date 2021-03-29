@@ -113,7 +113,7 @@ public class TeamServiceImpl implements TeamService {
      * Accessible only for a captain of the team
      */
     @Override
-    public Team expelParticipant(Team team, TeamParticipant teamParticipant) {
+    public Team expelParticipant(Team team, TeamParticipant teamParticipant, boolean isSelfQuit) {
         if (isNull(team) || isNull(teamParticipant)) {
             log.error("!> requesting expelParticipant for NULL team {} or NULL participant {}. Check evoking clients", team, teamParticipant);
             return null;
@@ -124,7 +124,7 @@ public class TeamServiceImpl implements TeamService {
             return null;
         }
         log.debug("^ trying to expel participant {} from team {}", teamParticipant, team.getId());
-        teamParticipantService.expelParticipant(teamParticipant);
+        teamParticipantService.expelParticipant(teamParticipant, isSelfQuit);
         return teamRepository.findById(team.getId()).orElse(null);
     }
 
@@ -140,7 +140,7 @@ public class TeamServiceImpl implements TeamService {
         }
         log.debug("^ trying to disband the team  {}", team);
         team.getParticipantList().parallelStream() // expel all participants
-                .forEach(teamParticipantService::expelParticipant);
+                .forEach(p -> teamParticipantService.expelParticipant(p, false));
         team.setStatus(TeamStateType.DELETED);
         teamRepository.saveAndFlush(team); // save changes to team
     }

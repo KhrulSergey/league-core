@@ -156,7 +156,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             throw new TeamManageException(ExceptionMessages.TEAM_EXPELLING_PARTICIPANT_ERROR,
                     "Only active members can be excluded, participant status is " + teamParticipant.getStatus());
         }
-        TeamExtendedDto teamDto = teamMapper.toExtendedDto(teamService.expelParticipant(team, teamParticipant));
+        TeamExtendedDto teamDto = teamMapper.toExtendedDto(teamService.expelParticipant(team, teamParticipant, false));
         if (isNull(teamDto)) {
             log.error("!> error while expelling participant {} from team {}.", teamParticipant, team);
             throw new TeamManageException(ExceptionMessages.TEAM_MODIFY_ERROR, "Team was not modified on Portal. Check requested params.");
@@ -190,7 +190,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.warn("~ forbiddenException for quitting user {} from team {}.", user, team);
             throw new TeamManageException(ExceptionMessages.TEAM_EXPELLING_ERROR, "Only active members can be excluded from team: captain, invited or deleted participant can't.");
         }
-        teamService.expelParticipant(team, teamParticipant);
+        teamService.expelParticipant(team, teamParticipant, true);
     }
 
     /**

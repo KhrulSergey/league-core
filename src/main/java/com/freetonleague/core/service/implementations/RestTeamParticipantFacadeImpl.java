@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.TeamDetailedInviteListDto;
 import com.freetonleague.core.domain.dto.TeamInviteRequestDto;
 import com.freetonleague.core.domain.dto.TeamParticipantDto;
 import com.freetonleague.core.domain.enums.TeamInviteRequestStatusType;
@@ -11,16 +12,17 @@ import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TeamInviteRequestMapper;
+import com.freetonleague.core.mapper.TeamMapper;
 import com.freetonleague.core.mapper.TeamParticipantMapper;
 import com.freetonleague.core.service.RestTeamParticipantFacade;
 import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.TeamService;
+import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -33,8 +35,10 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
     private final TeamParticipantService participantService;
     private final TeamService teamService;
+    private final UserService userService;
     private final TeamInviteRequestMapper inviteRequestMapper;
     private final TeamParticipantMapper participantMapper;
+    private final TeamMapper teamMapper;
 
     private final List<TeamParticipantStatusType> participantStatusAccessibleToInvite = Arrays.asList(
             TeamParticipantStatusType.ACTIVE,
@@ -44,10 +48,6 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
     /**
      * Returns all invite requests for specified team.
      * Available only for a captain
-     *
-     * @param teamId specified team identifier
-     * @param user   current user from Session
-     * @return list of invite requests
      */
     @Override
     public List<TeamInviteRequestDto> getInviteList(long teamId, User user) {
@@ -61,57 +61,119 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
     }
 
     /**
-     * Create new invite request for specified team.
-     *
-     * @param teamId specified team identifier
-     * @param user   current user from Session
-     * @return new invite request entity
+     * Returns all invite requests with detailed info about invitation to teams for current user.
      */
     @Override
-    public TeamInviteRequestDto createInvite(long teamId, User user) {
-        Team team = this.getVerifiedTeamById(teamId, user);
-        TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, user);
+    public List<TeamDetailedInviteListDto> getMyInviteList(User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'getMyInviteList' in RestTeamParticipantFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getMyInviteList' request denied");
+        }
+        List<TeamInviteRequest> inviteRequests = participantService.getInviteRequestListForUser(user);
+        if (inviteRequests.isEmpty()) {
+            return null;
+        }
+        Map<Team, List<TeamInviteRequest>> teamDetailedInviteMap = new HashMap<>();
+        for (TeamInviteRequest inviteRequest : inviteRequests) {
+            teamDetailedInviteMap.computeIfAbsent(inviteRequest.getTeam(), k -> new ArrayList<>()).add(inviteRequest);
+        }
+
+        List<TeamDetailedInviteListDto> detailedInviteList = new ArrayList<>();
+        for (Map.Entry<Team, List<TeamInviteRequest>> entry : teamDetailedInviteMap.entrySet()) {
+            detailedInviteList.add(
+                    new TeamDetailedInviteListDto(
+                            teamMapper.toDto(entry.getKey()),
+                            inviteRequestMapper.toDto(entry.getValue())));
+        }
+        return detailedInviteList;
+    }
+
+    /**
+     * Create new invite request for specified team for requsted User (by username or leagueId).
+     */
+    @Override
+    public TeamInviteRequestDto createInvite(long teamId, User currentUser, String username, String leagueId) {
+        Team team = this.getVerifiedTeamById(teamId, currentUser);
+        TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, currentUser);
         //check participation status
         if (isNull(teamParticipant) || !participantStatusAccessibleToInvite.contains(teamParticipant.getStatus())) {
-            log.debug("^ forbiddenException for getting invite list for user {} from team {}.", user, team);
+            log.debug("^ forbiddenException for creating invitation for user {} for team {}.", currentUser, team);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
-                    "Only captain can get list of all invitation to a team.");
+                    "Only participant of the team can create invitation.");
         }
-        return inviteRequestMapper.toDto(participantService.createInviteRequest(team, teamParticipant));
+
+        User invitedUser = null;
+        if (!isBlank(leagueId)) {
+            invitedUser = userService.findByLeagueId(UUID.fromString(leagueId));
+            if (isNull(invitedUser)) {
+                log.debug("^ User to invite was not found for request parameter leagueId {}", leagueId);
+                throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
+                        String.format("Requested parameter leagueId: '%s'", leagueId));
+            }
+        } else if (!isBlank(username)) {
+            invitedUser = userService.findByUsername(username);
+            if (isNull(invitedUser)) {
+                log.debug("^ User to invite was not found for request parameter username {}", username);
+                throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
+                        String.format("Requested parameter username: '%s'", username));
+            }
+        }
+
+        if (nonNull(invitedUser)) {
+            if (participantService.isExistsActiveInviteRequestByInvitedUser(invitedUser)) {
+                log.debug("^ Invitation to requested user with leagueId '{}' is already existed. Request was denied", leagueId);
+                throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_DUPLICATE_ERROR,
+                        String.format("Invitation to user with leagueId '%s' is already existed.", leagueId));
+            }
+            if (nonNull(teamService.getUserParticipantStatusOfTeam(team, invitedUser))) {
+                log.debug("^ createInvite was denied for user {} that is already participate in a team {}.", invitedUser, team);
+                throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_REJECTED_ERROR,
+                        "Double participation to one team is forbidden.");
+            }
+        }
+
+        return inviteRequestMapper.toDto(participantService.createInviteRequest(team, teamParticipant, invitedUser));
     }
 
     /**
      * Returns new team participant by applying specified token
      *
      * @param inviteToken specified unique token from Invite Request entity
-     * @param user        current user from Session
+     * @param currentUser current user from Session
      * @return team participant Dto of new team member
      */
     @Override
-    public TeamParticipantDto applyInviteRequest(String inviteToken, User user) {
-        TeamInviteRequest teamInviteRequest = this.getVerifiedTeamInviteRequestByToken(inviteToken, user);
-        if (nonNull(teamService.getUserParticipantStatusOfTeam(teamInviteRequest.getTeam(), user))) {
-            log.debug("^ applyInviteRequest was denied for user {} that is already participate in a team {}.", user, teamInviteRequest.getTeam());
-            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_DUPLICATE_ERROR,
+    public TeamParticipantDto applyInviteRequest(String inviteToken, User currentUser) {
+        TeamInviteRequest teamInviteRequest = this.getVerifiedTeamInviteRequestByToken(inviteToken, currentUser);
+        if (nonNull(teamService.getUserParticipantStatusOfTeam(teamInviteRequest.getTeam(), currentUser))) {
+            log.debug("^ applyInviteRequest was denied for user {} that is already participate in a team {}.", currentUser, teamInviteRequest.getTeam());
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_REJECTED_ERROR,
                     "Double participation to one team is forbidden.");
         }
         if (teamInviteRequest.getStatus() != TeamInviteRequestStatusType.OPENED) {
-            log.debug("^ applyInviteRequest was rejected by EXPIRED status of teamInviteRequest {} for user {}.", teamInviteRequest, user);
+            log.debug("^ applyInviteRequest was rejected by EXPIRED status of teamInviteRequest {} for user {}.", teamInviteRequest, currentUser);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_EXPIRED_ERROR,
                     "Applying invitation to a team was rejected because of invite status: " + teamInviteRequest.getStatus());
         }
-        return participantMapper.toDto(participantService.applyInviteRequest(teamInviteRequest, user));
+        if (nonNull(teamInviteRequest.getInvitedUser()) && !teamInviteRequest.getInvitedUser().equals(currentUser)) {
+            log.debug("^ applyInviteRequest was rejected because invite request assigned for user with ID {}, not for current user {}.",
+                    teamInviteRequest.getInvitedUser().getLeagueId(), Objects.requireNonNull(currentUser).getLeagueId());
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_ASSIGNED_ERROR,
+                    "Applying invitation to a team was rejected because of wrong assigned");
+        }
+
+        return participantMapper.toDto(participantService.applyInviteRequest(teamInviteRequest, currentUser));
     }
 
     /**
-     * Delete invite request.
+     * Cancel invite request.
      * Accessible only for a captain of a team or creator of invite request
      *
      * @param inviteToken specified unique token from Invite Request entity
      * @param user        current user from Session
      */
     @Override
-    public void deleteInviteRequest(String inviteToken, User user) {
+    public void cancelInviteRequest(String inviteToken, User user) {
         TeamInviteRequest teamInviteRequest = this.getVerifiedTeamInviteRequestByToken(inviteToken, user);
         TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(teamInviteRequest.getTeam(), user);
         //check rights of user to a requested team (in TeamInviteRequest)
@@ -122,7 +184,29 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
                     "Only captain or author can delete this invitation to a team.");
         }
-        participantService.deleteInviteRequest(teamInviteRequest);
+        participantService.cancelInviteRequest(teamInviteRequest);
+    }
+
+    /**
+     * Reject invite request by user.
+     * Accessible only for user that was invited
+     */
+    @Override
+    public void rejectInviteRequest(String inviteToken, User user) {
+        TeamInviteRequest teamInviteRequest = this.getVerifiedTeamInviteRequestByToken(inviteToken, user);
+        if (teamInviteRequest.getStatus() != TeamInviteRequestStatusType.OPENED) {
+            log.debug("^ applyInviteRequest was rejected by EXPIRED status of teamInviteRequest {} for user {}.", teamInviteRequest, user);
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_EXPIRED_ERROR,
+                    "Applying invitation to a team was rejected because of invite status: " + teamInviteRequest.getStatus());
+        }
+        //check rights to reject personal invitation to participate team
+        if (!teamInviteRequest.getInvitedUser().equals(user)) {
+            log.warn("~ forbiddenException for rejecting invitation for user {} from team {}. Current user {}",
+                    teamInviteRequest.getInvitedUser(), teamInviteRequest.getTeam(), user);
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
+                    "Only invited user can reject this invitation to a team.");
+        }
+        participantService.rejectInviteRequest(teamInviteRequest);
     }
 
     /**
@@ -161,7 +245,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
         }
         if (team.getStatus() != TeamStateType.ACTIVE) {
             log.debug("^ Team with requested id {} was {}. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id, team.getStatus());
-            throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR, "Team with requested id " + id + " was not found");
+            throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR, "Active team with requested id " + id + " was not found");
         }
         return team;
     }

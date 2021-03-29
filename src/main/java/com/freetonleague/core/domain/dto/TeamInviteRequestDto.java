@@ -1,12 +1,13 @@
 package com.freetonleague.core.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.freetonleague.core.domain.enums.TeamInviteRequestStatusType;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 @Data
-
 public class TeamInviteRequestDto {
 
     private String inviteToken;
@@ -14,6 +15,10 @@ public class TeamInviteRequestDto {
     private Long teamId;
 
     private Long participantCreatorId;
+
+    private String invitedUser;
+
+    private Long participantAppliedId;
 
     private LocalDateTime expiration;
 

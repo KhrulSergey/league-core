@@ -1,7 +1,9 @@
 package com.freetonleague.core.repository;
 
+import com.freetonleague.core.domain.enums.TeamInviteRequestStatusType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamInviteRequest;
+import com.freetonleague.core.domain.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
@@ -19,4 +21,14 @@ public interface TeamInviteRequestRepository extends JpaRepository<TeamInviteReq
      * Find invite requests by team
      */
     List<TeamInviteRequest> findAllByTeam(Team team);
+
+    /**
+     * Find invite requests by user
+     */
+    List<TeamInviteRequest> findAllByInvitedUser(User user);
+
+    /**
+     * Check if inviteRequest exists for specified user and status
+     */
+    boolean existsByInvitedUserAndStatus(User user, TeamInviteRequestStatusType requestStatus);
 }

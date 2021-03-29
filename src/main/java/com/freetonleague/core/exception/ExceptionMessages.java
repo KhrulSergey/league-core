@@ -35,6 +35,8 @@ public class ExceptionMessages {
     public static final String TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Participant was not found. Please check request parameters";
     public static final String TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR = "Need proper team status to manage team invitation. Please check your rights.";
     public static final String TEAM_PARTICIPANT_INVITE_EXPIRED_ERROR = "Invitation link was already used or expired. Please ask team captain for a new one.";
-    public static final String TEAM_PARTICIPANT_INVITE_DUPLICATE_ERROR = "You are already participate to a team. Please check your status or ask captain to check.";
+    public static final String TEAM_PARTICIPANT_INVITE_ASSIGNED_ERROR = "Invitation link was intended to another used. Please ask team captain for another one.";
+    public static final String TEAM_PARTICIPANT_INVITE_REJECTED_ERROR = "User is already participate to a team. Please check participation status or ask captain to check.";
+    public static final String TEAM_PARTICIPANT_INVITE_DUPLICATE_ERROR = "Invitation to requested user is already existed. Wait for user decision and status update.";
     public static final String TEAM_PARTICIPANT_INVITE_NOT_FOUND_ERROR = "Invitation to a team was not found. Please check request parameters";
 }
