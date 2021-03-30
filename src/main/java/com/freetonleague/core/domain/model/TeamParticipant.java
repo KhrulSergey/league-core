@@ -9,7 +9,6 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 import static java.util.Objects.nonNull;
@@ -22,7 +21,7 @@ import static java.util.Objects.nonNull;
 @SuperBuilder
 @Table(schema = "team_management", name = "team_participants")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "team_participants_id_seq", allocationSize = 1, schema = "team_management")
-public class TeamParticipant extends BaseEntity implements Serializable {
+public class TeamParticipant extends BaseEntity {
 
     //Properties
     @ManyToOne
