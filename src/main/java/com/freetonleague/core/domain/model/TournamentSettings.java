@@ -14,8 +14,6 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -59,11 +57,11 @@ public class TournamentSettings extends BaseEntity {
 
     @Type(type = "hstore")
     @Column(name = "prizeDistribution", columnDefinition = "hstore")
-    private Map<Integer, Double> prizePoolDistribution = new HashMap<>();
+    private Map<Integer, Double> prizePoolDistribution;
 
     @Type(type = "jsonb")
     @Column(name = "prizeDistribution2", columnDefinition = "jsonb")
-    private List<TournamentPrizePoolDistributionDto> prizePoolDistribution2 = new ArrayList<>();
+    private List<TournamentPrizePoolDistributionDto> prizePoolDistribution2;
 
     @NotNull
     @Column(name = "fund_gathering_type")

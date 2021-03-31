@@ -23,18 +23,24 @@ import javax.persistence.*;
 public class TournamentTeamParticipant extends BaseEntity {
 
     //Properties
+    /**
+     * Reference to Team Proposal to participate in tournament
+     */
     @ManyToOne
     @JoinColumn(name = "tournament_team_proposal_id", unique = true)
     private TournamentTeamProposal tournamentTeamProposal;
 
+    /** Reference to Team Participant entity */
     @ManyToOne
     @JoinColumn(name = "team_participant_id", nullable = false)
     private TeamParticipant teamParticipant;
 
+    /** Reference to LeagueId user */
     @ManyToOne
     @JoinColumn(name = "league_id", referencedColumnName = "league_id", nullable = false)
     private User user;
 
+    /** Team participant status (role) in current tournament (tournamentTeamProposal->tournament) */
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private TournamentTeamParticipantStatusType status;
