@@ -45,7 +45,6 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
      */
     @Type(type = "hstore")
     @Column(name = "game_optimal_indicators", columnDefinition = "hstore")
-    @Enumerated(EnumType.STRING)
     private Map<GameIndicatorType, Object> gameOptimalIndicators;
 
 
