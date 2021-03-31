@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.TournamentTeamType;
 import com.sun.istack.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -26,14 +27,28 @@ public class TournamentTeamProposal extends BaseEntity {
 
     //Properties
     @ManyToOne
-    @JoinColumn(name = "team_id", unique = true)
+    @JoinColumn(name = "team_id")
     private Team team;
 
+    /**
+     * Status of team participation in tournament
+     */
     @NotNull
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private TournamentTeamStateType status;
 
+    /**
+     * Type of team that participate in tournament
+     */
+    @NotNull
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private TournamentTeamType type;
+
+    /**
+     * Team participant list with their role (status) in tournament
+     */
     @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 }
