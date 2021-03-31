@@ -6,6 +6,7 @@ import com.freetonleague.core.exception.GameDisciplineManageException;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GameIndicatorConverter {
 
@@ -17,28 +18,36 @@ public class GameIndicatorConverter {
             return null;
         }
         HashMap<GameIndicatorType, Object> map = new HashMap<>();
+        AtomicReference<String> currentMap = new AtomicReference<>();
         try {
             objectMap.forEach((key, value) -> {
                 //find enum value
                 GameIndicatorType keyMap = GameIndicatorType.valueOf(String.valueOf(key));
-                Object valueMap = null;
+                Object valueMap;
                 String entryValue = String.valueOf(value);
+                currentMap.set("type: ".concat(keyMap.name()).concat(", value:").concat(entryValue));
                 // trying to parse MapValue to specified type from GameIndicatorType->valueType
-                if (Boolean.class.equals(keyMap.getValueType())) {
-                    valueMap = Boolean.valueOf(entryValue);
-                } else if (Integer.class.equals(keyMap.getValueType())) {
-                    valueMap = Integer.valueOf(entryValue);
-                } else if (Double.class.equals(keyMap.getValueType())) {
-                    valueMap = Double.valueOf(entryValue);
-                } else if (String.class.equals(keyMap.getValueType())) {
-                    valueMap = String.valueOf(entryValue);
-                } else if (Long.class.equals(keyMap.getValueType())) {
-                    valueMap = Long.valueOf(entryValue);
+                switch (keyMap.getValueClassType()) {
+                    case BOOLEAN:
+                        valueMap = Boolean.valueOf(entryValue);
+                        break;
+                    case DOUBLE:
+                        valueMap = Double.valueOf(entryValue);
+                        break;
+                    case INTEGER:
+                        valueMap = Integer.valueOf(entryValue);
+                        break;
+                    case LONG:
+                        valueMap = Long.valueOf(entryValue);
+                        break;
+                    case STRING:
+                    default:
+                        valueMap = entryValue;
                 }
                 map.put(keyMap, valueMap);
             });
         } catch (Exception exc) {
-            throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_CONVERTED_ERROR, exc.getMessage());
+            throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_CONVERTED_ERROR, "Problem occurred with value: ' " + currentMap + "'. Details: " + exc.getMessage());
         }
         return map;
     }

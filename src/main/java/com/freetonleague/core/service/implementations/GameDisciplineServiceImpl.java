@@ -10,6 +10,7 @@ import com.freetonleague.core.repository.GameDisciplineRepository;
 import com.freetonleague.core.repository.GameDisciplineSettingsRepository;
 import com.freetonleague.core.service.GameDisciplineService;
 import com.freetonleague.core.service.SessionService;
+import com.freetonleague.core.util.GameIndicatorConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -179,6 +180,7 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
             primaryDisciplineSettings.setIsPrimary(false);
             disciplineSettingsRepository.save(primaryDisciplineSettings);
         }
+        disciplineSettings.setGameOptimalIndicators(GameIndicatorConverter.convertAndValidate(disciplineSettings.getGameOptimalIndicators()));
         User currentUser = sessionService.getCurrentUser();
         disciplineSettings.setCreatedBy(currentUser);
         disciplineSettings.setModifiedBy(currentUser);
@@ -196,6 +198,9 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
             throw new GameDisciplineSettingsManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_PRIMARY_MODIFICATION_ERROR,
                     "Primary flag of discipline settings can't be changed");
         }
+        //check
+        disciplineSettings.setGameOptimalIndicators(GameIndicatorConverter.convertAndValidate(disciplineSettings.getGameOptimalIndicators()));
+
         if (disciplineSettings.getIsPrimary() && nonNull(primaryDisciplineSettings)) {
             primaryDisciplineSettings.setIsPrimary(false);
             disciplineSettingsRepository.save(primaryDisciplineSettings);

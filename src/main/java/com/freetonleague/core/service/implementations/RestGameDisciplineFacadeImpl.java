@@ -3,7 +3,6 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.GameDisciplineDto;
 import com.freetonleague.core.domain.dto.GameDisciplineSettingsDto;
-import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.model.GameDiscipline;
 import com.freetonleague.core.domain.model.GameDisciplineSettings;
 import com.freetonleague.core.domain.model.User;
@@ -19,9 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -59,6 +56,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Adding a new game discipline to DB.
      */
+    //TODO закрыть доступ для всех кроме админов
     @Override
     public GameDisciplineDto addDiscipline(GameDisciplineDto disciplineDto, User user) {
         if (isNull(user)) {
@@ -113,6 +111,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Adding a new game discipline settings to DB.
      */
+    //TODO закрыть доступ для всех кроме админов
     @Override
     public GameDisciplineSettingsDto addDisciplineSettings(GameDisciplineSettingsDto disciplineSettingsDto, User user) {
         Set<ConstraintViolation<GameDisciplineSettingsDto>> violations = validator.validate(disciplineSettingsDto);
@@ -125,16 +124,9 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
             throw new ValidationException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_DUPLICATE_BY_NAME_ERROR, "name",
                     "parameter name is not unique for addDisciplineSettings");
         }
+
         GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineSettingsDto.getGameDisciplineId(), user);
-
         GameDisciplineSettings gameDisciplineSettings = disciplineSettingsMapper.fromDto(disciplineSettingsDto);
-
-        Map<GameIndicatorType, Object> gameOptimalIndicators = new HashMap<>();
-        gameOptimalIndicators.put(GameIndicatorType.CHECK_POINT_PASSED, true);
-        gameOptimalIndicators.put(GameIndicatorType.FRAG_COUNT, 50);
-        gameDisciplineSettings.setGameOptimalIndicators(gameOptimalIndicators);
-
-
         gameDisciplineSettings.setGameDiscipline(gameDiscipline);
         gameDisciplineSettings = disciplineService.addDisciplineSettings(gameDisciplineSettings);
         if (isNull(gameDisciplineSettings)) {
