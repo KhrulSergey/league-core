@@ -39,4 +39,16 @@ public class ExceptionMessages {
     public static final String TEAM_PARTICIPANT_INVITE_REJECTED_ERROR = "User is already participate to a team. Please check participation status or ask captain to check.";
     public static final String TEAM_PARTICIPANT_INVITE_DUPLICATE_ERROR = "Invitation to requested user is already existed. Wait for user decision and status update.";
     public static final String TEAM_PARTICIPANT_INVITE_NOT_FOUND_ERROR = "Invitation to a team was not found. Please check request parameters";
+
+    public static final String GAME_DISCIPLINE_CREATION_ERROR = "Game discipline creation failed. Please try again";
+    public static final String GAME_DISCIPLINE_DUPLICATE_BY_NAME_ERROR = "Game discipline with requested name already exists on portal. Please change name";
+    public static final String GAME_DISCIPLINE_NOT_FOUND_ERROR = "Game discipline was not found. Please check request parameters";
+    public static final String GAME_DISCIPLINE_NOT_ACTIVE_ERROR = "Game discipline is not active. Getting of information rejected. Please check request parameters";
+
+    public static final String GAME_DISCIPLINE_SETTINGS_CREATION_ERROR = "Game discipline settings creation failed. Please try again";
+    public static final String GAME_DISCIPLINE_SETTINGS_DUPLICATE_BY_NAME_ERROR = "Game discipline settings with requested name already exists on portal. Please change name";
+    public static final String GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR = "Game discipline settings was not found. Please check request parameters";
+    public static final String GAME_DISCIPLINE_SETTINGS_CONVERTED_ERROR = "Game discipline settings was badly saved. Please try to modify or create new one";
+    public static final String GAME_DISCIPLINE_SETTINGS_PRIMARY_MODIFICATION_ERROR = "Only one primary game discipline settings must exist for one discipline. " +
+            "Changing primary flag available only with saving new entry. Please check request parameters";
 }
