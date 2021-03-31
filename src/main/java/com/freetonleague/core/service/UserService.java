@@ -10,8 +10,8 @@ public interface UserService extends UserDetailsService {
     /**
      * Adding a new user to DB.
      *
-     * @param user User to add
-     * @return Added User
+     * @param user data to add
+     * @return added User
      */
     User add(User user);
 

@@ -13,11 +13,11 @@ import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -104,8 +104,8 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public User getCurrentUser(HttpServletRequest request) {
-        return get(request.getHeader("X-Auth-Token")).getUser();
+    public User getCurrentUser() {
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
     private List<Session> getValidByUser(User user) {

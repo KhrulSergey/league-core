@@ -4,6 +4,7 @@ package com.freetonleague.core.domain.enums;
  * All Possible game indicators
  */
 public enum GameIndicatorType {
+        // !--- if you are extends class type than update converter GameIndicatorConverter.convertAndValidate() ---!
 
     // tag::common indicators[]
     FRAG_COUNT("frag count", Integer.class, null),
