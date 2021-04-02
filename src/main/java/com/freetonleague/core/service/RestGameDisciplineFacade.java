@@ -3,6 +3,8 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.GameDisciplineDto;
 import com.freetonleague.core.domain.dto.GameDisciplineSettingsDto;
+import com.freetonleague.core.domain.model.GameDiscipline;
+import com.freetonleague.core.domain.model.GameDisciplineSettings;
 import com.freetonleague.core.domain.model.User;
 
 import java.util.List;
@@ -71,4 +73,19 @@ public interface RestGameDisciplineFacade {
      * @return Edited game discipline settings
      */
     GameDisciplineSettingsDto editDisciplineSettings(GameDisciplineSettingsDto disciplineSettings, User user);
+
+    /**
+     * Getting game discipline info by id and user with privacy check
+     */
+    GameDiscipline getVerifiedDiscipline(long id, User user);
+
+    /**
+     * Getting game discipline settings info by id, discipline and user with privacy check
+     */
+    GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline, User user);
+
+    /**
+     * Getting primary game discipline settings info by game discipline with privacy check
+     */
+    GameDisciplineSettings getVerifiedPrimaryDisciplineSettingsByDiscipline(GameDiscipline gameDiscipline);
 }

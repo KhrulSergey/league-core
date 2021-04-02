@@ -15,9 +15,9 @@ import com.freetonleague.core.mapper.TeamInviteRequestMapper;
 import com.freetonleague.core.mapper.TeamMapper;
 import com.freetonleague.core.mapper.TeamParticipantMapper;
 import com.freetonleague.core.service.RestTeamParticipantFacade;
+import com.freetonleague.core.service.RestUserFacade;
 import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.TeamService;
-import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +35,8 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
     private final TeamParticipantService participantService;
     private final TeamService teamService;
-    private final UserService userService;
+    private final RestUserFacade restUserFacade;
+
     private final TeamInviteRequestMapper inviteRequestMapper;
     private final TeamParticipantMapper participantMapper;
     private final TeamMapper teamMapper;
@@ -104,19 +105,9 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
         User invitedUser = null;
         if (!isBlank(leagueId)) {
-            invitedUser = userService.findByLeagueId(UUID.fromString(leagueId));
-            if (isNull(invitedUser)) {
-                log.debug("^ User to invite was not found for request parameter leagueId {}", leagueId);
-                throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
-                        String.format("Requested parameter leagueId: '%s'", leagueId));
-            }
+            invitedUser = restUserFacade.getVerifiedUserByLeagueId(leagueId);
         } else if (!isBlank(username)) {
-            invitedUser = userService.findByUsername(username);
-            if (isNull(invitedUser)) {
-                log.debug("^ User to invite was not found for request parameter username {}", username);
-                throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
-                        String.format("Requested parameter username: '%s'", username));
-            }
+            invitedUser = restUserFacade.getVerifiedUserByUsername(username);
         }
 
         if (nonNull(invitedUser)) {
@@ -238,7 +229,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
             log.debug("^ user is not authenticate. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamById' request denied");
         }
-        Team team = teamService.getById(id);
+        Team team = teamService.getTeamById(id);
         if (isNull(team)) {
             log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id);
             throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR, "Team with requested id " + id + " was not found");
