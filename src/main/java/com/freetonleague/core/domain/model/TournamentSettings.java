@@ -1,9 +1,9 @@
 package com.freetonleague.core.domain.model;
 
-import com.freetonleague.core.domain.dto.FundGatheringType;
 import com.freetonleague.core.domain.dto.TournamentPrizePoolDistributionDto;
+import com.freetonleague.core.domain.dto.TournamentQuitPenaltyDistributionDto;
+import com.freetonleague.core.domain.enums.FundGatheringType;
 import com.sun.istack.NotNull;
-import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -15,7 +15,6 @@ import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 
 @EqualsAndHashCode(callSuper = true)
@@ -23,12 +22,11 @@ import java.util.Map;
 @SuperBuilder
 @Getter
 @Setter
-@TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
 @Table(schema = "public", name = "tournament_settings")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_settings_id_seq", schema = "public", allocationSize = 1)
-public class TournamentSettings extends BaseEntity {
+public class TournamentSettings extends ExtendedBaseEntity {
 
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "tournament_id")
@@ -52,16 +50,25 @@ public class TournamentSettings extends BaseEntity {
     @Column(name = "max_reserve_participant_count")
     private Integer maxTeamReserveParticipantCount;
 
+    /**
+     * Goal prize fund value. (info purpose only)
+     */
     @Column(name = "prize_fund")
     private Double prizeFund;
 
-    @Type(type = "hstore")
-    @Column(name = "prizeDistribution", columnDefinition = "hstore")
-    private Map<Integer, Double> prizePoolDistribution;
-
+    /**
+     * Schema of distribution prize fund between winners
+     */
     @Type(type = "jsonb")
-    @Column(name = "prizeDistribution2", columnDefinition = "jsonb")
-    private List<TournamentPrizePoolDistributionDto> prizePoolDistribution2;
+    @Column(name = "prize_distribution", columnDefinition = "jsonb")
+    private List<TournamentPrizePoolDistributionDto> prizePoolDistribution;
+
+    /**
+     * Schema of money penalties for quit tournament after approved participation
+     */
+    @Type(type = "jsonb")
+    @Column(name = "quit_penalty_distribution", columnDefinition = "jsonb")
+    private List<TournamentQuitPenaltyDistributionDto> quitPenaltyDistribution;
 
     @NotNull
     @Column(name = "fund_gathering_type")

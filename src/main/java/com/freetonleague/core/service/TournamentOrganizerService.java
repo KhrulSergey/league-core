@@ -4,6 +4,13 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.model.TournamentOrganizer;
 
 public interface TournamentOrganizerService {
+    /**
+     * Returns founded tournament organizer by id
+     *
+     * @param id of tournament to search
+     * @return tournament entity
+     */
+    TournamentOrganizer get(long id);
 
     /**
      * Adding a new tournament organizer to DB.

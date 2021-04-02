@@ -91,7 +91,7 @@ public interface TeamParticipantService {
     /**
      * Returns sign of active invite request existence for specified user.
      *
-     * @param user for which invite will be created
+     * @param user for which invite will be find
      * @return true is Active invite request exists, false - if not
      */
     boolean isExistsActiveInviteRequestByInvitedUser(User user);

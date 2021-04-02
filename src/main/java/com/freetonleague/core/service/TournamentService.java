@@ -2,8 +2,48 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.model.Tournament;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TournamentService {
 
-    Tournament getTournament(Long id);
+    /**
+     * Returns founded tournament by id
+     *
+     * @param id of tournament to search
+     * @return tournament entity
+     */
+    Tournament getTournament(long id);
+
+    /**
+     * Returns list of all teams filtered by requested params
+     *
+     * @param pageable filtered params to search tournament
+     * @return list of team entities
+     */
+    Page<Tournament> getTournamentList(Pageable pageable);
+
+    /**
+     * Add new tournament to DB.
+     *
+     * @param tournament to be added
+     * @return Added tournament
+     */
+    Tournament addTournament(Tournament tournament);
+
+    /**
+     * Edit tournament in DB.
+     *
+     * @param tournament to be edited
+     * @return Edited tournament
+     */
+    Tournament editTournament(Tournament tournament);
+
+    /**
+     * Returns sign of tournament existence for specified id.
+     *
+     * @param id for which tournament will be find
+     * @return true is Tournament exists, false - if not
+     */
+    boolean isExistsTournamentById(long id);
 }
