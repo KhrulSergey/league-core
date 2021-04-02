@@ -10,19 +10,20 @@ import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
- * Model for distribution prize fund between winner
+ * Money penalty entry for quit tournament after approved participation
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class TournamentPrizePoolDistributionDto implements Serializable {
-    private static final long serialVersionUID = -6443155301809569583L;
+public class TournamentQuitPenaltyDistributionDto implements Serializable {
+    private static final long serialVersionUID = -4409574506197851333L;
 
     @NotNull
-    @Min(1)
-    private Integer place;
-
     @Min(0)
+    private Double hoursSinceParticipate;
+
+    @NotNull
     @Max(100)
-    private Double proportion;
+    @Min(0)
+    private Double penaltyValue;
 }

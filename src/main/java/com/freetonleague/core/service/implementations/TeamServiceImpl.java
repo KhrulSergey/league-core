@@ -5,8 +5,6 @@ import com.freetonleague.core.domain.enums.TeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.ExceptionMessages;
-import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.repository.TeamRepository;
 import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.TeamService;
@@ -17,13 +15,13 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Transactional(propagation = Propagation.REQUIRES_NEW)
 @Service
@@ -38,11 +36,11 @@ public class TeamServiceImpl implements TeamService {
      * Add new team to DB.
      */
     @Override
-    public Team add(Team team) {
+    public Team addTeam(Team team) {
         Set<ConstraintViolation<Team>> violations = validator.validate(team);
         if (!violations.isEmpty()) {
-            log.warn("~ team: {} have constraint violations: {}", team, violations);
-            throw new ConstraintViolationException(violations);
+            log.error("!> requesting addTeam for team {} with constraint violations: {}. Check evoking clients", team, violations);
+            return null;
         }
         log.debug("^ trying to add team in DB: {}", team);
         return teamRepository.save(team);
@@ -52,18 +50,20 @@ public class TeamServiceImpl implements TeamService {
      * Edit team in DB.
      */
     @Override
-    public Team edit(Team team) {
+    public Team editTeam(Team team) {
+        if (isNull(team)) {
+            log.error("!> requesting editTeam for NULL team. Check evoking clients");
+            return null;
+        }
         Set<ConstraintViolation<Team>> violations = validator.validate(team);
         if (!violations.isEmpty()) {
-            log.warn("edited team: {} have constraint violations: {}", team, violations);
-            throw new ConstraintViolationException(violations);
+            log.error("!> requesting editTeam for team {} with constraint violations: {}. Check evoking clients", team, violations);
+            return null;
         }
         if (!teamRepository.existsById(team.getId())) {
-            log.warn("team: {} is not exist", team);
-            throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR,
-                    "Requested team with id " + team.getId() + " was not found");
+            log.error("!> requesting editTeam for non-existent team {}. Check evoking clients", team);
+            return null;
         }
-
         log.debug("^ trying to modify team in DB: {}", team);
         return teamRepository.saveAndFlush(team);
     }
@@ -72,7 +72,7 @@ public class TeamServiceImpl implements TeamService {
      * Returns founded team by id
      */
     @Override
-    public Team getById(long id) {
+    public Team getTeamById(long id) {
         log.debug("^ trying to get team by id: {}", id);
         return teamRepository.findById(id).orElse(null);
     }
@@ -81,7 +81,11 @@ public class TeamServiceImpl implements TeamService {
      * Returns founded team by id
      */
     @Override
-    public Team getByName(String teamName) {
+    public Team getTeamByName(String teamName) {
+        if (isBlank(teamName)) {
+            log.error("!> requesting getByName for Blank teamName. Check evoking clients");
+            return null;
+        }
         log.debug("^ trying to get team by name: {}", teamName);
         return teamRepository.findByName(teamName);
     }
@@ -90,7 +94,7 @@ public class TeamServiceImpl implements TeamService {
      * Returns list of all teams
      */
     @Override
-    public List<Team> getList() {
+    public List<Team> getTeamList() {
         log.debug("^ trying to get list of all teams");
         return teamRepository.findAll();
     }
@@ -99,7 +103,7 @@ public class TeamServiceImpl implements TeamService {
      * Get the list of teams for current user
      */
     @Override
-    public List<Team> getListByUser(User user) {
+    public List<Team> getTeamListByUser(User user) {
         log.debug("^ trying to get list of all teams, where user is a participant");
         if (isNull(user)) {
             log.error("!> requesting getListByUser for NULL user. Check evoking clients");
@@ -118,6 +122,10 @@ public class TeamServiceImpl implements TeamService {
             log.error("!> requesting expelParticipant for NULL team {} or NULL participant {}. Check evoking clients", team, teamParticipant);
             return null;
         }
+        if (!teamRepository.existsById(team.getId())) {
+            log.error("!> requesting expelParticipant for non-existent team {}. Check evoking clients", team);
+            return null;
+        }
         if (!team.getParticipantList().contains(teamParticipant)) {
             log.error("!> requesting expelParticipant for exclude participant {} who isn't a member of the team {}. " +
                     "Check evoking clients", teamParticipant, team);
@@ -133,9 +141,13 @@ public class TeamServiceImpl implements TeamService {
      * Accessible only for a captain of the team
      */
     @Override
-    public void disband(Team team) {
+    public void disbandTeam(Team team) {
         if (isNull(team)) {
             log.error("!> requesting disband for NULL team. Check evoking clients");
+            return;
+        }
+        if (!teamRepository.existsById(team.getId())) {
+            log.error("!> requesting disbandTeam for non-existent team {}. Check evoking clients", team);
             return;
         }
         log.debug("^ trying to disband the team  {}", team);
@@ -150,6 +162,10 @@ public class TeamServiceImpl implements TeamService {
      */
     @Override
     public TeamParticipant getParticipantOfTeamByUser(Team team, User user) {
+        if (isNull(team) || isNull(user)) {
+            log.error("!> requesting getParticipantOfTeamByUser for NULL team ot NULL user. Check evoking clients");
+            return null;
+        }
         return team.getParticipantList().stream()
                 .filter(p -> p.getUser().getLeagueId().equals(user.getLeagueId()))
                 .findFirst().orElse(null);

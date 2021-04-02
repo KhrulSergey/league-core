@@ -26,8 +26,9 @@ public class GameIndicatorConverter {
                 Object valueMap;
                 String entryValue = String.valueOf(value);
                 currentMap.set("type: ".concat(keyMap.name()).concat(", value:").concat(entryValue));
-                // trying to parse MapValue to specified type from GameIndicatorType->valueType
+                // trying to parse MapValue to specified type from GameIndicatorType->valueClassType
                 switch (keyMap.getValueClassType()) {
+
                     case BOOLEAN:
                         valueMap = Boolean.valueOf(entryValue);
                         break;

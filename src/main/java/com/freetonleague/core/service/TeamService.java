@@ -11,19 +11,19 @@ public interface TeamService {
     /**
      * Add new team to DB.
      *
-     * @param team Team to be added
+     * @param team data to be added
      * @return Added team
      */
-    Team add(Team team);
+    Team addTeam(Team team);
 
     /**
      * Edit team in DB.
      * Example - captain, logo, name
      *
-     * @param team Team to be edited
+     * @param team date to be edited
      * @return Edited team
      */
-    Team edit(Team team);
+    Team editTeam(Team team);
 
     /**
      * Returns founded team by id
@@ -31,7 +31,7 @@ public interface TeamService {
      * @param id of team to search
      * @return team entity
      */
-    Team getById(long id);
+    Team getTeamById(long id);
 
     /**
      * Returns founded team by name
@@ -39,21 +39,21 @@ public interface TeamService {
      * @param teamName of team to search
      * @return team entity
      */
-    Team getByName(String teamName);
+    Team getTeamByName(String teamName);
 
     /**
      * Returns list of all teams
      *
      * @return list of team entities
      */
-    List<Team> getList();
+    List<Team> getTeamList();
 
     /**
      * Get the list of teams for current user
      *
      * @param user current user from Session
      */
-    List<Team> getListByUser(User user);
+    List<Team> getTeamListByUser(User user);
 
     /**
      * Expel (exclude) from requested team the specified participant.
@@ -72,7 +72,7 @@ public interface TeamService {
      *
      * @param team entity to be deleted
      */
-    void disband(Team team);
+    void disbandTeam(Team team);
 
     /**
      * Returns participant entity by user in the specified team

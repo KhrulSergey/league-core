@@ -1,7 +1,8 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.enums.TournamentAccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.enums.TournamentType;
+import com.freetonleague.core.domain.enums.TournamentSystemType;
 import com.sun.istack.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -21,7 +22,7 @@ import java.util.List;
 @Entity
 @Table(schema = "public", name = "tournaments")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournaments_id_seq", schema = "public", allocationSize = 1)
-public class Tournament extends BaseEntity {
+public class Tournament extends ExtendedBaseEntity {
 
     //Properties
     @NotNull
@@ -34,7 +35,7 @@ public class Tournament extends BaseEntity {
     private GameDiscipline gameDiscipline;
 
     /**
-     * Specific game discipline settings
+     * Chosen game discipline settings
      */
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
@@ -52,10 +53,28 @@ public class Tournament extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TournamentStatusType status;
 
+    /**
+     * Type of financial settings to participate in tournament
+     */
     @NotNull
-    @Column(name = "type")
+    @Column(name = "access_type")
     @Enumerated(EnumType.STRING)
-    private TournamentType type;
+    private TournamentAccessType accessType;
+
+    /**
+     * Type of grid generation algorithm for creating matches
+     */
+    @NotNull
+    @Column(name = "system_type")
+    @Enumerated(EnumType.STRING)
+    private TournamentSystemType systemType;
+
+
+    /**
+     * Prototype for ref to Bank-Account entity for current tournament
+     */
+    @Transient
+    private Long fundAccountId;
 
     //Base settings
     @Column(name = "discord_channel_name")
@@ -71,9 +90,7 @@ public class Tournament extends BaseEntity {
     private LocalDateTime startPlannedDate;
 
     //Detailed settings
-//    @OneToOne(mappedBy = "tournament",fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    @JoinColumn(name = "tournament_settings_id")
+    @OneToOne(mappedBy = "tournament", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private TournamentSettings tournamentSettings;
 
 }

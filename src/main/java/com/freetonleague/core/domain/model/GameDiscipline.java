@@ -30,8 +30,10 @@ public class GameDiscipline extends ExtendedBaseEntity {
 
     @OneToMany(mappedBy = "gameDiscipline", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<GameDisciplineSettings> gameDisciplineSettings;
+
     @Column(name = "logo_file_name")
     private String logoFileName;
+
     @Column(name = "is_active")
     private boolean isActive;
 }
