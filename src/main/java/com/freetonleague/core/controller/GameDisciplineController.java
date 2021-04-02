@@ -31,8 +31,8 @@ public class GameDisciplineController {
 
     @ApiOperation("Get game discipline by id")
     @GetMapping(path = PATH_GET)
-    public ResponseEntity<GameDisciplineDto> getById(@PathVariable("discipline_id") long id,
-                                                     @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<GameDisciplineDto> getDisciplineById(@PathVariable("discipline_id") long id,
+                                                               @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.getDiscipline(id, user), HttpStatus.OK);
     }
 

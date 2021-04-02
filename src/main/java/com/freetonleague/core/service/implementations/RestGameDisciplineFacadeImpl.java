@@ -98,14 +98,8 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     @Override
     public GameDisciplineSettingsDto getPrimaryDisciplineSettingsByDiscipline(long disciplineId, User user) {
         GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId, user);
-        GameDisciplineSettings gameDisciplineSettings = disciplineService.getPrimaryDisciplineSettingsByDiscipline(gameDiscipline);
-        if (isNull(gameDisciplineSettings)) {
-            log.debug("^ Game discipline settings for requested discipline id {} was not found. " +
-                    "'getPrimaryDisciplineSettingsByDiscipline' in RestGameDisciplineFacade request denied", disciplineId);
-            throw new GameDisciplineSettingsManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR,
-                    "Game discipline settings for requested discipline id " + disciplineId + " was not found");
-        }
-        return disciplineSettingsMapper.toDto(gameDisciplineSettings);
+
+        return disciplineSettingsMapper.toDto(this.getVerifiedPrimaryDisciplineSettingsByDiscipline(gameDiscipline));
     }
 
     /**
@@ -152,7 +146,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Getting game discipline info by id and user with privacy check
      */
-    private GameDiscipline getVerifiedDiscipline(long id, User user) {
+    public GameDiscipline getVerifiedDiscipline(long id, User user) {
         if (isNull(user)) {
             log.debug("^ user is not authenticate. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedDiscipline' request denied");
@@ -169,5 +163,44 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
                     "Game discipline with requested id " + id + " is not active");
         }
         return gameDiscipline;
+    }
+
+    /**
+     * Getting game discipline settings info by id, discipline and user with privacy check
+     */
+    @Override
+    public GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedDisciplineSettings' request denied");
+        }
+        GameDisciplineSettings gameDisciplineSettings = disciplineService.getDisciplineSettings(id);
+        if (isNull(gameDisciplineSettings)) {
+            log.debug("^ Game discipline settings with requested id {} was not found. " +
+                    "'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied", id);
+            throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR,
+                    "Game discipline settings with requested id " + id + " was not found");
+        }
+        if (!gameDisciplineSettings.getGameDiscipline().equals(discipline)) {
+            log.debug("^ Game discipline settings with requested id {} is not match Game discipline." +
+                    " 'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied", id);
+            throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_MATCH_DISCIPLINE_ERROR,
+                    "Game discipline with requested id " + id + " is not match requested discipline id " + discipline.getId());
+        }
+        return gameDisciplineSettings;
+    }
+
+    /**
+     * Getting primary game discipline settings info by game discipline with privacy check
+     */
+    public GameDisciplineSettings getVerifiedPrimaryDisciplineSettingsByDiscipline(GameDiscipline gameDiscipline) {
+        GameDisciplineSettings gameDisciplineSettings = disciplineService.getPrimaryDisciplineSettingsByDiscipline(gameDiscipline);
+        if (isNull(gameDisciplineSettings)) {
+            log.debug("^ Game discipline settings for requested discipline id {} was not found. " +
+                    "'getPrimaryDisciplineSettingsByDiscipline' in RestGameDisciplineFacade request denied", gameDiscipline.getId());
+            throw new GameDisciplineSettingsManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR,
+                    "Game discipline settings for requested discipline id " + gameDiscipline.getId() + " was not found");
+        }
+        return gameDisciplineSettings;
     }
 }

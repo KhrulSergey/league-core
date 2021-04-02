@@ -36,8 +36,8 @@ public class TeamController {
 
     @ApiOperation("Get team by id")
     @GetMapping(path = PATH_GET)
-    public ResponseEntity<TeamBaseDto> getById(@PathVariable("team_id") long id,
-                                               @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<TeamBaseDto> getTeamById(@PathVariable("team_id") long id,
+                                                   @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.getTeamById(id, user), HttpStatus.OK);
     }
 

@@ -3,13 +3,11 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.model.GameDiscipline;
 import com.freetonleague.core.domain.model.GameDisciplineSettings;
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.GameDisciplineSettingsManageException;
 import com.freetonleague.core.repository.GameDisciplineRepository;
 import com.freetonleague.core.repository.GameDisciplineSettingsRepository;
 import com.freetonleague.core.service.GameDisciplineService;
-import com.freetonleague.core.service.SessionService;
 import com.freetonleague.core.util.GameIndicatorConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +32,6 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
     private final GameDisciplineRepository disciplineRepository;
 
     private final Validator validator;
-
-    private final SessionService sessionService;
-
     /**
      * Getting a specific game discipline from DB.
      */
@@ -67,9 +62,6 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
             log.error("!> requesting addDiscipline for discipline with ConstraintViolations. Check evoking clients");
             return null;
         }
-        User currentUser = sessionService.getCurrentUser();
-        discipline.setCreatedBy(currentUser);
-        discipline.setModifiedBy(currentUser);
 
         return disciplineRepository.save(discipline);
     }
@@ -88,8 +80,6 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
             log.error("!> requesting editDiscipline for discipline with ConstraintViolations. Check evoking clients");
             return null;
         }
-        User currentUser = sessionService.getCurrentUser();
-        discipline.setModifiedBy(currentUser);
         return disciplineRepository.save(discipline);
     }
 
@@ -181,9 +171,6 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
             disciplineSettingsRepository.save(primaryDisciplineSettings);
         }
         disciplineSettings.setGameOptimalIndicators(GameIndicatorConverter.convertAndValidate(disciplineSettings.getGameOptimalIndicators()));
-        User currentUser = sessionService.getCurrentUser();
-        disciplineSettings.setCreatedBy(currentUser);
-        disciplineSettings.setModifiedBy(currentUser);
 
         return disciplineSettingsRepository.save(disciplineSettings);
     }
@@ -205,8 +192,6 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
             primaryDisciplineSettings.setIsPrimary(false);
             disciplineSettingsRepository.save(primaryDisciplineSettings);
         }
-        User currentUser = sessionService.getCurrentUser();
-        disciplineSettings.setModifiedBy(currentUser);
         return disciplineSettingsRepository.save(disciplineSettings);
     }
 
