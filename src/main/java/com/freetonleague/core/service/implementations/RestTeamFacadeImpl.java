@@ -205,18 +205,23 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         return teamMapper.toExtendedDto(teamService.getTeamListByUser(user));
     }
 
+
     /**
      * Getting team by id and user with privacy check
      */
-    private Team getVerifiedTeamById(long id, User user) {
+    public Team getVerifiedTeamById(long id, User user) {
         if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedTeamById' request denied");
+            log.debug("^ user is not authenticate. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamById' request denied");
         }
         Team team = teamService.getTeamById(id);
         if (isNull(team)) {
-            log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' request denied", id);
+            log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id);
             throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR, "Team with requested id " + id + " was not found");
+        }
+        if (team.getStatus() != TeamStateType.ACTIVE) {
+            log.debug("^ Team with requested id {} was {}. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id, team.getStatus());
+            throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR, "Active team with requested id " + id + " was not found");
         }
         return team;
     }

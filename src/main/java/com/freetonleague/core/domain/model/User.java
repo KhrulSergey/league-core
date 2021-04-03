@@ -40,6 +40,9 @@ public class User extends BaseEntity  implements UserDetails {
     @Column(name = "avatar_file_name")
     private String avatarFileName;
 
+    @Column(name = "discord_id")
+    private String discordId;
+
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
