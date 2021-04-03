@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentSettings;
 import com.freetonleague.core.repository.TournamentRepository;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -43,12 +45,15 @@ public class TournamentServiceImpl implements TournamentService {
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<Tournament> getTournamentList(Pageable pageable) {
+    public Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList) {
         if (isNull(pageable)) {
             log.error("!> requesting getTournamentList for NULL pageable. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get tournament list with pageable params: {}", pageable);
+        log.debug("^ trying to get tournament list with pageable params: {} and status list {}", pageable, statusList);
+        if (nonNull(statusList) && !statusList.isEmpty()) {
+            return tournamentRepository.findAllByStatusIn(pageable, statusList);
+        }
         return tournamentRepository.findAll(pageable);
     }
 
@@ -60,6 +65,7 @@ public class TournamentServiceImpl implements TournamentService {
         if (!this.verifyTournament(tournament)) {
             return null;
         }
+        log.debug("^ trying to add new tournament {}", tournament);
         return tournamentRepository.save(tournament);
     }
 
@@ -72,10 +78,37 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         if (!this.isExistsTournamentById(tournament.getId())) {
-            log.error("!> requesting modify tournament with verifyTournament for NULL tournament. Check evoking clients");
+            log.error("!> requesting modify tournament for non-existed tournament. Check evoking clients");
             return null;
         }
+        log.debug("^ trying to modify tournament {}", tournament);
+        if (tournament.isStatusChanged()) {
+            this.handleTournamentStatusChanged(tournament);
+        }
         return tournamentRepository.save(tournament);
+    }
+
+    /**
+     * Mark 'deleted' tournament in DB.
+     *
+     * @param tournament to be deleted
+     * @return tournament with updated fields and deleted status
+     */
+    @Override
+    public Tournament deleteTournament(Tournament tournament) {
+        if (!this.verifyTournament(tournament)) {
+            return null;
+        }
+        if (!this.isExistsTournamentById(tournament.getId())) {
+            log.error("!> requesting delete tournament for non-existed tournament. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to set 'deleted' mark to tournament {}", tournament);
+        TournamentStatusType oldStatus = tournament.getStatus();
+        tournament.setStatus(TournamentStatusType.DELETED);
+        tournament = tournamentRepository.save(tournament);
+        this.handleTournamentStatusChanged(tournament);
+        return tournament;
     }
 
     /**
@@ -108,6 +141,15 @@ public class TournamentServiceImpl implements TournamentService {
             }
         }
         return true;
+    }
+
+    /**
+     * Prototype for handle tournament status
+     */
+    private void handleTournamentStatusChanged(Tournament tournament) {
+        log.warn("~ status for tournament id {} was changed from {} to {} ",
+                tournament.getId(), tournament.getPrevStatus(), tournament.getStatus());
+        tournament.setPrevStatus(tournament.getStatus());
     }
 
 }

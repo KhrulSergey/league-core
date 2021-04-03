@@ -20,7 +20,7 @@ public class TournamentQuitPenaltyDistributionDto implements Serializable {
 
     @NotNull
     @Min(0)
-    private Double hoursSinceParticipate;
+    private Double hoursBeforeTournamentStart;
 
     @NotNull
     @Max(100)

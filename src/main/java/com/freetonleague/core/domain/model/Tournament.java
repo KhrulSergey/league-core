@@ -3,7 +3,6 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.enums.TournamentAccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
-import com.sun.istack.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -53,6 +53,9 @@ public class Tournament extends ExtendedBaseEntity {
     @Enumerated(EnumType.STRING)
     private TournamentStatusType status;
 
+    @Transient
+    private TournamentStatusType prevStatus;
+
     /**
      * Type of financial settings to participate in tournament
      */
@@ -68,7 +71,6 @@ public class Tournament extends ExtendedBaseEntity {
     @Column(name = "system_type")
     @Enumerated(EnumType.STRING)
     private TournamentSystemType systemType;
-
 
     /**
      * Prototype for ref to Bank-Account entity for current tournament
@@ -93,4 +95,12 @@ public class Tournament extends ExtendedBaseEntity {
     @OneToOne(mappedBy = "tournament", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private TournamentSettings tournamentSettings;
 
+    public void setStatus(TournamentStatusType status) {
+        prevStatus = this.status;
+        this.status = status;
+    }
+
+    public boolean isStatusChanged() {
+        return !this.status.equals(this.prevStatus);
+    }
 }

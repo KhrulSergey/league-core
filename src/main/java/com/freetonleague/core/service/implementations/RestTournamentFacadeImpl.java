@@ -55,19 +55,19 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     }
 
     /**
-     * Returns list of all teams filtered by requested params
+     * Returns list of all teams filtered by requested params with detailed info
      */
     @Override
-    public List<TournamentDto> getTournamentList(Pageable pageable, User user) {
-        return tournamentMapper.toDto(tournamentService.getTournamentList(pageable).getContent());
+    public Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
+        return tournamentService.getTournamentList(pageable, statusList).map(tournamentMapper::toDto);
     }
 
     /**
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<TournamentBaseDto> getBaseTournamentList(Pageable pageable, User user) {
-        return null;
+    public Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
+        return tournamentService.getTournamentList(pageable, statusList).map(tournamentMapper::toBaseDto);
     }
 
     /**
@@ -97,6 +97,11 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     @Override
     public TournamentDto editTournament(TournamentDto tournamentDto, User user) {
         Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId(), user, true);
+        if (tournamentDto.getStatus() == TournamentStatusType.DELETED) {
+            log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
+                    "Modifying tournament was rejected. Check requested params and method.");
+        }
         if (!tournamentDto.getTournamentSettings().getId().equals(tournament.getTournamentSettings().getId())) {
             log.warn("~ parameter 'tournament settings' is not match by id to tournament for editTournament");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament settings",
@@ -111,6 +116,25 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                     "Tournament was not updated on Portal. Check requested params.");
         }
         return tournamentMapper.toDto(newTournament);
+    }
+
+    //TODO access only for admin
+
+    /**
+     * Delete (mark) tournament in DB.
+     * Accessible only for admin
+     */
+    @Override
+    public TournamentDto deleteTournament(long id, User user) {
+        Tournament tournament = this.getVerifiedTournamentById(id, user, true);
+        tournament = tournamentService.deleteTournament(tournament);
+
+        if (isNull(tournament)) {
+            log.error("!> error while deleting tournament with id {} for user {}.", id, user);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MODIFICATION_ERROR,
+                    "Tournament was not updated on Portal. Check requested params.");
+        }
+        return tournamentMapper.toDto(tournament);
     }
 
     /**
@@ -128,7 +152,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         if (tournament.getStatus() == TournamentStatusType.DELETED) {
             log.debug("^ Tournament with requested id {} was {}. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id, tournament.getStatus());
-            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_DISABLE_ERROR, "Visible tournament with requested id " + id + " was not found");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_VISIBLE_ERROR, "Visible tournament with requested id " + id + " was not found");
         }
         return tournament;
     }

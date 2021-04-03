@@ -2,6 +2,7 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,21 +33,22 @@ public interface RestTournamentFacade {
     TournamentBaseDto getBaseTournament(long id, User user);
 
     /**
-     * Returns list of all teams filtered by requested params
+     * Returns list of all teams filtered by requested params with detailed info
      *
      * @param pageable filtered params to search tournament
      * @param user     current user from Session
      * @return list of team entities
      */
-    List<TournamentDto> getTournamentList(Pageable pageable, User user);
+    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, List<TournamentStatusType> statusList);
 
     /**
-     * Returns list of all teams filtered by requested params
+     * Returns list of all teams filtered by requested params with base info
      *
      * @param pageable filtered params to search tournament
+     * @param user     current user from Session
      * @return list of team entities
      */
-    Page<TournamentBaseDto> getBaseTournamentList(Pageable pageable, User user);
+    Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList);
 
     /**
      * Add new tournament to DB.
@@ -65,4 +67,14 @@ public interface RestTournamentFacade {
      * @return Edited tournament
      */
     TournamentDto editTournament(TournamentDto tournamentDto, User user);
+
+    /**
+     * Delete tournament in DB.
+     *
+     * @param id   of tournament to search
+     * @param user current user from Session
+     * @return deleted tournament
+     */
+    TournamentDto deleteTournament(long id, User user);
+
 }

@@ -2,7 +2,6 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.util.GameIndicatorConverter;
-import com.sun.istack.NotNull;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -13,6 +12,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
