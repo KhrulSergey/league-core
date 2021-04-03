@@ -12,4 +12,5 @@ public class UserDto {
     private UUID leagueId;
     private String username;
     private String avatarFileName;
+    private String discordId;
 }

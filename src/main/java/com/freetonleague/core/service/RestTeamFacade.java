@@ -3,6 +3,7 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
+import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.User;
 
 import java.util.List;
@@ -82,4 +83,9 @@ public interface RestTeamFacade {
      * @param user current user from Session
      */
     List<TeamExtendedDto> getUserTeamList(User user);
+
+    /**
+     * Getting team by id and user with privacy check
+     */
+    Team getVerifiedTeamById(long id, User user);
 }
