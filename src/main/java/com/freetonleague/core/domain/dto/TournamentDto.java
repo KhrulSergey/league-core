@@ -1,9 +1,9 @@
 package com.freetonleague.core.domain.dto;
 
-import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)

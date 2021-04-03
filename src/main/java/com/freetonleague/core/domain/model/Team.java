@@ -1,7 +1,6 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TeamStateType;
-import com.sun.istack.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +8,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;

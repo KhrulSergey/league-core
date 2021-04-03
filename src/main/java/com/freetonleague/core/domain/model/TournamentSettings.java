@@ -3,7 +3,6 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.dto.TournamentPrizePoolDistributionDto;
 import com.freetonleague.core.domain.dto.TournamentQuitPenaltyDistributionDto;
 import com.freetonleague.core.domain.enums.FundGatheringType;
-import com.sun.istack.NotNull;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -14,6 +13,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 

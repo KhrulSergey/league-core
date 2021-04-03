@@ -40,6 +40,14 @@ public interface TournamentService {
     Tournament editTournament(Tournament tournament);
 
     /**
+     * Mark 'deleted' tournament in DB.
+     *
+     * @param tournament to be deleted
+     * @return tournament with updated fields and deleted status
+     */
+    Tournament deleteTournament(Tournament tournament);
+
+    /**
      * Returns sign of tournament existence for specified id.
      *
      * @param id for which tournament will be find
