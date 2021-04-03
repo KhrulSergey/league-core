@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -44,12 +45,15 @@ public class TournamentServiceImpl implements TournamentService {
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<Tournament> getTournamentList(Pageable pageable) {
+    public Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList) {
         if (isNull(pageable)) {
             log.error("!> requesting getTournamentList for NULL pageable. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get tournament list with pageable params: {}", pageable);
+        log.debug("^ trying to get tournament list with pageable params: {} and status list {}", pageable, statusList);
+        if (nonNull(statusList) && !statusList.isEmpty()) {
+            return tournamentRepository.findAllByStatusIn(pageable, statusList);
+        }
         return tournamentRepository.findAll(pageable);
     }
 

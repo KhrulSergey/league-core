@@ -1,9 +1,12 @@
 package com.freetonleague.core.service;
 
 
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 public interface TournamentService {
 
@@ -21,7 +24,7 @@ public interface TournamentService {
      * @param pageable filtered params to search tournament
      * @return list of team entities
      */
-    Page<Tournament> getTournamentList(Pageable pageable);
+    Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList);
 
     /**
      * Add new tournament to DB.

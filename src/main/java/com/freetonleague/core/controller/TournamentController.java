@@ -18,6 +18,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import java.util.List;
+
+import static java.util.Objects.nonNull;
+
 @RestController
 @RequestMapping(path = TournamentController.BASE_PATH)
 @RequiredArgsConstructor
@@ -46,8 +50,9 @@ public class TournamentController {
     @GetMapping(path = PATH_GET_LIST_DETAILED)
     public ResponseEntity<Page<TournamentDto>> getTournamentDetailedList(@PageableDefault Pageable pageable,
                                                                          @ApiIgnore @AuthenticationPrincipal User user,
-                                                                         @RequestParam(value = "statuses", required = false) TournamentStatusType... statusList) {
-        return new ResponseEntity<>(restTournamentFacade.getTournamentDetailedList(pageable, user), HttpStatus.OK);
+                                                                         @RequestParam(value = "statuses", required = false) TournamentStatusType... statuses) {
+        List<TournamentStatusType> statusList = nonNull(statuses) ? List.of(statuses) : null;
+        return new ResponseEntity<>(restTournamentFacade.getTournamentDetailedList(pageable, user, statusList), HttpStatus.OK);
     }
 
     @ApiOperation("Get tournament list info")
@@ -56,7 +61,8 @@ public class TournamentController {
     public ResponseEntity<Page<TournamentBaseDto>> getTournamentList(@PageableDefault Pageable pageable,
                                                                      @ApiIgnore @AuthenticationPrincipal User user,
                                                                      @RequestParam(value = "statuses", required = false) TournamentStatusType... statusList) {
-        return new ResponseEntity<>(restTournamentFacade.getTournamentList(pageable, user), HttpStatus.OK);
+
+        return new ResponseEntity<>(restTournamentFacade.getTournamentList(pageable, user, List.of(statusList)), HttpStatus.OK);
     }
 
     @ApiOperation("Create new tournament on platform")

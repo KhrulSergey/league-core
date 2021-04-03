@@ -2,9 +2,12 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * Service-facade for managing tournaments
@@ -36,7 +39,7 @@ public interface RestTournamentFacade {
      * @param user     current user from Session
      * @return list of team entities
      */
-    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user);
+    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, List<TournamentStatusType> statusList);
 
     /**
      * Returns list of all teams filtered by requested params with base info
@@ -45,7 +48,7 @@ public interface RestTournamentFacade {
      * @param user     current user from Session
      * @return list of team entities
      */
-    Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user);
+    Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList);
 
     /**
      * Add new tournament to DB.
