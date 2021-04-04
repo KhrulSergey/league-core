@@ -27,6 +27,13 @@ public interface TournamentService {
     Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList);
 
     /**
+     * Returns list of all teams on portal
+     *
+     * @return list of team entities
+     */
+    List<Tournament> getAllActiveTournament();
+
+    /**
      * Add new tournament to DB.
      *
      * @param tournament to be added
