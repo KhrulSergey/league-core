@@ -1,7 +1,6 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TeamInviteRequestStatusType;
-import com.sun.istack.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +8,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
@@ -48,7 +48,6 @@ public class TeamInviteRequest extends BaseEntity implements Serializable {
     @Enumerated(EnumType.STRING)
     private TeamInviteRequestStatusType status;
 
-    @NotNull
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "participant_applied_id")
     private TeamParticipant participantApplied;

@@ -17,6 +17,7 @@ public class ExceptionMessages {
     public static final String BLOCKCHAIN_DUPLICATE_EXCEPTION_ERROR = "Need proper permission to access. Please try login";
 
     public static final String USER_NOT_FOUND_ERROR = "User was not found. Please check request parameters";
+    public static final String USER_REQUIRED_ERROR = "User was not set in request. Please check request parameters";
     public static final String USER_MODIFICATION_ERROR = "User modification failed. Please try again";
     public static final String USER_DUPLICATE_FOUND_ERROR = "User has not been clearly defined. Please check request parameters";
     public static final String USER_DUPLICATE_BY_LOGIN_ERROR = "User with requested username already exists on portal. Please change name";
@@ -39,4 +40,28 @@ public class ExceptionMessages {
     public static final String TEAM_PARTICIPANT_INVITE_REJECTED_ERROR = "User is already participate to a team. Please check participation status or ask captain to check.";
     public static final String TEAM_PARTICIPANT_INVITE_DUPLICATE_ERROR = "Invitation to requested user is already existed. Wait for user decision and status update.";
     public static final String TEAM_PARTICIPANT_INVITE_NOT_FOUND_ERROR = "Invitation to a team was not found. Please check request parameters";
+
+    public static final String GAME_DISCIPLINE_CREATION_ERROR = "Game discipline creation failed. Please try again";
+    public static final String GAME_DISCIPLINE_DUPLICATE_BY_NAME_ERROR = "Game discipline with requested name already exists on portal. Please change name";
+    public static final String GAME_DISCIPLINE_NOT_FOUND_ERROR = "Game discipline was not found. Please check request parameters";
+    public static final String GAME_DISCIPLINE_NOT_ACTIVE_ERROR = "Game discipline is not active. Getting of information rejected. Please check request parameters";
+
+    public static final String GAME_DISCIPLINE_SETTINGS_CREATION_ERROR = "Game discipline settings creation failed. Please try again";
+    public static final String GAME_DISCIPLINE_SETTINGS_DUPLICATE_BY_NAME_ERROR = "Game discipline settings with requested name already exists on portal. Please change name";
+    public static final String GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR = "Game discipline settings was not found. Please check request parameters";
+    public static final String GAME_DISCIPLINE_SETTINGS_MATCH_DISCIPLINE_ERROR = "Game discipline settings is not match requested discipline. Please check request parameters";
+    public static final String GAME_DISCIPLINE_SETTINGS_CONVERTED_ERROR = "Game discipline settings was badly saved. Please try to modify or create new one";
+    public static final String GAME_DISCIPLINE_SETTINGS_PRIMARY_MODIFICATION_ERROR = "Only one primary game discipline settings must exist for one discipline. " +
+            "Changing primary flag available only with saving new entry. Please check request parameters";
+
+    public static final String TOURNAMENT_NOT_FOUND_ERROR = "Tournament was not found. Please check request parameters";
+    public static final String TOURNAMENT_VISIBLE_ERROR = "Tournament is not visible and modification forbidden. Please contact to organizers.";
+    public static final String TOURNAMENT_STATUS_DELETE_ERROR = "Tournament delete should be done with specific request. Please try again with other method.";
+    public static final String TOURNAMENT_CREATION_ERROR = "Tournament creation failed. Please try again";
+    public static final String TOURNAMENT_MODIFICATION_ERROR = "Tournament modifying failed. Please try again";
+
+    public static final String TOURNAMENT_SETTINGS_VALIDATION_ERROR = "Tournament settings was specified with errors. Please check request parameters";
+
+    public static final String TOURNAMENT_ORGANIZER_NOT_FOUND_ERROR = "Tournament organizer was not found. Please check request parameters";
+    public static final String TOURNAMENT_ORGANIZER_VALIDATION_ERROR = "Tournament organizer was specified with errors. Please check request parameters";
 }

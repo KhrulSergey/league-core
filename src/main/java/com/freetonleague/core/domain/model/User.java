@@ -1,7 +1,6 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.UserStatusType;
-import com.sun.istack.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -11,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.UUID;
@@ -39,6 +39,9 @@ public class User extends BaseEntity  implements UserDetails {
     //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
     @Column(name = "avatar_file_name")
     private String avatarFileName;
+
+    @Column(name = "discord_id")
+    private String discordId;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

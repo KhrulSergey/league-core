@@ -1,4 +1,4 @@
-package com.freetonleague.core.domain.dto;
+package com.freetonleague.core.domain.enums;
 
 public enum FundGatheringType {
     BY_ORGANIZERS,

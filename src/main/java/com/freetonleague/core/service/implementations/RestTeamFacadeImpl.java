@@ -67,7 +67,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ user is not authenticate. 'getTeamList' request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getTeamList' request denied");
         }
-        return teamMapper.toBaseDto(teamService.getList());
+        return teamMapper.toBaseDto(teamService.getTeamList());
     }
 
     /**
@@ -84,7 +84,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        if (nonNull(teamService.getByName(teamDto.getName()))) {
+        if (nonNull(teamService.getTeamByName(teamDto.getName()))) {
             log.warn("~ parameter 'name' is not unique for addTeam");
             throw new ValidationException(ExceptionMessages.TEAM_DUPLICATE_BY_NAME_ERROR, "name", "parameter name is not unique for addTeam");
         }
@@ -102,7 +102,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         newTeam.setParticipantList(Collections.singleton(captain));
         newTeam.setStatus(TeamStateType.ACTIVE);
         //save team and captain by Cascade persistence
-        newTeam = teamService.add(newTeam);
+        newTeam = teamService.addTeam(newTeam);
 
         if (isNull(newTeam)) {
             log.error("!> error while creating team from dto {} for user {}.", teamDto, user);
@@ -129,7 +129,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         }
         team.setName(teamDto.getName());
         team.setTeamLogoFileName(teamDto.getTeamLogoFileName());
-        team = teamService.edit(team);
+        team = teamService.editTeam(team);
         if (isNull(team)) {
             log.error("!> error while modifying team from dto {} for user {}.", teamDto, user);
             throw new TeamManageException(ExceptionMessages.TEAM_MODIFY_ERROR, "Team was not modified on Portal. Check requested params.");
@@ -176,7 +176,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.warn("~ forbiddenException for disband team {} for user {}.", team, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
         }
-        teamService.disband(team);
+        teamService.disbandTeam(team);
     }
 
     /**
@@ -202,21 +202,26 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getUserTeamList' request denied");
         }
-        return teamMapper.toExtendedDto(teamService.getListByUser(user));
+        return teamMapper.toExtendedDto(teamService.getTeamListByUser(user));
     }
+
 
     /**
      * Getting team by id and user with privacy check
      */
-    private Team getVerifiedTeamById(long id, User user) {
+    public Team getVerifiedTeamById(long id, User user) {
         if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedTeamById' request denied");
+            log.debug("^ user is not authenticate. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamById' request denied");
         }
-        Team team = teamService.getById(id);
+        Team team = teamService.getTeamById(id);
         if (isNull(team)) {
-            log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' request denied", id);
+            log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id);
             throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR, "Team with requested id " + id + " was not found");
+        }
+        if (team.getStatus() != TeamStateType.ACTIVE) {
+            log.debug("^ Team with requested id {} was {}. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id, team.getStatus());
+            throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR, "Active team with requested id " + id + " was not found");
         }
         return team;
     }

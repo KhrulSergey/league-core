@@ -1,7 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.GameIndicatorType;
-import com.sun.istack.NotNull;
+import com.freetonleague.core.util.GameIndicatorConverter;
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -12,7 +12,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
-import java.util.HashMap;
+import javax.validation.constraints.NotNull;
 import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
@@ -32,7 +32,11 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     private String name;
 
     @NotNull
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @Column(name = "is_primary")
+    private Boolean isPrimary;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "game_discipline_id")
     private GameDiscipline gameDiscipline;
 
@@ -41,6 +45,10 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
      */
     @Type(type = "hstore")
     @Column(name = "game_optimal_indicators", columnDefinition = "hstore")
-    private Map<GameIndicatorType, Object> gameOptimalIndicators = new HashMap<>();
+    private Map<GameIndicatorType, Object> gameOptimalIndicators;
 
+
+    public Map<GameIndicatorType, Object> getGameOptimalIndicators() {
+        return GameIndicatorConverter.convertAndValidate(gameOptimalIndicators);
+    }
 }

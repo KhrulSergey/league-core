@@ -1,16 +1,14 @@
 package com.freetonleague.core.domain.model;
 
-import com.sun.istack.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -29,4 +27,13 @@ public class GameDiscipline extends ExtendedBaseEntity {
 
     @Column(name = "description")
     private String description;
+
+    @OneToMany(mappedBy = "gameDiscipline", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    List<GameDisciplineSettings> gameDisciplineSettings;
+
+    @Column(name = "logo_file_name")
+    private String logoFileName;
+
+    @Column(name = "is_active")
+    private boolean isActive;
 }

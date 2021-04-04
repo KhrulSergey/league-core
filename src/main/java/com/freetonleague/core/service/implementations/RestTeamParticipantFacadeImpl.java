@@ -5,19 +5,18 @@ import com.freetonleague.core.domain.dto.TeamInviteRequestDto;
 import com.freetonleague.core.domain.dto.TeamParticipantDto;
 import com.freetonleague.core.domain.enums.TeamInviteRequestStatusType;
 import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
-import com.freetonleague.core.domain.enums.TeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamInviteRequest;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamParticipantManageException;
+import com.freetonleague.core.exception.UnauthorizedException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TeamInviteRequestMapper;
 import com.freetonleague.core.mapper.TeamMapper;
 import com.freetonleague.core.mapper.TeamParticipantMapper;
-import com.freetonleague.core.service.RestTeamParticipantFacade;
-import com.freetonleague.core.service.TeamParticipantService;
-import com.freetonleague.core.service.TeamService;
-import com.freetonleague.core.service.UserService;
+import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -35,7 +34,9 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
     private final TeamParticipantService participantService;
     private final TeamService teamService;
-    private final UserService userService;
+    private final RestUserFacade restUserFacade;
+    private final RestTeamFacade restTeamFacade;
+
     private final TeamInviteRequestMapper inviteRequestMapper;
     private final TeamParticipantMapper participantMapper;
     private final TeamMapper teamMapper;
@@ -51,7 +52,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
      */
     @Override
     public List<TeamInviteRequestDto> getInviteList(long teamId, User user) {
-        Team team = this.getVerifiedTeamById(teamId, user);
+        Team team = restTeamFacade.getVerifiedTeamById(teamId, user);
         if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for getting invite list for user {} from team {}.", user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
@@ -93,7 +94,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
      */
     @Override
     public TeamInviteRequestDto createInvite(long teamId, User currentUser, String username, String leagueId) {
-        Team team = this.getVerifiedTeamById(teamId, currentUser);
+        Team team = restTeamFacade.getVerifiedTeamById(teamId, currentUser);
         TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, currentUser);
         //check participation status
         if (isNull(teamParticipant) || !participantStatusAccessibleToInvite.contains(teamParticipant.getStatus())) {
@@ -104,19 +105,9 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
         User invitedUser = null;
         if (!isBlank(leagueId)) {
-            invitedUser = userService.findByLeagueId(UUID.fromString(leagueId));
-            if (isNull(invitedUser)) {
-                log.debug("^ User to invite was not found for request parameter leagueId {}", leagueId);
-                throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
-                        String.format("Requested parameter leagueId: '%s'", leagueId));
-            }
+            invitedUser = restUserFacade.getVerifiedUserByLeagueId(leagueId);
         } else if (!isBlank(username)) {
-            invitedUser = userService.findByUsername(username);
-            if (isNull(invitedUser)) {
-                log.debug("^ User to invite was not found for request parameter username {}", username);
-                throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
-                        String.format("Requested parameter username: '%s'", username));
-            }
+            invitedUser = restUserFacade.getVerifiedUserByUsername(username);
         }
 
         if (nonNull(invitedUser)) {
@@ -228,25 +219,5 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
                     "Invitation to a team with requested token " + inviteToken + " was not found");
         }
         return teamInviteRequest;
-    }
-
-    /**
-     * Getting team by id and user with privacy check
-     */
-    private Team getVerifiedTeamById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamById' request denied");
-        }
-        Team team = teamService.getById(id);
-        if (isNull(team)) {
-            log.debug("^ Team with requested id {} was not found. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id);
-            throw new TeamManageException(ExceptionMessages.TEAM_NOT_FOUND_ERROR, "Team with requested id " + id + " was not found");
-        }
-        if (team.getStatus() != TeamStateType.ACTIVE) {
-            log.debug("^ Team with requested id {} was {}. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied", id, team.getStatus());
-            throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR, "Active team with requested id " + id + " was not found");
-        }
-        return team;
     }
 }

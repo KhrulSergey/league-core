@@ -4,34 +4,34 @@ package com.freetonleague.core.domain.enums;
  * All Possible game indicators
  */
 public enum GameIndicatorType {
+    // !--- if you are extends class type than update converter GameIndicatorConverter.convertAndValidate() ---!
 
     // tag::common indicators[]
-    FRAG_COUNT("frag count", Integer.class, null),
-
-    FLAG_CAPTURED("flag captured", Boolean.class, null),
-    FLAG_CAPTURED_COUNT("flag captured count", Integer.class, null),
-
-    CHECK_POINT_PASSED("check point passed", Boolean.class, null)
+    FRAG_COUNT("frag count", GameIndicatorValueClassType.INTEGER, null),
+    FLAG_CAPTURED("flag captured", GameIndicatorValueClassType.BOOLEAN, null),
+    FLAG_CAPTURED_COUNT("flag captured count", GameIndicatorValueClassType.INTEGER, null),
+    CHECK_POINT_PASSED("check point passed", GameIndicatorValueClassType.BOOLEAN, null),
+    KEY_WORD_DETECTED("found key word", GameIndicatorValueClassType.STRING, null)
     // end::common indicators[]
 
     ;
 
-    private final String name;
-    private final Class<?> valueType;
+    private final String description;
+    private final GameIndicatorValueClassType valueClassType;
     private final Long gameDisciplineId;
 
-    GameIndicatorType(String name, Class<?> valueType, Long gameDisciplineId) {
-        this.name = name;
-        this.valueType = valueType;
+    GameIndicatorType(String description, GameIndicatorValueClassType valueClassType, Long gameDisciplineId) {
+        this.description = description;
+        this.valueClassType = valueClassType;
         this.gameDisciplineId = gameDisciplineId;
     }
 
-    public String getName() {
-        return name;
+    public String getDescription() {
+        return description;
     }
 
-    public Class<?> getValueType() {
-        return valueType;
+    public GameIndicatorValueClassType getValueClassType() {
+        return valueClassType;
     }
 
     public Long getGameDisciplineId() {
