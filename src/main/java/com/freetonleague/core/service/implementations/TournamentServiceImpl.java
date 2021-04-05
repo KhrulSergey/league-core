@@ -30,7 +30,13 @@ public class TournamentServiceImpl implements TournamentService {
     private final TournamentSettingsRepository tournamentSettingsRepository;
     private final Validator validator;
 
-    //    нельзя удалить команду которая участвует в турнире
+    private final List<TournamentStatusType> activeStatusList = List.of(
+            TournamentStatusType.CREATED,
+            TournamentStatusType.SIGN_UP,
+            TournamentStatusType.ADJUSTMENT,
+            TournamentStatusType.STARTED,
+            TournamentStatusType.PAUSE
+    );
 
     /**
      * Returns founded tournament by id
@@ -58,6 +64,16 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     /**
+     * Returns list of all teams on portal
+     *
+     * @return list of team entities
+     */
+    @Override
+    public List<Tournament> getAllActiveTournament() {
+        return tournamentRepository.findAllActive(activeStatusList);
+    }
+
+    /**
      * Add new tournament to DB.
      */
     @Override
@@ -78,7 +94,7 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         if (!this.isExistsTournamentById(tournament.getId())) {
-            log.error("!> requesting modify tournament for non-existed tournament. Check evoking clients");
+            log.error("!> requesting modify tournament {} for non-existed tournament. Check evoking clients", tournament.getId());
             return null;
         }
         log.debug("^ trying to modify tournament {}", tournament);
@@ -129,14 +145,14 @@ public class TournamentServiceImpl implements TournamentService {
         }
         Set<ConstraintViolation<Tournament>> violations = validator.validate(tournament);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament with verifyTournament for tournament with ConstraintViolations. Check evoking clients");
+            log.error("!> requesting modify tournament {} with verifyTournament for tournament with ConstraintViolations. Check evoking clients", tournament.getId());
             return false;
         }
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
         if (nonNull(tournamentSettings)) {
             Set<ConstraintViolation<TournamentSettings>> settingsViolations = validator.validate(tournamentSettings);
             if (!settingsViolations.isEmpty()) {
-                log.error("!> requesting modify tournament with verifyTournament for tournament settings with ConstraintViolations. Check evoking clients");
+                log.error("!> requesting modify tournament {} with verifyTournament for tournament settings with ConstraintViolations. Check evoking clients", tournament.getId());
                 return false;
             }
         }

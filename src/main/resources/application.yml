@@ -15,6 +15,44 @@ spring:
     username: postgres
   session:
     token-name: X-Auth-Token
+  # ===============================
+  # Kafka configuration
+  # ===============================
+  kafka:
+    bootstrap-servers: ${kafka_bootstrap_servers:localhost:9092}
+    properties:
+      sasl:
+        jaas:
+          config: org.apache.kafka.common.security.plain.PlainLoginModule required username=${kafka_username:'admin'} password=${kafka_password:'admin-secret'};
+        mechanism: PLAIN
+      security:
+        protocol: SASL_PLAINTEXT
+    consumer:
+      auto-offset-reset: earliest
+      group-id: example
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      max-poll-records: 5
+      fetch-max-wait: 360000
+      enable-auto-commit: false
+      client-id: example
+      properties:
+        spring.json.trusted.packages: "*"
+        #        fetch.min.bytes: 1000
+        fetch.min.bytes: 1
+        fetch.max.wait.ms: 200000
+    producer:
+      client-id: example
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      retries: 2
+    jaas:
+      enabled: true
+    listener:
+      poll-timeout: 180000
+      concurrency: 2
+      ack-mode: manual_immediate
+      idle-event-interval: 200000
 
 freetonleague:
   service:
@@ -23,6 +61,8 @@ freetonleague:
   team:
     invitation:
       token-duration-in-sec: 432000
+  tournament:
+    auto-start: true
 
 #LOGGING CONFIG
 debug: false
@@ -47,7 +87,9 @@ logging:
       freetonleague: DEBUG
   file:
     name: \Users\Khsa\FreetonLeague\logs\League_Core_Tournament.log
-
+# ===============================
+#Configuring Feign
+# ===============================
 feign:
   client:
     config:

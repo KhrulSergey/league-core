@@ -38,6 +38,6 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
 
     @Override
     public void quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
-
+        //    нельзя удалить команду которая участвует в турнире
     }
 }

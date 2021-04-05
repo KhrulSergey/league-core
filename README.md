@@ -1,13 +1,13 @@
 Freeton League Core "Tournament" - the system for manage FreeTon League Game Tournaments
 ---
-Tags: #java, #springboot, #hibernate, #jpa, #springSecurity, #oauth2, #postgreSQL
+Tags: #java, #springboot, #hibernate, #jpa, #springSecurity, #oauth2, #postgreSQL, #kafka
 
 Project uses: JDK11, Remote/Local PostgreSQL server.
 
 
 ### Requirements
 **core-tournament**
-- Available ports: 7701
+- Available ports: 7701, 9092, 2181
 - Installed: gradle and jdk11 for development
 - Installed: docker and docker-compose Windows / Mac / Linux for deploy
 
