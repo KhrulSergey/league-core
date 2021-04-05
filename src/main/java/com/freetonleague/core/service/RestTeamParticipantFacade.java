@@ -1,6 +1,7 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TeamDetailedInviteListDto;
+import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamInviteRequestDto;
 import com.freetonleague.core.domain.dto.TeamParticipantDto;
 import com.freetonleague.core.domain.model.User;
@@ -39,6 +40,15 @@ public interface RestTeamParticipantFacade {
      * @return new invite request entity
      */
     TeamInviteRequestDto createInvite(long teamId, User currentUser, String username, String leagueId);
+
+    /**
+     * Returns info about team by specified token
+     *
+     * @param inviteToken specified unique token from Invite Request entity
+     * @param user        current user from Session
+     * @return team participant Dto of new team member
+     */
+    TeamDto getInviteRequestInfo(String inviteToken, User user);
 
     /**
      * Returns new team participant by applying specified token
