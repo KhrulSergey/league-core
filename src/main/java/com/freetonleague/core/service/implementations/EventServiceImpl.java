@@ -2,8 +2,8 @@ package com.freetonleague.core.service.implementations;
 
 
 import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.kafka.engine.Producer;
 import com.freetonleague.core.service.EventService;
+import com.freetonleague.core.service.kafka.Producer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.support.SendResult;

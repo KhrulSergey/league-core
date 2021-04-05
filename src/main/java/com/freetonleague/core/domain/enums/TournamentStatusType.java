@@ -7,8 +7,8 @@ public enum TournamentStatusType {
     STARTED(4), // started and mathes began
     PAUSE(5), // pause for further instructions
     FINISHED(6), // successfully finished
-    DECLINED(7), //  canceled before started
-    DELETED(8) // not seen to anybody, just save in DB
+    DECLINED(0), //  canceled before started
+    DELETED(-1) // not seen to anybody, just save in DB
     ;
 
     private final int sequencePosition;

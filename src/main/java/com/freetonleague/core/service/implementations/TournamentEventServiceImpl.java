@@ -11,6 +11,7 @@ import com.freetonleague.core.service.TournamentEventService;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +30,9 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final EventService eventService;
     private final TournamentService tournamentService;
+
+    @Value("${freetonleague.tournament.auto-start:false}")
+    private boolean tournamentAutoStartEnabled;
 
     @Override
     public EventDto add(EventDto event) {
@@ -80,7 +84,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         } else if (tournamentStatus.isBefore(TournamentStatusType.ADJUSTMENT)
                 && tournament.getSignUpEndDate().isBefore(LocalDateTime.now())) {
             this.handleStatusChange(tournament, TournamentStatusType.ADJUSTMENT);
-        } else if (tournamentStatus.isBefore(TournamentStatusType.STARTED)
+        } else if (tournamentAutoStartEnabled && tournamentStatus.isBefore(TournamentStatusType.STARTED)
                 && tournament.getStartPlannedDate().isBefore(LocalDateTime.now())) {
             this.handleStatusChange(tournament, TournamentStatusType.STARTED);
         }

@@ -1,11 +1,10 @@
-package com.freetonleague.core.kafka.engine;
+package com.freetonleague.core.service.kafka;
 
 
 import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.service.EventService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -16,7 +15,6 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-@ConditionalOnProperty(value = "example.kafka.consumer-enabled", havingValue = "true")
 public class Consumer {
 
     private final EventService eventService;
