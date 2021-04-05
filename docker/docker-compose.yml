@@ -55,6 +55,7 @@ services:
     restart: always
     depends_on:
       - postgres
+      - kafka
 volumes:
   postgres: { }
 
