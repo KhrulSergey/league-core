@@ -16,7 +16,6 @@ public interface TeamParticipantMapper {
     TeamParticipant fromDto(TeamParticipantDto dto);
 
     @Mapping(target = "teamId", source = "entity.team.id")
-    @Mapping(target = "userLeagueId", expression = "java(entity.getUser().getLeagueId().toString())")
     TeamParticipantDto toDto(TeamParticipant entity);
 
     List<TeamParticipant> fromDto(List<TeamParticipantDto> dtoList);
