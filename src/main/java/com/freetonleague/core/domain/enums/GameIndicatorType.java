@@ -9,7 +9,7 @@ public enum GameIndicatorType {
     // tag::common indicators[]
     FRAG_COUNT("frag count", GameIndicatorValueClassType.INTEGER, null),
     FLAG_CAPTURED("flag captured", GameIndicatorValueClassType.BOOLEAN, null),
-    FLAG_CAPTURED_COUNT("flag captured count", GameIndicatorValueClassType.INTEGER, null),
+    FLAG_CAPTURED_COUNT("flag captured count", GameIndicatorValueClassType.DOUBLE, null),
     CHECK_POINT_PASSED("check point passed", GameIndicatorValueClassType.BOOLEAN, null),
     KEY_WORD_DETECTED("found key word", GameIndicatorValueClassType.STRING, null)
     // end::common indicators[]

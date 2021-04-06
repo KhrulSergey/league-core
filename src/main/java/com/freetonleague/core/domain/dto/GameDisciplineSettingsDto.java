@@ -1,11 +1,11 @@
 package com.freetonleague.core.domain.dto;
 
-import com.freetonleague.core.domain.enums.GameIndicatorType;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Map;
+import java.util.List;
 
 @Data
 public class GameDisciplineSettingsDto {
@@ -20,5 +20,7 @@ public class GameDisciplineSettingsDto {
     @NotNull
     private Long gameDisciplineId;
 
-    private Map<GameIndicatorType, Object> gameOptimalIndicators;
+    @NotNull
+    @NotEmpty
+    private List<GameDisciplineIndicatorDto> gameOptimalIndicators;
 }

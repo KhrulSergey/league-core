@@ -1,8 +1,7 @@
 package com.freetonleague.core.domain.model;
 
-import com.freetonleague.core.domain.enums.GameIndicatorType;
-import com.freetonleague.core.util.GameIndicatorConverter;
-import com.vladmihalcea.hibernate.type.basic.PostgreSQLHStoreType;
+import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,15 +11,16 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.Map;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
 @Getter
 @Setter
-@TypeDef(name = "hstore", typeClass = PostgreSQLHStoreType.class)
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Entity
 @Table(schema = "public", name = "game_disciplines_settings")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "game_disciplines_settings_id_seq", schema = "public", allocationSize = 1)
@@ -43,12 +43,10 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     /**
      * Hash map of indicators with optimal values
      */
-    @Type(type = "hstore")
-    @Column(name = "game_optimal_indicators", columnDefinition = "hstore")
-    private Map<GameIndicatorType, Object> gameOptimalIndicators;
-
-
-    public Map<GameIndicatorType, Object> getGameOptimalIndicators() {
-        return GameIndicatorConverter.convertAndValidate(gameOptimalIndicators);
-    }
+    @NotNull
+    @NotEmpty
+    @Type(type = "jsonb")
+    @Column(name = "game_optimal_indicators", columnDefinition = "jsonb")
+    private List<GameDisciplineIndicatorDto> gameOptimalIndicators;
 }
+
