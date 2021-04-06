@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class TeamParticipantDto {
     private Long id;
 
-    private String userLeagueId;
+    private UserDto user;
 
     private Long teamId;
 
