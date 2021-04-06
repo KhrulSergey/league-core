@@ -1,55 +1,48 @@
 package com.freetonleague.core.util;
 
-import com.freetonleague.core.domain.enums.GameIndicatorType;
+import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.GameDisciplineManageException;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class GameIndicatorConverter {
 
     /**
-     * Convert HashMap field entry form DB (from hstore type) to correct type entity
+     * Verified GameDisciplineIndicator List field entry form DB (from jsonB type) to correct type entity
      */
-    public static Map<GameIndicatorType, Object> convertAndValidate(Map<?, Object> objectMap) {
-        if (objectMap == null) {
+    public static List<GameDisciplineIndicatorDto> convertAndValidate(List<GameDisciplineIndicatorDto> gameDisciplineIndicatorList) {
+        if (gameDisciplineIndicatorList == null) {
             return null;
         }
-        HashMap<GameIndicatorType, Object> map = new HashMap<>();
-        AtomicReference<String> currentMap = new AtomicReference<>();
+        AtomicReference<GameDisciplineIndicatorDto> currentIndicator = new AtomicReference<>();
         try {
-            objectMap.forEach((key, value) -> {
-                //find enum value
-                GameIndicatorType keyMap = GameIndicatorType.valueOf(String.valueOf(key));
-                Object valueMap;
-                String entryValue = String.valueOf(value);
-                currentMap.set("type: ".concat(keyMap.name()).concat(", value:").concat(entryValue));
-                // trying to parse MapValue to specified type from GameIndicatorType->valueClassType
-                switch (keyMap.getValueClassType()) {
-
+            gameDisciplineIndicatorList.forEach(gameIndicator -> {
+                currentIndicator.set(gameIndicator);
+                String entryValue = String.valueOf(gameIndicator.getGameIndicatorValue());
+                switch (gameIndicator.getGameIndicatorType().getValueClassType()) {
                     case BOOLEAN:
-                        valueMap = Boolean.valueOf(entryValue);
+                        gameIndicator.setGameIndicatorValue(Boolean.valueOf(entryValue));
                         break;
                     case DOUBLE:
-                        valueMap = Double.valueOf(entryValue);
+                        gameIndicator.setGameIndicatorValue(Double.valueOf(entryValue));
                         break;
                     case INTEGER:
-                        valueMap = Integer.valueOf(entryValue);
+                        gameIndicator.setGameIndicatorValue(Integer.valueOf(entryValue));
                         break;
                     case LONG:
-                        valueMap = Long.valueOf(entryValue);
+                        gameIndicator.setGameIndicatorValue(Long.valueOf(entryValue));
                         break;
                     case STRING:
                     default:
-                        valueMap = entryValue;
+                        gameIndicator.setGameIndicatorValue(entryValue);
                 }
-                map.put(keyMap, valueMap);
             });
         } catch (Exception exc) {
-            throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_CONVERTED_ERROR, "Problem occurred with value: ' " + currentMap + "'. Details: " + exc.getMessage());
+            throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_CONVERTED_ERROR,
+                    "Problem occurred with value: ' " + currentIndicator + "'. Details: " + exc.getMessage());
         }
-        return map;
+        return gameDisciplineIndicatorList;
     }
 }
