@@ -1,7 +1,8 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.TeamDto;
+import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
+import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
@@ -15,6 +16,7 @@ import com.freetonleague.core.service.RestTournamentTeamFacade;
 import com.freetonleague.core.service.TournamentTeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Validator;
@@ -45,7 +47,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
 
         tournamentTeamService.addProposal(tournamentTeamMapper.fromDto(teamProposalDto));
 
-        TeamDto teamDto = (TeamDto) restTeamFacade.getTeamById(teamId, user);
+        TeamBaseDto teamDto = restTeamFacade.getTeamById(teamId, user);
 
         List<TournamentTeamParticipantDto> tournamentTeamParticipantDtoList =
                 restTeamFacade.getVerifiedTeamById(teamDto.getId(), user).getParticipantList().parallelStream()
@@ -59,7 +61,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
                         ).collect(Collectors.toList());
 
         TournamentTeamProposalDto tournamentTeamProposalDto = TournamentTeamProposalDto.builder()
-                .teamId(teamId)
+                .team(teamDto)
                 .status(TournamentTeamStateType.values()[(int) Math.round(Math.random() * (TournamentTeamStateType.values().length - 1))])
                 .type(TournamentTeamType.values()[(int) Math.round(Math.random() * (TournamentTeamType.values().length - 1))])
                 .tournamentTeamParticipantList(tournamentTeamParticipantDtoList)
@@ -75,6 +77,25 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     public void quitFromTournament(long tournamentId, long teamId, User user) {
         tournamentTeamService.quitFromTournament(new TournamentTeamProposal());
         return;
+    }
+
+    /**
+     * Get team proposal for tournament
+     */
+    @Override
+    public TournamentTeamProposalBaseDto getProposalForTournament(long tournamentId, long teamId, User user) {
+        return null;
+    }
+
+    /**
+     * Get team proposal list for tournament
+     *
+     * @param tournamentId identify of tournament
+     * @param user         current user from Session
+     */
+    @Override
+    public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(long tournamentId, User user) {
+        return null;
     }
 }
 

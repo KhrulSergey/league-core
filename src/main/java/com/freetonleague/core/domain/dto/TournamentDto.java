@@ -22,4 +22,8 @@ public class TournamentDto extends TournamentBaseDto {
 
     //Detailed settings
     private TournamentSettingsDto tournamentSettings;
+
+    private List<TournamentSeriesDto> tournamentSeriesList;
+
+    private List<TournamentWinnerDto> winnerTeamProposal;
 }

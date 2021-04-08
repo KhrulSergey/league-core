@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.freetonleague.core.domain.enums.EventOperationType;
 import com.freetonleague.core.domain.enums.EventProducerModelType;
 import lombok.Data;
@@ -13,6 +14,7 @@ import java.util.Map;
 @SuperBuilder
 @Data
 @RequiredArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class EventDto implements Serializable {
 
     private String id;
