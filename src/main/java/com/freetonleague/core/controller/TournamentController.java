@@ -30,7 +30,7 @@ public class TournamentController {
 
     public static final String BASE_PATH = "/api/tournament";
     public static final String PATH_CREATE = "/";
-    public static final String PATH_MODIFY = "/";
+    public static final String PATH_EDIT = "/";
     public static final String PATH_GET = "/{tournament_id}";
     public static final String PATH_DELETE = "/{tournament_id}";
     public static final String PATH_GET_LIST = "/list";
@@ -73,7 +73,7 @@ public class TournamentController {
     }
 
     @ApiOperation("Modify tournament on platform")
-    @PutMapping(path = PATH_MODIFY)
+    @PutMapping(path = PATH_EDIT)
     public ResponseEntity<TournamentDto> modifyTournament(@RequestBody TournamentDto tournamentDto,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentFacade.editTournament(tournamentDto, user), HttpStatus.OK);

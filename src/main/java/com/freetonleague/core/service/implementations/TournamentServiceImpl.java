@@ -6,6 +6,7 @@ import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentSettings;
 import com.freetonleague.core.repository.TournamentRepository;
 import com.freetonleague.core.repository.TournamentSettingsRepository;
+import com.freetonleague.core.repository.TournamentWinnersRepository;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
     private final TournamentSettingsRepository tournamentSettingsRepository;
+    private final TournamentWinnersRepository tournamentWinnersRepository;
     private final Validator validator;
 
     private final List<TournamentStatusType> activeStatusList = List.of(

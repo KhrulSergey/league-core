@@ -1,12 +1,10 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.TournamentBaseDto;
-import com.freetonleague.core.domain.dto.TournamentDto;
-import com.freetonleague.core.domain.dto.TournamentOrganizerDto;
-import com.freetonleague.core.domain.dto.TournamentSettingsDto;
+import com.freetonleague.core.domain.dto.*;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentOrganizer;
 import com.freetonleague.core.domain.model.TournamentSettings;
+import com.freetonleague.core.domain.model.TournamentWinner;
 import org.mapstruct.*;
 
 import java.util.List;
@@ -49,10 +47,19 @@ public interface TournamentMapper {
     @Named(value = "toDto")
     TournamentOrganizerDto toDto(TournamentOrganizer entity);
 
-    List<TournamentOrganizer> fromListDto(List<TournamentOrganizerDto> dto);
+    List<TournamentOrganizer> fromOrganizerListDto(List<TournamentOrganizerDto> dto);
 
     @IterableMapping(qualifiedByName = "toDto")
-    List<TournamentOrganizerDto> toListDto(List<TournamentOrganizer> entities);
+    List<TournamentOrganizerDto> toListOrganizersDto(List<TournamentOrganizer> entities);
     //endregion
 
+    //region Tournament Winners
+    TournamentWinner fromDto(TournamentWinnerDto dto);
+
+    @Named(value = "toWinnerDto")
+    TournamentWinnerDto toDto(TournamentWinner entity);
+
+    @IterableMapping(qualifiedByName = "toWinnerDto")
+    List<TournamentWinnerDto> toListWinnerDto(List<TournamentWinner> entities);
+    //endregion
 }

@@ -19,17 +19,18 @@ public interface TournamentService {
     Tournament getTournament(long id);
 
     /**
-     * Returns list of all teams filtered by requested params
+     * Returns list of all tournaments filtered by requested params
      *
-     * @param pageable filtered params to search tournament
-     * @return list of team entities
+     * @param pageable   filtered params to search tournament
+     * @param statusList filtered params to search tournament
+     * @return list of tournaments entities
      */
     Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList);
 
     /**
-     * Returns list of all teams on portal
+     * Returns list of all tournaments on portal
      *
-     * @return list of team entities
+     * @return list of tournaments entities
      */
     List<Tournament> getAllActiveTournament();
 
