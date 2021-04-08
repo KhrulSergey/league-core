@@ -4,7 +4,9 @@ package com.freetonleague.core.domain.enums;
 public enum EventProducerModelType {
     TOURNAMENT("TOURNAMENT"),
     TEAM("TEAM"),
-    USER("USER");
+    USER("USER"),
+    TEST_DATA("TEST_DATA"),
+    INPUT_DATA("INPUT_DATA");
 
     private final String topicName;
 
