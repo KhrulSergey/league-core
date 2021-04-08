@@ -26,9 +26,13 @@ import java.util.List;
 public class TournamentTeamProposal extends BaseEntity {
 
     //Properties
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_id")
     private Team team;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "tournament_id")
+    private Tournament tournament;
 
     /**
      * Status of team participation in tournament
@@ -49,6 +53,6 @@ public class TournamentTeamProposal extends BaseEntity {
     /**
      * Team participant list with their role (status) in tournament
      */
-    @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 }
