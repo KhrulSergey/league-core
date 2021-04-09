@@ -18,7 +18,7 @@ public class TeamInviteRequestDto {
 
     private String invitedUser;
 
-    private Long participantAppliedId;
+    private TeamParticipantDto participantApplied;
 
     private LocalDateTime expiration;
 
