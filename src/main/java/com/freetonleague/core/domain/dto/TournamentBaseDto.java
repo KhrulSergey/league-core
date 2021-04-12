@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.enums.TournamentAccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
@@ -23,6 +24,7 @@ public class TournamentBaseDto {
     private Long gameDisciplineId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnoreProperties("gameDisciplineSettings")
     private GameDisciplineDto gameDiscipline;
 
     private TournamentStatusType status;
@@ -44,6 +46,9 @@ public class TournamentBaseDto {
 
     @NotNull
     private Long gameDisciplineSettingsId;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private UserDto tournamentCreator;
 
     private List<TournamentOrganizerDto> tournamentOrganizerList;
 
