@@ -60,9 +60,10 @@ public class TournamentController {
     @GetMapping(path = PATH_GET_LIST)
     public ResponseEntity<Page<TournamentBaseDto>> getTournamentList(@PageableDefault Pageable pageable,
                                                                      @ApiIgnore @AuthenticationPrincipal User user,
-                                                                     @RequestParam(value = "statuses", required = false) TournamentStatusType... statusList) {
+                                                                     @RequestParam(value = "statuses", required = false) TournamentStatusType... statuses) {
 
-        return new ResponseEntity<>(restTournamentFacade.getTournamentList(pageable, user, List.of(statusList)), HttpStatus.OK);
+        List<TournamentStatusType> statusList = nonNull(statuses) ? List.of(statuses) : null;
+        return new ResponseEntity<>(restTournamentFacade.getTournamentList(pageable, user, statusList), HttpStatus.OK);
     }
 
     @ApiOperation("Create new tournament on platform")
