@@ -13,4 +13,6 @@ public class UserDto {
     private String username;
     private String avatarFileName;
     private String discordId;
+
+
 }
