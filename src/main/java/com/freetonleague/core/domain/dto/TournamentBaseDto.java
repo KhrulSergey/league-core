@@ -9,6 +9,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class TournamentBaseDto {
     private Long id;
 
     @NotBlank
+    @Size(max = 55)
     private String name;
 
     @NotNull
@@ -27,6 +29,7 @@ public class TournamentBaseDto {
     @JsonIgnoreProperties("gameDisciplineSettings")
     private GameDisciplineDto gameDiscipline;
 
+    @NotNull
     private TournamentStatusType status;
 
     @NotNull
@@ -53,5 +56,6 @@ public class TournamentBaseDto {
     private List<TournamentOrganizerDto> tournamentOrganizerList;
 
     //Detailed settings
+    @NotNull
     private TournamentSettingsDto tournamentSettings;
 }

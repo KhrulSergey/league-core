@@ -50,9 +50,10 @@ public class TournamentController {
     @GetMapping(path = PATH_GET_LIST_DETAILED)
     public ResponseEntity<Page<TournamentDto>> getTournamentDetailedList(@PageableDefault Pageable pageable,
                                                                          @ApiIgnore @AuthenticationPrincipal User user,
+                                                                         @RequestParam(value = "creator", required = false) String creatorLeagueId,
                                                                          @RequestParam(value = "statuses", required = false) TournamentStatusType... statuses) {
         List<TournamentStatusType> statusList = nonNull(statuses) ? List.of(statuses) : null;
-        return new ResponseEntity<>(restTournamentFacade.getTournamentDetailedList(pageable, user, statusList), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentFacade.getTournamentDetailedList(pageable, user, creatorLeagueId, statusList), HttpStatus.OK);
     }
 
     @ApiOperation("Get tournament list info")

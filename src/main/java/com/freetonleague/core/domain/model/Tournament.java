@@ -10,7 +10,9 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,8 +26,10 @@ import java.util.List;
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournaments_id_seq", schema = "public", allocationSize = 1)
 public class Tournament extends ExtendedBaseEntity {
 
+
     //Properties
-    @NotNull
+    @NotBlank
+    @Size(max = 55)
     @Column(name = "name")
     private String name;
 
