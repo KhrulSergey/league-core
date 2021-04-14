@@ -10,7 +10,10 @@ import lombok.Data;
 public class GameIndicatorTypeDto {
 
     private String name;
+
     private String description;
+
     private GameIndicatorValueClassType valueClassType;
+
     private Long gameDisciplineId;
 }
