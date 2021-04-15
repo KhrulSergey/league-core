@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
 
@@ -33,6 +35,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
      */
     @OneToMany(mappedBy = "tournamentMatchRival", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<TournamentMatchRivalParticipant> rivalParticipants;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "match_id")
     private TournamentMatch tournamentMatch;
@@ -42,6 +45,15 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_proposal_id")
     private TournamentTeamProposal teamProposal;
+
+    @NotNull
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private TournamentStatusType status;
+
+    @Transient
+    private TournamentStatusType prevStatus;
+
     /**
      * Indicators (score) of team on current match
      */
@@ -54,5 +66,14 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
      */
     @Column(name = "place_in_match")
     private Integer placeInMatch;
+
+    public void setStatus(TournamentStatusType status) {
+        prevStatus = this.status;
+        this.status = status;
+    }
+
+    public boolean isStatusChanged() {
+        return !this.status.equals(this.prevStatus);
+    }
 }
 

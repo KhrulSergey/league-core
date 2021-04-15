@@ -2,6 +2,7 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.model.TournamentMatchRival;
+import com.freetonleague.core.domain.model.TournamentMatchRivalParticipant;
 
 public interface TournamentMatchRivalService {
 
@@ -49,4 +50,12 @@ public interface TournamentMatchRivalService {
      * Verify tournament match rival info with validation and business check
      */
     boolean verifyTournamentMatchRival(TournamentMatchRival tournamentMatchRival);
+
+    /**
+     * Returns founded tournament rival participant by id
+     *
+     * @param id of tournament rival participant to search
+     * @return tournament match rival participant entity or NULL of not found
+     */
+    TournamentMatchRivalParticipant getMatchRivalParticipant(long id);
 }

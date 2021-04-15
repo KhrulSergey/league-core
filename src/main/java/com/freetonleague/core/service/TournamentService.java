@@ -3,6 +3,7 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -65,4 +66,9 @@ public interface TournamentService {
      * @return true is Tournament exists, false - if not
      */
     boolean isExistsTournamentById(long id);
+
+    /**
+     * Returns sign of user is tournament organizer, or false if not
+     */
+    boolean isUserTournamentOrganizer(Tournament tournament, User user);
 }

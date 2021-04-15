@@ -23,18 +23,17 @@ import java.util.Set;
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_matches_id_seq", schema = "public", allocationSize = 1)
 public class TournamentMatch extends ExtendedBaseEntity {
 
-    @NotNull
     @Column(name = "name")
     private String name;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
 
-    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<TournamentMatchRival> rivals;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "winner_match_rival_id")
     private TournamentMatchRival matchWinner;
 
@@ -42,6 +41,9 @@ public class TournamentMatch extends ExtendedBaseEntity {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private TournamentStatusType status;
+
+    @Transient
+    private TournamentStatusType prevStatus;
 
     @NotNull
     @Column(name = "type")
@@ -56,5 +58,14 @@ public class TournamentMatch extends ExtendedBaseEntity {
 
     @Column(name = "finished_at")
     private LocalDateTime finishedDate;
+
+    public void setStatus(TournamentStatusType status) {
+        prevStatus = this.status;
+        this.status = status;
+    }
+
+    public boolean isStatusChanged() {
+        return !this.status.equals(this.prevStatus);
+    }
 }
 
