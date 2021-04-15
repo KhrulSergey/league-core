@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.freetonleague.core.domain.enums.UserStatusType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -11,8 +12,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
@@ -33,6 +36,7 @@ public class User extends BaseEntity  implements UserDetails {
     private UUID leagueId;
 
     @NotBlank
+    @Size(max = 25)
     @Column(name = "username", unique = true)
     private String username;
 
@@ -46,6 +50,10 @@ public class User extends BaseEntity  implements UserDetails {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
+
+    @JsonIgnore
+    @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    private List<TeamParticipant> userTeamParticipantList;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
