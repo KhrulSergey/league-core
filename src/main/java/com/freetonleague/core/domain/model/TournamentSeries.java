@@ -38,7 +38,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     private Tournament tournament;
 
     @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-    private List<TournamentMatch> matches;
+    private List<TournamentMatch> matchList;
 
     /**
      * Position of all series for current tournament (round number)
@@ -95,8 +95,8 @@ public class TournamentSeries extends ExtendedBaseEntity {
 
     public int teamProposalCount() {
         int count = 0;
-        if (nonNull(matches)) {
-            count = toIntExact(matches.stream()
+        if (nonNull(matchList)) {
+            count = toIntExact(matchList.stream()
                     .map(TournamentMatch::getRivals).filter(Objects::nonNull)
                     .mapToInt(Set::size).count()
             );
@@ -106,8 +106,8 @@ public class TournamentSeries extends ExtendedBaseEntity {
 
     public int teamProposalParticipantCount() {
         int count = 0;
-        if (nonNull(matches)) {
-            count = toIntExact(matches.stream()
+        if (nonNull(matchList)) {
+            count = toIntExact(matchList.stream()
                     .map(TournamentMatch::getRivals).filter(Objects::nonNull)
                     .flatMap(Set::stream).filter(Objects::nonNull)
                     .map(TournamentMatchRival::getRivalParticipants)

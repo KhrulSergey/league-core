@@ -1,6 +1,6 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.model.User;
 
 /**
@@ -9,13 +9,13 @@ import com.freetonleague.core.domain.model.User;
 public interface RestUserFacade {
 
     /**
-     * Returns founded team by id
+     * Returns founded user by leagueId
      *
-     * @param id   of team to search
-     * @param user current user from Session
+     * @param leagueId of user to search
+     * @param user     current user from Session
      * @return team entity
      */
-    UserDto getTeamById(long id, User user);
+    UserPublicDto getUserByLeagueId(String leagueId, User user);
 
     /**
      * Getting user by username with privacy check

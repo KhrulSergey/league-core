@@ -10,7 +10,7 @@ import java.util.Set;
 @Data
 public class TournamentMatchRivalDto extends TournamentMatchRivalBaseDto {
 
-    Set<TournamentMatchRivalParticipantDto> rivalParticipants;
+    Set<TournamentMatchRivalParticipantDto> rivalParticipantList;
 
     private List<GameDisciplineIndicatorDto> matchIndicator;
 }

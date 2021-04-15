@@ -1,5 +1,7 @@
 package com.freetonleague.core.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -14,8 +16,9 @@ public class TournamentDto extends TournamentBaseDto {
      */
     private Long fundAccountId;
 
-
     //Detailed settings
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @JsonIgnoreProperties("matchList")
     private List<TournamentSeriesDto> tournamentSeriesList;
 
     private List<TournamentWinnerDto> winnerTeamProposal;
