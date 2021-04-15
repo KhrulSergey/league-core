@@ -1,8 +1,11 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.TournamentMatch;
+import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.repository.TournamentMatchRepository;
+import com.freetonleague.core.service.TournamentMatchRivalService;
 import com.freetonleague.core.service.TournamentMatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +13,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.Set;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -18,73 +26,91 @@ import javax.validation.Validator;
 public class TournamentMatchServiceImpl implements TournamentMatchService {
 
     private final TournamentMatchRepository tournamentMatchRepository;
+    private final TournamentMatchRivalService tournamentMatchRivalService;
     private final Validator validator;
 
     /**
      * Returns founded tournament match by id
-     *
-     * @param id of tournament match to search
-     * @return tournament match entity or NULL of not found
      */
     @Override
     public TournamentMatch getMatch(long id) {
-        return null;
+        log.debug("^ trying to get tournament match by id: {}", id);
+        return tournamentMatchRepository.findById(id).orElse(null);
     }
 
     /**
      * Returns list of all tournament matches filtered by requested params
-     *
-     * @param pageable         filtered params to search tournament series
-     * @param tournamentSeries specified series to search suitable tournament matches
-     * @return list of tournament series entities
      */
     @Override
     public Page<TournamentMatch> getMatchList(Pageable pageable, TournamentSeries tournamentSeries) {
-        return null;
+        if (isNull(pageable) || isNull(tournamentSeries)) {
+            log.error("!> requesting getMatchList for NULL pageable {} or NULL tournament {}. Check evoking clients",
+                    pageable, tournamentSeries);
+            return null;
+        }
+        log.debug("^ trying to get tournament match list with pageable params: {} and by tournament series id {}",
+                pageable, tournamentSeries.getId());
+
+        return tournamentMatchRepository.findAllByTournamentSeries(pageable, tournamentSeries);
     }
 
     /**
-     * Add new tournament series to DB.
-     *
-     * @param tournamentMatch to be added
-     * @return Added tournament series
+     * Add new tournament match to DB.
      */
     @Override
     public TournamentMatch addMatch(TournamentMatch tournamentMatch) {
-        return null;
+        if (!this.verifyTournamentMatch(tournamentMatch)) {
+            return null;
+        }
+        log.debug("^ trying to add new tournament series {}", tournamentMatch);
+        return tournamentMatchRepository.save(tournamentMatch);
     }
 
     /**
-     * Edit tournament series in DB.
-     *
-     * @param tournamentMatch to be edited
-     * @return Edited tournament series
+     * Edit tournament match in DB.
      */
     @Override
     public TournamentMatch editMatch(TournamentMatch tournamentMatch) {
-        return null;
+        if (!this.verifyTournamentMatch(tournamentMatch)) {
+            return null;
+        }
+        if (!this.isExistsTournamentMatchById(tournamentMatch.getId())) {
+            log.error("!> requesting modify tournament match {} for non-existed tournament match. Check evoking clients",
+                    tournamentMatch.getId());
+            return null;
+        }
+        log.debug("^ trying to modify tournament match {}", tournamentMatch);
+        if (tournamentMatch.isStatusChanged()) {
+            this.handleTournamentMatchStatusChanged(tournamentMatch);
+        }
+        return tournamentMatchRepository.save(tournamentMatch);
     }
 
     /**
-     * Mark 'deleted' tournament series in DB.
-     *
-     * @param tournamentMatch to be deleted
-     * @return tournament series with updated fields and deleted status
+     * Mark 'deleted' tournament match in DB.
      */
     @Override
     public TournamentMatch deleteMatch(TournamentMatch tournamentMatch) {
-        return null;
+        if (!this.verifyTournamentMatch(tournamentMatch)) {
+            return null;
+        }
+        if (!this.isExistsTournamentMatchById(tournamentMatch.getId())) {
+            log.error("!> requesting delete tournament match for non-existed tournament tournamentMatch. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to set 'deleted' mark to tournament match {}", tournamentMatch);
+        tournamentMatch.setStatus(TournamentStatusType.DELETED);
+        tournamentMatch = tournamentMatchRepository.save(tournamentMatch);
+        this.handleTournamentMatchStatusChanged(tournamentMatch);
+        return tournamentMatch;
     }
 
     /**
-     * Returns sign of tournament series existence for specified id.
-     *
-     * @param id for which tournament series will be find
-     * @return true is tournament series exists, false - if not
+     * Returns sign of tournament match existence for specified id.
      */
     @Override
     public boolean isExistsTournamentMatchById(long id) {
-        return false;
+        return tournamentMatchRepository.existsById(id);
     }
 
     /**
@@ -92,6 +118,35 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
      */
     @Override
     public boolean verifyTournamentMatch(TournamentMatch tournamentMatch) {
-        return false;
+        if (isNull(tournamentMatch)) {
+            log.error("!> requesting modify tournament series with verifyTournamentMatch for NULL tournamentMatch. Check evoking clients");
+            return false;
+        }
+        Set<ConstraintViolation<TournamentMatch>> violations = validator.validate(tournamentMatch);
+        if (!violations.isEmpty()) {
+            log.error("!> requesting modify tournament match id:{} name:{} with verifyTournamentMatch for tournament match with ConstraintViolations. Check evoking clients",
+                    tournamentMatch.getId(), tournamentMatch.getName());
+            return false;
+        }
+        Set<TournamentMatchRival> tournamentMatchRivals = tournamentMatch.getRivals();
+        if (nonNull(tournamentMatchRivals)) {
+            for (TournamentMatchRival matchRival : tournamentMatchRivals) {
+                if (!tournamentMatchRivalService.verifyTournamentMatchRival(matchRival)) {
+                    log.error("!> requesting modify tournament match id:{} name:{} with verifyTournamentMatch for tournament match rival with ConstraintViolations. Check evoking clients",
+                            tournamentMatch.getId(), tournamentMatch.getName());
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Prototype for handle tournament match status
+     */
+    private void handleTournamentMatchStatusChanged(TournamentMatch tournamentMatch) {
+        log.warn("~ status for tournament match id {} was changed from {} to {} ",
+                tournamentMatch.getId(), tournamentMatch.getPrevStatus(), tournamentMatch.getStatus());
+        tournamentMatch.setPrevStatus(tournamentMatch.getStatus());
     }
 }

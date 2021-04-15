@@ -8,7 +8,9 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Set;
 
 import static java.util.Objects.nonNull;
@@ -24,7 +26,8 @@ import static java.util.Objects.nonNull;
 public class Team extends BaseEntity {
 
     //Properties
-    @NotNull
+    @NotBlank
+    @Size(max = 25)
     @Column(name = "name", unique = true)
     private String name;
 

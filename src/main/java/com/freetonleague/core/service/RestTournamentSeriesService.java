@@ -2,6 +2,7 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
+import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -36,7 +37,7 @@ public interface RestTournamentSeriesService {
     TournamentSeriesDto getActiveSeriesForTournament(long tournamentId, User user);
 
     /**
-     * Add new tournament series to DB.
+     * Add new tournament series.
      *
      * @param tournamentSeriesDto to be added
      * @param user                current user from Session
@@ -45,16 +46,15 @@ public interface RestTournamentSeriesService {
     TournamentSeriesDto addSeries(TournamentSeriesDto tournamentSeriesDto, User user);
 
     /**
-     * Generate next active series for tournament.
+     * Generate all series for tournament.
      *
-     * @param tournamentId specified tournament to generate new tournament series
+     * @param tournamentId specified tournament to generate tournament series list
      * @param user         current user from Session
-     * @return Generated tournament series or NULL if all series was formed
      */
-    TournamentSeriesDto generateSeriesForTournament(long tournamentId, User user);
+    void generateSeriesForTournament(long tournamentId, User user);
 
     /**
-     * Edit tournament series in DB.
+     * Edit tournament series.
      *
      * @param id                  Identity of a series
      * @param tournamentSeriesDto data to be edited
@@ -64,11 +64,21 @@ public interface RestTournamentSeriesService {
     TournamentSeriesDto editSeries(long id, TournamentSeriesDto tournamentSeriesDto, User user);
 
     /**
-     * Mark 'deleted' tournament series in DB.
+     * Mark 'deleted' tournament series.
      *
      * @param id   identify series to be deleted
      * @param user current user from Session
      * @return tournament series with updated fields and deleted status
      */
     TournamentSeriesDto deleteSeries(long id, User user);
+
+    /**
+     * Returns tournament series by id and user with privacy check
+     */
+    TournamentSeries getVerifiedSeriesById(long id, User user);
+
+    /**
+     * Getting tournament settings by DTO with privacy check
+     */
+    TournamentSeries getVerifiedSeriesByDto(TournamentSeriesDto tournamentSeriesDto, User user);
 }

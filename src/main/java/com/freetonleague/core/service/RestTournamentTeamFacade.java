@@ -1,7 +1,10 @@
 package com.freetonleague.core.service;
 
+import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
+import com.freetonleague.core.domain.model.TournamentTeamParticipant;
+import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 
@@ -45,6 +48,18 @@ public interface RestTournamentTeamFacade {
      * @param user         current user from Session
      */
     Page<TournamentTeamProposalBaseDto> getProposalListForTournament(long tournamentId, User user);
+
+    /**
+     * Getting participant by TournamentTeamParticipantDto, verify team membership
+     */
+    TournamentTeamParticipant getVerifiedTournamentTeamParticipantByDto(
+            TournamentTeamParticipantDto tournamentTeamParticipantDto, TournamentTeamProposal tournamentTeamProposal);
+
+    /**
+     * Getting participant by id, verify team membership
+     */
+    TournamentTeamParticipant getVerifiedTournamentTeamParticipantById(
+            long tournamentTeamParticipantId, TournamentTeamProposal tournamentTeamProposal);
 }
 
 

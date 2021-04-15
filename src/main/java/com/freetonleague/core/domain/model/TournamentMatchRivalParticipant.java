@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
+import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
@@ -40,6 +42,11 @@ public class TournamentMatchRivalParticipant extends ExtendedBaseEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "tournament_team_participant_id")
     private TournamentTeamParticipant tournamentTeamParticipant;
+
+    @NotNull
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    private TournamentMatchRivalParticipantStatusType status;
 
     /**
      * Indicators (score) of participant on current match

@@ -2,7 +2,9 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
+import com.freetonleague.core.domain.dto.TournamentWinnerDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,17 +37,20 @@ public interface RestTournamentFacade {
     /**
      * Returns list of all teams filtered by requested params with detailed info
      *
-     * @param pageable filtered params to search tournament
-     * @param user     current user from Session
+     * @param pageable        filtered params to search tournament
+     * @param user            current user from Session
+     * @param creatorLeagueId filter params
+     * @param statusList      filter params
      * @return list of team entities
      */
-    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, List<TournamentStatusType> statusList);
+    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<TournamentStatusType> statusList);
 
     /**
      * Returns list of all teams filtered by requested params with base info
      *
-     * @param pageable filtered params to search tournament
-     * @param user     current user from Session
+     * @param pageable   filtered params to search tournament
+     * @param user       current user from Session
+     * @param statusList filter params
      * @return list of team entities
      */
     Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList);
@@ -77,4 +82,17 @@ public interface RestTournamentFacade {
      */
     TournamentDto deleteTournament(long id, User user);
 
+    /**
+     * Define tournament winners and it's places.
+     *
+     * @param tournamentWinnerList winner list of tournament
+     * @param user                 current user from Session
+     * @return deleted tournament
+     */
+    TournamentDto defineTournamentWinners(List<TournamentWinnerDto> tournamentWinnerList, User user);
+
+    /**
+     * Getting tournament by id and user with privacy check
+     */
+    Tournament getVerifiedTournamentById(long id, User user, boolean checkUser);
 }

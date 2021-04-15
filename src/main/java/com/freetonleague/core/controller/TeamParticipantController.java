@@ -52,7 +52,7 @@ public class TeamParticipantController {
                                                              @RequestParam(value = "username", required = false) String username,
                                                              @RequestParam(value = "leagueId", required = false) String leagueId,
                                                              @ApiIgnore @AuthenticationPrincipal User currentUser) {
-        return new ResponseEntity<>(teamParticipantFacade.createInvite(teamId, currentUser, username, leagueId), HttpStatus.OK);
+        return new ResponseEntity<>(teamParticipantFacade.createInvite(teamId, currentUser, username, leagueId), HttpStatus.CREATED);
     }
 
     @ApiOperation("Get info about team by invitation")

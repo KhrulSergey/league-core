@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
@@ -21,6 +22,18 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestUserFacadeImpl implements RestUserFacade {
 
     private final UserService userService;
+
+    /**
+     * Returns founded team by id
+     *
+     * @param id   of team to search
+     * @param user current user from Session
+     * @return team entity
+     */
+    @Override
+    public UserDto getTeamById(long id, User user) {
+        return null;
+    }
 
     /**
      * Getting user by username with privacy check

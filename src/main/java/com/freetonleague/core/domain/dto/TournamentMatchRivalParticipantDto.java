@@ -7,6 +7,8 @@ import java.util.List;
 @Data
 public class TournamentMatchRivalParticipantDto {
 
+    private Long id;
+
     private Long tournamentMatchRivalId;
 
     private Long tournamentTeamParticipantId;

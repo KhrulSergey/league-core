@@ -1,7 +1,8 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.domain.dto.TournamentMatchDto;
-import com.freetonleague.core.domain.dto.TournamentMatchRivalParticipantDto;
+import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
+import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentMatchRivalService;
 import com.freetonleague.core.service.RestTournamentMatchService;
@@ -17,7 +18,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(path = TournamentMatchController.BASE_PATH)
@@ -27,11 +28,12 @@ public class TournamentMatchController {
 
     public static final String BASE_PATH = "/api/tournament/match";
     public static final String PATH_EDIT = "/{match_id}";
+    public static final String PATH_ADD = "/";
     public static final String PATH_GET = "/{match_id}";
     public static final String PATH_DELETE = "/{match_id}";
     public static final String PATH_GET_LIST_BY_SERIES = "/list-by-series/{series_id}";
-    public static final String PATH_RIVAL_PARTICIPANT_EDIT = "{match_id}/rival/{rival_id}/participants";
 
+    public static final String PATH_RIVAL_PARTICIPANT_EDIT = "{match_id}/rival/{rival_id}/participants";
 
     private final RestTournamentMatchRivalService restTournamentMatchRivalService;
     private final RestTournamentMatchService restTournamentMatchService;
@@ -43,6 +45,13 @@ public class TournamentMatchController {
         return new ResponseEntity<>(restTournamentMatchService.getMatch(id, user), HttpStatus.OK);
     }
 
+    @ApiOperation("Create new match with specified params (only for orgs)")
+    @PostMapping(path = PATH_ADD)
+    public ResponseEntity<TournamentMatchDto> createMatch(@RequestBody TournamentMatchDto tournamentMatchDto,
+                                                          @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentMatchService.addMatch(tournamentMatchDto, user), HttpStatus.CREATED);
+    }
+
     @ApiOperation("Get matches list info by series")
     @GetMapping(path = PATH_GET_LIST_BY_SERIES)
     public ResponseEntity<Page<TournamentMatchDto>> getMatchList(@PageableDefault Pageable pageable,
@@ -51,7 +60,7 @@ public class TournamentMatchController {
         return new ResponseEntity<>(restTournamentMatchService.getMatchList(pageable, seriesId, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Edit match info")
+    @ApiOperation("Edit match info (only for orgs)")
     @PutMapping(path = PATH_EDIT)
     public ResponseEntity<TournamentMatchDto> editMatch(@PathVariable("match_id") long matchId,
                                                         @RequestBody TournamentMatchDto tournamentMatchDto,
@@ -59,7 +68,7 @@ public class TournamentMatchController {
         return new ResponseEntity<>(restTournamentMatchService.editMatch(matchId, tournamentMatchDto, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Delete (archive) match")
+    @ApiOperation("Delete (archive) match (only for orgs)")
     @DeleteMapping(path = PATH_DELETE)
     public ResponseEntity<Void> deleteMatch(@PathVariable("match_id") long matchId,
                                             @ApiIgnore @AuthenticationPrincipal User user) {
@@ -69,10 +78,10 @@ public class TournamentMatchController {
 
     @ApiOperation("Edit rival participant composition for match (only for capitan and orgs)")
     @PutMapping(path = PATH_RIVAL_PARTICIPANT_EDIT)
-    public ResponseEntity<TournamentMatchDto> editMatchRivalComposition(@PathVariable("match_id") long matchId,
-                                                                        @PathVariable("rival_id") long rivalId,
-                                                                        @RequestBody List<TournamentMatchRivalParticipantDto> rivalParticipantList,
-                                                                        @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentMatchService.editMatchRivalParticipant(matchId, rivalId, rivalParticipantList, user), HttpStatus.OK);
+    public ResponseEntity<TournamentMatchRivalDto> editMatchRivalComposition(@PathVariable("match_id") long matchId,
+                                                                             @PathVariable("rival_id") long rivalId,
+                                                                             @RequestBody Set<TournamentTeamParticipantDto> rivalParticipantList,
+                                                                             @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentMatchRivalService.changeActiveMatchRivalParticipants(matchId, rivalId, rivalParticipantList, user), HttpStatus.OK);
     }
 }

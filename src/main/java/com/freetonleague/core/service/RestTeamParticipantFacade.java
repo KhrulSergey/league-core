@@ -4,6 +4,8 @@ import com.freetonleague.core.domain.dto.TeamDetailedInviteListDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamInviteRequestDto;
 import com.freetonleague.core.domain.dto.TeamParticipantDto;
+import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 
 import java.util.List;
@@ -77,4 +79,9 @@ public interface RestTeamParticipantFacade {
      * @param user        current user from Session
      */
     void rejectInviteRequest(String inviteToken, User user);
+
+    /**
+     * Getting participant by id, verify team membering
+     */
+    TeamParticipant getTeamParticipant(long participantId, Team team);
 }

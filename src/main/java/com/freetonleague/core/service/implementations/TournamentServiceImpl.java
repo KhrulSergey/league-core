@@ -4,8 +4,8 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentSettings;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TournamentRepository;
-import com.freetonleague.core.repository.TournamentSettingsRepository;
 import com.freetonleague.core.repository.TournamentWinnersRepository;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,6 @@ import static java.util.Objects.nonNull;
 public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
-    private final TournamentSettingsRepository tournamentSettingsRepository;
     private final TournamentWinnersRepository tournamentWinnersRepository;
     private final Validator validator;
 
@@ -49,26 +48,32 @@ public class TournamentServiceImpl implements TournamentService {
         return tournamentRepository.findById(id).orElse(null);
     }
 
+
     /**
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList) {
+    public Page<Tournament> getTournamentList(Pageable pageable, User creatorUser, List<TournamentStatusType> statusList) {
         if (isNull(pageable)) {
             log.error("!> requesting getTournamentList for NULL pageable. Check evoking clients");
             return null;
         }
         log.debug("^ trying to get tournament list with pageable params: {} and status list {}", pageable, statusList);
-        if (nonNull(statusList) && !statusList.isEmpty()) {
+        boolean filterByStatusEnabled = nonNull(statusList) && !statusList.isEmpty();
+        boolean filterByCreatorEnabled = nonNull(creatorUser);
+
+        if (filterByStatusEnabled && filterByCreatorEnabled) {
+            return tournamentRepository.findAllByStatusInAndCreatedBy(pageable, statusList, creatorUser);
+        } else if (filterByStatusEnabled) {
             return tournamentRepository.findAllByStatusIn(pageable, statusList);
+        } else if (filterByCreatorEnabled) {
+            return tournamentRepository.findAllByCreatedBy(pageable, creatorUser);
         }
         return tournamentRepository.findAll(pageable);
     }
 
     /**
      * Returns list of all teams on portal
-     *
-     * @return list of team entities
      */
     @Override
     public List<Tournament> getAllActiveTournament() {
@@ -108,9 +113,6 @@ public class TournamentServiceImpl implements TournamentService {
 
     /**
      * Mark 'deleted' tournament in DB.
-     *
-     * @param tournament to be deleted
-     * @return tournament with updated fields and deleted status
      */
     @Override
     public Tournament deleteTournament(Tournament tournament) {
@@ -122,7 +124,6 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to set 'deleted' mark to tournament {}", tournament);
-        TournamentStatusType oldStatus = tournament.getStatus();
         tournament.setStatus(TournamentStatusType.DELETED);
         tournament = tournamentRepository.save(tournament);
         this.handleTournamentStatusChanged(tournament);
@@ -135,6 +136,18 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     public boolean isExistsTournamentById(long id) {
         return tournamentRepository.existsById(id);
+    }
+
+    /**
+     * Returns sign of user is tournament organizer, or false if not
+     */
+    public boolean isUserTournamentOrganizer(Tournament tournament, User user) {
+        if (isNull(tournament) || isNull(user)) {
+            log.error("!> requesting isUserTournamentOrganizer for NULL tournament {} or NULL user {}. Check evoking clients",
+                    tournament, user);
+            return false;
+        }
+        return tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
     }
 
     /**
@@ -169,5 +182,4 @@ public class TournamentServiceImpl implements TournamentService {
                 tournament.getId(), tournament.getPrevStatus(), tournament.getStatus());
         tournament.setPrevStatus(tournament.getStatus());
     }
-
 }
