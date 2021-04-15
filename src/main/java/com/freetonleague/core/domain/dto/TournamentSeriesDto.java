@@ -20,9 +20,9 @@ public class TournamentSeriesDto {
 
     private Long tournamentId;
 
-    @ApiModelProperty(required = false, readOnly = true)
+    @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<TournamentMatchDto> matchesDtoList;
+    private List<TournamentMatchBaseDto> matchList;
 
     @ApiModelProperty(required = true, allowableValues = "range[1, infinity]")
     @NotNull

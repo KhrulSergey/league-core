@@ -155,7 +155,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
                     tournamentSeries.getId());
             return false;
         }
-        List<TournamentMatch> tournamentMatches = tournamentSeries.getMatches();
+        List<TournamentMatch> tournamentMatches = tournamentSeries.getMatchList();
         if (nonNull(tournamentMatches)) {
             for (TournamentMatch match : tournamentMatches) {
                 if (!tournamentMatchService.verifyTournamentMatch(match)) {

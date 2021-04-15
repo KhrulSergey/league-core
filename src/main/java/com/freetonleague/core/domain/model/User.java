@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.enums.UserStatusType;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -52,6 +53,7 @@ public class User extends BaseEntity  implements UserDetails {
     private UserStatusType status;
 
     @JsonIgnore
+    @ToString.Exclude
     @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
