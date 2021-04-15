@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.service.RestUserFacade;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -22,17 +23,15 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestUserFacadeImpl implements RestUserFacade {
 
     private final UserService userService;
+    private final UserMapper userMapper;
+
 
     /**
-     * Returns founded team by id
-     *
-     * @param id   of team to search
-     * @param user current user from Session
-     * @return team entity
+     * Returns founded user by leagueId
      */
     @Override
-    public UserDto getTeamById(long id, User user) {
-        return null;
+    public UserDto getUserByLeagueId(String leagueId, User user) {
+        return userMapper.toDto(this.getVerifiedUserByLeagueId(leagueId));
     }
 
     /**
