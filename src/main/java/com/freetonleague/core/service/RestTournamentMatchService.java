@@ -2,12 +2,10 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.dto.TournamentMatchDto;
-import com.freetonleague.core.domain.dto.TournamentMatchRivalParticipantDto;
+import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-
-import java.util.List;
 
 public interface RestTournamentMatchService {
 
@@ -42,12 +40,12 @@ public interface RestTournamentMatchService {
     /**
      * Edit tournament match.
      *
-     * @param id                 Identity of a match
+     * @param matchId            Identity of a match
      * @param tournamentMatchDto to be edited
      * @param user               current user from Session
      * @return Edited tournament matches
      */
-    TournamentMatchDto editMatch(long id, TournamentMatchDto tournamentMatchDto, User user);
+    TournamentMatchDto editMatch(long matchId, TournamentMatchDto tournamentMatchDto, User user);
 
     /**
      * Mark 'deleted' tournament matches in DB.
@@ -59,18 +57,13 @@ public interface RestTournamentMatchService {
     TournamentMatchDto deleteMatch(long matchId, User user);
 
     /**
-     * Change match rival participant for specified match.
-     *
-     * @param matchId              Identity of a match
-     * @param rivalId              Identity of a rival
-     * @param rivalParticipantList list of new participant for rival (team) to fight in match
-     * @param user                 current user from Session
-     * @return Edited tournament matches
+     * Returns tournament match by DTO, with validation, business logic and user with privacy check
      */
-    TournamentMatchDto editMatchRivalParticipant(long matchId, long rivalId, List<TournamentMatchRivalParticipantDto> rivalParticipantList, User user);
+    TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto, User user);
 
     /**
-     * Verify tournament match info with validation and business check
+     * Returns tournament match by id and user with privacy check
      */
-    boolean verifyTournamentMatch(TournamentMatchDto tournamentMatchDto, User user);
+    TournamentMatch getVerifiedMatchById(long id, User user);
+
 }

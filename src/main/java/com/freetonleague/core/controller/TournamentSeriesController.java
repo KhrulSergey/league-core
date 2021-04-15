@@ -49,16 +49,17 @@ public class TournamentSeriesController {
 
     @ApiOperation("Generate tournament next (active) series for tournament (only for orgs)")
     @PostMapping(path = PATH_GENERATE)
-    public ResponseEntity<TournamentSeriesDto> generateActiveSeries(@PathVariable("tournament_id") long tournamentId,
-                                                                    @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentSeriesService.generateSeriesForTournament(tournamentId, user), HttpStatus.OK);
+    public ResponseEntity<Void> generateSeries(@PathVariable("tournament_id") long tournamentId,
+                                               @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentSeriesService.generateSeriesForTournament(tournamentId, user);
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @ApiOperation("Create new series with specified params (only for orgs)")
     @PostMapping(path = PATH_ADD)
     public ResponseEntity<TournamentSeriesDto> createSeries(@RequestBody TournamentSeriesDto tournamentSeriesDto,
                                                             @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentSeriesService.addSeries(tournamentSeriesDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentSeriesService.addSeries(tournamentSeriesDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Edit series info (only for orgs)")

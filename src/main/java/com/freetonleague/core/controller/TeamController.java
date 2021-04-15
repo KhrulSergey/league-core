@@ -51,7 +51,7 @@ public class TeamController {
     @PostMapping(path = PATH_REGISTER)
     public ResponseEntity<TeamDto> register(@RequestBody TeamBaseDto teamDto,
                                             @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTeamFacade.addTeam(teamDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTeamFacade.addTeam(teamDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Edit team info (only for captain)")

@@ -19,6 +19,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -118,12 +119,11 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         return tournamentMapper.toDto(newTournament);
     }
 
-    //TODO access only for admin
-
     /**
      * Delete (mark) tournament in DB.
      * Accessible only for admin
      */
+    //TODO access only for admin
     @Override
     public TournamentDto deleteTournament(long id, User user) {
         Tournament tournament = this.getVerifiedTournamentById(id, user, true);
@@ -132,15 +132,23 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         if (isNull(tournament)) {
             log.error("!> error while deleting tournament with id {} for user {}.", id, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MODIFICATION_ERROR,
-                    "Tournament was not updated on Portal. Check requested params.");
+                    "Tournament was not deleted on Portal. Check requested params.");
         }
         return tournamentMapper.toDto(tournament);
     }
 
     /**
+     * Define tournament winners and it's places.
+     */
+    @Override
+    public TournamentDto defineTournamentWinners(List<TournamentWinnerDto> tournamentWinnerList, User user) {
+        return null;
+    }
+
+    /**
      * Getting tournament by id and user with privacy check
      */
-    private Tournament getVerifiedTournamentById(long id, User user, boolean checkUser) {
+    public Tournament getVerifiedTournamentById(long id, User user, boolean checkUser) {
         if (checkUser && isNull(user)) {
             log.debug("^ user is not authenticate. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTournamentById' request denied");
@@ -187,7 +195,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                         "parameter 'tournament organizers' is not correctly set for getVerifiedTournamentByDto. There are duplicates by LeagueId in organizers list.");
             }
             tournamentOrganizers = tournamentOrganizerDtoList.parallelStream()
-                    .map(this::getVerifiedTournamentOrganizerByDto).collect(Collectors.toList());
+                    .map(this::getVerifiedTournamentOrganizerByDto).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
         //Verify Discipline and its Settings for Tournament
@@ -272,7 +280,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      */
     private TournamentOrganizer getVerifiedTournamentOrganizerByDto(TournamentOrganizerDto organizerDto) {
         if (isNull(organizerDto)) {
-            log.warn("^ requested getVerifiedTournamentOrganizerByDto for NULL organizerDto. Check evoking clients");
+            log.error("^ requested getVerifiedTournamentOrganizerByDto for NULL organizerDto. Check evoking clients");
             return null;
         }
         Set<ConstraintViolation<TournamentOrganizerDto>> settingsViolations = validator.validate(organizerDto);

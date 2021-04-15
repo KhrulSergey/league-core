@@ -7,8 +7,12 @@ import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
+import com.freetonleague.core.domain.model.TournamentTeamParticipant;
 import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamParticipantManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentTeamMapper;
 import com.freetonleague.core.service.RestTeamFacade;
 import com.freetonleague.core.service.RestTeamParticipantFacade;
@@ -22,6 +26,8 @@ import org.springframework.stereotype.Service;
 import javax.validation.Validator;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
 
 /**
  * Service-facade for managing tournament team proposal and team composition
@@ -60,14 +66,12 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
                                         .build()
                         ).collect(Collectors.toList());
 
-        TournamentTeamProposalDto tournamentTeamProposalDto = TournamentTeamProposalDto.builder()
+        return TournamentTeamProposalDto.builder()
                 .team(teamDto)
                 .status(TournamentTeamStateType.values()[(int) Math.round(Math.random() * (TournamentTeamStateType.values().length - 1))])
                 .type(TournamentTeamType.values()[(int) Math.round(Math.random() * (TournamentTeamType.values().length - 1))])
                 .tournamentTeamParticipantList(tournamentTeamParticipantDtoList)
                 .build();
-
-        return tournamentTeamProposalDto;
     }
 
     /**
@@ -96,6 +100,37 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     @Override
     public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(long tournamentId, User user) {
         return null;
+    }
+
+    /**
+     * Getting participant by TournamentTeamParticipantDto, verify team membership
+     */
+    //TODO check all fields
+    public TournamentTeamParticipant getVerifiedTournamentTeamParticipantByDto(TournamentTeamParticipantDto tournamentTeamParticipantDto, TournamentTeamProposal tournamentTeamProposal) {
+        return this.getVerifiedTournamentTeamParticipantById(tournamentTeamParticipantDto.getId(), tournamentTeamProposal);
+    }
+
+    /**
+     * Getting participant by id, verify team membership
+     */
+    public TournamentTeamParticipant getVerifiedTournamentTeamParticipantById(long tournamentTeamParticipantId, TournamentTeamProposal tournamentTeamProposal) {
+        if (isNull(tournamentTeamProposal)) {
+            log.error("^ requested getVerifiedTournamentTeamParticipant for NULL tournamentTeamProposal. Check evoking clients");
+            return null;
+        }
+        TournamentTeamParticipant tournamentTeamParticipant = tournamentTeamService.getTournamentTeamParticipantById(tournamentTeamParticipantId);
+        if (isNull(tournamentTeamParticipant)) {
+            log.debug("^ Tournament team participant with requested id {} was not found. 'getVerifiedTournamentTeamParticipant' request denied",
+                    tournamentTeamParticipantId);
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PARTICIPANT_NOT_FOUND_ERROR,
+                    "Tournament team participant with requested id " + tournamentTeamParticipantId + " was not found");
+        }
+        if (!tournamentTeamParticipant.getTournamentTeamProposal().equals(tournamentTeamProposal)) {
+            log.warn("~ parameter 'tournamentTeamParticipantId' is not match specified tournamentTeamProposal for getVerifiedTournamentTeamParticipant");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournamentTeamParticipantId",
+                    "parameter 'tournamentTeamParticipantId' is not match specified tournamentTeamProposal for getVerifiedTournamentTeamParticipant");
+        }
+        return tournamentTeamParticipant;
     }
 }
 
