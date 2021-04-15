@@ -64,4 +64,28 @@ public class ExceptionMessages {
 
     public static final String TOURNAMENT_ORGANIZER_NOT_FOUND_ERROR = "Tournament organizer was not found. Please check request parameters";
     public static final String TOURNAMENT_ORGANIZER_VALIDATION_ERROR = "Tournament organizer was specified with errors. Please check request parameters";
+
+    public static final String TOURNAMENT_SERIES_NOT_FOUND_ERROR = "Tournament series was not found. Please check request parameters";
+    public static final String TOURNAMENT_SERIES_DISABLE_ERROR = "Tournament series is not active and modification forbidden. Please contact to organizers.";
+    public static final String TOURNAMENT_SERIES_CREATION_ERROR = "Tournament series creation failed. Please try again";
+    public static final String TOURNAMENT_SERIES_MODIFICATION_ERROR = "Tournament series modifying failed. Please try again";
+    public static final String TOURNAMENT_SERIES_GENERATION_ERROR = "Tournament series generation failed. Please try again";
+    public static final String TOURNAMENT_SERIES_VALIDATION_ERROR = "Tournament series was specified with errors. Please check request parameters";
+
+    public static final String TOURNAMENT_MATCH_CREATION_ERROR = "Tournament match creation failed. Please try again";
+    public static final String TOURNAMENT_MATCH_NOT_FOUND_ERROR = "Tournament match was not found. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_MODIFICATION_ERROR = "Tournament match modifying failed. Please try again";
+    public static final String TOURNAMENT_MATCH_DISABLE_ERROR = "Tournament match is not active and modification forbidden. Please contact to organizers.";
+    public static final String TOURNAMENT_MATCH_VALIDATION_ERROR = "Tournament match was specified with errors. Please check request parameters";
+
+    public static final String TOURNAMENT_MATCH_RIVAL_FORBIDDEN_ERROR = "Need proper team status to manage match settings for team. Please check your rights.";
+    public static final String TOURNAMENT_MATCH_RIVAL_NOT_FOUND_ERROR = "Tournament match rival was not found. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR = "Tournament match rival was specified with errors. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_RIVAL_PARTICIPANT_NOT_FOUND_ERROR = "Tournament match rival participant was not found. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_RIVAL_PARTICIPANT_MODIFY_ERROR = "Tournament match rival participant modifying failed. Please try again";
+    public static final String TOURNAMENT_MATCH_RIVAL_PARTICIPANT_VALIDATION_ERROR = "Tournament match rival participant was specified with errors. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_RIVAL_PARTICIPANT_BANNED_ERROR = "Team participant was banned for this match. Request for activate participant in match was rejected. Please contact to organizers.";
+
+    public static final String TOURNAMENT_TEAM_PARTICIPANT_VALIDATION_ERROR = "Tournament team participant was specified with errors. Please check request parameters";
+    public static final String TOURNAMENT_TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Tournament team participant was not found. Please check request parameters";
 }

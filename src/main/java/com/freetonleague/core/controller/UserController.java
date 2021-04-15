@@ -1,6 +1,6 @@
 package com.freetonleague.core.controller;
 
-import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestUserFacade;
 import io.swagger.annotations.Api;
@@ -28,8 +28,8 @@ public class UserController {
 
     @ApiOperation("Get user info by league id")
     @GetMapping(path = PATH_GET)
-    public ResponseEntity<UserDto> getDisciplineById(@PathVariable("league_id") String leagueId,
-                                                     @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<UserPublicDto> getDisciplineById(@PathVariable("league_id") String leagueId,
+                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.getUserByLeagueId(leagueId, user), HttpStatus.OK);
     }
 }

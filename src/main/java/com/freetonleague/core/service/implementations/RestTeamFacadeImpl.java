@@ -11,7 +11,7 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TeamMapper;
 import com.freetonleague.core.service.RestTeamFacade;
-import com.freetonleague.core.service.TeamParticipantService;
+import com.freetonleague.core.service.RestTeamParticipantFacade;
 import com.freetonleague.core.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +34,7 @@ import static java.util.Objects.nonNull;
 public class RestTeamFacadeImpl implements RestTeamFacade {
 
     private final TeamService teamService;
-    private final TeamParticipantService teamParticipantService;
+    private final RestTeamParticipantFacade teamParticipantFacade;
     private final TeamMapper teamMapper;
     private final Validator validator;
 
@@ -149,7 +149,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
                     participantId, team, user);
             throw new TeamManageException(ExceptionMessages.TEAM_FORBIDDEN_ERROR, "Only captain can exclude participants from team.");
         }
-        TeamParticipant teamParticipant = this.getTeamParticipant(participantId, team);
+        TeamParticipant teamParticipant = teamParticipantFacade.getTeamParticipant(participantId, team);
         if (teamParticipant.getStatus() != TeamParticipantStatusType.ACTIVE) {
             log.debug("^ forbiddenException for expelling participant id {} team from team {} for user {}.",
                     participantId, team, user);
@@ -205,7 +205,6 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         return teamMapper.toExtendedDto(teamService.getTeamListByUser(user));
     }
 
-
     /**
      * Getting team by id and user with privacy check
      */
@@ -226,19 +225,5 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         return team;
     }
 
-    /**
-     * Getting participant by id, verify team membering
-     */
-    private TeamParticipant getTeamParticipant(long participantId, Team team) {
-        TeamParticipant teamParticipant = teamParticipantService.getParticipantById(participantId);
-        if (isNull(teamParticipant)) {
-            log.debug("^ Participant with requested id {} was not found. 'getTeamParticipant' request denied", participantId);
-            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id " + participantId + " was not found");
-        }
-        if (!team.getParticipantList().contains(teamParticipant)) {
-            log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
-            throw new TeamManageException(ExceptionMessages.TEAM_PARTICIPANT_MEMBERSHIP_ERROR, "Participant with requested id " + participantId + " is not a member of team id " + team.getId());
-        }
-        return teamParticipant;
-    }
+
 }

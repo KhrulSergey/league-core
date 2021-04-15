@@ -6,7 +6,7 @@ RUN gradle assemble --no-daemon
 
 # Running stage
 FROM openjdk:11.0.6-jre-buster
-EXPOSE 8080
+EXPOSE 7701
 RUN mkdir /app
 
 COPY --from=build /home/gradle/src/build/libs/*.jar /app/league-core.jar

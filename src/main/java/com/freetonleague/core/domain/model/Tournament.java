@@ -49,6 +49,9 @@ public class Tournament extends ExtendedBaseEntity {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentOrganizer> tournamentOrganizerList;
 
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TournamentTeamProposal> tournamentTeam;
+
     /**
      * Current tournament status
      */
@@ -81,6 +84,15 @@ public class Tournament extends ExtendedBaseEntity {
      */
     @Transient
     private Long fundAccountId;
+
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    private List<TournamentSeries> tournamentSeriesList;
+
+    /**
+     * List of tournament winners with places
+     */
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TournamentWinner> winnerTeamProposal;
 
     //Base settings
     @Column(name = "discord_channel_name")

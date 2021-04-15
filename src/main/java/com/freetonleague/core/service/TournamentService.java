@@ -20,12 +20,20 @@ public interface TournamentService {
     Tournament getTournament(long id);
 
     /**
-     * Returns list of all teams filtered by requested params
+     * Returns list of all tournaments filtered by requested params
      *
-     * @param pageable filtered params to search tournament
-     * @return list of team entities
+     * @param pageable   filtered params to search tournament
+     * @param statusList filtered params to search tournament
+     * @return list of tournaments entities
      */
     Page<Tournament> getTournamentList(Pageable pageable, User creatorUser, List<TournamentStatusType> statusList);
+
+    /**
+     * Returns list of all tournaments on portal
+     *
+     * @return list of tournaments entities
+     */
+    List<Tournament> getAllActiveTournament();
 
     /**
      * Add new tournament to DB.
@@ -58,4 +66,9 @@ public interface TournamentService {
      * @return true is Tournament exists, false - if not
      */
     boolean isExistsTournamentById(long id);
+
+    /**
+     * Returns sign of user is tournament organizer, or false if not
+     */
+    boolean isUserTournamentOrganizer(Tournament tournament, User user);
 }

@@ -23,9 +23,6 @@ public class TournamentOrganizerServiceIml implements TournamentOrganizerService
 
     /**
      * Returns founded tournament organizer by id
-     *
-     * @param id of tournament to search
-     * @return tournament entity
      */
     @Override
     public TournamentOrganizer get(long id) {
@@ -35,9 +32,6 @@ public class TournamentOrganizerServiceIml implements TournamentOrganizerService
 
     /**
      * Adding a new tournament organizer to DB.
-     *
-     * @param tournamentOrganizer data to add
-     * @return added Tournament Organizer
      */
     @Override
     public TournamentOrganizer add(TournamentOrganizer tournamentOrganizer) {
@@ -56,9 +50,6 @@ public class TournamentOrganizerServiceIml implements TournamentOrganizerService
 
     /**
      * Edit an existing tournament organizer in DB.
-     *
-     * @param tournamentOrganizer Updated organizer's data to be modified in database
-     * @return Edited tournament organizer
      */
     @Override
     public TournamentOrganizer edit(TournamentOrganizer tournamentOrganizer) {

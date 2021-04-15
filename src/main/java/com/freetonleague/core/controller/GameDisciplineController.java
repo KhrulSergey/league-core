@@ -46,7 +46,7 @@ public class GameDisciplineController {
     @PostMapping(path = PATH_CREATE)
     public ResponseEntity<GameDisciplineDto> create(@RequestBody GameDisciplineDto disciplineDto,
                                                     @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restFacade.addDiscipline(disciplineDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restFacade.addDiscipline(disciplineDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Get game discipline settings by id")
@@ -60,7 +60,7 @@ public class GameDisciplineController {
     @PostMapping(path = PATH_CREATE_SETTINGS)
     public ResponseEntity<GameDisciplineSettingsDto> createSettings(@RequestBody GameDisciplineSettingsDto disciplineSettingsDto,
                                                                     @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restFacade.addDisciplineSettings(disciplineSettingsDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restFacade.addDisciplineSettings(disciplineSettingsDto, user), HttpStatus.CREATED);
     }
 
 

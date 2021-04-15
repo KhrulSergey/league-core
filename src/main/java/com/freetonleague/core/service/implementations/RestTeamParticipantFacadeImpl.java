@@ -18,6 +18,8 @@ import com.freetonleague.core.mapper.TeamParticipantMapper;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -34,11 +36,14 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
     private final TeamParticipantService participantService;
     private final TeamService teamService;
     private final RestUserFacade restUserFacade;
-    private final RestTeamFacade restTeamFacade;
 
     private final TeamInviteRequestMapper inviteRequestMapper;
     private final TeamParticipantMapper participantMapper;
     private final TeamMapper teamMapper;
+
+    @Lazy
+    @Autowired
+    private RestTeamFacade restTeamFacade;
 
     private final List<TeamParticipantStatusType> participantStatusAccessibleToInvite = Arrays.asList(
             TeamParticipantStatusType.ACTIVE,
@@ -197,6 +202,24 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
                     "Only invited user can reject this invitation to a team.");
         }
         participantService.rejectInviteRequest(teamInviteRequest);
+    }
+
+
+    /**
+     * Getting participant by id, verify team membering
+     */
+    @Override
+    public TeamParticipant getTeamParticipant(long participantId, Team team) {
+        TeamParticipant teamParticipant = participantService.getParticipantById(participantId);
+        if (isNull(teamParticipant)) {
+            log.debug("^ Participant with requested id {} was not found. 'getTeamParticipant' request denied", participantId);
+            throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id " + participantId + " was not found");
+        }
+        if (!team.getParticipantList().contains(teamParticipant)) {
+            log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
+            throw new TeamManageException(ExceptionMessages.TEAM_PARTICIPANT_MEMBERSHIP_ERROR, "Participant with requested id " + participantId + " is not a member of team id " + team.getId());
+        }
+        return teamParticipant;
     }
 
     /**

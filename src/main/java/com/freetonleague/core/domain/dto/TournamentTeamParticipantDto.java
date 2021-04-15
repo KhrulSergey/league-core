@@ -9,6 +9,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @Data
 public class TournamentTeamParticipantDto {
+
+    private long id;
+
     private Long tournamentTeamProposalId;
 
     private Long teamParticipantId;

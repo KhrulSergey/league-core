@@ -6,7 +6,7 @@ import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentSettings;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TournamentRepository;
-import com.freetonleague.core.repository.TournamentSettingsRepository;
+import com.freetonleague.core.repository.TournamentWinnersRepository;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,10 +28,16 @@ import static java.util.Objects.nonNull;
 public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
-    private final TournamentSettingsRepository tournamentSettingsRepository;
+    private final TournamentWinnersRepository tournamentWinnersRepository;
     private final Validator validator;
 
-    //    нельзя удалить команду которая участвует в турнире
+    private final List<TournamentStatusType> activeStatusList = List.of(
+            TournamentStatusType.CREATED,
+            TournamentStatusType.SIGN_UP,
+            TournamentStatusType.ADJUSTMENT,
+            TournamentStatusType.STARTED,
+            TournamentStatusType.PAUSE
+    );
 
     /**
      * Returns founded tournament by id
@@ -67,6 +73,14 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     /**
+     * Returns list of all teams on portal
+     */
+    @Override
+    public List<Tournament> getAllActiveTournament() {
+        return tournamentRepository.findAllActive(activeStatusList);
+    }
+
+    /**
      * Add new tournament to DB.
      */
     @Override
@@ -87,7 +101,7 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         if (!this.isExistsTournamentById(tournament.getId())) {
-            log.error("!> requesting modify tournament for non-existed tournament. Check evoking clients");
+            log.error("!> requesting modify tournament {} for non-existed tournament. Check evoking clients", tournament.getId());
             return null;
         }
         log.debug("^ trying to modify tournament {}", tournament);
@@ -99,9 +113,6 @@ public class TournamentServiceImpl implements TournamentService {
 
     /**
      * Mark 'deleted' tournament in DB.
-     *
-     * @param tournament to be deleted
-     * @return tournament with updated fields and deleted status
      */
     @Override
     public Tournament deleteTournament(Tournament tournament) {
@@ -113,7 +124,6 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to set 'deleted' mark to tournament {}", tournament);
-        TournamentStatusType oldStatus = tournament.getStatus();
         tournament.setStatus(TournamentStatusType.DELETED);
         tournament = tournamentRepository.save(tournament);
         this.handleTournamentStatusChanged(tournament);
@@ -129,6 +139,18 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     /**
+     * Returns sign of user is tournament organizer, or false if not
+     */
+    public boolean isUserTournamentOrganizer(Tournament tournament, User user) {
+        if (isNull(tournament) || isNull(user)) {
+            log.error("!> requesting isUserTournamentOrganizer for NULL tournament {} or NULL user {}. Check evoking clients",
+                    tournament, user);
+            return false;
+        }
+        return tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
+    }
+
+    /**
      * Validate tournament parameters and settings to modify
      */
     private boolean verifyTournament(Tournament tournament) {
@@ -138,14 +160,14 @@ public class TournamentServiceImpl implements TournamentService {
         }
         Set<ConstraintViolation<Tournament>> violations = validator.validate(tournament);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament with verifyTournament for tournament with ConstraintViolations. Check evoking clients");
+            log.error("!> requesting modify tournament {} with verifyTournament for tournament with ConstraintViolations. Check evoking clients", tournament.getId());
             return false;
         }
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
         if (nonNull(tournamentSettings)) {
             Set<ConstraintViolation<TournamentSettings>> settingsViolations = validator.validate(tournamentSettings);
             if (!settingsViolations.isEmpty()) {
-                log.error("!> requesting modify tournament with verifyTournament for tournament settings with ConstraintViolations. Check evoking clients");
+                log.error("!> requesting modify tournament {} with verifyTournament for tournament settings with ConstraintViolations. Check evoking clients", tournament.getId());
                 return false;
             }
         }
@@ -160,5 +182,4 @@ public class TournamentServiceImpl implements TournamentService {
                 tournament.getId(), tournament.getPrevStatus(), tournament.getStatus());
         tournament.setPrevStatus(tournament.getStatus());
     }
-
 }

@@ -1,18 +1,16 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.TournamentBaseDto;
-import com.freetonleague.core.domain.dto.TournamentDto;
-import com.freetonleague.core.domain.dto.TournamentOrganizerDto;
-import com.freetonleague.core.domain.dto.TournamentSettingsDto;
+import com.freetonleague.core.domain.dto.*;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentOrganizer;
 import com.freetonleague.core.domain.model.TournamentSettings;
+import com.freetonleague.core.domain.model.TournamentWinner;
 import org.mapstruct.*;
 
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {GameDisciplineMapper.class, UserMapper.class})
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {GameDisciplineMapper.class, UserMapper.class, TournamentSeriesMapper.class})
 public interface TournamentMapper {
 
     //region Tournaments
@@ -20,13 +18,14 @@ public interface TournamentMapper {
 
     @Mapping(target = "gameDisciplineId", source = "entity.gameDiscipline.id")
     @Mapping(target = "gameDisciplineSettingsId", source = "entity.gameDisciplineSettings.id")
-    @Mapping(target = "tournamentCreator", source = "entity.createdBy")
+    @Mapping(target = "tournamentCreator", source = "entity.createdBy", qualifiedByName = "toDto")
+    @Mapping(target = "tournamentSeriesList", source = "entity.tournamentSeriesList", qualifiedByName = "toDto")
     @Named(value = "toDto")
     TournamentDto toDto(Tournament entity);
 
     @Mapping(target = "gameDisciplineId", source = "entity.gameDiscipline.id")
     @Mapping(target = "gameDisciplineSettingsId", source = "entity.gameDisciplineSettings.id")
-    @Mapping(target = "tournamentCreator", source = "entity.createdBy")
+    @Mapping(target = "tournamentCreator", source = "entity.createdBy", qualifiedByName = "toDto")
     @Named(value = "toBaseDto")
     TournamentBaseDto toBaseDto(Tournament entity);
 
@@ -51,13 +50,23 @@ public interface TournamentMapper {
 
     @Mapping(target = "tournamentId", source = "entity.tournament.id")
     @Mapping(target = "userLeagueId", expression = "java(entity.getUser().getLeagueId().toString())")
+    @Mapping(target = "user", source = "entity.user", qualifiedByName = "toDto")
     @Named(value = "toDto")
     TournamentOrganizerDto toDto(TournamentOrganizer entity);
 
-    List<TournamentOrganizer> fromListDto(List<TournamentOrganizerDto> dto);
+    List<TournamentOrganizer> fromOrganizerListDto(List<TournamentOrganizerDto> dto);
 
     @IterableMapping(qualifiedByName = "toDto")
-    List<TournamentOrganizerDto> toListDto(List<TournamentOrganizer> entities);
+    List<TournamentOrganizerDto> toListOrganizersDto(List<TournamentOrganizer> entities);
     //endregion
 
+    //region Tournament Winners
+    TournamentWinner fromDto(TournamentWinnerDto dto);
+
+    @Named(value = "toWinnerDto")
+    TournamentWinnerDto toDto(TournamentWinner entity);
+
+    @IterableMapping(qualifiedByName = "toWinnerDto")
+    List<TournamentWinnerDto> toListWinnerDto(List<TournamentWinner> entities);
+    //endregion
 }

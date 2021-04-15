@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
@@ -27,4 +29,10 @@ public interface TournamentRepository extends JpaRepository<Tournament, Long>,
      * Returns all tournaments with created by specified user
      */
     Page<Tournament> findAllByCreatedBy(Pageable pageable, User user);
+
+    /**
+     * Returns all tournaments with status in the list and pageable params
+     */
+    @Query(value = "select t from Tournament t where t.status in :activeStatusList")
+    List<Tournament> findAllActive(@Param("activeStatusList") List<TournamentStatusType> activeStatusList);
 }

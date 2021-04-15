@@ -3,6 +3,7 @@ package com.freetonleague.core.controller;
 import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
+import com.freetonleague.core.domain.dto.TournamentWinnerDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentFacade;
@@ -30,7 +31,8 @@ public class TournamentController {
 
     public static final String BASE_PATH = "/api/tournament";
     public static final String PATH_CREATE = "/";
-    public static final String PATH_MODIFY = "/";
+    public static final String PATH_EDIT = "/";
+    public static final String PATH_DEFINE_WINNERS = "/winners/";
     public static final String PATH_GET = "/{tournament_id}";
     public static final String PATH_DELETE = "/{tournament_id}";
     public static final String PATH_GET_LIST = "/list";
@@ -71,11 +73,11 @@ public class TournamentController {
     @PostMapping(path = PATH_CREATE)
     public ResponseEntity<TournamentDto> createTournament(@RequestBody TournamentDto tournamentDto,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentFacade.addTournament(tournamentDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentFacade.addTournament(tournamentDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Modify tournament on platform")
-    @PutMapping(path = PATH_MODIFY)
+    @PutMapping(path = PATH_EDIT)
     public ResponseEntity<TournamentDto> modifyTournament(@RequestBody TournamentDto tournamentDto,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentFacade.editTournament(tournamentDto, user), HttpStatus.OK);
@@ -86,5 +88,12 @@ public class TournamentController {
     public ResponseEntity<TournamentDto> deleteTournament(@PathVariable("tournament_id") long id,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentFacade.deleteTournament(id, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Define winners of tournament")
+    @PostMapping(path = PATH_DEFINE_WINNERS)
+    public ResponseEntity<TournamentDto> defineTournamentWinners(@RequestBody List<TournamentWinnerDto> tournamentWinnerList,
+                                                                 @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentFacade.defineTournamentWinners(tournamentWinnerList, user), HttpStatus.OK);
     }
 }

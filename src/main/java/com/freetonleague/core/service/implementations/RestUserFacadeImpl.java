@@ -1,6 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
@@ -30,8 +30,8 @@ public class RestUserFacadeImpl implements RestUserFacade {
      * Returns founded user by leagueId
      */
     @Override
-    public UserDto getUserByLeagueId(String leagueId, User user) {
-        return userMapper.toDto(this.getVerifiedUserByLeagueId(leagueId));
+    public UserPublicDto getUserByLeagueId(String leagueId, User user) {
+        return userMapper.toPubicDto(this.getVerifiedUserByLeagueId(leagueId));
     }
 
     /**
