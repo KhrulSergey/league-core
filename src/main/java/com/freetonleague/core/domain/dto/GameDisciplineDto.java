@@ -9,11 +9,15 @@ import java.util.List;
 @Data
 public class GameDisciplineDto {
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    List<GameDisciplineSettingsDto> gameDisciplineSettings;
     private Long id;
+
     @NotBlank
     private String name;
+
     private String description;
+
     private String logoFileName;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    List<GameDisciplineSettingsDto> gameDisciplineSettings;
 }

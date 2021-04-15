@@ -48,18 +48,26 @@ public class TournamentServiceImpl implements TournamentService {
         return tournamentRepository.findById(id).orElse(null);
     }
 
+
     /**
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList) {
+    public Page<Tournament> getTournamentList(Pageable pageable, User creatorUser, List<TournamentStatusType> statusList) {
         if (isNull(pageable)) {
             log.error("!> requesting getTournamentList for NULL pageable. Check evoking clients");
             return null;
         }
         log.debug("^ trying to get tournament list with pageable params: {} and status list {}", pageable, statusList);
-        if (nonNull(statusList) && !statusList.isEmpty()) {
+        boolean filterByStatusEnabled = nonNull(statusList) && !statusList.isEmpty();
+        boolean filterByCreatorEnabled = nonNull(creatorUser);
+
+        if (filterByStatusEnabled && filterByCreatorEnabled) {
+            return tournamentRepository.findAllByStatusInAndCreatedBy(pageable, statusList, creatorUser);
+        } else if (filterByStatusEnabled) {
             return tournamentRepository.findAllByStatusIn(pageable, statusList);
+        } else if (filterByCreatorEnabled) {
+            return tournamentRepository.findAllByCreatedBy(pageable, creatorUser);
         }
         return tournamentRepository.findAll(pageable);
     }

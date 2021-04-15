@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,9 +59,14 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     /**
      * Returns list of all teams filtered by requested params with detailed info
      */
+    //TODO make available only for admin and orgs
     @Override
-    public Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
-        return tournamentService.getTournamentList(pageable, statusList).map(tournamentMapper::toDto);
+    public Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<TournamentStatusType> statusList) {
+        User creatorUser = null;
+        if (!isBlank(creatorLeagueId)) {
+            creatorUser = restUserFacade.getVerifiedUserByLeagueId(creatorLeagueId);
+        }
+        return tournamentService.getTournamentList(pageable, creatorUser, statusList).map(tournamentMapper::toDto);
     }
 
     /**
@@ -68,7 +74,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      */
     @Override
     public Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
-        return tournamentService.getTournamentList(pageable, statusList).map(tournamentMapper::toBaseDto);
+        return tournamentService.getTournamentList(pageable, null, statusList).map(tournamentMapper::toBaseDto);
     }
 
     /**
@@ -97,20 +103,34 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      */
     @Override
     public TournamentDto editTournament(TournamentDto tournamentDto, User user) {
+        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
+
+        if (isNull(tournamentDto.getId())) {
+            log.warn("~ parameter 'tournament id' is not set for editTournament");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament id",
+                    "parameter 'tournament id' is not set for editTournament");
+        }
         Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId(), user, true);
+
         if (tournamentDto.getStatus() == TournamentStatusType.DELETED) {
             log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
                     "Modifying tournament was rejected. Check requested params and method.");
+        }
+
+        if (isNull(tournamentDto.getTournamentSettings().getId())) {
+            log.warn("~ parameter 'tournament settings id' is not set for editTournament");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament settings id",
+                    "parameter 'tournament settings id' is not set for editTournament");
         }
         if (!tournamentDto.getTournamentSettings().getId().equals(tournament.getTournamentSettings().getId())) {
             log.warn("~ parameter 'tournament settings' is not match by id to tournament for editTournament");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament settings",
                     "parameter 'tournament settings' is not match by id to tournament for editTournament");
         }
-        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
-        newTournament = tournamentService.editTournament(newTournament);
 
+        newTournament.setCreatedBy(tournament.getCreatedBy());
+        newTournament = tournamentService.editTournament(newTournament);
         if (isNull(newTournament)) {
             log.error("!> error while modifying tournament from dto {} for user {}.", tournamentDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MODIFICATION_ERROR,

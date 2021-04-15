@@ -26,7 +26,7 @@ public interface TournamentService {
      * @param statusList filtered params to search tournament
      * @return list of tournaments entities
      */
-    Page<Tournament> getTournamentList(Pageable pageable, List<TournamentStatusType> statusList);
+    Page<Tournament> getTournamentList(Pageable pageable, User creatorUser, List<TournamentStatusType> statusList);
 
     /**
      * Returns list of all tournaments on portal
