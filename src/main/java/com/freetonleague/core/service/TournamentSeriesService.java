@@ -41,6 +41,14 @@ public interface TournamentSeriesService {
     TournamentSeries addSeries(TournamentSeries tournamentSeries);
 
     /**
+     * Generate tournament series list for specified tournament and save to DB.
+     *
+     * @param tournament to generate series for
+     * @return Sign of series list was created
+     */
+    boolean generateSeriesForTournament(Tournament tournament);
+
+    /**
      * Edit tournament series in DB.
      *
      * @param tournamentSeries to be edited
@@ -54,7 +62,7 @@ public interface TournamentSeriesService {
      * @param tournamentSeries to be deleted
      * @return tournament series with updated fields and deleted status
      */
-    TournamentSeries deleteTournament(TournamentSeries tournamentSeries);
+    TournamentSeries deleteSeries(TournamentSeries tournamentSeries);
 
     /**
      * Returns sign of tournament series existence for specified id.

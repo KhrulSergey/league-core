@@ -41,8 +41,8 @@ dependencies {
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
 
 
-    compile('io.springfox:springfox-swagger2:2.7.0')
-    compile('io.springfox:springfox-swagger-ui:2.7.0')
+    compile 'io.springfox:springfox-swagger2:2.7.0'
+    compile 'io.springfox:springfox-swagger-ui:2.7.0'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
 

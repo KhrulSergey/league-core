@@ -57,8 +57,8 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
                     pageable, tournament);
             return null;
         }
-        log.debug("^ trying to get tournament list with pageable params: {} and tournament id {}", pageable, tournament.getId());
-
+        log.debug("^ trying to get tournament series list with pageable params: {} and by tournament id {}", pageable,
+                tournament.getId());
         return tournamentSeriesRepository.findAllByTournament(pageable, tournament);
     }
 
@@ -87,6 +87,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     }
 
     /**
+     * Generate tournament series list for specified tournament and save to DB.
+     */
+    @Override
+    public boolean generateSeriesForTournament(Tournament tournament) {
+        return false;
+    }
+
+    /**
      * Edit tournament series in DB.
      */
     @Override
@@ -95,12 +103,13 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             return null;
         }
         if (!this.isExistsTournamentSeriesById(tournamentSeries.getId())) {
-            log.error("!> requesting modify tournament series {} for non-existed tournament series. Check evoking clients", tournamentSeries.getId());
+            log.error("!> requesting modify tournament series {} for non-existed tournament series. Check evoking clients",
+                    tournamentSeries.getId());
             return null;
         }
         log.debug("^ trying to modify tournament series {}", tournamentSeries);
         if (tournamentSeries.isStatusChanged()) {
-            this.handleTournamentStatusChanged(tournamentSeries);
+            this.handleTournamentSeriesStatusChanged(tournamentSeries);
         }
         return tournamentSeriesRepository.save(tournamentSeries);
     }
@@ -109,7 +118,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
      * Mark 'deleted' tournament series in DB.
      */
     @Override
-    public TournamentSeries deleteTournament(TournamentSeries tournamentSeries) {
+    public TournamentSeries deleteSeries(TournamentSeries tournamentSeries) {
         if (!this.verifyTournamentSeries(tournamentSeries)) {
             return null;
         }
@@ -118,18 +127,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             return null;
         }
         log.debug("^ trying to set 'deleted' mark to tournament series {}", tournamentSeries);
-        TournamentStatusType oldStatus = tournamentSeries.getStatus();
         tournamentSeries.setStatus(TournamentStatusType.DELETED);
         tournamentSeries = tournamentSeriesRepository.save(tournamentSeries);
-        this.handleTournamentStatusChanged(tournamentSeries);
+        this.handleTournamentSeriesStatusChanged(tournamentSeries);
         return tournamentSeries;
     }
 
     /**
      * Returns sign of tournament series existence for specified id.
-     *
-     * @param id for which tournament series will be find
-     * @return true is tournament series exists, false - if not
      */
     @Override
     public boolean isExistsTournamentSeriesById(long id) {
@@ -166,7 +171,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     /**
      * Prototype for handle tournament status
      */
-    private void handleTournamentStatusChanged(TournamentSeries tournamentSeries) {
+    private void handleTournamentSeriesStatusChanged(TournamentSeries tournamentSeries) {
         log.warn("~ status for tournament series id {} was changed from {} to {} ",
                 tournamentSeries.getId(), tournamentSeries.getPrevStatus(), tournamentSeries.getStatus());
         tournamentSeries.setPrevStatus(tournamentSeries.getStatus());

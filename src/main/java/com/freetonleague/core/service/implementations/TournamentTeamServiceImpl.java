@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -25,17 +23,26 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     private final TeamParticipantService teamParticipantService;
     private final TeamService teamService;
 
-
+    /**
+     * Returns tournament team proposal (request to participate on tournament).
+     */
     @Override
     public TournamentTeamProposal addProposal(TournamentTeamProposal tournamentTeamProposal) {
         return null;
     }
 
+    /**
+     * Returns founded participant by id
+     */
     @Override
-    public List<TournamentTeamParticipant> getTournamentTeamParticipant(TournamentTeamProposal tournamentTeamProposal) {
-        return null;
+    public TournamentTeamParticipant getTournamentTeamParticipantById(long id) {
+        log.debug("^ trying to get tournament team participant by id: {}", id);
+        return tournamentTeamParticipantRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Quit requested team (in team proposal) from tournament.
+     */
     @Override
     public void quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
         //    нельзя удалить команду которая участвует в турнире
