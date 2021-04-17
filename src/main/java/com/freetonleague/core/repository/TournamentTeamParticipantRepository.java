@@ -7,4 +7,5 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface TournamentTeamParticipantRepository extends JpaRepository<TournamentTeamParticipant, Long>,
         JpaSpecificationExecutor<TournamentTeamParticipant> {
 
+
 }

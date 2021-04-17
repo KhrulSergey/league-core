@@ -41,6 +41,12 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     private GameDiscipline gameDiscipline;
 
     /**
+     * Count of rivals to fight in match
+     */
+    @Transient
+    private Integer matchRivalCount = 2;
+
+    /**
      * Hash map of indicators with optimal values
      */
     @NotNull

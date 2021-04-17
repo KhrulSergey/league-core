@@ -15,7 +15,9 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -62,8 +64,17 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (!this.verifyTournamentMatch(tournamentMatch)) {
             return null;
         }
-        log.debug("^ trying to add new tournament series {}", tournamentMatch);
+        log.debug("^ trying to add new tournament match {}", tournamentMatch);
         return tournamentMatchRepository.save(tournamentMatch);
+    }
+
+    /**
+     * Add tournament match list to DB.
+     */
+    @Override
+    public List<TournamentMatch> addMatchList(List<TournamentMatch> tournamentMatchList) {
+        log.debug("^ trying to add list of new tournament matches with size {}", tournamentMatchList.size());
+        return tournamentMatchList.stream().map(this::addMatch).collect(Collectors.toList());
     }
 
     /**

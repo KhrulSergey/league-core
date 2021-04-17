@@ -34,7 +34,7 @@ public class Tournament extends ExtendedBaseEntity {
     private String name;
 
     @NotNull
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "game_discipline_id")
     private GameDiscipline gameDiscipline;
 
@@ -46,11 +46,13 @@ public class Tournament extends ExtendedBaseEntity {
     @JoinColumn(name = "game_disciplines_settings_id")
     private GameDisciplineSettings gameDisciplineSettings;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentOrganizer> tournamentOrganizerList;
 
-    @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TournamentTeamProposal> tournamentTeam;
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "tournament", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    private List<TournamentTeamProposal> tournamentTeamProposalList;
 
     /**
      * Current tournament status
@@ -85,6 +87,7 @@ public class Tournament extends ExtendedBaseEntity {
     @Transient
     private Long fundAccountId;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TournamentSeries> tournamentSeriesList;
 
@@ -108,6 +111,7 @@ public class Tournament extends ExtendedBaseEntity {
     private LocalDateTime startPlannedDate;
 
     //Detailed settings
+    @EqualsAndHashCode.Exclude
     @OneToOne(mappedBy = "tournament", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private TournamentSettings tournamentSettings;
 
