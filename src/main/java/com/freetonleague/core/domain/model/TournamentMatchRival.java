@@ -15,6 +15,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Model of team on current match
@@ -74,6 +75,12 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
 
     public boolean isStatusChanged() {
         return !this.status.equals(this.prevStatus);
+    }
+
+    public void setRivalParticipantsFromTournamentTeamParticipant(Set<TournamentTeamParticipant> tournamentTeamParticipants) {
+        rivalParticipants = tournamentTeamParticipants.parallelStream()
+                .map(p -> new TournamentMatchRivalParticipant(this, p))
+                .collect(Collectors.toSet());
     }
 }
 

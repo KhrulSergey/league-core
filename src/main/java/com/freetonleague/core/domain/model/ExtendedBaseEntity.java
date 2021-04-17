@@ -28,14 +28,16 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
 @MappedSuperclass
 public class ExtendedBaseEntity extends BaseEntity {
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @CreatedBy
-    @JoinColumn(name = "created_by_league_id", referencedColumnName = "league_id", updatable = false)
+    @JoinColumn(name = "created_by_league_id", referencedColumnName = "league_id", nullable = false, updatable = false)
     private User createdBy;
 
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @LastModifiedBy
-    @JoinColumn(name = "modified_by_league_id", referencedColumnName = "league_id")
+    @JoinColumn(name = "modified_by_league_id", referencedColumnName = "league_id", nullable = false)
     private User modifiedBy;
 
 

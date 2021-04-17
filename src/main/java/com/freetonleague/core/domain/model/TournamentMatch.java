@@ -26,7 +26,7 @@ public class TournamentMatch extends ExtendedBaseEntity {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
 

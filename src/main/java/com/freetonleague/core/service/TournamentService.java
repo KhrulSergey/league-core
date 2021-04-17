@@ -71,4 +71,10 @@ public interface TournamentService {
      * Returns sign of user is tournament organizer, or false if not
      */
     boolean isUserTournamentOrganizer(Tournament tournament, User user);
+
+    /**
+     * Returns "active" statuses for tournaments
+     */
+    List<TournamentStatusType> getTournamentActiveStatusList();
+
 }

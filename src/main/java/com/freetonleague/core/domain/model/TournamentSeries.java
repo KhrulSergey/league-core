@@ -37,7 +37,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
-    @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentMatch> matchList;
 
     /**
@@ -64,6 +64,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     /**
      * How many match should be in current series
      */
+    //TODO delete fields
     @NotNull
     @Column(name = "goal_match_count")
     private Integer goalMatchCount;
@@ -71,6 +72,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     /**
      * How many rivals should be in current series
      */
+    //TODO delete fields
     @NotNull
     @Column(name = "goal_match_rival_count")
     private Integer goalMatchRivalCount;

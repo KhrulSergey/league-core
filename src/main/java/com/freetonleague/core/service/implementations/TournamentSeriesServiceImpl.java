@@ -6,10 +6,13 @@ import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.repository.TournamentSeriesRepository;
+import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentMatchService;
 import com.freetonleague.core.service.TournamentSeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     private final TournamentSeriesRepository tournamentSeriesRepository;
     private final TournamentMatchService tournamentMatchService;
     private final Validator validator;
+
+    @Autowired
+    @Qualifier("singleEliminationGenerator")
+    private TournamentGenerator singleEliminationGenerator;
+
+    @Autowired
+    @Qualifier("doubleEliminationGenerator")
+    private TournamentGenerator doubleEliminationGenerator;
 
     private final List<TournamentStatusType> activeStatusList = List.of(
             TournamentStatusType.SIGN_UP,
@@ -91,7 +102,30 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
      */
     @Override
     public boolean generateSeriesForTournament(Tournament tournament) {
-        return false;
+        if (isNull(tournament)) {
+            log.error("!> requesting generateSeriesForTournament for NULL tournament. Check evoking clients");
+            return false;
+        }
+        List<TournamentSeries> tournamentSeriesList = null;
+        log.debug("^ trying to define component for generation algorithm {}", tournament.getSystemType());
+        switch (tournament.getSystemType()) {
+            case SINGLE_ELIMINATION:
+                tournamentSeriesList = singleEliminationGenerator.generateSeriesForTournament(tournament);
+                break;
+            case DOUBLE_ELIMINATION:
+                tournamentSeriesList = doubleEliminationGenerator.generateSeriesForTournament(tournament);
+                break;
+            default:
+                break;
+        }
+        log.debug("^ trying to save series and matches from generator with series list size {}",
+                nonNull(tournamentSeriesList) ? tournamentSeriesList.size() : null);
+        if (nonNull(tournamentSeriesList)) {
+            tournamentSeriesList.forEach(this::addSeries);
+        } else {
+            return false;
+        }
+        return true;
     }
 
     /**
