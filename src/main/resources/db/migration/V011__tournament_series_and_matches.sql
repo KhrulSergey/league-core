@@ -95,7 +95,7 @@ comment on column public.tournament_match_rivals.indicators is 'Matches indicato
 
 -- ADD WINNER TO MATCH --
 alter table public.tournament_matches
-    add column winner_match_rival_id bigint
+    add column if not exists winner_match_rival_id bigint
         constraint fk_winner_match_rival_id references public.tournament_match_rivals (id);
 comment on column public.tournament_matches.winner_match_rival_id is 'Reference of match winner to match rival id';
 
