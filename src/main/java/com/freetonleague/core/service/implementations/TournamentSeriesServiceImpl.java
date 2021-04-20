@@ -2,17 +2,14 @@ package com.freetonleague.core.service.implementations;
 
 
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentMatch;
+import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.repository.TournamentSeriesRepository;
-import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentMatchService;
 import com.freetonleague.core.service.TournamentSeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -34,21 +31,6 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     private final TournamentMatchService tournamentMatchService;
     private final Validator validator;
 
-    @Autowired
-    @Qualifier("singleEliminationGenerator")
-    private TournamentGenerator singleEliminationGenerator;
-
-    @Autowired
-    @Qualifier("doubleEliminationGenerator")
-    private TournamentGenerator doubleEliminationGenerator;
-
-    private final List<TournamentStatusType> activeStatusList = List.of(
-            TournamentStatusType.SIGN_UP,
-            TournamentStatusType.ADJUSTMENT,
-            TournamentStatusType.STARTED,
-            TournamentStatusType.PAUSE
-    );
-
     /**
      * Returns founded tournament series by id
      */
@@ -62,27 +44,15 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
      * Returns list of all tournament series filtered by requested params
      */
     @Override
-    public Page<TournamentSeries> getSeriesList(Pageable pageable, Tournament tournament) {
-        if (isNull(pageable) || isNull(tournament)) {
-            log.error("!> requesting getSeriesList for NULL pageable {} or NULL tournament {}. Check evoking clients",
-                    pageable, tournament);
+    public Page<TournamentSeries> getSeriesList(Pageable pageable, TournamentRound tournamentRound) {
+        if (isNull(pageable) || isNull(tournamentRound)) {
+            log.error("!> requesting getSeriesList for NULL pageable {} or NULL tournamentRound {}. Check evoking clients",
+                    pageable, tournamentRound);
             return null;
         }
-        log.debug("^ trying to get tournament series list with pageable params: {} and by tournament id {}", pageable,
-                tournament.getId());
-        return tournamentSeriesRepository.findAllByTournament(pageable, tournament);
-    }
-
-    /**
-     * Returns current active series for tournament
-     */
-    @Override
-    public TournamentSeries getActiveSeriesForTournament(Tournament tournament) {
-        if (isNull(tournament)) {
-            log.error("!> requesting getActiveSeriesForTournament for NULL tournament. Check evoking clients");
-            return null;
-        }
-        return tournamentSeriesRepository.findByStatusInAndTournament(activeStatusList, tournament);
+        log.debug("^ trying to get tournament series list with pageable params: {} and by tournament round id {}", pageable,
+                tournamentRound.getId());
+        return tournamentSeriesRepository.findAllByTournamentRound(pageable, tournamentRound);
     }
 
     /**
@@ -97,36 +67,6 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         return tournamentSeriesRepository.save(tournamentSeries);
     }
 
-    /**
-     * Generate tournament series list for specified tournament and save to DB.
-     */
-    @Override
-    public boolean generateSeriesForTournament(Tournament tournament) {
-        if (isNull(tournament)) {
-            log.error("!> requesting generateSeriesForTournament for NULL tournament. Check evoking clients");
-            return false;
-        }
-        List<TournamentSeries> tournamentSeriesList = null;
-        log.debug("^ trying to define component for generation algorithm {}", tournament.getSystemType());
-        switch (tournament.getSystemType()) {
-            case SINGLE_ELIMINATION:
-                tournamentSeriesList = singleEliminationGenerator.generateSeriesForTournament(tournament);
-                break;
-            case DOUBLE_ELIMINATION:
-                tournamentSeriesList = doubleEliminationGenerator.generateSeriesForTournament(tournament);
-                break;
-            default:
-                break;
-        }
-        log.debug("^ trying to save series and matches from generator with series list size {}",
-                nonNull(tournamentSeriesList) ? tournamentSeriesList.size() : null);
-        if (nonNull(tournamentSeriesList)) {
-            tournamentSeriesList.forEach(this::addSeries);
-        } else {
-            return false;
-        }
-        return true;
-    }
 
     /**
      * Edit tournament series in DB.

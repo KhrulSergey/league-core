@@ -1,7 +1,7 @@
 package com.freetonleague.core.service;
 
 
-import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -19,18 +19,18 @@ public interface TournamentSeriesService {
     /**
      * Returns list of all tournament series filtered by requested params
      *
-     * @param pageable   filtered params to search tournament series
-     * @param tournament specified tournament to search suitable tournament series
+     * @param pageable        filtered params to search tournament series
+     * @param tournamentRound specified tournament round to search suitable tournament series
      * @return list of tournament series entities
      */
-    Page<TournamentSeries> getSeriesList(Pageable pageable, Tournament tournament);
+    Page<TournamentSeries> getSeriesList(Pageable pageable, TournamentRound tournamentRound);
 
-    /**
-     * Returns current active series for tournament
-     *
-     * @return active tournament series entity or NULL of not found
-     */
-    TournamentSeries getActiveSeriesForTournament(Tournament tournament);
+//    /**
+//     * Returns current active series for tournament
+//     *
+//     * @return active tournament series entity or NULL of not found
+//     */
+//    TournamentSeries getActiveSeriesForTournament(Tournament tournament);
 
     /**
      * Add new tournament series to DB.
@@ -40,13 +40,13 @@ public interface TournamentSeriesService {
      */
     TournamentSeries addSeries(TournamentSeries tournamentSeries);
 
-    /**
-     * Generate tournament series list for specified tournament and save to DB.
-     *
-     * @param tournament to generate series for
-     * @return Sign of series list was created
-     */
-    boolean generateSeriesForTournament(Tournament tournament);
+//    /**
+//     * Generate tournament series list for specified tournament and save to DB.
+//     *
+//     * @param tournament to generate series for
+//     * @return Sign of series list was created
+//     */
+//    boolean generateSeriesForTournament(Tournament tournament);
 
     /**
      * Edit tournament series in DB.

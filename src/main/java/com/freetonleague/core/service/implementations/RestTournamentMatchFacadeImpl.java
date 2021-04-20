@@ -8,8 +8,8 @@ import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentMatchMapper;
-import com.freetonleague.core.service.RestTournamentMatchService;
-import com.freetonleague.core.service.RestTournamentSeriesService;
+import com.freetonleague.core.service.RestTournamentMatchFacade;
+import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.TournamentMatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class RestTournamentMatchServiceImpl implements RestTournamentMatchService {
+public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade {
 
     private final TournamentMatchService tournamentMatchService;
     private final TournamentMatchMapper tournamentMatchMapper;
@@ -41,7 +41,7 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
 
     @Lazy
     @Autowired
-    private RestTournamentSeriesService restTournamentSeriesService;
+    private RestTournamentSeriesFacade restTournamentSeriesFacade;
 
     /**
      * Returns founded tournament match by id
@@ -56,7 +56,7 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
      */
     @Override
     public Page<TournamentMatchDto> getMatchList(Pageable pageable, long tournamentSeriesId, User user) {
-        TournamentSeries tournamentSeries = restTournamentSeriesService.getVerifiedSeriesById(tournamentSeriesId, user);
+        TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(tournamentSeriesId, user);
         return tournamentMatchService.getMatchList(pageable, tournamentSeries).map(tournamentMatchMapper::toDto);
     }
 
@@ -135,7 +135,7 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "tournament series id",
                     "parameter 'tournament series id' is not set in tournamentMatchDto for get or modify tournament series");
         }
-        TournamentSeries tournamentSeries = restTournamentSeriesService.getVerifiedSeriesById(
+        TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(
                 tournamentMatchDto.getTournamentSeriesId(), user);
 
         Set<ConstraintViolation<TournamentMatchDto>> settingsViolations = validator.validate(tournamentMatchDto);

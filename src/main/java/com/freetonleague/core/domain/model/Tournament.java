@@ -89,13 +89,14 @@ public class Tournament extends ExtendedBaseEntity {
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
-    private List<TournamentSeries> tournamentSeriesList;
+    private List<TournamentRound> tournamentRoundList;
 
     /**
      * List of tournament winners with places
      */
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TournamentWinner> winnerTeamProposal;
+    private List<TournamentWinner> teamProposalWinnerList;
 
     //Base settings
     @Column(name = "discord_channel_name")

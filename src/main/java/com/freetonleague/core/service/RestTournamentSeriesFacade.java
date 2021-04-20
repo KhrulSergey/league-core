@@ -4,10 +4,8 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
-public interface RestTournamentSeriesService {
+public interface RestTournamentSeriesFacade {
 
     /**
      * Returns founded tournament series by id
@@ -18,23 +16,23 @@ public interface RestTournamentSeriesService {
      */
     TournamentSeriesDto getSeries(long id, User user);
 
-    /**
-     * Returns list of all tournament series filtered by requested params
-     *
-     * @param pageable     filtered params to search tournament series
-     * @param tournamentId specified tournament to search suitable tournament series
-     * @param user         current user from Session
-     * @return list of tournament series entities
-     */
-    Page<TournamentSeriesDto> getSeriesList(Pageable pageable, long tournamentId, User user);
+//    /**
+//     * Returns list of all tournament series filtered by requested params
+//     *
+//     * @param pageable     filtered params to search tournament series
+//     * @param tournamentId specified tournament to search suitable tournament series
+//     * @param user         current user from Session
+//     * @return list of tournament series entities
+//     */
+//    Page<TournamentSeriesDto> getSeriesList(Pageable pageable, long tournamentId, User user);
 
-    /**
-     * Returns current active series for tournament
-     *
-     * @param user current user from Session
-     * @return active tournament series entity or NULL of not found
-     */
-    TournamentSeriesDto getActiveSeriesForTournament(long tournamentId, User user);
+//    /**
+//     * Returns current active series for tournament
+//     *
+//     * @param user current user from Session
+//     * @return active tournament series entity or NULL of not found
+//     */
+//    TournamentSeriesDto getActiveSeriesForTournament(long tournamentId, User user);
 
     /**
      * Add new tournament series.
@@ -45,13 +43,13 @@ public interface RestTournamentSeriesService {
      */
     TournamentSeriesDto addSeries(TournamentSeriesDto tournamentSeriesDto, User user);
 
-    /**
-     * Generate all series for tournament.
-     *
-     * @param tournamentId specified tournament to generate tournament series list
-     * @param user         current user from Session
-     */
-    void generateSeriesForTournament(long tournamentId, User user);
+//    /**
+//     * Generate all series for tournament.
+//     *
+//     * @param tournamentId specified tournament to generate tournament series list
+//     * @param user         current user from Session
+//     */
+//    void generateSeriesForTournament(long tournamentId, User user);
 
     /**
      * Edit tournament series.

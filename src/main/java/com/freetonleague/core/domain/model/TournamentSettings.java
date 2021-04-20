@@ -4,10 +4,7 @@ import com.freetonleague.core.domain.dto.TournamentPrizePoolDistributionDto;
 import com.freetonleague.core.domain.dto.TournamentQuitPenaltyDistributionDto;
 import com.freetonleague.core.domain.enums.FundGatheringType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -37,8 +34,9 @@ public class TournamentSettings extends ExtendedBaseEntity {
     private Double organizerCommission;
 
     @NotNull
+    @Builder.Default
     @Column(name = "min_team_count")
-    private Integer minTeamCount;
+    private Integer minTeamCount = 2;
 
     @Column(name = "max_team_count")
     private Integer maxTeamCount;
@@ -49,6 +47,10 @@ public class TournamentSettings extends ExtendedBaseEntity {
 
     @Column(name = "max_reserve_participant_count")
     private Integer maxTeamReserveParticipantCount;
+
+    @Builder.Default
+    @Column(name = "match_count_per_series")
+    private Integer matchCountPerSeries = 3;
 
     /**
      * Goal prize fund value. (info purpose only)
