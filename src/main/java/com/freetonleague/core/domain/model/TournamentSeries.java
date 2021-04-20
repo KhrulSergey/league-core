@@ -35,9 +35,11 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @JoinColumn(name = "tournament_round_id")
     private TournamentRound tournamentRound;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentMatch> matchList;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<TournamentSeriesRival> rivalList;
 
@@ -61,6 +63,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @Transient
     private TournamentStatusType prevStatus;
 
+    @EqualsAndHashCode.Exclude
     @ManyToMany(targetEntity = TournamentSeries.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "tournament_series_parents",
             joinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"),
@@ -85,7 +88,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 
-    //TODO нужно ли?
+    //TODO нужно ли? Удалить до 01.05.2021
 //    public int teamProposalCount() {
 //        int count = 0;
 //        if (nonNull(matchList)) {

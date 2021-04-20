@@ -9,10 +9,9 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Set;
 
 @Data
-public class TournamentSeriesBaseDto {
+public class TournamentSeriesParentDto {
 
     private Long id;
 
@@ -37,7 +36,4 @@ public class TournamentSeriesBaseDto {
     @ApiModelProperty(required = false, readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime finishedDate;
-
-    @ApiModelProperty(required = true)
-    private Set<TournamentSeriesParentDto> parentSeriesList;
 }

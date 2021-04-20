@@ -1,7 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -49,10 +49,10 @@ public class TournamentSeriesRival extends ExtendedBaseEntity {
     @NotNull
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private TournamentStatusType status;
+    private TournamentMatchRivalParticipantStatusType status;
 
     @Transient
-    private TournamentStatusType prevStatus;
+    private TournamentMatchRivalParticipantStatusType prevStatus;
 
     /**
      * Indicators (score) of team on current series
@@ -67,7 +67,7 @@ public class TournamentSeriesRival extends ExtendedBaseEntity {
     @Column(name = "won_place_in_series")
     private Integer wonPlaceInSeries;
 
-    public void setStatus(TournamentStatusType status) {
+    public void setStatus(TournamentMatchRivalParticipantStatusType status) {
         prevStatus = this.status;
         this.status = status;
     }

@@ -26,6 +26,7 @@ public class TournamentMatch extends ExtendedBaseEntity {
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<TournamentMatchRival> rivals;
 
