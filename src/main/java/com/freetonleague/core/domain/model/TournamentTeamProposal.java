@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 
 /**
  * Team proposal to participate in tournament
@@ -42,7 +44,7 @@ public class TournamentTeamProposal extends BaseEntity {
      * State of team participation in tournament
      */
     @NotNull
-    @Column(name = "status")
+    @Column(name = "state")
     @Enumerated(EnumType.STRING)
     private TournamentTeamStateType state;
 
@@ -60,9 +62,15 @@ public class TournamentTeamProposal extends BaseEntity {
     @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 
+    @Transient
+    private Set<TournamentTeamParticipant> mainTournamentTeamParticipantList;
+
     public Set<TournamentTeamParticipant> getMainTournamentTeamParticipantList() {
-        return tournamentTeamParticipantList.parallelStream()
-                .filter(p -> p.getStatus() == TournamentTeamParticipantStatusType.MAIN)
-                .collect(Collectors.toSet());
+        if (isNull(mainTournamentTeamParticipantList)) {
+            mainTournamentTeamParticipantList = tournamentTeamParticipantList.parallelStream()
+                    .filter(p -> p.getStatus() == TournamentTeamParticipantStatusType.MAIN)
+                    .collect(Collectors.toSet());
+        }
+        return mainTournamentTeamParticipantList;
     }
 }

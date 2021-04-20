@@ -4,8 +4,8 @@ import com.freetonleague.core.domain.dto.TournamentMatchDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.RestTournamentMatchRivalService;
-import com.freetonleague.core.service.RestTournamentMatchService;
+import com.freetonleague.core.service.RestTournamentMatchFacade;
+import com.freetonleague.core.service.RestTournamentMatchRivalFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -35,21 +35,21 @@ public class TournamentMatchController {
 
     public static final String PATH_RIVAL_PARTICIPANT_EDIT = "{match_id}/rival/{rival_id}/participants";
 
-    private final RestTournamentMatchRivalService restTournamentMatchRivalService;
-    private final RestTournamentMatchService restTournamentMatchService;
+    private final RestTournamentMatchRivalFacade restTournamentMatchRivalFacade;
+    private final RestTournamentMatchFacade restTournamentMatchFacade;
 
     @ApiOperation("Get match by id")
     @GetMapping(path = PATH_GET)
     public ResponseEntity<TournamentMatchDto> getMatchById(@PathVariable("match_id") long id,
                                                            @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentMatchService.getMatch(id, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentMatchFacade.getMatch(id, user), HttpStatus.OK);
     }
 
     @ApiOperation("Create new match with specified params (only for orgs)")
     @PostMapping(path = PATH_ADD)
     public ResponseEntity<TournamentMatchDto> createMatch(@RequestBody TournamentMatchDto tournamentMatchDto,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentMatchService.addMatch(tournamentMatchDto, user), HttpStatus.CREATED);
+        return new ResponseEntity<>(restTournamentMatchFacade.addMatch(tournamentMatchDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Get matches list info by series")
@@ -57,7 +57,7 @@ public class TournamentMatchController {
     public ResponseEntity<Page<TournamentMatchDto>> getMatchList(@PageableDefault Pageable pageable,
                                                                  @PathVariable("series_id") long seriesId,
                                                                  @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentMatchService.getMatchList(pageable, seriesId, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentMatchFacade.getMatchList(pageable, seriesId, user), HttpStatus.OK);
     }
 
     @ApiOperation("Edit match info (only for orgs)")
@@ -65,14 +65,14 @@ public class TournamentMatchController {
     public ResponseEntity<TournamentMatchDto> editMatch(@PathVariable("match_id") long matchId,
                                                         @RequestBody TournamentMatchDto tournamentMatchDto,
                                                         @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentMatchService.editMatch(matchId, tournamentMatchDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentMatchFacade.editMatch(matchId, tournamentMatchDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Delete (archive) match (only for orgs)")
     @DeleteMapping(path = PATH_DELETE)
     public ResponseEntity<Void> deleteMatch(@PathVariable("match_id") long matchId,
                                             @ApiIgnore @AuthenticationPrincipal User user) {
-        restTournamentMatchService.deleteMatch(matchId, user);
+        restTournamentMatchFacade.deleteMatch(matchId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -82,6 +82,6 @@ public class TournamentMatchController {
                                                                              @PathVariable("rival_id") long rivalId,
                                                                              @RequestBody Set<TournamentTeamParticipantDto> rivalParticipantList,
                                                                              @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentMatchRivalService.changeActiveMatchRivalParticipants(matchId, rivalId, rivalParticipantList, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentMatchRivalFacade.changeActiveMatchRivalParticipants(matchId, rivalId, rivalParticipantList, user), HttpStatus.OK);
     }
 }

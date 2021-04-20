@@ -2,7 +2,7 @@ package com.freetonleague.core.service.implementations;
 
 
 import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentService;
 import com.freetonleague.core.service.TournamentTeamService;
@@ -26,10 +26,10 @@ public class TournamentDoubleEliminationGeneratorImpl implements TournamentGener
     private TournamentService tournamentService;
 
     /**
-     * Generate tournament series list with embedded list of match prototypes for specified tournament and it's settings.
+     * Generate tournament round list with embedded list of series & matches prototypes for specified tournament and it's settings.
      */
     @Override
-    public List<TournamentSeries> generateSeriesForTournament(Tournament tournament) {
+    public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
         return null;
     }
 }
