@@ -6,7 +6,10 @@ import com.freetonleague.core.domain.dto.TournamentMatchRivalParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.model.*;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchRivalMapper;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +40,6 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentService tournamentService;
     private final TournamentMatchRivalMapper tournamentMatchRivalMapper;
-    private final RestTeamParticipantFacade teamParticipantFacade;
     private final RestTournamentTeamFacade restTournamentTeamFacade;
     private final Validator validator;
 
@@ -149,10 +151,6 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
      */
     @Override
     public TournamentMatchRival getVerifiedMatchRivalById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedMatchRivalById' request denied");
-        }
         TournamentMatchRival tournamentMatchRival = tournamentMatchRivalService.getMatchRival(id);
         if (isNull(tournamentMatchRival)) {
             log.debug("^ Tournament rival with requested id {} was not found. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied", id);

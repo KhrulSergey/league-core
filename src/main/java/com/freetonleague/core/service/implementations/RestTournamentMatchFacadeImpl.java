@@ -6,7 +6,10 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchMapper;
 import com.freetonleague.core.service.RestTournamentMatchFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
@@ -94,6 +97,12 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         }
         TournamentMatch tournamentMatch = this.getVerifiedTournamentMatchByDto(tournamentMatchDto, user);
 
+        if (tournamentMatch.getStatus() == TournamentStatusType.DELETED) {
+            log.warn("~ tournament match deleting was declined in editMatch. This operation should be done with specific method.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_DELETE_ERROR,
+                    "Modifying tournament match was rejected. Check requested params and method.");
+        }
+
         tournamentMatch = tournamentMatchService.editMatch(tournamentMatch);
         if (isNull(tournamentMatch)) {
             log.error("!> error while editing tournament match from dto {} for user {}.", tournamentMatchDto, user);
@@ -163,10 +172,6 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
      */
     @Override
     public TournamentMatch getVerifiedMatchById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedMatchById' in RestTournamentMatchService request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedMatchById' request denied");
-        }
         TournamentMatch tournamentMatch = tournamentMatchService.getMatch(id);
         if (isNull(tournamentMatch)) {
             log.debug("^ Tournament match with requested id {} was not found. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id);
