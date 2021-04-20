@@ -1,6 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentMatchRivalParticipant;
 import com.freetonleague.core.repository.TournamentMatchRivalParticipantRepository;
@@ -80,7 +80,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
             return null;
         }
         log.debug("^ trying to set 'deleted' mark to tournament match rival {}", tournamentMatchRival);
-        tournamentMatchRival.setStatus(TournamentStatusType.DELETED);
+        tournamentMatchRival.setStatus(TournamentMatchRivalParticipantStatusType.DISABLED);
         tournamentMatchRival = tournamentMatchRivalRepository.save(tournamentMatchRival);
         this.handleTournamentMatchRivalStatusChanged(tournamentMatchRival);
         return tournamentMatchRival;

@@ -10,7 +10,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {GameDisciplineMapper.class, UserMapper.class, TournamentSeriesMapper.class})
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {GameDisciplineMapper.class, UserMapper.class, TournamentRoundMapper.class})
 public interface TournamentMapper {
 
     //region Tournaments
@@ -19,7 +19,7 @@ public interface TournamentMapper {
     @Mapping(target = "gameDisciplineId", source = "entity.gameDiscipline.id")
     @Mapping(target = "gameDisciplineSettingsId", source = "entity.gameDisciplineSettings.id")
     @Mapping(target = "tournamentCreator", source = "entity.createdBy", qualifiedByName = "toDto")
-//    @Mapping(target = "tournamentSeriesList", source = "entity.tournamentSeriesList", qualifiedByName = "toDto") //TODO
+    @Mapping(target = "tournamentRoundList", source = "entity.tournamentRoundList", qualifiedByName = "toDto")
     @Named(value = "toDto")
     TournamentDto toDto(Tournament entity);
 

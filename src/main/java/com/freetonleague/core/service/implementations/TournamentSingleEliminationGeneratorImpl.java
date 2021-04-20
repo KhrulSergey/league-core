@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentRoundType;
 import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
@@ -9,6 +10,7 @@ import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentService;
 import com.freetonleague.core.service.TournamentTeamService;
+import com.freetonleague.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 
@@ -73,6 +76,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         int roundsCount;
         int currentRoundNumber = 1;
         List<Set<TournamentTeamProposal>> rivalCombinations;
+        List<TournamentSeries> parentTournamentSeriesList = new ArrayList<>();
         List<TournamentRound> newTournamentRoundList = new ArrayList<>();
 
         //generate round, series and matches
@@ -83,9 +87,10 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
             // get rival combinations or empty list for 2+ round
             rivalCombinations = this.composeRivalCombinationsFromTeamProposal(roundsCount,
                     matchRivalCountLimit, teamProposalList);
-            TournamentRound newRound = this.generateRound(rivalCombinations, currentRoundNumber, matchCountPerSeries);
+            TournamentRound newRound = this.generateRound(rivalCombinations, parentTournamentSeriesList, currentRoundNumber, matchCountPerSeries);
             newRound.setTournament(tournament);
             newTournamentRoundList.add(newRound);
+            parentTournamentSeriesList = newRound.getSeriesList();
             teamProposalListSize = newRound.getSeriesList().size();
             currentRoundNumber++;
 
@@ -98,6 +103,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      * Returns generated series for specified rivalCombinations, matchCount, seriesPosition
      */
     private TournamentRound generateRound(List<Set<TournamentTeamProposal>> rivalCombinations,
+                                          List<TournamentSeries> parentTournamentSeriesList,
                                           Integer roundNumber, int matchCountPerSeries) {
         if (isNull(rivalCombinations)) {
             log.error("!> round generation with TournamentSingleEliminationGeneratorImpl caused error. RivalCombinations is NULL. Check evoking params");
@@ -110,21 +116,15 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                 .type(TournamentRoundType.DEFAULT)
                 .build();
 
-        // size of rivalCombinations equals match count
-        List<TournamentSeries> tournamentSeriesList = rivalCombinations.parallelStream()
-                .map(combination -> {
-                    Set<TournamentSeries> parentSeriesList = combination.parallelStream()
-                            .map(this::getPrevSeriesForTournamentTeamProposal).collect(Collectors.toSet());
-                    return this.generateSeries(tournamentRound, parentSeriesList, combination, matchCountPerSeries);
-                })
+        List<TournamentSeries> tournamentSeriesList = IntStream.range(0, rivalCombinations.size()).parallel()
+                .mapToObj(index -> this.generateSeries(tournamentRound,
+                        getParentSeries(index, parentTournamentSeriesList),
+                        rivalCombinations.get(index), matchCountPerSeries)
+                )
                 .collect(Collectors.toList());
 
         tournamentRound.setSeriesList(tournamentSeriesList);
         return tournamentRound;
-    }
-
-    private TournamentSeries getPrevSeriesForTournamentTeamProposal(TournamentTeamProposal tournamentTeamProposal) {
-        return null;
     }
 
     /**
@@ -138,12 +138,22 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         }
         // For Single elimination all series with type 'UPPER_BRACKET'
         TournamentSeries tournamentSeries = TournamentSeries.builder()
-                .name(String.format("Series for %s", tournamentRound.getName()))
+                .name(String.format("Series '%s' for %s", StringUtil.generateRandomName(), tournamentRound.getName()))
                 .status(TournamentStatusType.CREATED)
                 .type(TournamentSeriesBracketType.UPPER_BRACKET)
                 .tournamentRound(tournamentRound)
                 .parentSeriesList(parentSeriesList)
                 .build();
+
+        Set<TournamentSeriesRival> rivalList = rivalCombinations.parallelStream().map(rival ->
+                TournamentSeriesRival.builder()
+                        .tournamentSeries(tournamentSeries)
+                        .status(TournamentMatchRivalParticipantStatusType.ACTIVE)
+                        .parentTournamentSeries(parentSeriesList.iterator().next())
+                        .teamProposal(rivalCombinations.iterator().next())
+                        .build()
+        ).collect(Collectors.toSet());
+        tournamentSeries.setRivalList(rivalList);
 
         List<TournamentMatch> tournamentMatchList = Collections.nCopies(matchCount, null).parallelStream()
                 .map(i -> this.generateMatch(tournamentSeries, rivalCombinations))
@@ -154,13 +164,25 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     }
 
     /**
+     * Collect two series sequentially from list of series to form "parent" of new series
+     */
+    private Set<TournamentSeries> getParentSeries(int index, List<TournamentSeries> parentTournamentSeriesList) {
+        if (isNull(parentTournamentSeriesList) || parentTournamentSeriesList.isEmpty()) {
+            return null;
+        }
+        int parentSeriesIndex = index * 2;
+        // from range [parentSeriesIndex, parentSeriesIndex + 2) means [parentSeriesIndex, parentSeriesIndex + 1]
+        return new HashSet<>(parentTournamentSeriesList.subList(parentSeriesIndex, parentSeriesIndex + 2));
+    }
+
+    /**
      * Returns new match from specified series and rivalCombination
      */
     private TournamentMatch generateMatch(TournamentSeries tournamentSeries,
                                           Set<TournamentTeamProposal> rivalCombination) {
         TournamentMatch tournamentMatch = TournamentMatch.builder()
                 .tournamentSeries(tournamentSeries)
-                .name("Match for " + tournamentSeries.getName())
+                .name(String.format("Match '%s' for %s", StringUtil.generateRandomName(), tournamentSeries.getName()))
                 .status(TournamentStatusType.CREATED)
 
                 .build();
@@ -184,7 +206,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      */
     private TournamentMatchRival generateMatchRival(TournamentMatch tournamentMatch, TournamentTeamProposal teamProposal) {
         TournamentMatchRival matchRival = TournamentMatchRival.builder()
-                .status(TournamentStatusType.CREATED)
+                .status(TournamentMatchRivalParticipantStatusType.ACTIVE)
                 .tournamentMatch(tournamentMatch)
                 .teamProposal(teamProposal)
                 .build();
@@ -225,7 +247,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                 }
                 int randomTeam = randomGenerator(teamProposalList.size());
                 TournamentTeamProposal teamProposal = teamProposalList.get(randomTeam);
-                //removing chosen team proposal
+                //removing chosen team proposal from list
                 teamProposalList.remove(teamProposal);
                 teamProposalSet.add(teamProposal);
             }
@@ -233,7 +255,6 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         }
         return rivalCombinationList;
     }
-
 
     /**
      * Returns sign if 'value' is power of specified number N
@@ -247,5 +268,4 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         }
         return value == 1;
     }
-
 }

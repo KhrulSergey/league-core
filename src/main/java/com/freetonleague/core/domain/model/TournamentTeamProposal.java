@@ -59,6 +59,7 @@ public class TournamentTeamProposal extends BaseEntity {
     /**
      * Team participant list with their role (status) in tournament
      */
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 

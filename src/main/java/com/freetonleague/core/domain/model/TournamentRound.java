@@ -32,6 +32,7 @@ public class TournamentRound extends ExtendedBaseEntity {
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
 
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentRound", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentSeries> seriesList;
 
