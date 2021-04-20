@@ -6,7 +6,10 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentSeriesMapper;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
@@ -141,10 +144,6 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
      */
     @Override
     public TournamentSeries getVerifiedSeriesById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedSeriesById' request denied");
-        }
         TournamentSeries tournamentSeries = tournamentSeriesService.getSeries(id);
         if (isNull(tournamentSeries)) {
             log.debug("^ Tournament series with requested id {} was not found. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied", id);
