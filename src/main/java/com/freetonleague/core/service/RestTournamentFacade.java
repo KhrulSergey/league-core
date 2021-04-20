@@ -53,7 +53,7 @@ public interface RestTournamentFacade {
      * @param statusList filter params
      * @return list of team entities
      */
-    Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList);
+    Page<TournamentDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList);
 
     /**
      * Add new tournament to DB.

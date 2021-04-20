@@ -1,7 +1,6 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
 import com.freetonleague.core.domain.dto.TournamentWinnerDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
@@ -61,9 +60,9 @@ public class TournamentController {
     @ApiOperation("Get tournament list info")
     @ApiPageable
     @GetMapping(path = PATH_GET_LIST)
-    public ResponseEntity<Page<TournamentBaseDto>> getTournamentList(@PageableDefault Pageable pageable,
-                                                                     @ApiIgnore @AuthenticationPrincipal User user,
-                                                                     @RequestParam(value = "statuses", required = false) TournamentStatusType... statuses) {
+    public ResponseEntity<Page<TournamentDto>> getTournamentList(@PageableDefault Pageable pageable,
+                                                                 @ApiIgnore @AuthenticationPrincipal User user,
+                                                                 @RequestParam(value = "statuses", required = false) TournamentStatusType... statuses) {
 
         List<TournamentStatusType> statusList = nonNull(statuses) ? List.of(statuses) : null;
         return new ResponseEntity<>(restTournamentFacade.getTournamentList(pageable, user, statusList), HttpStatus.OK);

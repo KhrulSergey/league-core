@@ -5,7 +5,10 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentRoundMapper;
 import com.freetonleague.core.service.RestTournamentFacade;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
@@ -48,7 +51,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @Override
     public Page<TournamentRoundDto> getRoundList(Pageable pageable, long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
         return tournamentRoundService.getRoundList(pageable, tournament).map(tournamentRoundMapper::toDto);
     }
 
@@ -57,7 +60,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @Override
     public TournamentRoundDto getActiveRoundForTournament(long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
         return tournamentRoundMapper.toDto(tournamentRoundService.getActiveRoundForTournament(tournament));
     }
 
@@ -148,10 +151,6 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @Override
     public TournamentRound getVerifiedRoundById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedSeriesById' request denied");
-        }
         TournamentRound tournamentRound = tournamentRoundService.getRound(id);
         if (isNull(tournamentRound)) {
             log.debug("^ Tournament round with requested id {} was not found. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id);
