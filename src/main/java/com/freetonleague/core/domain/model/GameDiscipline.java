@@ -28,7 +28,8 @@ public class GameDiscipline extends ExtendedBaseEntity {
     @Column(name = "description")
     private String description;
 
-    @OneToMany(mappedBy = "gameDiscipline", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "gameDiscipline", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     List<GameDisciplineSettings> gameDisciplineSettings;
 
     @Column(name = "logo_file_name")

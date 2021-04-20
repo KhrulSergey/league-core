@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -15,7 +16,9 @@ public class TournamentMatchDto extends TournamentMatchBaseDto {
     @NotNull
     private Long tournamentSeriesId;
 
-    private Set<TournamentMatchRivalDto> rivalList;
+    @ApiModelProperty(readOnly = true)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Set<TournamentMatchRivalDto> matchRivalList;
 
     private TournamentMatchRivalDto matchWinner;
 }

@@ -75,7 +75,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     private void tryMakeStatusUpdateOperations(Tournament tournament) {
-        log.debug("^ try to determinate events for tournament: {}", tournament.getId());
+        log.debug("^ try to define events for tournament: {}", tournament.getId());
         final TournamentStatusType tournamentStatus = tournament.getStatus();
 
         if (tournamentStatus.isBefore(TournamentStatusType.SIGN_UP)

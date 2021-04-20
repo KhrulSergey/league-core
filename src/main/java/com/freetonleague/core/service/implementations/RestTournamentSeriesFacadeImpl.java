@@ -3,20 +3,18 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentSeriesMapper;
-import com.freetonleague.core.service.RestTournamentFacade;
-import com.freetonleague.core.service.RestTournamentSeriesService;
+import com.freetonleague.core.service.RestTournamentRoundFacade;
+import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.TournamentSeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
@@ -33,7 +31,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesService {
+public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacade {
 
     private final TournamentSeriesService tournamentSeriesService;
     private final TournamentSeriesMapper tournamentSeriesMapper;
@@ -41,7 +39,7 @@ public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesServ
 
     @Lazy
     @Autowired
-    private RestTournamentFacade restTournamentFacade;
+    private RestTournamentRoundFacade restTournamentRoundFacade;
 
     /**
      * Returns founded tournament series by id
@@ -52,23 +50,14 @@ public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesServ
         return tournamentSeriesMapper.toDto(tournamentSeries);
     }
 
-    /**
-     * Returns list of all tournament series filtered by requested params
-     */
-    @Override
-    public Page<TournamentSeriesDto> getSeriesList(Pageable pageable, long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
-        return tournamentSeriesService.getSeriesList(pageable, tournament).map(tournamentSeriesMapper::toDto);
-    }
-
-    /**
-     * Returns current active series for tournament
-     */
-    @Override
-    public TournamentSeriesDto getActiveSeriesForTournament(long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
-        return tournamentSeriesMapper.toDto(tournamentSeriesService.getActiveSeriesForTournament(tournament));
-    }
+//    /**
+//     * Returns list of all tournament series filtered by requested params
+//     */
+//    @Override
+//    public Page<TournamentSeriesDto> getSeriesList(Pageable pageable, long tournamentId, User user) {
+//        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
+//        return tournamentSeriesService.getSeriesList(pageable, tournament).map(tournamentSeriesMapper::toDto);
+//    }
 
     /**
      * Add new tournament series
@@ -89,20 +78,20 @@ public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesServ
         return tournamentSeriesMapper.toDto(newTournamentSeries);
     }
 
-    /**
-     * Generate next active series for tournament.
-     */
-    //TODO make available only for orgs
-    @Override
-    public void generateSeriesForTournament(long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
-        boolean result = tournamentSeriesService.generateSeriesForTournament(tournament);
-        if (!result) {
-            log.error("!> error while generated tournament series list for tournament id {} with user {}.", tournamentId, user);
-            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR,
-                    "Tournament series was not generated and saved on Portal. Check requested params.");
-        }
-    }
+//    /**
+//     * Generate next active series for tournament.
+//     */
+//    //TODO make available only for orgs
+//    @Override
+//    public void generateSeriesForTournament(long tournamentId, User user) {
+//        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
+//        boolean result = tournamentSeriesService.generateSeriesForTournament(tournament);
+//        if (!result) {
+//            log.error("!> error while generated tournament series list for tournament id {} with user {}.", tournamentId, user);
+//            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR,
+//                    "Tournament series was not generated and saved on Portal. Check requested params.");
+//        }
+//    }
 
     /**
      * Edit tournament series.
@@ -116,7 +105,11 @@ public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesServ
                     "parameter 'tournamentSeriesDto.id' is not match specified id in parameters for editSeries");
         }
         TournamentSeries tournamentSeries = this.getVerifiedSeriesByDto(tournamentSeriesDto, user);
-
+        if (tournamentSeries.getStatus() == TournamentStatusType.DELETED) {
+            log.warn("~ tournament series deleting was declined in editSeries. This operation should be done with specific method.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_STATUS_DELETE_ERROR,
+                    "Modifying tournament series was rejected. Check requested params and method.");
+        }
         tournamentSeries = tournamentSeriesService.editSeries(tournamentSeries);
         if (isNull(tournamentSeries)) {
             log.error("!> error while editing tournament series from dto {} for user {}.", tournamentSeriesDto, user);
@@ -174,13 +167,13 @@ public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesServ
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournamentSeriesDto",
                     "parameter 'tournamentSeriesDto' is not set for get or modify tournament series");
         }
-        if (isNull(tournamentSeriesDto.getTournamentId())) {
-            log.warn("~ parameter 'tournament id' is not set in tournamentSeriesDto for getVerifiedSeriesByDto");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournament settings",
-                    "parameter 'tournament id' is not set in tournamentSeriesDto for get or modify tournament series");
+        if (isNull(tournamentSeriesDto.getTournamentRoundId())) {
+            log.warn("~ parameter 'tournament round id' is not set in tournamentSeriesDto for getVerifiedSeriesByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournament round id",
+                    "parameter 'tournament round id' is not set in tournamentSeriesDto for get or modify tournament series");
         }
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentSeriesDto.getTournamentId(),
-                user, true);
+        TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId(),
+                user);
 
         Set<ConstraintViolation<TournamentSeriesDto>> settingsViolations = validator.validate(tournamentSeriesDto);
         if (!settingsViolations.isEmpty()) {
@@ -188,14 +181,16 @@ public class RestTournamentSeriesServiceImpl implements RestTournamentSeriesServ
                     tournamentSeriesDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
+        TournamentSeries tournamentSeries = tournamentSeriesMapper.fromDto(tournamentSeriesDto);
 
         //Check existence of tournament series and it's status
         if (nonNull(tournamentSeriesDto.getId())) {
-            getVerifiedSeriesById(tournamentSeriesDto.getId(), user);
+            TournamentSeries existedSeries = getVerifiedSeriesById(tournamentSeriesDto.getId(), user);
+            tournamentSeries.setParentSeriesList(existedSeries.getParentSeriesList());
+            tournamentSeries.setMatchList(existedSeries.getMatchList());
         }
-        TournamentSeries tournamentSeries = tournamentSeriesMapper.fromDto(tournamentSeriesDto);
-        tournamentSeries.setTournament(tournament);
 
+        tournamentSeries.setTournamentRound(tournamentRound);
         return tournamentSeries;
     }
 }

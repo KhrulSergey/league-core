@@ -20,6 +20,7 @@ public interface TournamentMatchMapper {
     @Named(value = "toBaseDto")
     TournamentMatchBaseDto toBaseDto(TournamentMatch entity);
 
+    @Named(value = "toDto")
     @IterableMapping(qualifiedByName = "toDto")
     List<TournamentMatchDto> toDto(List<TournamentMatch> entities);
 

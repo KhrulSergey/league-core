@@ -1,13 +1,18 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.enums.TournamentRoundType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -15,27 +20,29 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(schema = "public", name = "tournament_matches")
-@SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_matches_id_seq", schema = "public", allocationSize = 1)
-public class TournamentMatch extends ExtendedBaseEntity {
+@Table(schema = "public", name = "tournament_rounds")
+@SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_rounds_id_seq", schema = "public", allocationSize = 1)
+public class TournamentRound extends ExtendedBaseEntity {
 
+    @NotNull
     @Column(name = "name")
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
-    @JoinColumn(name = "series_id")
-    private TournamentSeries tournamentSeries;
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")
+    private Tournament tournament;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<TournamentMatchRival> rivals;
+    @OneToMany(mappedBy = "tournamentRound", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<TournamentSeries> seriesList;
 
     /**
-     * Winner of current (finished) match. If null - then there were a dead heat
+     * Position of round for current tournament
      */
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "winner_match_rival_id")
-    private TournamentMatchRival matchWinner;
+    @NotNull
+    @Min(1)
+    @Column(name = "round_number")
+    private Integer roundNumber;
 
     @NotNull
     @Column(name = "status")
@@ -45,15 +52,10 @@ public class TournamentMatch extends ExtendedBaseEntity {
     @Transient
     private TournamentStatusType prevStatus;
 
-    // TODO Delete column until 01/09/2021 if no use
-    /**
-     * Not usable field
-     */
-    @Transient
-    @Getter(AccessLevel.NONE)
-    @Setter(AccessLevel.NONE)
+    @NotNull
     @Column(name = "type")
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private TournamentRoundType type;
 
     @Column(name = "start_planned_at")
     private LocalDateTime startPlannedDate;
@@ -73,4 +75,3 @@ public class TournamentMatch extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 }
-

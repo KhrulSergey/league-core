@@ -8,7 +8,7 @@ import com.freetonleague.core.domain.model.User;
 
 import java.util.Set;
 
-public interface RestTournamentMatchRivalService {
+public interface RestTournamentMatchRivalFacade {
 
     /**
      * Returns founded tournament match by id

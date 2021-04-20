@@ -29,6 +29,13 @@ import java.util.List;
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_match_rival_participant_id_seq", schema = "public", allocationSize = 1)
 public class TournamentMatchRivalParticipant extends ExtendedBaseEntity {
 
+    public TournamentMatchRivalParticipant(TournamentMatchRival tournamentMatchRival,
+                                           TournamentTeamParticipant tournamentTeamParticipant) {
+        this.tournamentMatchRival = tournamentMatchRival;
+        this.tournamentTeamParticipant = tournamentTeamParticipant;
+        this.status = TournamentMatchRivalParticipantStatusType.ACTIVE;
+    }
+
     /**
      * Reference to tournament match rival (team)
      */
@@ -54,5 +61,6 @@ public class TournamentMatchRivalParticipant extends ExtendedBaseEntity {
     @Type(type = "jsonb")
     @Column(name = "indicators", columnDefinition = "jsonb")
     private List<GameDisciplineIndicatorDto> participantIndicator;
+
 }
 

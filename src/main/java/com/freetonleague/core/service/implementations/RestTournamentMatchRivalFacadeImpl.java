@@ -32,7 +32,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchRivalService {
+public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRivalFacade {
 
     private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentService tournamentService;
@@ -43,7 +43,7 @@ public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchR
 
     @Lazy
     @Autowired
-    private RestTournamentMatchService restTournamentMatchService;
+    private RestTournamentMatchFacade restTournamentMatchFacade;
 
     /**
      * Returns founded tournament match by id
@@ -82,7 +82,7 @@ public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchR
                     "parameter 'rivalParticipantList' set empty in request for editMatchRivalParticipant");
         }
         // find Match and Rival entities
-        TournamentMatch tournamentMatch = restTournamentMatchService.getVerifiedMatchById(matchId, user);
+        TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId, user);
         TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(rivalId, user);
         TournamentTeamProposal tournamentTeamProposal = tournamentMatchRival.getTeamProposal();
 
@@ -94,7 +94,7 @@ public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchR
                     "parameter 'rivalId' is not match by id to Tournament Match with 'matchId' for editMatchRivalParticipant");
         }
         // Check if current user is not Captain of specified MatchRival or is not Organizer of specified Match
-        if (!tournamentService.isUserTournamentOrganizer(tournamentMatch.getTournamentSeries().getTournament(), user)
+        if (!tournamentService.isUserTournamentOrganizer(tournamentMatch.getTournamentSeries().getTournamentRound().getTournament(), user)
                 || !tournamentTeamProposal.getTeam().isCaptain(user)) {
             log.warn("~ forbiddenException for manage active match participants from rivalId {} for user {}.",
                     rivalId, user);

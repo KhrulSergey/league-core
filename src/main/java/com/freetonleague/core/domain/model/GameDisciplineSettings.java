@@ -2,10 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -39,6 +36,14 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "game_discipline_id")
     private GameDiscipline gameDiscipline;
+
+    /**
+     * Count of rivals to fight in match
+     */
+    @NotNull
+    @Builder.Default
+    @Column(name = "match_rival_count")
+    private Integer matchRivalCount = 2;
 
     /**
      * Hash map of indicators with optimal values

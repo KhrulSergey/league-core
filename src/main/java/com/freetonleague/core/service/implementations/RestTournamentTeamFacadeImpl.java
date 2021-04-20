@@ -105,7 +105,6 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     /**
      * Getting participant by TournamentTeamParticipantDto, verify team membership
      */
-    //TODO check all fields
     public TournamentTeamParticipant getVerifiedTournamentTeamParticipantByDto(TournamentTeamParticipantDto tournamentTeamParticipantDto, TournamentTeamProposal tournamentTeamProposal) {
         return this.getVerifiedTournamentTeamParticipantById(tournamentTeamParticipantDto.getId(), tournamentTeamProposal);
     }

@@ -151,6 +151,14 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     /**
+     * Returns "active" statuses for tournaments
+     */
+    @Override
+    public List<TournamentStatusType> getTournamentActiveStatusList() {
+        return activeStatusList;
+    }
+
+    /**
      * Validate tournament parameters and settings to modify
      */
     private boolean verifyTournament(Tournament tournament) {

@@ -1,7 +1,8 @@
 package com.freetonleague.core.domain.enums;
 
-public enum TournamentSeriesType {
+public enum TournamentRoundType {
 
+    DEFAULT,
     QUALIFICATION,
     QUARTER_FINAL,
     SEMI_FINAL,
