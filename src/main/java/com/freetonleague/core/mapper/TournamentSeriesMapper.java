@@ -10,12 +10,13 @@ import java.util.List;
 import java.util.Set;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = TournamentMatchMapper.class)
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {TournamentMatchMapper.class, TournamentTeamMapper.class})
 public interface TournamentSeriesMapper {
     TournamentSeries fromDto(TournamentSeriesDto dto);
 
     @Mapping(target = "tournamentRoundId", source = "entity.tournamentRound.id")
     @Mapping(target = "matchList", source = "entity.matchList", qualifiedByName = "toDto")
+    @Mapping(target = "teamProposalList", source = "entity.teamProposalList", qualifiedByName = "toDtoList")
     @Named(value = "toDto")
     TournamentSeriesDto toDto(TournamentSeries entity);
 
