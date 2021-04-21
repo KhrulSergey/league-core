@@ -14,11 +14,11 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
- * Model of team on current match
+ * Model of team on series of matches
+ * entity to have ref to teamProposal & tournamentSeries
+ * (all other fields doesn't make critical sense on 18/04/2021)
  */
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -27,26 +27,24 @@ import java.util.stream.Collectors;
 @Setter
 @Entity
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
-@Table(schema = "public", name = "tournament_match_rivals")
-@SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_match_rivals_id_seq", schema = "public", allocationSize = 1)
-public class TournamentMatchRival extends ExtendedBaseEntity {
+@Table(schema = "public", name = "tournament_series_rivals")
+@SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_series_rivals_id_seq", schema = "public", allocationSize = 1)
+public class TournamentSeriesRival extends ExtendedBaseEntity {
 
-    /**
-     * List of team participants on current match
-     */
-    @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentMatchRival", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    Set<TournamentMatchRivalParticipant> rivalParticipants;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "match_id")
-    private TournamentMatch tournamentMatch;
+    @JoinColumn(name = "series_id")
+    private TournamentSeries tournamentSeries;
     /**
      * Reference to team on tournament
      */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_proposal_id")
     private TournamentTeamProposal teamProposal;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "parent_series_id")
+    private TournamentSeries parentTournamentSeries;
 
     @NotNull
     @Column(name = "status")
@@ -57,17 +55,17 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
     private TournamentMatchRivalParticipantStatusType prevStatus;
 
     /**
-     * Indicators (score) of team on current match
+     * Indicators (score) of team on current series
      */
     @Type(type = "jsonb")
     @Column(name = "indicators", columnDefinition = "jsonb")
-    private List<GameDisciplineIndicatorDto> matchIndicator;
+    private List<GameDisciplineIndicatorDto> seriesIndicatorList;
 
     /**
      * Won place in the match
      */
-    @Column(name = "place_in_match")
-    private Integer placeInMatch;
+    @Column(name = "won_place_in_series")
+    private Integer wonPlaceInSeries;
 
     public void setStatus(TournamentMatchRivalParticipantStatusType status) {
         prevStatus = this.status;
@@ -76,12 +74,6 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
 
     public boolean isStatusChanged() {
         return !this.status.equals(this.prevStatus);
-    }
-
-    public void setRivalParticipantsFromTournamentTeamParticipant(Set<TournamentTeamParticipant> tournamentTeamParticipants) {
-        rivalParticipants = tournamentTeamParticipants.parallelStream()
-                .map(p -> new TournamentMatchRivalParticipant(this, p))
-                .collect(Collectors.toSet());
     }
 }
 

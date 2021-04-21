@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.model;
 
-import com.freetonleague.core.domain.enums.TournamentSeriesType;
+import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,16 +9,14 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
-import static java.lang.Math.toIntExact;
-import static java.util.Objects.nonNull;
-
+/**
+ * Entity to save collection of matches (one item in round tournament net)
+ */
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
@@ -34,19 +32,28 @@ public class TournamentSeries extends ExtendedBaseEntity {
     private String name;
 
     @ManyToOne
-    @JoinColumn(name = "tournament_id")
-    private Tournament tournament;
+    @JoinColumn(name = "tournament_round_id")
+    private TournamentRound tournamentRound;
 
-    @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentMatch> matchList;
 
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<TournamentSeriesRival> rivalList;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "winner_series_rival_id")
+    private TournamentSeriesRival seriesWinner;
+
     /**
-     * Position of all series for current tournament (round number)
+     * Bracket type for series
      */
     @NotNull
-    @Min(1)
-    @Column(name = "series_sequence_position")
-    private Integer seriesSequencePosition;
+    @Column(name = "type")
+    @Enumerated(EnumType.STRING)
+    private TournamentSeriesBracketType type;
 
     @NotNull
     @Column(name = "status")
@@ -56,24 +63,12 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @Transient
     private TournamentStatusType prevStatus;
 
-    @NotNull
-    @Column(name = "type")
-    @Enumerated(EnumType.STRING)
-    private TournamentSeriesType type;
-
-    /**
-     * How many match should be in current series
-     */
-    @NotNull
-    @Column(name = "goal_match_count")
-    private Integer goalMatchCount;
-
-    /**
-     * How many rivals should be in current series
-     */
-    @NotNull
-    @Column(name = "goal_match_rival_count")
-    private Integer goalMatchRivalCount;
+    @EqualsAndHashCode.Exclude
+    @ManyToMany(targetEntity = TournamentSeries.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "tournament_series_parents",
+            joinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "series_id", referencedColumnName = "id"))
+    private Set<TournamentSeries> parentSeriesList;
 
     @Column(name = "start_planned_at")
     private LocalDateTime startPlannedDate;
@@ -93,27 +88,28 @@ public class TournamentSeries extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 
-    public int teamProposalCount() {
-        int count = 0;
-        if (nonNull(matchList)) {
-            count = toIntExact(matchList.stream()
-                    .map(TournamentMatch::getRivals).filter(Objects::nonNull)
-                    .mapToInt(Set::size).count()
-            );
-        }
-        return count;
-    }
-
-    public int teamProposalParticipantCount() {
-        int count = 0;
-        if (nonNull(matchList)) {
-            count = toIntExact(matchList.stream()
-                    .map(TournamentMatch::getRivals).filter(Objects::nonNull)
-                    .flatMap(Set::stream).filter(Objects::nonNull)
-                    .map(TournamentMatchRival::getRivalParticipants)
-                    .mapToInt(Set::size).count()
-            );
-        }
-        return count;
-    }
+    //TODO нужно ли? Удалить до 01.05.2021
+//    public int teamProposalCount() {
+//        int count = 0;
+//        if (nonNull(matchList)) {
+//            count = toIntExact(matchList.stream()
+//                    .map(TournamentMatch::getRivals).filter(Objects::nonNull)
+//                    .mapToInt(Set::size).count()
+//            );
+//        }
+//        return count;
+//    }
+//
+//    public int teamProposalParticipantCount() {
+//        int count = 0;
+//        if (nonNull(matchList)) {
+//            count = toIntExact(matchList.stream()
+//                    .map(TournamentMatch::getRivals).filter(Objects::nonNull)
+//                    .flatMap(Set::stream).filter(Objects::nonNull)
+//                    .map(TournamentMatchRival::getRivalParticipants)
+//                    .mapToInt(Set::size).count()
+//            );
+//        }
+//        return count;
+//    }
 }

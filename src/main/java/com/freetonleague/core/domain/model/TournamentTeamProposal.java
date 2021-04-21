@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
 import lombok.EqualsAndHashCode;
@@ -11,6 +12,11 @@ import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.isNull;
+
 
 /**
  * Team proposal to participate in tournament
@@ -35,12 +41,12 @@ public class TournamentTeamProposal extends BaseEntity {
     private Tournament tournament;
 
     /**
-     * Status of team participation in tournament
+     * State of team participation in tournament
      */
     @NotNull
-    @Column(name = "status")
+    @Column(name = "state")
     @Enumerated(EnumType.STRING)
-    private TournamentTeamStateType status;
+    private TournamentTeamStateType state;
 
     /**
      * Type of team that participate in tournament
@@ -53,6 +59,19 @@ public class TournamentTeamProposal extends BaseEntity {
     /**
      * Team participant list with their role (status) in tournament
      */
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
+
+    @Transient
+    private Set<TournamentTeamParticipant> mainTournamentTeamParticipantList;
+
+    public Set<TournamentTeamParticipant> getMainTournamentTeamParticipantList() {
+        if (isNull(mainTournamentTeamParticipantList)) {
+            mainTournamentTeamParticipantList = tournamentTeamParticipantList.parallelStream()
+                    .filter(p -> p.getStatus() == TournamentTeamParticipantStatusType.MAIN)
+                    .collect(Collectors.toSet());
+        }
+        return mainTournamentTeamParticipantList;
+    }
 }

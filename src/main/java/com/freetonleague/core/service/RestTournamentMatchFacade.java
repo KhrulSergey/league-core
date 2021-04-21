@@ -7,7 +7,7 @@ import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface RestTournamentMatchService {
+public interface RestTournamentMatchFacade {
 
     /**
      * Returns founded tournament match by id

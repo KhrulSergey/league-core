@@ -6,10 +6,13 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchMapper;
-import com.freetonleague.core.service.RestTournamentMatchService;
-import com.freetonleague.core.service.RestTournamentSeriesService;
+import com.freetonleague.core.service.RestTournamentMatchFacade;
+import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.TournamentMatchService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +36,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class RestTournamentMatchServiceImpl implements RestTournamentMatchService {
+public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade {
 
     private final TournamentMatchService tournamentMatchService;
     private final TournamentMatchMapper tournamentMatchMapper;
@@ -41,7 +44,7 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
 
     @Lazy
     @Autowired
-    private RestTournamentSeriesService restTournamentSeriesService;
+    private RestTournamentSeriesFacade restTournamentSeriesFacade;
 
     /**
      * Returns founded tournament match by id
@@ -56,7 +59,7 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
      */
     @Override
     public Page<TournamentMatchDto> getMatchList(Pageable pageable, long tournamentSeriesId, User user) {
-        TournamentSeries tournamentSeries = restTournamentSeriesService.getVerifiedSeriesById(tournamentSeriesId, user);
+        TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(tournamentSeriesId, user);
         return tournamentMatchService.getMatchList(pageable, tournamentSeries).map(tournamentMatchMapper::toDto);
     }
 
@@ -93,6 +96,12 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
                     "parameter 'tournamentMatchDto.id' is not match specified id in parameters for editMatch");
         }
         TournamentMatch tournamentMatch = this.getVerifiedTournamentMatchByDto(tournamentMatchDto, user);
+
+        if (tournamentMatch.getStatus() == TournamentStatusType.DELETED) {
+            log.warn("~ tournament match deleting was declined in editMatch. This operation should be done with specific method.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_DELETE_ERROR,
+                    "Modifying tournament match was rejected. Check requested params and method.");
+        }
 
         tournamentMatch = tournamentMatchService.editMatch(tournamentMatch);
         if (isNull(tournamentMatch)) {
@@ -135,7 +144,7 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "tournament series id",
                     "parameter 'tournament series id' is not set in tournamentMatchDto for get or modify tournament series");
         }
-        TournamentSeries tournamentSeries = restTournamentSeriesService.getVerifiedSeriesById(
+        TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(
                 tournamentMatchDto.getTournamentSeriesId(), user);
 
         Set<ConstraintViolation<TournamentMatchDto>> settingsViolations = validator.validate(tournamentMatchDto);
@@ -163,10 +172,6 @@ public class RestTournamentMatchServiceImpl implements RestTournamentMatchServic
      */
     @Override
     public TournamentMatch getVerifiedMatchById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedMatchById' in RestTournamentMatchService request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedMatchById' request denied");
-        }
         TournamentMatch tournamentMatch = tournamentMatchService.getMatch(id);
         if (isNull(tournamentMatch)) {
             log.debug("^ Tournament match with requested id {} was not found. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id);

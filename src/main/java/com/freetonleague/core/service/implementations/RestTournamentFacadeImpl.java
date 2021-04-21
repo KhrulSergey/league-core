@@ -73,8 +73,8 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<TournamentBaseDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
-        return tournamentService.getTournamentList(pageable, null, statusList).map(tournamentMapper::toBaseDto);
+    public Page<TournamentDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
+        return tournamentService.getTournamentList(pageable, null, statusList).map(tournamentMapper::toDto);
     }
 
     /**

@@ -65,15 +65,25 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_ORGANIZER_NOT_FOUND_ERROR = "Tournament organizer was not found. Please check request parameters";
     public static final String TOURNAMENT_ORGANIZER_VALIDATION_ERROR = "Tournament organizer was specified with errors. Please check request parameters";
 
+    public static final String TOURNAMENT_ROUND_NOT_FOUND_ERROR = "Tournament round was not found. Please check request parameters";
+    public static final String TOURNAMENT_ROUND_DISABLE_ERROR = "Tournament round is not active and modification forbidden. Please contact to organizers.";
+    public static final String TOURNAMENT_ROUND_CREATION_ERROR = "Tournament round creation failed. Please try again";
+    public static final String TOURNAMENT_ROUND_STATUS_DELETE_ERROR = "Tournament round delete should be done with specific request. Please try again with other method.";
+    public static final String TOURNAMENT_ROUND_MODIFICATION_ERROR = "Tournament round modifying failed. Please try again";
+    public static final String TOURNAMENT_ROUND_GENERATION_ERROR = "Tournament round generation failed. Please try again";
+    public static final String TOURNAMENT_ROUND_VALIDATION_ERROR = "Tournament round was specified with errors. Please check request parameters";
+
     public static final String TOURNAMENT_SERIES_NOT_FOUND_ERROR = "Tournament series was not found. Please check request parameters";
     public static final String TOURNAMENT_SERIES_DISABLE_ERROR = "Tournament series is not active and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_SERIES_CREATION_ERROR = "Tournament series creation failed. Please try again";
     public static final String TOURNAMENT_SERIES_MODIFICATION_ERROR = "Tournament series modifying failed. Please try again";
+    public static final String TOURNAMENT_SERIES_STATUS_DELETE_ERROR = "Tournament series delete should be done with specific request. Please try again with other method.";
     public static final String TOURNAMENT_SERIES_GENERATION_ERROR = "Tournament series generation failed. Please try again";
     public static final String TOURNAMENT_SERIES_VALIDATION_ERROR = "Tournament series was specified with errors. Please check request parameters";
 
     public static final String TOURNAMENT_MATCH_CREATION_ERROR = "Tournament match creation failed. Please try again";
     public static final String TOURNAMENT_MATCH_NOT_FOUND_ERROR = "Tournament match was not found. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_STATUS_DELETE_ERROR = "Tournament match delete should be done with specific request. Please try again with other method.";
     public static final String TOURNAMENT_MATCH_MODIFICATION_ERROR = "Tournament match modifying failed. Please try again";
     public static final String TOURNAMENT_MATCH_DISABLE_ERROR = "Tournament match is not active and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_MATCH_VALIDATION_ERROR = "Tournament match was specified with errors. Please check request parameters";

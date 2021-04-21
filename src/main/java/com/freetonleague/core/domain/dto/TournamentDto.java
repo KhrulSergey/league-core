@@ -18,8 +18,8 @@ public class TournamentDto extends TournamentBaseDto {
 
     //Detailed settings
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonIgnoreProperties("matchList")
-    private List<TournamentSeriesDto> tournamentSeriesList;
+    @JsonIgnoreProperties("seriesList")
+    private List<TournamentRoundDto> tournamentRoundList;
 
     private List<TournamentWinnerDto> winnerTeamProposal;
 }

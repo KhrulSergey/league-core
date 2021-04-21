@@ -6,7 +6,10 @@ import com.freetonleague.core.domain.dto.TournamentMatchRivalParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.model.*;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchRivalMapper;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
@@ -32,18 +35,17 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchRivalService {
+public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRivalFacade {
 
     private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentService tournamentService;
     private final TournamentMatchRivalMapper tournamentMatchRivalMapper;
-    private final RestTeamParticipantFacade teamParticipantFacade;
     private final RestTournamentTeamFacade restTournamentTeamFacade;
     private final Validator validator;
 
     @Lazy
     @Autowired
-    private RestTournamentMatchService restTournamentMatchService;
+    private RestTournamentMatchFacade restTournamentMatchFacade;
 
     /**
      * Returns founded tournament match by id
@@ -82,7 +84,7 @@ public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchR
                     "parameter 'rivalParticipantList' set empty in request for editMatchRivalParticipant");
         }
         // find Match and Rival entities
-        TournamentMatch tournamentMatch = restTournamentMatchService.getVerifiedMatchById(matchId, user);
+        TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId, user);
         TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(rivalId, user);
         TournamentTeamProposal tournamentTeamProposal = tournamentMatchRival.getTeamProposal();
 
@@ -94,7 +96,7 @@ public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchR
                     "parameter 'rivalId' is not match by id to Tournament Match with 'matchId' for editMatchRivalParticipant");
         }
         // Check if current user is not Captain of specified MatchRival or is not Organizer of specified Match
-        if (!tournamentService.isUserTournamentOrganizer(tournamentMatch.getTournamentSeries().getTournament(), user)
+        if (!tournamentService.isUserTournamentOrganizer(tournamentMatch.getTournamentSeries().getTournamentRound().getTournament(), user)
                 || !tournamentTeamProposal.getTeam().isCaptain(user)) {
             log.warn("~ forbiddenException for manage active match participants from rivalId {} for user {}.",
                     rivalId, user);
@@ -149,10 +151,6 @@ public class RestTournamentMatchRivalServiceImpl implements RestTournamentMatchR
      */
     @Override
     public TournamentMatchRival getVerifiedMatchRivalById(long id, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedMatchRivalById' request denied");
-        }
         TournamentMatchRival tournamentMatchRival = tournamentMatchRivalService.getMatchRival(id);
         if (isNull(tournamentMatchRival)) {
             log.debug("^ Tournament rival with requested id {} was not found. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied", id);
