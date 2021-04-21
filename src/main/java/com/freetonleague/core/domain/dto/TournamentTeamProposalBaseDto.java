@@ -13,9 +13,13 @@ import lombok.experimental.SuperBuilder;
 @Data
 public class TournamentTeamProposalBaseDto {
 
+    private Integer id;
+
+    private Long tournamentId;
+
     private TeamBaseDto team;
 
-    private TournamentTeamStateType status;
+    private TournamentTeamStateType state;
 
     private TournamentTeamType type;
 }

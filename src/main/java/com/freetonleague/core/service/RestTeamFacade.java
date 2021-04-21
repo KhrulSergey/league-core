@@ -87,5 +87,5 @@ public interface RestTeamFacade {
     /**
      * Getting team by id and user with privacy check
      */
-    Team getVerifiedTeamById(long id, User user);
+    Team getVerifiedTeamById(long id, User user, boolean checkUser);
 }

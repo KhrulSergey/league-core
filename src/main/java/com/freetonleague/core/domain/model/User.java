@@ -53,6 +53,7 @@ public class User extends BaseEntity  implements UserDetails {
     private UserStatusType status;
 
     @JsonIgnore
+    @EqualsAndHashCode.Exclude
     @ToString.Exclude
     @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;

@@ -77,4 +77,8 @@ public interface TournamentService {
      */
     List<TournamentStatusType> getTournamentActiveStatusList();
 
+    /**
+     * Returns "started" statuses for tournaments
+     */
+    List<TournamentStatusType> getTournamentStartedStatusList();
 }

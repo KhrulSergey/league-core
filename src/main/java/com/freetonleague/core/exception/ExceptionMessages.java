@@ -96,6 +96,16 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_MATCH_RIVAL_PARTICIPANT_VALIDATION_ERROR = "Tournament match rival participant was specified with errors. Please check request parameters";
     public static final String TOURNAMENT_MATCH_RIVAL_PARTICIPANT_BANNED_ERROR = "Team participant was banned for this match. Request for activate participant in match was rejected. Please contact to organizers.";
 
+    public static final String TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR = "Tournament team proposal was not found. Please check request parameters";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR = "Tournament team proposal already existed. Creation duplicates is prohibited";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR = "Need proper team status to manage team proposals to tournaments. Please check your rights.";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR = "Quit from specified tournament is prohibited. Request is rejected. Please contact to organizers to get more information.";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_VISIBLE_ERROR = "Tournament team proposal is not visible and modification forbidden. Please contact to organizers.";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_VALIDATION_ERROR = "Tournament team proposal was specified with errors. Please check request parameters";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR = "Team can't participate in specified tournament. Please check team participants, account balance or contact to organizers";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR = "Tournament team proposal creation failed. Please try again";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR = "Tournament team proposal modifying failed. Please try again";
+
     public static final String TOURNAMENT_TEAM_PARTICIPANT_VALIDATION_ERROR = "Tournament team participant was specified with errors. Please check request parameters";
     public static final String TOURNAMENT_TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Tournament team participant was not found. Please check request parameters";
 }

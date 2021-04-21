@@ -48,6 +48,9 @@ public class Team extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TeamStateType status;
 
+    @Transient
+    private String accountId;
+
     public boolean isCaptain(User user) {
         return captain.getUser().equals(user);
     }

@@ -58,7 +58,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         }
         GameDisciplineSettings gameDisciplineSettings = tournament.getGameDisciplineSettings();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
-        List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalByTournament(tournament);
+        List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament);
         Integer matchRivalCountLimit = gameDisciplineSettings.getMatchRivalCount();
         Integer matchCountPerSeries = tournamentSettings.getMatchCountPerSeries();
 

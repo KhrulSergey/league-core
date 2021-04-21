@@ -48,6 +48,9 @@ public class TournamentTeamProposal extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TournamentTeamStateType state;
 
+    @Transient
+    private TournamentTeamStateType prevState;
+
     /**
      * Type of team that participate in tournament
      */
@@ -73,5 +76,14 @@ public class TournamentTeamProposal extends BaseEntity {
                     .collect(Collectors.toSet());
         }
         return mainTournamentTeamParticipantList;
+    }
+
+    public void setState(TournamentTeamStateType state) {
+        prevState = this.state;
+        this.state = state;
+    }
+
+    public boolean isStateChanged() {
+        return !this.state.equals(this.prevState);
     }
 }
