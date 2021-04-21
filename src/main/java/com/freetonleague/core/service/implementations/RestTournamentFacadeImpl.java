@@ -45,7 +45,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      */
     @Override
     public TournamentDto getTournament(long id, User user) {
-        return tournamentMapper.toDto(this.getVerifiedTournamentById(id, user, true));
+        return tournamentMapper.toDto(this.getVerifiedTournamentById(id, user, false));
     }
 
     /**
