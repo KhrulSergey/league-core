@@ -1,10 +1,10 @@
 package com.freetonleague.core.service.implementations;
 
 
+import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.TournamentMatch;
-import com.freetonleague.core.domain.model.TournamentRound;
-import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
+import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentSeriesRepository;
 import com.freetonleague.core.service.TournamentMatchService;
 import com.freetonleague.core.service.TournamentSeriesService;
@@ -16,8 +16,12 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -82,10 +86,47 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             return null;
         }
         log.debug("^ trying to modify tournament series {}", tournamentSeries);
+        if (tournamentSeries.getStatus().isFinished()) {
+            tournamentSeries.setFinishedDate(LocalDateTime.now());
+            tournamentSeries.setSeriesWinner(calculateSeriesWinner(tournamentSeries));
+        }
         if (tournamentSeries.isStatusChanged()) {
             this.handleTournamentSeriesStatusChanged(tournamentSeries);
         }
         return tournamentSeriesRepository.save(tournamentSeries);
+    }
+
+    private TournamentSeriesRival calculateSeriesWinner(TournamentSeries tournamentSeries) {
+        Map<TournamentTeamProposal, Long> matchRivalWinnerMap = tournamentSeries.getMatchList().parallelStream()
+                .filter(m -> m.getStatus().isFinished()).map(TournamentMatch::getMatchWinner)
+                .collect(Collectors.groupingBy(TournamentMatchRival::getTeamProposal, Collectors.counting()));
+
+        Long max = matchRivalWinnerMap.values().stream().max(Comparator.naturalOrder()).orElse(null);
+        if (isNull(max)) {
+            log.error("!> requesting calculateSeriesWinner tournament series winner {} for non-existed rival with advantage score. Check evoking clients",
+                    tournamentSeries.getId());
+            return null;
+        }
+        Map.Entry<TournamentTeamProposal, Long> matchRivalWinnerEntry = tournamentSeries.getMatchList().parallelStream()
+                .filter(m -> m.getStatus().isFinished())
+                .map(TournamentMatch::getMatchWinner)
+                .collect(Collectors.groupingBy(TournamentMatchRival::getTeamProposal, Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue()).orElse(null);
+
+        if (isNull(matchRivalWinnerEntry) || isNull(matchRivalWinnerEntry.getKey())) {
+            log.error("!> requesting calculateSeriesWinner tournament series winner {} for non-existed rival with advantage score. Check evoking clients",
+                    tournamentSeries.getId());
+            return null;
+        }
+        return TournamentSeriesRival.builder()
+                .parentTournamentSeries(tournamentSeries)
+                .tournamentSeries(null)
+                .wonPlaceInSeries(TournamentWinnerPlaceType.FIRST)
+                .status(TournamentMatchRivalParticipantStatusType.ACTIVE)
+                .teamProposal(matchRivalWinnerEntry.getKey())
+                .build();
     }
 
     /**

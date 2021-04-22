@@ -110,7 +110,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
                     tournamentMatchRival.getId());
             return false;
         }
-        Set<TournamentMatchRivalParticipant> tournamentMatchRivalParticipants = tournamentMatchRival.getRivalParticipants();
+        Set<TournamentMatchRivalParticipant> tournamentMatchRivalParticipants = tournamentMatchRival.getRivalParticipantList();
         if (nonNull(tournamentMatchRivalParticipants)) {
             for (TournamentMatchRivalParticipant matchRivalParticipant : tournamentMatchRivalParticipants) {
                 if (!this.verifyTournamentRivalParticipant(matchRivalParticipant)) {

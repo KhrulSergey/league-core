@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.nonNull;
+
 /**
  * Entity to save collection of matches (one item in round tournament net)
  */
@@ -44,7 +46,8 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<TournamentSeriesRival> rivalList;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @EqualsAndHashCode.Exclude
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "winner_series_rival_id")
     private TournamentSeriesRival seriesWinner;
 
@@ -91,9 +94,14 @@ public class TournamentSeries extends ExtendedBaseEntity {
 
 
     public Set<TournamentTeamProposal> getTeamProposalList() {
-        return rivalList.parallelStream()
+        return nonNull(rivalList) ? rivalList.parallelStream()
                 .map(TournamentSeriesRival::getTeamProposal)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toSet())
+                : null;
+    }
+
+    public TournamentTeamProposal getTeamProposalWinner() {
+        return nonNull(seriesWinner) ? seriesWinner.getTeamProposal() : null;
     }
 
     //TODO нужно ли? Удалить до 01.05.2021

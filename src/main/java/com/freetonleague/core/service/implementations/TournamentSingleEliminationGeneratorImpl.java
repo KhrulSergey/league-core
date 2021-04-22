@@ -197,7 +197,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                         tournamentMatchRivalList.add(this.generateMatchRival(tournamentMatch, teamProposal));
                     });
         }
-        tournamentMatch.setRivals(tournamentMatchRivalList);
+        tournamentMatch.setMatchRivalList(tournamentMatchRivalList);
         return tournamentMatch;
     }
 

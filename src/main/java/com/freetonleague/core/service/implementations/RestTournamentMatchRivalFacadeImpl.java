@@ -84,7 +84,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                     "parameter 'rivalParticipantList' set empty in request for editMatchRivalParticipant");
         }
         // find Match and Rival entities
-        TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId, user);
+        TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId, user, true);
         TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(rivalId, user);
         TournamentTeamProposal tournamentTeamProposal = tournamentMatchRival.getTeamProposal();
 
@@ -109,7 +109,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                 .map(p -> restTournamentTeamFacade.getVerifiedTournamentTeamParticipantByDto(p, tournamentTeamProposal))
                 .filter(Objects::nonNull).collect(Collectors.toList());
 
-        Set<TournamentMatchRivalParticipant> currentTournamentMatchRivalParticipants = tournamentMatchRival.getRivalParticipants();
+        Set<TournamentMatchRivalParticipant> currentTournamentMatchRivalParticipants = tournamentMatchRival.getRivalParticipantList();
         // Collect new tournamentMatchRivalParticipants from specified tournamentTeamParticipants
         TournamentMatchRival finalTournamentMatchRival = tournamentMatchRival;
         Set<TournamentMatchRivalParticipant> newTournamentMatchRivalParticipants = tournamentTeamParticipants.parallelStream()
@@ -126,7 +126,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         }
 
         // Save new match rival Participant composition
-        tournamentMatchRival.setRivalParticipants(newTournamentMatchRivalParticipants);
+        tournamentMatchRival.setRivalParticipantList(newTournamentMatchRivalParticipants);
         tournamentMatchRival = tournamentMatchRivalService.editMatchRival(tournamentMatchRival);
         if (isNull(tournamentMatchRival)) {
             log.error("!> error while editing ActiveMatchRivalParticipants for matchId {}, rivalId {}, size of new rival participant {}, for user {}.",
@@ -157,6 +157,36 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_NOT_FOUND_ERROR, "Tournament rival with requested id " + id + " was not found");
         }
 
+        return tournamentMatchRival;
+    }
+
+    /**
+     * Returns tournament rival by dto and user with privacy check
+     */
+    //TODO verify fileds for check embedded entities rivalParticipantList, tournamentMatchId, teamProposalId
+    @Override
+    public TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto, User user) {
+        if (isNull(matchRivalDto)) {
+            log.warn("~ parameter 'matchRivalDto' is NULL for getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchRivalDto",
+                    "parameter 'matchRivalDto' is not set for get or modify tournament match rival");
+        }
+        Set<ConstraintViolation<TournamentMatchRivalDto>> settingsViolations = validator.validate(matchRivalDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament match rival dto: {} have constraint violations: {}",
+                    matchRivalDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+        TournamentMatchRival tournamentMatchRival = null;
+        if (nonNull(matchRivalDto.getId())) {
+            tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId(), user);
+            if (!matchRivalDto.getTournamentMatchId().equals(tournamentMatchRival.getTournamentMatch().getId())) {
+                log.warn("~ parameter 'matchRivalDto.tournamentMatchId' isn't fit existed ref from matchRival to match. " +
+                        "Request to change reference from matchRival to other match is prohibited in getVerifiedMatchRivalByDto");
+                throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "matchRivalDto.tournamentMatchId",
+                        "parameter 'tournament organizer' is not match by id to tournament for getVerifiedMatchRivalByDto");
+            }
+        }
         return tournamentMatchRival;
     }
 

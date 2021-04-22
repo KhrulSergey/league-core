@@ -28,7 +28,7 @@ public class TeamParticipant extends BaseEntity {
     @JoinColumn(name = "league_id", referencedColumnName = "league_id", nullable = false)
     private User user;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "team_id", unique = true)
     private Team team;
 

@@ -115,7 +115,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
         }
         TournamentRound tournamentRound = this.getVerifiedRoundByDto(tournamentRoundDto, user);
 
-        if (tournamentRound.getStatus() == TournamentStatusType.DELETED) {
+        if (tournamentRound.getStatus().isDeleted()) {
             log.warn("~ tournament round deleting was declined in editRound. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_STATUS_DELETE_ERROR,
                     "Modifying tournament round was rejected. Check requested params and method.");
@@ -156,7 +156,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
             log.debug("^ Tournament round with requested id {} was not found. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_NOT_FOUND_ERROR, "Tournament series  with requested id " + id + " was not found");
         }
-        if (tournamentRound.getStatus() == TournamentStatusType.DELETED) {
+        if (tournamentRound.getStatus().isDeleted()) {
             log.debug("^ Tournament round with requested id {} was {}. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id, tournamentRound.getStatus());
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_DISABLE_ERROR, "Active tournament round with requested id " + id + " was not found");
         }

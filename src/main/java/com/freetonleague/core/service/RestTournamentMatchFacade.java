@@ -59,11 +59,11 @@ public interface RestTournamentMatchFacade {
     /**
      * Returns tournament match by DTO, with validation, business logic and user with privacy check
      */
-    TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto, User user);
+    TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto, User user, boolean checkUser);
 
     /**
      * Returns tournament match by id and user with privacy check
      */
-    TournamentMatch getVerifiedMatchById(long id, User user);
+    TournamentMatch getVerifiedMatchById(long id, User user, boolean checkUser);
 
 }

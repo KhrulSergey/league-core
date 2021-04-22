@@ -77,6 +77,7 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_SERIES_DISABLE_ERROR = "Tournament series is not active and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_SERIES_CREATION_ERROR = "Tournament series creation failed. Please try again";
     public static final String TOURNAMENT_SERIES_MODIFICATION_ERROR = "Tournament series modifying failed. Please try again";
+    public static final String TOURNAMENT_SERIES_STATUS_FINISHED_ERROR = "Tournament tournament series can be finished only automatically when all match is finished. Request to set status was rejected.";
     public static final String TOURNAMENT_SERIES_STATUS_DELETE_ERROR = "Tournament series delete should be done with specific request. Please try again with other method.";
     public static final String TOURNAMENT_SERIES_GENERATION_ERROR = "Tournament series generation failed. Please try again";
     public static final String TOURNAMENT_SERIES_VALIDATION_ERROR = "Tournament series was specified with errors. Please check request parameters";
@@ -84,6 +85,7 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_MATCH_CREATION_ERROR = "Tournament match creation failed. Please try again";
     public static final String TOURNAMENT_MATCH_NOT_FOUND_ERROR = "Tournament match was not found. Please check request parameters";
     public static final String TOURNAMENT_MATCH_STATUS_DELETE_ERROR = "Tournament match delete should be done with specific request. Please try again with other method.";
+    public static final String TOURNAMENT_MATCH_STATUS_FINISHED_ERROR = "Tournament match can be finished only with setting the winner of the match. Please try to set match winner and finished status simultaneously.";
     public static final String TOURNAMENT_MATCH_MODIFICATION_ERROR = "Tournament match modifying failed. Please try again";
     public static final String TOURNAMENT_MATCH_DISABLE_ERROR = "Tournament match is not active and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_MATCH_VALIDATION_ERROR = "Tournament match was specified with errors. Please check request parameters";

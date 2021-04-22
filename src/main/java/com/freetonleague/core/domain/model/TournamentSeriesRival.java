@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -32,7 +33,7 @@ import java.util.List;
 public class TournamentSeriesRival extends ExtendedBaseEntity {
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
     /**
@@ -65,7 +66,8 @@ public class TournamentSeriesRival extends ExtendedBaseEntity {
      * Won place in the match
      */
     @Column(name = "won_place_in_series")
-    private Integer wonPlaceInSeries;
+    @Enumerated(EnumType.ORDINAL)
+    private TournamentWinnerPlaceType wonPlaceInSeries;
 
     public void setStatus(TournamentMatchRivalParticipantStatusType status) {
         prevStatus = this.status;
