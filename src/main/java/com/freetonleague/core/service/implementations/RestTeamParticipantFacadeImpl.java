@@ -56,7 +56,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
      */
     @Override
     public List<TeamInviteRequestDto> getInviteList(long teamId, User user) {
-        Team team = restTeamFacade.getVerifiedTeamById(teamId, user);
+        Team team = restTeamFacade.getVerifiedTeamById(teamId, user, true);
         if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for getting invite list for user {} from team {}.", user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
@@ -98,7 +98,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
      */
     @Override
     public TeamInviteRequestDto createInvite(long teamId, User currentUser, String username, String leagueId) {
-        Team team = restTeamFacade.getVerifiedTeamById(teamId, currentUser);
+        Team team = restTeamFacade.getVerifiedTeamById(teamId, currentUser, true);
         TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, currentUser);
         //check participation status
         if (isNull(teamParticipant) || !participantStatusAccessibleToInvite.contains(teamParticipant.getStatus())) {

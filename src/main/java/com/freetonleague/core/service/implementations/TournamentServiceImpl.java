@@ -39,6 +39,12 @@ public class TournamentServiceImpl implements TournamentService {
             TournamentStatusType.PAUSE
     );
 
+    private final List<TournamentStatusType> startedStatusList = List.of(
+            TournamentStatusType.STARTED,
+            TournamentStatusType.PAUSE,
+            TournamentStatusType.FINISHED
+    );
+
     /**
      * Returns founded tournament by id
      */
@@ -79,6 +85,7 @@ public class TournamentServiceImpl implements TournamentService {
     public List<Tournament> getAllActiveTournament() {
         return tournamentRepository.findAllActive(activeStatusList);
     }
+
 
     /**
      * Add new tournament to DB.
@@ -156,6 +163,14 @@ public class TournamentServiceImpl implements TournamentService {
     @Override
     public List<TournamentStatusType> getTournamentActiveStatusList() {
         return activeStatusList;
+    }
+
+    /**
+     * Returns "started" statuses for tournaments
+     */
+    @Override
+    public List<TournamentStatusType> getTournamentStartedStatusList() {
+        return startedStatusList;
     }
 
     /**

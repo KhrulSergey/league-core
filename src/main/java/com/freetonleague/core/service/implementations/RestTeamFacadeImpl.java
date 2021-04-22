@@ -45,7 +45,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      */
     @Override
     public TeamBaseDto getTeamById(long id, User user) {
-        Team team = this.getVerifiedTeamById(id, user);
+        Team team = this.getVerifiedTeamById(id, user, true);
         TeamBaseDto teamDto;
         if (nonNull(teamService.getUserParticipantStatusOfTeam(team, user))) {
             teamDto = teamMapper.toExtendedDto(team);
@@ -117,7 +117,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      */
     @Override
     public TeamExtendedDto editTeam(long id, TeamBaseDto teamDto, User user) {
-        Team team = this.getVerifiedTeamById(id, user);
+        Team team = this.getVerifiedTeamById(id, user, true);
         Set<ConstraintViolation<TeamBaseDto>> violations = validator.validate(teamDto);
         if (!violations.isEmpty()) {
             log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
@@ -143,7 +143,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      */
     @Override
     public TeamExtendedDto expel(long id, long participantId, User user) {
-        Team team = this.getVerifiedTeamById(id, user);
+        Team team = this.getVerifiedTeamById(id, user, true);
         if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for expelling participant id {} team from team {} for user {}.",
                     participantId, team, user);
@@ -171,7 +171,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      */
     @Override
     public void disband(long id, User user) {
-        Team team = this.getVerifiedTeamById(id, user);
+        Team team = this.getVerifiedTeamById(id, user, true);
         if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for disband team {} for user {}.", team, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
@@ -184,7 +184,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      */
     @Override
     public void quitUserFromTeam(long id, User user) {
-        Team team = this.getVerifiedTeamById(id, user);
+        Team team = this.getVerifiedTeamById(id, user, true);
         TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, user);
         if (isNull(teamParticipant) || teamParticipant.getStatus() != TeamParticipantStatusType.ACTIVE) {
             log.warn("~ forbiddenException for quitting user {} from team {}.", user, team);
@@ -208,8 +208,9 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
     /**
      * Getting team by id and user with privacy check
      */
-    public Team getVerifiedTeamById(long id, User user) {
-        if (isNull(user)) {
+    @Override
+    public Team getVerifiedTeamById(long id, User user, boolean checkUser) {
+        if (checkUser && isNull(user)) {
             log.debug("^ user is not authenticate. 'getVerifiedTeamById' in RestTeamParticipantFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamById' request denied");
         }

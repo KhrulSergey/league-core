@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,7 +59,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         }
         GameDisciplineSettings gameDisciplineSettings = tournament.getGameDisciplineSettings();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
-        List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalByTournament(tournament);
+        List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament);
         Integer matchRivalCountLimit = gameDisciplineSettings.getMatchRivalCount();
         Integer matchCountPerSeries = tournamentSettings.getMatchCountPerSeries();
 
@@ -149,8 +150,8 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                 TournamentSeriesRival.builder()
                         .tournamentSeries(tournamentSeries)
                         .status(TournamentMatchRivalParticipantStatusType.ACTIVE)
-                        .parentTournamentSeries(parentSeriesList.iterator().next())
-                        .teamProposal(rivalCombinations.iterator().next())
+                        .parentTournamentSeries(nonNull(parentSeriesList) ? parentSeriesList.iterator().next() : null)
+                        .teamProposal(rival)
                         .build()
         ).collect(Collectors.toSet());
         tournamentSeries.setRivalList(rivalList);
