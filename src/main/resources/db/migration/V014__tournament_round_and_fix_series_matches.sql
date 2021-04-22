@@ -65,7 +65,7 @@ comment on column public.tournament_series_rivals.indicators is 'Matches indicat
 alter table if exists public.tournament_series
     add column IF NOT EXISTS tournament_round_id bigint
         constraint fk_tournament_round_id references public.tournament_rounds (id),
-    add column winner_series_rival_id            bigint
+    add column IF NOT EXISTS winner_series_rival_id bigint
         constraint fk_winner_series_rival_id references public.tournament_series_rivals (id),
     drop constraint if exists fk_tournament_id,
     drop column if exists tournament_id,
