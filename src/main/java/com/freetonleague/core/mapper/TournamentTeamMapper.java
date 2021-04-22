@@ -9,11 +9,13 @@ import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface TournamentTeamMapper {
 
+    @Named(value = "toDto")
     @Mapping(target = "tournamentId", source = "entity.tournament.id")
     @Mapping(target = "tournamentTeamParticipantList", source = "entity.tournamentTeamParticipantList", qualifiedByName = "toDtoList")
     TournamentTeamProposalDto toDto(TournamentTeamProposal entity);
@@ -35,4 +37,7 @@ public interface TournamentTeamMapper {
     @IterableMapping(qualifiedByName = "toDto")
     List<TournamentTeamParticipantDto> toDtoList(List<TournamentTeamParticipant> entity);
 
+    @Named(value = "toDtoList")
+    @IterableMapping(qualifiedByName = "toDto")
+    Set<TournamentTeamProposalDto> toDto(Set<TournamentTeamProposal> entity);
 }
