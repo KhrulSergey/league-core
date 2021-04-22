@@ -37,7 +37,7 @@ public class User extends BaseEntity  implements UserDetails {
     private UUID leagueId;
 
     @NotBlank
-    @Size(max = 25)
+    @Size(max = 32)
     @Column(name = "username", unique = true)
     private String username;
 

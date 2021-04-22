@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Entity to save collection of matches (one item in round tournament net)
@@ -86,6 +87,13 @@ public class TournamentSeries extends ExtendedBaseEntity {
 
     public boolean isStatusChanged() {
         return !this.status.equals(this.prevStatus);
+    }
+
+
+    public Set<TournamentTeamProposal> getTeamProposalList() {
+        return rivalList.parallelStream()
+                .map(TournamentSeriesRival::getTeamProposal)
+                .collect(Collectors.toSet());
     }
 
     //TODO нужно ли? Удалить до 01.05.2021

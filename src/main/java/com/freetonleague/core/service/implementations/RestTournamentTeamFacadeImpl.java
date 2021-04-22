@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Service-facade for managing tournament team proposal and team composition
@@ -253,9 +254,10 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
      */
     private void verifyBusinessLogicOnTeamToParticipateTournament(Tournament tournament, Team team,
                                                                   List<TournamentTeamParticipant> tournamentTeamParticipantList) {
-        if (isNull(team) || isNull(tournament)) {
-            log.error("!> requesting validateTeamToParticipateTournament for NULL team {} or NULL tournament {}. Check evoking clients",
-                    team, tournament);
+        if (isNull(team) || isNull(tournament) || isNull(tournamentTeamParticipantList) || tournamentTeamParticipantList.isEmpty()) {
+            log.error("!> requesting validateTeamToParticipateTournament for NULL team {} or NULL tournament {} " +
+                            "or BLANK tournamentTeamParticipantList {}. Check evoking clients",
+                    team, tournament, tournamentTeamParticipantList);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     "Team cant participate on tournament. Check requested params.");
         }
@@ -265,12 +267,13 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         if (tournamentTeamParticipantList.parallelStream()
                 .anyMatch(p -> {
                     lastTeamParticipant.set(p);
-                    return p.getUser().getDiscordId().isBlank();
+                    return isBlank(p.getUser().getDiscordId());
                 })) {
             log.warn("~ requesting validateTeamToParticipateTournament for team {} with participant without Discord reference. At least for {}",
                     team, lastTeamParticipant.get());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
-                    "Team cant participate on tournament. There are team participant without Discord reference. At least for " + lastTeamParticipant.get().getUser().getUsername());
+                    String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
+                            lastTeamParticipant.get().getUser().getUsername()));
         }
 
         if (tournament.getAccessType() == TournamentAccessType.PAID_ACCESS) {
