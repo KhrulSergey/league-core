@@ -59,6 +59,12 @@ public class TournamentSettings extends ExtendedBaseEntity {
     private Double prizeFund;
 
     /**
+     * Goal prize fund value. (info purpose only)
+     */
+    @Transient
+    private Double participateFee = 1.0;
+
+    /**
      * Schema of distribution prize fund between winners
      */
     @Type(type = "jsonb")
