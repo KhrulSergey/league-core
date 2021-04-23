@@ -1,6 +1,7 @@
 package com.freetonleague.core.controller;
 
 
+import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentRoundDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
@@ -39,6 +40,7 @@ public class TournamentRoundController {
         return new ResponseEntity<>(restTournamentRoundFacade.getRound(id, user), HttpStatus.OK);
     }
 
+    @ApiPageable
     @ApiOperation("Get round list info by tournament")
     @GetMapping(path = PATH_GET_LIST_BY_TOURNAMENT)
     public ResponseEntity<Page<TournamentRoundDto>> getRoundList(@PageableDefault Pageable pageable,

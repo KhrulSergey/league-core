@@ -1,5 +1,6 @@
 package com.freetonleague.core.controller;
 
+import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
@@ -69,6 +70,7 @@ public class TournamentTeamController {
         return new ResponseEntity<>(restTournamentTeamFacade.getProposalFromTeamForTournament(tournamentId, teamId, user), HttpStatus.OK);
     }
 
+    @ApiPageable
     @ApiOperation("Get team proposal list for tournament (for orgs and team - extended view)")
     @GetMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_GET_LIST_FOR_TOURNAMENT)
     public ResponseEntity<Page<TournamentTeamProposalBaseDto>> getTournamentProposalList(@PageableDefault Pageable pageable,

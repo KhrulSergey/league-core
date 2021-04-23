@@ -112,7 +112,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId(), user, true);
 
-        if (tournamentDto.getStatus() == TournamentStatusType.DELETED) {
+        if (tournamentDto.getStatus().isDeleted()) {
             log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
                     "Modifying tournament was rejected. Check requested params and method.");
@@ -178,7 +178,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
             log.debug("^ Tournament with requested id {} was not found. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_NOT_FOUND_ERROR, "Tournament with requested id " + id + " was not found");
         }
-        if (tournament.getStatus() == TournamentStatusType.DELETED) {
+        if (tournament.getStatus().isDeleted()) {
             log.debug("^ Tournament with requested id {} was {}. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id, tournament.getStatus());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_VISIBLE_ERROR, "Visible tournament with requested id " + id + " was not found");
         }

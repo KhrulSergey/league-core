@@ -67,6 +67,8 @@ public interface TournamentMatchService {
      */
     boolean isExistsTournamentMatchById(long id);
 
+    boolean isAllMatchesFinishedBySeries(TournamentSeries tournamentSeries);
+
     /**
      * Verify tournament match info with validation and business check
      */

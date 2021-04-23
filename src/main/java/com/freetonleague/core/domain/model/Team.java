@@ -31,12 +31,14 @@ public class Team extends BaseEntity {
     @Column(name = "name", unique = true)
     private String name;
 
+    @EqualsAndHashCode.Exclude
     @NotNull
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "captain_id", unique = true)
     private TeamParticipant captain;
 
-    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<TeamParticipant> participantList;
 
     //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
@@ -59,9 +61,9 @@ public class Team extends BaseEntity {
     public String toString() {
 
         String participantListString = (nonNull(participantList) && !participantList.isEmpty()) ?
-                ", participantList=" + participantList :
+                ", participantList size=" + participantList.size() :
                 "";
-        String capitanString = nonNull(captain) ? ", captain=" + captain : "";
+        String capitanString = nonNull(captain) ? ", captain participant id =" + captain.getId() : "";
         return "Team{" +
                 "name='" + name + '\'' +
                 capitanString +

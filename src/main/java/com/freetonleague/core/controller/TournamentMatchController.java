@@ -1,5 +1,6 @@
 package com.freetonleague.core.controller;
 
+import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentMatchDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
@@ -52,6 +53,7 @@ public class TournamentMatchController {
         return new ResponseEntity<>(restTournamentMatchFacade.addMatch(tournamentMatchDto, user), HttpStatus.CREATED);
     }
 
+    @ApiPageable
     @ApiOperation("Get matches list info by series")
     @GetMapping(path = PATH_GET_LIST_BY_SERIES)
     public ResponseEntity<Page<TournamentMatchDto>> getMatchList(@PageableDefault Pageable pageable,
