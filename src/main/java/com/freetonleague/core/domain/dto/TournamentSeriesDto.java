@@ -19,4 +19,8 @@ public class TournamentSeriesDto extends TournamentSeriesBaseDto {
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Set<TournamentTeamProposalDto> teamProposalList;
+
+    @ApiModelProperty(required = false, readOnly = true, notes = "The field is set automatically")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private TournamentTeamProposalBaseDto teamProposalWinner;
 }

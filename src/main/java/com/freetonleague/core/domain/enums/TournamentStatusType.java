@@ -24,4 +24,12 @@ public enum TournamentStatusType {
     public boolean isBefore(TournamentStatusType compare) {
         return this.sequencePosition < compare.getSequencePosition();
     }
+
+    public boolean isFinished() {
+        return this == FINISHED;
+    }
+
+    public boolean isDeleted() {
+        return this == DELETED;
+    }
 }

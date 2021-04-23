@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.repository.TournamentMatchRepository;
+import com.freetonleague.core.service.TournamentEventService;
 import com.freetonleague.core.service.TournamentMatchRivalService;
 import com.freetonleague.core.service.TournamentMatchService;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,7 +31,14 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
 
     private final TournamentMatchRepository tournamentMatchRepository;
     private final TournamentMatchRivalService tournamentMatchRivalService;
+    private final TournamentEventService tournamentEventService;
     private final Validator validator;
+
+    private final List<TournamentStatusType> finishedMatchStatusList = List.of(
+            TournamentStatusType.FINISHED,
+            TournamentStatusType.DECLINED,
+            TournamentStatusType.DELETED
+    );
 
     /**
      * Returns founded tournament match by id
@@ -91,10 +100,14 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
             return null;
         }
         log.debug("^ trying to modify tournament match {}", tournamentMatch);
+        if (tournamentMatch.getStatus().isFinished()) {
+            tournamentMatch.setFinishedDate(LocalDateTime.now());
+        }
+        tournamentMatch = tournamentMatchRepository.save(tournamentMatch);
         if (tournamentMatch.isStatusChanged()) {
             this.handleTournamentMatchStatusChanged(tournamentMatch);
         }
-        return tournamentMatchRepository.save(tournamentMatch);
+        return tournamentMatch;
     }
 
     /**
@@ -125,6 +138,19 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     }
 
     /**
+     * Returns sign of all match for series was finished.
+     */
+    @Override
+    public boolean isAllMatchesFinishedBySeries(TournamentSeries tournamentSeries) {
+        //TODO use it with EventService. Delete until 01/09/2021
+//        int finishedMatchCount = tournamentMatchRepository.countByTournamentSeriesAndStatusIn(
+//                tournamentSeries, this.finishedMatchStatusList);
+//        int allMatchCount = tournamentMatchRepository.countByTournamentSeries(tournamentSeries);
+        return tournamentSeries.getMatchList().parallelStream()
+                .map(TournamentMatch::getStatus).allMatch(this.finishedMatchStatusList::contains);
+    }
+
+    /**
      * Verify tournament match info with validation and business check
      */
     @Override
@@ -139,7 +165,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
                     tournamentMatch.getId(), tournamentMatch.getName());
             return false;
         }
-        Set<TournamentMatchRival> tournamentMatchRivals = tournamentMatch.getRivals();
+        Set<TournamentMatchRival> tournamentMatchRivals = tournamentMatch.getMatchRivalList();
         if (nonNull(tournamentMatchRivals)) {
             for (TournamentMatchRival matchRival : tournamentMatchRivals) {
                 if (!tournamentMatchRivalService.verifyTournamentMatchRival(matchRival)) {
@@ -158,6 +184,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     private void handleTournamentMatchStatusChanged(TournamentMatch tournamentMatch) {
         log.warn("~ status for tournament match id {} was changed from {} to {} ",
                 tournamentMatch.getId(), tournamentMatch.getPrevStatus(), tournamentMatch.getStatus());
+        tournamentEventService.processMatchStatusChange(tournamentMatch, tournamentMatch.getStatus());
         tournamentMatch.setPrevStatus(tournamentMatch.getStatus());
     }
 }

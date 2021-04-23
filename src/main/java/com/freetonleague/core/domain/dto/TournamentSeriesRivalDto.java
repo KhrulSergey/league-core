@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.dto;
 
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -24,5 +25,5 @@ public class TournamentSeriesRivalDto {
 
     private List<GameDisciplineIndicatorDto> seriesIndicatorList;
 
-    private Integer wonPlaceInSeries;
+    private TournamentWinnerPlaceType wonPlaceInSeries;
 }

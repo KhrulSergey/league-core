@@ -27,7 +27,7 @@ public class TournamentOrganizer extends ExtendedBaseEntity {
 
     //Properties
     @NotNull
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tournament_id", nullable = false)
     private Tournament tournament;
 

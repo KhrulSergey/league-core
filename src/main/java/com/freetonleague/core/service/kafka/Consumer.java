@@ -21,7 +21,7 @@ public class Consumer {
     private final String[] kafkaTopicList;
 
 
-    @KafkaListener(topics = "TOURNAMENT")
+    @KafkaListener(topics = {"TOURNAMENT", "TOURNAMENT_SERIES", "TOURNAMENT_MATCH"})
     public void handleEvent(final @Payload EventDto data,
                             final @Header(KafkaHeaders.OFFSET) Integer offset,
                             final @Header(KafkaHeaders.RECEIVED_MESSAGE_KEY) String key,

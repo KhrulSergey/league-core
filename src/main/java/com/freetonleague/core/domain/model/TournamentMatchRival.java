@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -36,7 +37,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
      */
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentMatchRival", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    Set<TournamentMatchRivalParticipant> rivalParticipants;
+    Set<TournamentMatchRivalParticipant> rivalParticipantList;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "match_id")
@@ -67,7 +68,8 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
      * Won place in the match
      */
     @Column(name = "place_in_match")
-    private Integer placeInMatch;
+    @Enumerated(EnumType.ORDINAL)
+    private TournamentWinnerPlaceType placeInMatch;
 
     public void setStatus(TournamentMatchRivalParticipantStatusType status) {
         prevStatus = this.status;
@@ -79,7 +81,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
     }
 
     public void setRivalParticipantsFromTournamentTeamParticipant(Set<TournamentTeamParticipant> tournamentTeamParticipants) {
-        rivalParticipants = tournamentTeamParticipants.parallelStream()
+        rivalParticipantList = tournamentTeamParticipants.parallelStream()
                 .map(p -> new TournamentMatchRivalParticipant(this, p))
                 .collect(Collectors.toSet());
     }

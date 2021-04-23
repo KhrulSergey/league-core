@@ -63,4 +63,9 @@ public interface RestTournamentMatchRivalFacade {
      * Returns tournament rival by id and user with privacy check
      */
     TournamentMatchRival getVerifiedMatchRivalById(long id, User user);
+
+    /**
+     * Returns tournament rival by dto and user with privacy check
+     */
+    TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto, User user);
 }

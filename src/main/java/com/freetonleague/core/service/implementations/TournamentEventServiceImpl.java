@@ -6,12 +6,14 @@ import com.freetonleague.core.domain.enums.EventOperationType;
 import com.freetonleague.core.domain.enums.EventProducerModelType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.service.EventService;
-import com.freetonleague.core.service.TournamentEventService;
-import com.freetonleague.core.service.TournamentService;
+import com.freetonleague.core.domain.model.TournamentMatch;
+import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +32,14 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final EventService eventService;
     private final TournamentService tournamentService;
+
+    @Lazy
+    @Autowired
+    private TournamentSeriesService tournamentSeriesService;
+
+    @Lazy
+    @Autowired
+    private TournamentMatchService tournamentMatchService;
 
     @Value("${freetonleague.tournament.auto-start:false}")
     private boolean tournamentAutoStartEnabled;
@@ -80,19 +90,19 @@ public class TournamentEventServiceImpl implements TournamentEventService {
 
         if (tournamentStatus.isBefore(TournamentStatusType.SIGN_UP)
                 && tournament.getSignUpStartDate().isBefore(LocalDateTime.now())) {
-            this.handleStatusChange(tournament, TournamentStatusType.SIGN_UP);
+            this.handleTournamentStatusChange(tournament, TournamentStatusType.SIGN_UP);
         } else if (tournamentStatus.isBefore(TournamentStatusType.ADJUSTMENT)
                 && tournament.getSignUpEndDate().isBefore(LocalDateTime.now())) {
-            this.handleStatusChange(tournament, TournamentStatusType.ADJUSTMENT);
+            this.handleTournamentStatusChange(tournament, TournamentStatusType.ADJUSTMENT);
         } else if (tournamentAutoStartEnabled && tournamentStatus.isBefore(TournamentStatusType.STARTED)
                 && tournament.getStartPlannedDate().isBefore(LocalDateTime.now())) {
-            this.handleStatusChange(tournament, TournamentStatusType.STARTED);
+            this.handleTournamentStatusChange(tournament, TournamentStatusType.STARTED);
         }
         log.debug("^ tournament {} with status {} were checked, and added to cache", tournament.getName(), tournament.getId());
         cachedTournamentId.add(tournament.getId());
     }
 
-    private void handleStatusChange(Tournament tournament, TournamentStatusType newTournamentStatus) {
+    private void handleTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentStatus) {
 
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentStatus,
@@ -116,5 +126,62 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
         tournament.setStatus(newTournamentStatus);
         tournamentService.editTournament(tournament);
+    }
+
+    /**
+     * Process match status changing
+     */
+    public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
+        this.handleMatchStatusChange(tournamentMatch, newTournamentMatchStatus);
+        // check all match is finished to finish the series
+        if (newTournamentMatchStatus.isFinished()
+                && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())) {
+            this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
+        }
+    }
+
+    private void handleSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
+        Map<String, Object> updateFields = Map.of(
+                "status", newTournamentSeriesStatus
+        );
+
+        EventDto event = EventDto.builder()
+                .id(UUID.randomUUID().toString())
+                .message("Change status of Tournament Series")
+                .eventOperationType(EventOperationType.UPDATE_FIELDS)
+                .eventTopic(EventProducerModelType.TOURNAMENT_MATCH)
+                .modelId(tournamentSeries.getId().toString())
+                .modelData(updateFields)
+                .createdDate(LocalDateTime.now())
+                .build();
+        try {
+            eventService.sendEvent(event);
+        } catch (Exception exc) {
+            log.error("Error in handleStatusChange: {}", exc.getMessage());
+        }
+        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
+        tournamentSeries.setStatus(newTournamentSeriesStatus);
+        tournamentSeriesService.editSeries(tournamentSeries);
+    }
+
+    private void handleMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
+        Map<String, Object> updateFields = Map.of(
+                "status", newTournamentMatchStatus
+        );
+
+        EventDto event = EventDto.builder()
+                .id(UUID.randomUUID().toString())
+                .message("Change status of Tournament Match")
+                .eventOperationType(EventOperationType.UPDATE_FIELDS)
+                .eventTopic(EventProducerModelType.TOURNAMENT_MATCH)
+                .modelId(tournamentMatch.getId().toString())
+                .modelData(updateFields)
+                .createdDate(LocalDateTime.now())
+                .build();
+        try {
+            eventService.sendEvent(event);
+        } catch (Exception exc) {
+            log.error("Error in handleStatusChange: {}", exc.getMessage());
+        }
     }
 }

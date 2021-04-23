@@ -3,7 +3,6 @@ package com.freetonleague.core.domain.dto;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
@@ -20,8 +19,6 @@ public class TournamentSeriesBaseDto {
 
     private Long tournamentRoundId;
 
-    private TournamentSeriesRival seriesWinner;
-
     @ApiModelProperty(required = true)
     @NotNull
     private TournamentSeriesBracketType type;
@@ -34,7 +31,7 @@ public class TournamentSeriesBaseDto {
 
     private LocalDateTime startDate;
 
-    @ApiModelProperty(required = false, readOnly = true)
+    @ApiModelProperty(required = false, readOnly = true, notes = "The field is set automatically")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime finishedDate;
 
