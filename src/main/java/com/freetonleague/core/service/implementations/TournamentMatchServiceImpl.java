@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -27,18 +28,13 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class TournamentMatchServiceImpl implements TournamentMatchService {
 
     private final TournamentMatchRepository tournamentMatchRepository;
     private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentEventService tournamentEventService;
     private final Validator validator;
-
-    private final List<TournamentStatusType> finishedMatchStatusList = List.of(
-            TournamentStatusType.FINISHED,
-            TournamentStatusType.DECLINED,
-            TournamentStatusType.DELETED
-    );
 
     /**
      * Returns founded tournament match by id
@@ -147,7 +143,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
 //                tournamentSeries, this.finishedMatchStatusList);
 //        int allMatchCount = tournamentMatchRepository.countByTournamentSeries(tournamentSeries);
         return tournamentSeries.getMatchList().parallelStream()
-                .map(TournamentMatch::getStatus).allMatch(this.finishedMatchStatusList::contains);
+                .map(TournamentMatch::getStatus).allMatch(TournamentStatusType.getFinishedStatusList()::contains);
     }
 
     /**
@@ -184,6 +180,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     private void handleTournamentMatchStatusChanged(TournamentMatch tournamentMatch) {
         log.warn("~ status for tournament match id {} was changed from {} to {} ",
                 tournamentMatch.getId(), tournamentMatch.getPrevStatus(), tournamentMatch.getStatus());
+        //TODO check all match to be finished
         tournamentEventService.processMatchStatusChange(tournamentMatch, tournamentMatch.getStatus());
         tournamentMatch.setPrevStatus(tournamentMatch.getStatus());
     }

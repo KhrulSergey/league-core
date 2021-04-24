@@ -1,7 +1,7 @@
 package com.freetonleague.core.domain.enums;
 
 public enum TournamentWinnerPlaceType {
-
+    NONE(0),
     FIRST(1),
     SECOND(2),
     THIRD(3),

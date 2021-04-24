@@ -21,5 +21,5 @@ public class TournamentDto extends TournamentBaseDto {
     @JsonIgnoreProperties("seriesList")
     private List<TournamentRoundDto> tournamentRoundList;
 
-    private List<TournamentWinnerDto> winnerTeamProposal;
+    private List<TournamentWinnerDto> tournamentWinnerList;
 }

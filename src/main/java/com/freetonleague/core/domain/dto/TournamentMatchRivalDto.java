@@ -20,5 +20,5 @@ public class TournamentMatchRivalDto extends TournamentMatchRivalBaseDto {
     private List<GameDisciplineIndicatorDto> matchIndicator;
 
     @ApiModelProperty(required = false)
-    private TournamentWinnerPlaceType placeInMatch;
+    private TournamentWinnerPlaceType wonPlaceInMatch;
 }

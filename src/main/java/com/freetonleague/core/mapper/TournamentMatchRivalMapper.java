@@ -23,6 +23,7 @@ public interface TournamentMatchRivalMapper {
     @Mapping(target = "tournamentMatchId", source = "entity.tournamentMatch.id")
     @Mapping(target = "teamProposalId", source = "entity.teamProposal.id")
     @Mapping(target = "rivalParticipantList", source = "entity.rivalParticipantList", qualifiedByName = "toParticipantDtoList")
+    @Mapping(target = "teamlId", source = "entity.teamProposal.team.id")
     TournamentMatchRivalDto toDto(TournamentMatchRival entity);
 
     @Named(value = "fromRivalDto")

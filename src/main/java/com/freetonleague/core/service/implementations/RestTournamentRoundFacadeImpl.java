@@ -94,7 +94,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     @Override
     public void generateRoundForTournament(long tournamentId, User user) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
-        boolean result = tournamentRoundService.generateRoundForTournament(tournament);
+        boolean result = tournamentRoundService.generateRoundListForTournament(tournament);
         if (!result) {
             log.error("!> error while generated tournament round list for tournament id {} with user {}.", tournamentId, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_GENERATION_ERROR,

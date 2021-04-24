@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
@@ -17,6 +18,11 @@ public class TournamentMatchBaseDto {
     @ApiModelProperty(required = true)
     @NotNull
     private TournamentStatusType status;
+
+    @ApiModelProperty(required = true)
+    @NotNull
+    @Min(1)
+    private Integer matchNumberInSeries;
 
     @ApiModelProperty(required = true)
     @NotNull

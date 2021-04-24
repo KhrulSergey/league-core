@@ -9,6 +9,7 @@ import com.freetonleague.core.service.TournamentMatchRivalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -20,6 +21,7 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalService {
 
     private final TournamentMatchRivalRepository tournamentMatchRivalRepository;
@@ -142,7 +144,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
         }
         Set<ConstraintViolation<TournamentMatchRivalParticipant>> violations = validator.validate(tournamentMatchRivalParticipant);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament rival participant id:{} with verifyTournamentRivalParticipant for tournament match with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify tournament rival participant id:{} with verifyTournamentRivalParticipant for tournament match rival with ConstraintViolations. Check evoking clients",
                     tournamentMatchRivalParticipant.getId());
             return false;
         }
