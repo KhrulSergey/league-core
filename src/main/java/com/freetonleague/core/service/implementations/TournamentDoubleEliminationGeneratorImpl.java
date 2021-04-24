@@ -32,4 +32,12 @@ public class TournamentDoubleEliminationGeneratorImpl implements TournamentGener
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
         return null;
     }
+
+    /**
+     * Compose series, matches and rivals for tournament round. Look to parents for series in specified tournamentRound and compose rivals.
+     */
+    @Override
+    public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
+        return null;
+    }
 }

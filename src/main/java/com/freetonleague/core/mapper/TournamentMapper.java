@@ -10,7 +10,8 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {GameDisciplineMapper.class, UserMapper.class, TournamentRoundMapper.class})
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {GameDisciplineMapper.class, UserMapper.class,
+        TournamentRoundMapper.class, TeamMapper.class})
 public interface TournamentMapper {
 
     //region Tournaments
@@ -20,6 +21,7 @@ public interface TournamentMapper {
     @Mapping(target = "gameDisciplineSettingsId", source = "entity.gameDisciplineSettings.id")
     @Mapping(target = "tournamentCreator", source = "entity.createdBy", qualifiedByName = "toDto")
     @Mapping(target = "tournamentRoundList", source = "entity.tournamentRoundList", qualifiedByName = "toDto")
+    @Mapping(target = "tournamentWinnerList", source = "entity.tournamentWinnerList", qualifiedByName = "toWinnerDtoList")
     @Named(value = "toDto")
     TournamentDto toDto(Tournament entity);
 
@@ -60,12 +62,17 @@ public interface TournamentMapper {
     List<TournamentOrganizerDto> toListOrganizersDto(List<TournamentOrganizer> entities);
     //endregion
 
+
     //region Tournament Winners
     TournamentWinner fromDto(TournamentWinnerDto dto);
 
     @Named(value = "toWinnerDto")
+    @Mapping(target = "team", source = "teamProposal.team", qualifiedByName = "toBaseDto")
+    @Mapping(target = "tournamentId", source = "tournament.id")
+    @Mapping(target = "teamProposalId", source = "teamProposal.id")
     TournamentWinnerDto toDto(TournamentWinner entity);
 
+    @Named(value = "toWinnerDtoList")
     @IterableMapping(qualifiedByName = "toWinnerDto")
     List<TournamentWinnerDto> toListWinnerDto(List<TournamentWinner> entities);
     //endregion

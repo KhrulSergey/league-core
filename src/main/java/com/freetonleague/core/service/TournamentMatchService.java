@@ -67,6 +67,9 @@ public interface TournamentMatchService {
      */
     boolean isExistsTournamentMatchById(long id);
 
+    /**
+     * Returns sign of all match for series was finished.
+     */
     boolean isAllMatchesFinishedBySeries(TournamentSeries tournamentSeries);
 
     /**

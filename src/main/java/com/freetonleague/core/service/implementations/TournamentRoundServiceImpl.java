@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.repository.TournamentRoundRepository;
+import com.freetonleague.core.service.TournamentEventService;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentRoundService;
 import lombok.RequiredArgsConstructor;
@@ -14,10 +15,14 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -26,9 +31,11 @@ import static java.util.Objects.nonNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
+@Transactional
 public class TournamentRoundServiceImpl implements TournamentRoundService {
 
     private final TournamentRoundRepository tournamentRoundRepository;
+    private final TournamentEventService tournamentEventService;
     private final Validator validator;
     private final List<TournamentStatusType> activeStatusList = List.of(
             TournamentStatusType.SIGN_UP,
@@ -95,7 +102,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
      * Generate tournament round list for specified tournament and save to DB.
      */
     @Override
-    public boolean generateRoundForTournament(Tournament tournament) {
+    public boolean generateRoundListForTournament(Tournament tournament) {
         if (isNull(tournament)) {
             log.error("!> requesting generateRoundForTournament for NULL tournament. Check evoking clients");
             return false;
@@ -112,14 +119,45 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             default:
                 break;
         }
-        log.debug("^ trying to save round and matches from generator with round list size {}",
-                nonNull(tournamentRoundList) ? tournamentRoundList.size() : null);
-        if (nonNull(tournamentRoundList)) {
-            tournamentRoundList.forEach(this::addRound);
-        } else {
+        if (isNull(tournamentRoundList)) {
+            log.error("!> error while generateRoundListForTournament. Check stack trace");
             return false;
         }
-        return true;
+        log.debug("^ trying to save round and matches from generator with round list size {}", tournamentRoundList.size());
+        return tournamentRoundList.stream().map(this::addRound).allMatch(Objects::nonNull);
+    }
+
+    /**
+     * Compose new matches and rivals for next round (fill existed prototypes of series).
+     */
+    @Override
+    public boolean composeNextRoundForTournament(Tournament tournament) {
+        if (isNull(tournament)) {
+            log.error("!> requesting composeNewRoundForTournament for NULL tournament. Check evoking clients");
+            return false;
+        }
+
+        TournamentRound tournamentRound = this.getNextOpenRoundForTournament(tournament);
+        if (isNull(tournamentRound)) {
+            log.error("!> requesting composeNewRoundForTournament for tournament with no existed open round for compose series. Check evoking clients");
+            return false;
+        }
+        switch (tournament.getSystemType()) {
+            case SINGLE_ELIMINATION:
+                tournamentRound = singleEliminationGenerator.composeNextRoundForTournament(tournamentRound);
+                break;
+            case DOUBLE_ELIMINATION:
+                tournamentRound = doubleEliminationGenerator.composeNextRoundForTournament(tournamentRound);
+                break;
+            default:
+                break;
+        }
+        if (isNull(tournamentRound)) {
+            log.error("!> error while composeNewRoundForTournament. Check stack trace");
+            return false;
+        }
+        log.debug("^ trying to save updated round with series, matches and rivals {}", tournamentRound);
+        return nonNull(this.editRound(tournamentRound));
     }
 
     /**
@@ -136,10 +174,22 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             return null;
         }
         log.debug("^ trying to modify tournament round {}", tournamentRound);
+        if (tournamentRound.getStatus().isFinished()) {
+            tournamentRound.setFinishedDate(LocalDateTime.now());
+        }
         if (tournamentRound.isStatusChanged()) {
             this.handleTournamentRoundStatusChanged(tournamentRound);
         }
         return tournamentRoundRepository.save(tournamentRound);
+    }
+
+    /**
+     * Returns sign of all series for round was finished.
+     */
+    @Override
+    public boolean isAllRoundsFinishedByTournament(Tournament tournament) {
+        return tournament.getTournamentRoundList().parallelStream()
+                .map(TournamentRound::getStatus).allMatch(TournamentStatusType.getFinishedStatusList()::contains);
     }
 
     /**
@@ -177,6 +227,23 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         return this.getActiveRoundForTournament(tournament).getRoundNumber();
     }
 
+    private TournamentRound getNextOpenRoundForTournament(Tournament tournament) {
+        if (isNull(tournament)) {
+            log.error("!> requesting getNextOpenRound for NULL tournament. Check evoking clients");
+            return null;
+        }
+        List<TournamentRound> tournamentRoundList = tournament.getTournamentRoundList();
+        if (isNull(tournamentRoundList) || tournamentRoundList.isEmpty()) {
+            log.error("!> requesting getNextOpenRound for EMPTY tournamentRoundList. Check evoking clients");
+            return null;
+        }
+        return tournamentRoundList.stream()
+                .sorted(Comparator.comparingInt(TournamentRound::getRoundNumber))
+                .filter(round -> round.getStatus().isCreated())
+                .findFirst()
+                .orElse(null);
+    }
+
     /**
      * Validate tournament parameters and settings to modify
      */
@@ -200,6 +267,8 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
     private void handleTournamentRoundStatusChanged(TournamentRound tournamentRound) {
         log.warn("~ status for tournament round id {} was changed from {} to {} ",
                 tournamentRound.getId(), tournamentRound.getPrevStatus(), tournamentRound.getStatus());
+        //TODO check all series to be finished
+        tournamentEventService.processRoundStatusChange(tournamentRound, tournamentRound.getStatus());
         tournamentRound.setPrevStatus(tournamentRound.getStatus());
     }
 }

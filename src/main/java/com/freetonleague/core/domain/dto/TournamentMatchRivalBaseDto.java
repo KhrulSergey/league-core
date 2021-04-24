@@ -16,4 +16,8 @@ public class TournamentMatchRivalBaseDto {
     @ApiModelProperty(required = false, notes = "No need to set team proposal id")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long teamProposalId;
+
+    @ApiModelProperty(required = false, notes = "No need to set team id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private Long teamlId;
 }

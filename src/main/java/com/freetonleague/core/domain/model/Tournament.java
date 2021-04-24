@@ -96,7 +96,7 @@ public class Tournament extends ExtendedBaseEntity {
      */
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<TournamentWinner> teamProposalWinnerList;
+    private List<TournamentWinner> tournamentWinnerList;
 
     //Base settings
     @Column(name = "discord_channel_name")
@@ -110,6 +110,9 @@ public class Tournament extends ExtendedBaseEntity {
 
     @Column(name = "start_planned_at")
     private LocalDateTime startPlannedDate;
+
+    @Column(name = "finished_at")
+    private LocalDateTime finishedDate;
 
     //Detailed settings
     @EqualsAndHashCode.Exclude

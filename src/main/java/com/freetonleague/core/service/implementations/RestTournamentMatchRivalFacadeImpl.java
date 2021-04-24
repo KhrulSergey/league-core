@@ -186,6 +186,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                 throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "matchRivalDto.tournamentMatchId",
                         "parameter 'tournament organizer' is not match by id to tournament for getVerifiedMatchRivalByDto");
             }
+            tournamentMatchRival.setWonPlaceInMatch(matchRivalDto.getWonPlaceInMatch());
         }
         return tournamentMatchRival;
     }
