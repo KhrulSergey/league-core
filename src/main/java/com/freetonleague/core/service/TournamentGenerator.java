@@ -16,4 +16,13 @@ public interface TournamentGenerator {
      * @return tournament series list with embedded list of match prototypes
      */
     List<TournamentRound> generateRoundsForTournament(Tournament tournament);
+
+    /**
+     * Compose series, matches and rivals for tournament round. Look to parents for series in specified tournamentRound and compose rivals.
+     * Tournament Round should open.
+     *
+     * @param tournamentRound to compose series for
+     * @return tournament round with embedded list of series and matches
+     */
+    TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound);
 }

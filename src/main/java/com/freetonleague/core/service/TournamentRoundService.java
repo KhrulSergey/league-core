@@ -46,7 +46,12 @@ public interface TournamentRoundService {
      * @param tournament to generate round for
      * @return Sign of round list was created
      */
-    boolean generateRoundForTournament(Tournament tournament);
+    boolean generateRoundListForTournament(Tournament tournament);
+
+    /**
+     * Compose new matches and rivals for next round (fill existed prototypes of series).
+     */
+    boolean composeNextRoundForTournament(Tournament tournament);
 
     /**
      * Edit tournament round in DB.
@@ -76,4 +81,9 @@ public interface TournamentRoundService {
      * Returns number of last active tournament round in specified tournament
      */
     int getLastActiveRoundNumberForTournament(Tournament tournament);
+
+    /**
+     * Returns sign of all rounds for tournament was finished.
+     */
+    boolean isAllRoundsFinishedByTournament(Tournament tournament);
 }

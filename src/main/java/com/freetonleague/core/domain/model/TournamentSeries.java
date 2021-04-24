@@ -92,7 +92,6 @@ public class TournamentSeries extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 
-
     public Set<TournamentTeamProposal> getTeamProposalList() {
         return nonNull(rivalList) ? rivalList.parallelStream()
                 .map(TournamentSeriesRival::getTeamProposal)
@@ -103,29 +102,4 @@ public class TournamentSeries extends ExtendedBaseEntity {
     public TournamentTeamProposal getTeamProposalWinner() {
         return nonNull(seriesWinner) ? seriesWinner.getTeamProposal() : null;
     }
-
-    //TODO нужно ли? Удалить до 01.05.2021
-//    public int teamProposalCount() {
-//        int count = 0;
-//        if (nonNull(matchList)) {
-//            count = toIntExact(matchList.stream()
-//                    .map(TournamentMatch::getRivals).filter(Objects::nonNull)
-//                    .mapToInt(Set::size).count()
-//            );
-//        }
-//        return count;
-//    }
-//
-//    public int teamProposalParticipantCount() {
-//        int count = 0;
-//        if (nonNull(matchList)) {
-//            count = toIntExact(matchList.stream()
-//                    .map(TournamentMatch::getRivals).filter(Objects::nonNull)
-//                    .flatMap(Set::stream).filter(Objects::nonNull)
-//                    .map(TournamentMatchRival::getRivalParticipants)
-//                    .mapToInt(Set::size).count()
-//            );
-//        }
-//        return count;
-//    }
 }

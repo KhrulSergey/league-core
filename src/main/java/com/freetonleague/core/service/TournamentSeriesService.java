@@ -71,4 +71,9 @@ public interface TournamentSeriesService {
      * @return true is tournament series exists, false - if not
      */
     boolean isExistsTournamentSeriesById(long id);
+
+    /**
+     * Returns sign of all series for round was finished.
+     */
+    boolean isAllSeriesFinishedByRound(TournamentRound tournamentRound);
 }

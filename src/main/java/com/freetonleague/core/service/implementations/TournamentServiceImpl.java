@@ -2,11 +2,9 @@ package com.freetonleague.core.service.implementations;
 
 
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.domain.model.TournamentSettings;
-import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
+import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentRepository;
-import com.freetonleague.core.repository.TournamentWinnersRepository;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,11 +14,16 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -28,7 +31,6 @@ import static java.util.Objects.nonNull;
 public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
-    private final TournamentWinnersRepository tournamentWinnersRepository;
     private final Validator validator;
 
     private final List<TournamentStatusType> activeStatusList = List.of(
@@ -65,7 +67,7 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to get tournament list with pageable params: {} and status list {}", pageable, statusList);
-        boolean filterByStatusEnabled = nonNull(statusList) && !statusList.isEmpty();
+        boolean filterByStatusEnabled = isNotEmpty(statusList);
         boolean filterByCreatorEnabled = nonNull(creatorUser);
 
         if (filterByStatusEnabled && filterByCreatorEnabled) {
@@ -112,10 +114,42 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to modify tournament {}", tournament);
+
+        if (tournament.getStatus().isFinished()) {
+            tournament.setFinishedDate(LocalDateTime.now());
+            List<TournamentWinner> tournamentWinnerList = this.getCalculatedTeamProposalWinnerList(tournament);
+            if (isEmpty(tournamentWinnerList)) {
+                log.error("!> requesting modify tournament id {} was canceled. Tournament winner was not defined or found. Check stack trace.",
+                        tournament.getId());
+                tournament.setStatus(TournamentStatusType.PAUSE);
+            }
+            tournament.setTournamentWinnerList(tournamentWinnerList);
+        }
         if (tournament.isStatusChanged()) {
             this.handleTournamentStatusChanged(tournament);
         }
         return tournamentRepository.save(tournament);
+    }
+
+    private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {
+        List<TournamentWinner> winnerTeamProposal = new ArrayList<>();
+        TournamentRound tournamentRound = tournament.getTournamentRoundList().stream()
+                .max(Comparator.comparingInt(TournamentRound::getRoundNumber))
+                .orElse(null);
+
+        if (isNull(tournamentRound) || isEmpty(tournamentRound.getSeriesList()) || tournamentRound.getSeriesList().size() > 1) {
+            log.error("!> requesting getCalculatedTeamProposalWinnerList for tournament {} " +
+                            "for non-existed rival with advantage score. Check evoking clients",
+                    tournament.getId());
+            return null;
+        }
+        TournamentSeriesRival winnerOfLastSeries = tournamentRound.getSeriesList().get(0).getSeriesWinner();
+        winnerTeamProposal.add(TournamentWinner.builder()
+                .winnerPlaceType(TournamentWinnerPlaceType.FIRST)
+                .tournament(tournament)
+                .teamProposal(winnerOfLastSeries.getTeamProposal())
+                .build());
+        return winnerTeamProposal;
     }
 
     /**

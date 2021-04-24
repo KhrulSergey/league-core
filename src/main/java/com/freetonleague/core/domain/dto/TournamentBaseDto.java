@@ -47,6 +47,8 @@ public class TournamentBaseDto {
 
     private LocalDateTime startPlannedDate;
 
+    private LocalDateTime finishedDate;
+
     @NotNull
     private Long gameDisciplineSettingsId;
 

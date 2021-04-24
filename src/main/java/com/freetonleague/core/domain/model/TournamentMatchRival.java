@@ -69,7 +69,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
      */
     @Column(name = "place_in_match")
     @Enumerated(EnumType.ORDINAL)
-    private TournamentWinnerPlaceType placeInMatch;
+    private TournamentWinnerPlaceType wonPlaceInMatch;
 
     public void setStatus(TournamentMatchRivalParticipantStatusType status) {
         prevStatus = this.status;

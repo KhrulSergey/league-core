@@ -7,6 +7,7 @@ import com.freetonleague.core.domain.enums.EventProducerModelType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentMatch;
+import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,10 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     @Lazy
     @Autowired
     private TournamentMatchService tournamentMatchService;
+
+    @Lazy
+    @Autowired
+    private TournamentRoundService tournamentRoundService;
 
     @Value("${freetonleague.tournament.auto-start:false}")
     private boolean tournamentAutoStartEnabled;
@@ -76,12 +81,58 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         }
     }
 
+    /**
+     * Process match status changing
+     */
+    @Override
+    public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
+        // check all match is finished to finish the series
+        if (newTournamentMatchStatus.isFinished()
+                && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())) {
+            this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
+        }
+    }
+
+    /**
+     * Process series status changing
+     */
+    @Override
+    public void processSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
+        // check all series is finished to finish the round
+        if (newTournamentSeriesStatus.isFinished()
+                && tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())) {
+            this.handleRoundStatusChange(tournamentSeries.getTournamentRound(), TournamentStatusType.FINISHED);
+        }
+    }
+
+    /**
+     * Process round status changing
+     */
+    @Override
+    public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
+        // check all rounds is finished to finish the tournament or to compose new round
+        if (newTournamentRoundStatus.isFinished()) {
+            if (tournamentRoundService.isAllRoundsFinishedByTournament(tournamentRound.getTournament())) {
+                this.handleTournamentStatusChange(tournamentRound.getTournament(), TournamentStatusType.FINISHED);
+            } else {
+                tournamentRoundService.composeNextRoundForTournament(tournamentRound.getTournament());
+            }
+        }
+    }
+
+    /**
+     * Process series dead head for rivals
+     */
+    @Override
+    public void processSeriesDeadHead(TournamentSeries tournamentSeries) {
+        log.error("!> We have a dead head in series {}. Create new match manually", tournamentSeries);
+    }
+
     private Map<Long, Tournament> getIdToTournamentMap() {
         return Collections.unmodifiableMap(
                 tournamentService.getAllActiveTournament()
                         .stream()
                         .collect(Collectors.toMap(Tournament::getId, tournament -> tournament)));
-
     }
 
     private void tryMakeStatusUpdateOperations(Tournament tournament) {
@@ -103,10 +154,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     private void handleTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentStatus) {
-
         Map<String, Object> updateFields = Map.of(
-                "status", newTournamentStatus,
-                "fundAccountId", "setKafka"
+                "status", newTournamentStatus
         );
 
         EventDto event = EventDto.builder()
@@ -119,7 +168,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .createdDate(LocalDateTime.now())
                 .build();
         try {
-            eventService.sendEvent(event);
+//            eventService.sendEvent(event);
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: {}", exc.getMessage());
         }
@@ -128,16 +177,28 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         tournamentService.editTournament(tournament);
     }
 
-    /**
-     * Process match status changing
-     */
-    public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
-        this.handleMatchStatusChange(tournamentMatch, newTournamentMatchStatus);
-        // check all match is finished to finish the series
-        if (newTournamentMatchStatus.isFinished()
-                && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())) {
-            this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
+    private void handleRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
+        Map<String, Object> updateFields = Map.of(
+                "status", newTournamentRoundStatus
+        );
+
+        EventDto event = EventDto.builder()
+                .id(UUID.randomUUID().toString())
+                .message("Change status of Tournament Round")
+                .eventOperationType(EventOperationType.UPDATE_FIELDS)
+                .eventTopic(EventProducerModelType.TOURNAMENT_ROUND)
+                .modelId(tournamentRound.getId().toString())
+                .modelData(updateFields)
+                .createdDate(LocalDateTime.now())
+                .build();
+        try {
+            eventService.sendEvent(event);
+        } catch (Exception exc) {
+            log.error("Error in handleStatusChange: {}", exc.getMessage());
         }
+        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
+        tournamentRound.setStatus(newTournamentRoundStatus);
+        tournamentRoundService.editRound(tournamentRound);
     }
 
     private void handleSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {

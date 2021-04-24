@@ -22,12 +22,12 @@ public class TournamentMatch extends ExtendedBaseEntity {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private Set<TournamentMatchRival> matchRivalList;
 
     /**
@@ -45,6 +45,10 @@ public class TournamentMatch extends ExtendedBaseEntity {
 
     @Transient
     private TournamentStatusType prevStatus;
+
+    @Builder.Default
+    @Column(name = "match_number_in_series")
+    private Integer matchNumberInSeries = 1;
 
     // TODO Delete column until 01/09/2021 if no use
     /**

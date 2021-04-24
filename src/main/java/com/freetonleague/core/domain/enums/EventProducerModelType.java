@@ -3,6 +3,7 @@ package com.freetonleague.core.domain.enums;
 
 public enum EventProducerModelType {
     TOURNAMENT("TOURNAMENT"),
+    TOURNAMENT_ROUND("TOURNAMENT_ROUND"),
     TOURNAMENT_SERIES("TOURNAMENT_SERIES"),
     TOURNAMENT_MATCH("TOURNAMENT_MATCH"),
     TEAM("TEAM"),

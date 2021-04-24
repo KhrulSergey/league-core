@@ -10,5 +10,7 @@ public class TournamentWinnerDto {
 
     private Long teamProposalId;
 
+    private TeamBaseDto team;
+
     private TournamentWinnerPlaceType winnerPlaceType;
 }
