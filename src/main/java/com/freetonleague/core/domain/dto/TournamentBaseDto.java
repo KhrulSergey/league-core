@@ -39,6 +39,7 @@ public class TournamentBaseDto {
     private TournamentSystemType systemType;
 
     //Base settings
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private String discordChannelName;
 
     private LocalDateTime signUpStartDate;

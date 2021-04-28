@@ -160,7 +160,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({AuthProviderConfigException.class, UserManageException.class,
             TeamManageException.class, TeamParticipantManageException.class, GameDisciplineManageException.class,
-            GameDisciplineSettingsManageException.class, TournamentManageException.class})
+            GameDisciplineSettingsManageException.class, TournamentManageException.class, FinancialUnitManageException.class})
     public ResponseEntity<Object> handleBaseDetailedException(BaseDetailedException ex, WebRequest request) {
         String debugMessage = enableDebugMessage() ? ex.getDetailedMessage() : null;
         List<String> errors = enableStackTrace && nonNull(ex.getCause()) ? Collections.singletonList(ex.getCause().toString()) : null;

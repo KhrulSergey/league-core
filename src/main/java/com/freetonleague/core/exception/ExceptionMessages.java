@@ -110,4 +110,12 @@ public class ExceptionMessages {
 
     public static final String TOURNAMENT_TEAM_PARTICIPANT_VALIDATION_ERROR = "Tournament team participant was specified with errors. Please check request parameters";
     public static final String TOURNAMENT_TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Tournament team participant was not found. Please check request parameters";
+
+    public static final String ACCOUNT_INFO_NOT_FOUND_ERROR = "Account info was not found. Please check request parameters";
+
+    //---//
+    public static final String FINANCE_UNIT_ACCOUNT_NOT_FOUND_ERROR = "Financial account was not found. Please check request parameters";
+    public static final String FINANCE_UNIT_ACCOUNT_CREATION_ERROR = "Financial account creation failed. Please try again";
+    public static final String FINANCE_UNIT_TRANSACTION_CREATION_ERROR = "Financial transation was not saved. Please check request parameters";
+    public static final String FINANCE_UNIT_TOKEN_VALIDATION_ERROR = "Specified token is not valid for operate with deposit transactions. Request denied";
 }

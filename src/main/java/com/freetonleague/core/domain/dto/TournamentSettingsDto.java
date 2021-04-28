@@ -27,6 +27,10 @@ public class TournamentSettingsDto {
 
     @NotNull
     @Min(0)
+    private Double participationFee;
+
+    @NotNull
+    @Min(0)
     private Integer minTeamCount;
 
     @Min(0)
