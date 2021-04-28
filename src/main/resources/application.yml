@@ -54,10 +54,20 @@ spring:
       ack-mode: manual_immediate
       idle-event-interval: 200000
 
+
+config:
+  broxus-client:
+    debug: false
+    url: http://49.12.10.52:3383
+    token: XXXXXXXXXXXXXXXXXXXXXXXXX
+
 freetonleague:
   service:
     leagueId:
       url: http://localhost:7700/api
+    leagueFinance:
+      access-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
+      balance-update-timeout-in-sec: 300
   team:
     invitation:
       token-duration-in-sec: 432000

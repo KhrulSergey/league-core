@@ -1,7 +1,6 @@
 package com.freetonleague.core.service;
 
 
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -69,15 +68,15 @@ public interface TournamentTeamService {
     List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament);
 
     /**
-     * Returns "started" statuses for tournaments
-     */
-    List<TournamentTeamStateType> getTournamentTeamProposalActiveStateList();
-
-    /**
      * Returns founded participant by id
      *
      * @param id of team to search
      * @return team entity
      */
     TournamentTeamParticipant getTournamentTeamParticipantById(long id);
+
+    /**
+     * Returns calculated participation fee for specified teamProposal
+     */
+    double calculateTeamParticipationFee(TournamentTeamProposal teamProposal);
 }

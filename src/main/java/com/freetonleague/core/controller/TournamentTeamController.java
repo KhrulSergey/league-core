@@ -44,7 +44,7 @@ public class TournamentTeamController {
     }
 
     @ApiOperation("Change team proposal to tournament by teamProposalId or by tournamentId + teamId (available edit only state, for orgs)")
-    @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_EDIT_TEAM_PROPOSAL)
+    @PutMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_EDIT_TEAM_PROPOSAL)
     public ResponseEntity<TournamentTeamProposalDto> editTeamProposal(@RequestParam(value = "tournament_id", required = false) Long tournamentId,
                                                                       @RequestParam(value = "team_id", required = false) Long teamId,
                                                                       @RequestParam(value = "team_poposal_id", required = false) Long teamProposalId,

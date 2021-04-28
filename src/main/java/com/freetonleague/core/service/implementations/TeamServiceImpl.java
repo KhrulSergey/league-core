@@ -6,10 +6,13 @@ import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TeamRepository;
+import com.freetonleague.core.service.TeamEventService;
 import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +35,10 @@ public class TeamServiceImpl implements TeamService {
     private final TeamParticipantService teamParticipantService;
     private final Validator validator;
 
+    @Lazy
+    @Autowired
+    private TeamEventService teamEventService;
+
     /**
      * Add new team to DB.
      */
@@ -43,7 +50,9 @@ public class TeamServiceImpl implements TeamService {
             return null;
         }
         log.debug("^ trying to add team in DB: {}", team);
-        return teamRepository.save(team);
+        team = teamRepository.save(team);
+        teamEventService.processTeamStatusChange(team, TeamStateType.CREATED);
+        return team;
     }
 
     /**

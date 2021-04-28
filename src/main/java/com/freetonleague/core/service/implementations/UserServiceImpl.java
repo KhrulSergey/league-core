@@ -8,6 +8,7 @@ import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.repository.UserRepository;
+import com.freetonleague.core.service.UserEventService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final LeagueIdClientService leagueIdClientService;
     private final Validator validator;
+    private final UserEventService userEventService;
 
     /**
      * Adding a new user to DB.
@@ -46,14 +48,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public User add(User user) {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        if (violations.isEmpty()) {
-            log.debug("^ User [ {} ] binding is successful", user);
-            user.setStatus(UserStatusType.ACTIVE);
-            return userRepository.saveAndFlush(user);
-        } else {
+        if (!violations.isEmpty()) {
             log.warn("~ User [ {} ] have constraint violations: {}", user, violations);
             throw new ConstraintViolationException(violations);
         }
+        log.debug("^ User [ {} ] binding is successful", user);
+        user.setStatus(UserStatusType.ACTIVE);
+        user = userRepository.saveAndFlush(user);
+        userEventService.processUserStatusChange(user, UserStatusType.CREATED);
+        return user;
     }
 
     /**
@@ -147,12 +150,14 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-    /** Add user to DB from LeagueId source data*/
-    private User add(UserDto userDto){
+    /**
+     * Add user to DB from LeagueId source data
+     */
+    private User add(UserDto userDto) {
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         if (violations.isEmpty()) {
             if (!isBlank(userDto.getUsername()) && this.isUserExistedByUserName(userDto.getUsername())) {
-                log.error("^ user with username already exists on core module: {} but with DIFFERENT guid. Check data!", userDto.getUsername());
+                log.error("^ user with username already exists on core module: {} but with DIFFERENT GUID. Check data!", userDto.getUsername());
                 throw new UserManageException(ExceptionMessages.USER_DUPLICATE_FOUND_ERROR,
                         String.format("Found duplicates by username '%s' on auth and data modules", userDto.getUsername()));
             }
@@ -163,7 +168,9 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /** Check if user already existed on platform*/
+    /**
+     * Check if user already existed on platform
+     */
     public boolean isUserExistedByUserName(String username) {
         return userRepository.existsByUsername(username);
     }

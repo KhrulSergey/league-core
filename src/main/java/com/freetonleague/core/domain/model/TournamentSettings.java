@@ -34,6 +34,10 @@ public class TournamentSettings extends ExtendedBaseEntity {
     private Double organizerCommission;
 
     @NotNull
+    @Column(name = "participation_fee")
+    private Double participationFee;
+
+    @NotNull
     @Builder.Default
     @Column(name = "min_team_count")
     private Integer minTeamCount = 2;
@@ -57,12 +61,6 @@ public class TournamentSettings extends ExtendedBaseEntity {
      */
     @Column(name = "prize_fund")
     private Double prizeFund;
-
-    /**
-     * Goal prize fund value. (info purpose only)
-     */
-    @Transient
-    private Double participateFee = 1.0;
 
     /**
      * Schema of distribution prize fund between winners

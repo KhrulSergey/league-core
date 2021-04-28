@@ -25,9 +25,9 @@ public class LeagueIdClientService {
                 sessionFromLeagueId = leagueIdClientCloud.session(token);
             }catch (FeignClientException exc){
                 //TODO habdle exception
-                log.error("New FeignClientException exc {}", exc);
+                log.error("New FeignClientException exc {}", exc, exc);
             } catch (FeignException exc){
-                log.error("New FeignException exc {}", exc);
+                log.error("New FeignException exc {}", exc, exc);
             }
         }
         return sessionFromLeagueId;
@@ -40,9 +40,9 @@ public class LeagueIdClientService {
                 userInfo = leagueIdClientCloud.account(token);
             }catch (FeignClientException exc){
                 //TODO habdle exception
-                log.error("New FeignClientException exc {}", exc);
+                log.error("New FeignClientException exc {}", exc, exc);
             } catch (FeignException exc){
-                log.error("New FeignException exc {}", exc);
+                log.error("New FeignException exc {}", exc, exc);
             }
         }
         return userInfo;

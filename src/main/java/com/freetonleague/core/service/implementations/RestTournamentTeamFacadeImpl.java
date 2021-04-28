@@ -183,7 +183,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         TournamentTeamProposal teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
 
         // check if proposal is active
-        if (!tournamentTeamService.getTournamentTeamProposalActiveStateList().contains(teamProposal.getState())) {
+        if (!TournamentTeamStateType.activeProposalStateList.contains(teamProposal.getState())) {
             log.warn("~ forbiddenException for modify non-active proposal with state {} to tournament.id {} for user {} from team {}.",
                     teamProposal.getState(), tournament.getId(), user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
@@ -275,25 +275,6 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
                     String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
                             lastTeamParticipant.get().getUser().getUsername()));
         }
-
-        if (tournament.getAccessType() == TournamentAccessType.PAID_ACCESS) {
-            double participateFee = tournament.getTournamentSettings().getParticipateFee();
-            double teamAccountBalance = getTeamAccountBalance(team.getAccountId());
-            if (teamAccountBalance < participateFee) {
-                log.warn("~ requesting validateTeamToParticipateTournament for team {} with not enough money to participate Tournament. Team balance is {}, need to participate {}",
-                        team, teamAccountBalance, participateFee);
-                throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
-                        "Team cant participate on tournament. Team account balance is not enough to make participate fee payment.");
-            }
-        }
-    }
-
-    /**
-     * Mock method to get account balance of team
-     */
-    //TODO change logic to bank accounting
-    private double getTeamAccountBalance(String accountId) {
-        return 10.0;
     }
 
     /**

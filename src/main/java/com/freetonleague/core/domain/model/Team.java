@@ -1,17 +1,16 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TeamStateType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Objects.nonNull;
 
@@ -30,6 +29,10 @@ public class Team extends BaseEntity {
     @Size(max = 25)
     @Column(name = "name", unique = true)
     private String name;
+
+    @Setter(AccessLevel.NONE)
+    @Column(name = "core_id", nullable = false)
+    private UUID coreId;
 
     @EqualsAndHashCode.Exclude
     @NotNull
@@ -52,6 +55,12 @@ public class Team extends BaseEntity {
 
     @Transient
     private String accountId;
+
+    @PrePersist
+    public void prePersist() {
+        byte[] uniqueTournamentTimeSlice = this.toString().concat(LocalDateTime.now().toString()).getBytes();
+        coreId = UUID.nameUUIDFromBytes(uniqueTournamentTimeSlice);
+    }
 
     public boolean isCaptain(User user) {
         return captain.getUser().equals(user);
