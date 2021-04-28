@@ -34,4 +34,10 @@ public interface TournamentEventService {
      * Process series dead head for rivals
      */
     void processSeriesDeadHead(TournamentSeries tournamentSeries);
+
+    /**
+     * Process tournament status changing
+     */
+    boolean processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
+                                                     TournamentTeamStateType newTournamentTeamState);
 }

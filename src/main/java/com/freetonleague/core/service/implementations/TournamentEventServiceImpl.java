@@ -144,6 +144,122 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         log.error("!> We have a dead head in series {}. Create new match manually", tournamentSeries);
     }
 
+    /**
+     * Process tournament status changing
+     */
+    @Override
+    public boolean processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
+                                                            TournamentTeamStateType newTournamentTeamState) {
+        if (tournamentTeamProposal.getTournament().getAccessType().isPaid()) {
+            if (this.needToPaidParticipationFee(tournamentTeamProposal)) {
+                this.tryMakeParticipationFeePayment(tournamentTeamProposal);
+            } else if (this.needToRefundParticipationFee(tournamentTeamProposal)) {
+                this.bankServiceRefundMockMethod(tournamentTeamProposal);
+            }
+        }
+        return true;
+    }
+
+    /**
+     * if prev status was non-active and new status is active we need to debit money from team
+     */
+    private boolean needToPaidParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
+        return (isNull(tournamentTeamProposal.getPrevState())
+                || TournamentTeamStateType.disabledProposalStateList
+                .contains(tournamentTeamProposal.getPrevState()))
+                && TournamentTeamStateType.activeProposalStateList.contains(tournamentTeamProposal.getState());
+    }
+
+    /**
+     * if prev status was active and new status is non-active we need to refund money to team
+     */
+    private boolean needToRefundParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
+        return nonNull(tournamentTeamProposal.getPrevState())
+                && TournamentTeamStateType.activeProposalStateList.contains(tournamentTeamProposal.getPrevState())
+                && TournamentTeamStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState());
+    }
+
+    //TODO delete method
+    private void bankServiceRefundMockMethod(TournamentTeamProposal teamProposal) {
+        //make some staff
+    }
+
+    /**
+     * Try to make participation fee and commission from team to tournament
+     */
+    private void tryMakeParticipationFeePayment(TournamentTeamProposal teamProposal) {
+        User teamCapitan = teamProposal.getTeam().getCaptain().getUser();
+        Tournament tournament = teamProposal.getTournament();
+
+        double teamParticipationFee = tournamentTeamService.calculateTeamParticipationFee(teamProposal);
+        AccountInfoDto teamCapitanAccountDto = financialClientService.getAccountByHolderInfo(teamCapitan.getLeagueId(),
+                AccountHolderType.USER);
+        if (teamCapitanAccountDto.getAmount() < teamParticipationFee) {
+            log.warn("~ forbiddenException for create new proposal for team {} to tournament id {} and status {}. " +
+                            "Team capitan {} doesn't have enough fund to pay participation fee for all team members",
+                    teamProposal.getTeam().getId(), tournament.getId(), tournament.getStatus(), teamCapitan);
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    String.format("Team capitan '%s' doesn't have enough fund to pay participation fee for all team members. Request rejected.",
+                            teamCapitan));
+        }
+
+        double tournamentOwnerCommissionPercentage = teamProposal.getTournament()
+                .getTournamentSettings().getOrganizerCommission() / 100;
+
+        double commissionAmount = teamParticipationFee * tournamentOwnerCommissionPercentage;
+        double tournamentFundAmount = teamParticipationFee - commissionAmount;
+
+        AccountInfoDto tournamentOwnerAccountDto = financialClientService.getAccountByHolderInfo(
+                teamProposal.getTournament().getCreatedBy().getLeagueId(), AccountHolderType.USER);
+        AccountInfoDto tournamentAccountDto = financialClientService.getAccountByHolderInfo(
+                tournament.getCoreId(), AccountHolderType.TOURNAMENT);
+
+        AccountTransactionInfoDto result = financialClientService.createTransactionFromSourceToTargetHolder(
+                this.composeParticipationFeeTransaction(teamCapitanAccountDto, tournamentAccountDto, tournamentFundAmount));
+        if (isNull(result)) {
+            log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
+                            "Error while transferring fund to pat participation fee. Check requested params.",
+                    teamProposal.getTeam().getId(), tournament.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    "Error while transferring fund to pay participation fee. Check requested params.");
+        }
+
+        result = financialClientService.createTransactionFromSourceToTargetHolder(
+                this.composeParticipationCommissionTransaction(teamCapitanAccountDto, tournamentOwnerAccountDto, commissionAmount));
+        if (isNull(result)) {
+            log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
+                            "Error while transferring fund to pat participation fee. Check requested params.",
+                    teamProposal.getTeam().getId(), tournament.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    "Error while transferring fund to pay commission participation fee. Check requested params.");
+        }
+    }
+
+    private AccountTransactionInfoDto composeParticipationFeeTransaction(AccountInfoDto accountSourceDto,
+                                                                         AccountInfoDto accountTargetDto,
+                                                                         double tournamentFundAmount) {
+        return AccountTransactionInfoDto.builder()
+                .amount(tournamentFundAmount)
+                .sourceAccount(accountSourceDto)
+                .targetAccount(accountTargetDto)
+                .transactionType(TransactionType.PAYMENT)
+                .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
+                .build();
+
+    }
+
+    private AccountTransactionInfoDto composeParticipationCommissionTransaction(AccountInfoDto accountSourceDto,
+                                                                                AccountInfoDto accountTargetDto,
+                                                                                double commissionAmount) {
+        return AccountTransactionInfoDto.builder()
+                .amount(commissionAmount)
+                .sourceAccount(accountSourceDto)
+                .targetAccount(accountTargetDto)
+                .transactionType(TransactionType.PAYMENT)
+                .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_COMMISSION)
+                .build();
+    }
+
     private Map<Long, Tournament> getIdToTournamentMap() {
         return Collections.unmodifiableMap(
                 tournamentService.getAllActiveTournament()
