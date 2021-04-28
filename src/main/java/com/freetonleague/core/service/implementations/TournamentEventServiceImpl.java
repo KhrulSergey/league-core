@@ -148,16 +148,17 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      * Process tournament status changing
      */
     @Override
-    public boolean processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
-                                                            TournamentTeamStateType newTournamentTeamState) {
+    public List<AccountTransactionInfoDto> processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
+                                                                                    TournamentTeamStateType newTournamentTeamState) {
+        List<AccountTransactionInfoDto> paymentList = null;
         if (tournamentTeamProposal.getTournament().getAccessType().isPaid()) {
             if (this.needToPaidParticipationFee(tournamentTeamProposal)) {
-                this.tryMakeParticipationFeePayment(tournamentTeamProposal);
+                paymentList = this.tryMakeParticipationFeePayment(tournamentTeamProposal);
             } else if (this.needToRefundParticipationFee(tournamentTeamProposal)) {
                 this.bankServiceRefundMockMethod(tournamentTeamProposal);
             }
         }
-        return true;
+        return paymentList;
     }
 
     /**
@@ -187,7 +188,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     /**
      * Try to make participation fee and commission from team to tournament
      */
-    private void tryMakeParticipationFeePayment(TournamentTeamProposal teamProposal) {
+    private List<AccountTransactionInfoDto> tryMakeParticipationFeePayment(TournamentTeamProposal teamProposal) {
         User teamCapitan = teamProposal.getTeam().getCaptain().getUser();
         Tournament tournament = teamProposal.getTournament();
 
@@ -214,6 +215,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         AccountInfoDto tournamentAccountDto = financialClientService.getAccountByHolderInfo(
                 tournament.getCoreId(), AccountHolderType.TOURNAMENT);
 
+        List<AccountTransactionInfoDto> participatePaymentList = new ArrayList<>();
         AccountTransactionInfoDto result = financialClientService.createTransactionFromSourceToTargetHolder(
                 this.composeParticipationFeeTransaction(teamCapitanAccountDto, tournamentAccountDto, tournamentFundAmount));
         if (isNull(result)) {
@@ -223,6 +225,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     "Error while transferring fund to pay participation fee. Check requested params.");
         }
+        participatePaymentList.add(result);
 
         result = financialClientService.createTransactionFromSourceToTargetHolder(
                 this.composeParticipationCommissionTransaction(teamCapitanAccountDto, tournamentOwnerAccountDto, commissionAmount));
@@ -233,6 +236,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     "Error while transferring fund to pay commission participation fee. Check requested params.");
         }
+        participatePaymentList.add(result);
+        return participatePaymentList;
     }
 
     private AccountTransactionInfoDto composeParticipationFeeTransaction(AccountInfoDto accountSourceDto,

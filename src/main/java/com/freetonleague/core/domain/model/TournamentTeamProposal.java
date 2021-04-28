@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
@@ -8,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -50,6 +52,10 @@ public class TournamentTeamProposal extends BaseEntity {
 
     @Transient
     private TournamentTeamStateType prevState;
+
+    @Type(type = "jsonb")
+    @Column(name = "participate_payment_list", columnDefinition = "jsonb")
+    private List<AccountTransactionInfoDto> participatePaymentList;
 
     /**
      * Type of team that participate in tournament
