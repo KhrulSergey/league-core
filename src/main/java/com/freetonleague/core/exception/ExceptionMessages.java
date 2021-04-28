@@ -58,6 +58,7 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_VISIBLE_ERROR = "Tournament is not visible and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_STATUS_DELETE_ERROR = "Tournament delete should be done with specific request. Please try again with other method.";
     public static final String TOURNAMENT_CREATION_ERROR = "Tournament creation failed. Please try again";
+    public static final String TOURNAMENT_STATUS_FINISHED_ERROR = "Tournament can be finished only with setting winner list of the tournament. Please try to set winners and finished status simultaneously.";
     public static final String TOURNAMENT_MODIFICATION_ERROR = "Tournament modifying failed. Please try again";
 
     public static final String TOURNAMENT_SETTINGS_VALIDATION_ERROR = "Tournament settings was specified with errors. Please check request parameters";
