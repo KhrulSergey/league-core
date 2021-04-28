@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
@@ -87,10 +88,13 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
         }
         log.debug("^ trying to add new team proposal {}", tournamentTeamProposal);
 
-        if (!tournamentEventService
-                .processTournamentTeamProposalStateChange(tournamentTeamProposal, tournamentTeamProposal.getState())) {
+        List<AccountTransactionInfoDto> paymentList = tournamentEventService.processTournamentTeamProposalStateChange(
+                tournamentTeamProposal, tournamentTeamProposal.getState());
+        if (isNull(paymentList)) {
+            log.error("^ paymentList for participate in tournament was NULL, add in DB new team proposal {} was rejected", tournamentTeamProposal);
             return null;
         }
+        tournamentTeamProposal.setParticipatePaymentList(paymentList);
         return teamProposalRepository.save(tournamentTeamProposal);
     }
 
