@@ -84,6 +84,11 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     public TournamentDto addTournament(TournamentDto tournamentDto, User user) {
         tournamentDto.setId(null);
         tournamentDto.setStatus(TournamentStatusType.CREATED);
+        if (isNull(tournamentDto.getTournamentSettings())) {
+            log.warn("~ parameter 'tournament settings' is NULL for addTournament. Request rejected.");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament settings",
+                    "parameter 'tournament settings' is not set for addTournament. Please provide correct settings data.");
+        }
         tournamentDto.getTournamentSettings().setId(null);
         tournamentDto.getTournamentSettings().setTournamentId(null);
 

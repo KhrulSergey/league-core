@@ -5,9 +5,12 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentRepository;
+import com.freetonleague.core.service.TournamentEventService;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -32,6 +35,10 @@ public class TournamentServiceImpl implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
     private final Validator validator;
+
+    @Lazy
+    @Autowired
+    private TournamentEventService tournamentEventService;
 
     private final List<TournamentStatusType> activeStatusList = List.of(
             TournamentStatusType.CREATED,
@@ -98,7 +105,9 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to add new tournament {}", tournament);
-        return tournamentRepository.save(tournament);
+        tournament = tournamentRepository.save(tournament);
+        tournamentEventService.processTournamentStatusChange(tournament, tournament.getStatus());
+        return tournament;
     }
 
     /**
@@ -132,6 +141,7 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {
+
         List<TournamentWinner> winnerTeamProposal = new ArrayList<>();
         TournamentRound tournamentRound = tournament.getTournamentRoundList().stream()
                 .max(Comparator.comparingInt(TournamentRound::getRoundNumber))

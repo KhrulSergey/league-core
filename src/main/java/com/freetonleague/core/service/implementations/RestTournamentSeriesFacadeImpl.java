@@ -181,14 +181,14 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
                     tournamentSeriesDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
-        TournamentSeries tournamentSeries = tournamentSeriesMapper.fromDto(tournamentSeriesDto);
-
         if (tournamentSeriesDto.getStatus().isFinished()) {
             log.warn("~ tournament series can be finished only automatically when all match is finished." +
                     "Request to set status was rejected.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_FINISHED_ERROR,
                     "Modifying tournament match was rejected. Check requested params and method.");
         }
+
+        TournamentSeries tournamentSeries = tournamentSeriesMapper.fromDto(tournamentSeriesDto);
 
         //Check existence of tournament series and it's status
         if (nonNull(tournamentSeriesDto.getId())) {

@@ -2,14 +2,18 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.TournamentMatch;
-import com.freetonleague.core.domain.model.TournamentRound;
-import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.model.*;
 
 
 public interface TournamentEventService {
 
     EventDto add(EventDto event);
+
+    /**
+     * Process tournament status changing
+     */
+    void processTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentMatchStatus);
 
     /**
      * Process match status changing

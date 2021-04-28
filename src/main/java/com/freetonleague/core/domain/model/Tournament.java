@@ -3,10 +3,7 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.enums.TournamentAccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -15,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -32,6 +30,10 @@ public class Tournament extends ExtendedBaseEntity {
     @Size(max = 55)
     @Column(name = "name")
     private String name;
+
+    @Setter(AccessLevel.NONE)
+    @Column(name = "core_id", nullable = false)
+    private UUID coreId;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
@@ -122,6 +124,12 @@ public class Tournament extends ExtendedBaseEntity {
     public void setStatus(TournamentStatusType status) {
         prevStatus = this.status;
         this.status = status;
+    }
+
+    @PrePersist
+    public void prePersist() {
+        byte[] uniqueTournamentTimeSlice = this.toString().concat(LocalDateTime.now().toString()).getBytes();
+        coreId = UUID.nameUUIDFromBytes(uniqueTournamentTimeSlice);
     }
 
     public boolean isStatusChanged() {

@@ -1,14 +1,13 @@
 package com.freetonleague.core.service.implementations;
 
 
+import com.freetonleague.core.domain.dto.AccountInfoDto;
+import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.domain.enums.EventOperationType;
-import com.freetonleague.core.domain.enums.EventProducerModelType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.domain.model.TournamentMatch;
-import com.freetonleague.core.domain.model.TournamentRound;
-import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.enums.*;
+import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamParticipantManageException;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +23,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -32,7 +34,9 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private final Set<Long> cachedTournamentId = Collections.synchronizedSet(new HashSet<>());
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final EventService eventService;
+    private final FinancialClientService financialClientService;
     private final TournamentService tournamentService;
+    private final TournamentTeamService tournamentTeamService;
 
     @Lazy
     @Autowired
@@ -78,6 +82,18 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         for (Long selectedKey : keys) {
             Tournament tournament = idToTournament.get(selectedKey);
             tryMakeStatusUpdateOperations(tournament);
+        }
+    }
+
+    /**
+     * Process tournament status changing
+     */
+    @Override
+    public void processTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentMatchStatus) {
+        log.debug("^ new status changed for tournament {} with new status {}.", tournament, newTournamentMatchStatus);
+        if (newTournamentMatchStatus.isCreated()) {
+            financialClientService.createAccountByHolderInfo(tournament.getCoreId(),
+                    AccountHolderType.TOURNAMENT, tournament.getName());
         }
     }
 
