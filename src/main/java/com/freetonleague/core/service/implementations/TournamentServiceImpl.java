@@ -25,6 +25,7 @@ import java.util.Set;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
@@ -126,13 +127,16 @@ public class TournamentServiceImpl implements TournamentService {
 
         if (tournament.getStatus().isFinished()) {
             tournament.setFinishedDate(LocalDateTime.now());
-            List<TournamentWinner> tournamentWinnerList = this.getCalculatedTeamProposalWinnerList(tournament);
-            if (isEmpty(tournamentWinnerList)) {
-                log.error("!> requesting modify tournament id {} was canceled. Tournament winner was not defined or found. Check stack trace.",
-                        tournament.getId());
-                tournament.setStatus(TournamentStatusType.PAUSE);
+            // if tournament was automatically finished by EventService (not manually-forced)
+            if (isFalse(tournament.getIsForcedFinished())) {
+                List<TournamentWinner> tournamentWinnerList = this.getCalculatedTeamProposalWinnerList(tournament);
+                if (isEmpty(tournamentWinnerList)) {
+                    log.error("!> requesting modify tournament id {} was canceled. Tournament winner was not defined or found. Check stack trace.",
+                            tournament.getId());
+                    tournament.setStatus(TournamentStatusType.PAUSE);
+                }
+                tournament.setTournamentWinnerList(tournamentWinnerList);
             }
-            tournament.setTournamentWinnerList(tournamentWinnerList);
         }
         if (tournament.isStatusChanged()) {
             this.handleTournamentStatusChanged(tournament);
