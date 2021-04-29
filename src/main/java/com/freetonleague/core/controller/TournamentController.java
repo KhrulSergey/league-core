@@ -1,6 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
+import com.freetonleague.core.domain.dto.TournamentDiscordInfoListDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.User;
@@ -35,6 +36,7 @@ public class TournamentController {
     public static final String PATH_DELETE = "/{tournament_id}";
     public static final String PATH_GET_LIST = "/list";
     public static final String PATH_GET_LIST_DETAILED = "/detailed-list";
+    public static final String PATH_GET_DISCORD_CHANNELS = "/discord-channel-list";
 
     private final RestTournamentFacade restTournamentFacade;
 
@@ -86,5 +88,12 @@ public class TournamentController {
     public ResponseEntity<TournamentDto> deleteTournament(@PathVariable("tournament_id") long id,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentFacade.deleteTournament(id, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Get channel list info for active tournaments")
+    @GetMapping(path = PATH_GET_DISCORD_CHANNELS)
+    public ResponseEntity<TournamentDiscordInfoListDto> getDiscordChannelsForActiveTournaments(
+            @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentFacade.getDiscordChannelsForActiveTournament(), HttpStatus.OK);
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.isNull;
 
@@ -164,6 +165,18 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     public TournamentTeamParticipant getTournamentTeamParticipantById(long id) {
         log.debug("^ trying to get tournament team participant by id: {}", id);
         return tournamentTeamParticipantRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Returns list of discordId from user that specified in tournamentTeamProposal
+     */
+    @Override
+    public Set<String> getUserDiscordIdListFromTeamProposal(TournamentTeamProposal tournamentTeamProposal) {
+        if (isNull(tournamentTeamProposal)) {
+            log.error("!> requesting getUserDiscordIdListFromTeamProposal for NULL tournamentTeamProposal. Check evoking clients");
+            return null;
+        }
+        return tournamentTeamParticipantRepository.findUserDiscordIdListForTournamentTeamProposal(tournamentTeamProposal);
     }
 
     /**

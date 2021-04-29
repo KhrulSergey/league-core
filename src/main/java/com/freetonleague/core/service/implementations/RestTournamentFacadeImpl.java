@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -37,6 +38,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestTournamentFacadeImpl implements RestTournamentFacade {
 
     private final TournamentService tournamentService;
+    private final TournamentTeamService tournamentTeamService;
     private final TournamentOrganizerService tournamentOrganizerService;
     private final RestUserFacade restUserFacade;
     private final TournamentMapper tournamentMapper;
@@ -46,7 +48,6 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     @Lazy
     @Autowired
     private RestTournamentTeamFacade restTournamentTeamFacade;
-
     /**
      * Returns founded tournament by id
      */
@@ -178,8 +179,21 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     }
 
     /**
+     * Returns discord info for active tournament list with embedded data of approved tournament team participants
+     */
+    @Override
+    public TournamentDiscordInfoListDto getDiscordChannelsForActiveTournament() {
+        List<TournamentDiscordChannelDto> tournamentDiscordInfoList = tournamentService.getAllActiveTournament()
+                .parallelStream().map(this::composeDiscordChannelInfoForTournament).collect(Collectors.toList());
+        return TournamentDiscordInfoListDto.builder()
+                .rooms(tournamentDiscordInfoList)
+                .build();
+    }
+
+    /**
      * Getting tournament by id and user with privacy check
      */
+    @Override
     public Tournament getVerifiedTournamentById(long id, User user, boolean checkUser) {
         if (checkUser && isNull(user)) {
             log.debug("^ user is not authenticate. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied");
@@ -195,6 +209,20 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_VISIBLE_ERROR, "Visible tournament with requested id " + id + " was not found");
         }
         return tournament;
+    }
+
+    private TournamentDiscordChannelDto composeDiscordChannelInfoForTournament(Tournament tournament) {
+        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament)
+                .parallelStream()
+                .map(tournamentTeamService::getUserDiscordIdListFromTeamProposal)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
+        return TournamentDiscordChannelDto.builder()
+                .discordChannelId(tournament.getDiscordChannelId())
+                .gameDisciplineName(tournament.getGameDiscipline().getName())
+                .tournamentGUID(tournament.getCoreId().toString())
+                .tournamentInvolvedUsersDiscordIdList(tournamentInvolvedUsersDiscordIdList)
+                .build();
     }
 
     /**
@@ -424,4 +452,6 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                 && (!status.isFinished() || isNull(isForcesFinished) || !isForcesFinished);
         return isFinishedButNotWithWinnerList || isWinnerListSetButStatusNotFinished;
     }
+
+
 }
