@@ -127,6 +127,12 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.warn("~ forbiddenException for modifying team from dto {} for user {}.", teamDto, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
         }
+
+        if (!team.getName().equals(teamDto.getName()) && nonNull(teamService.getTeamByName(teamDto.getName()))) {
+            log.warn("~ parameter 'name' is not unique for editTeam");
+            throw new ValidationException(ExceptionMessages.TEAM_DUPLICATE_BY_NAME_ERROR, "name", "parameter name is not unique for editTeam");
+        }
+
         team.setName(teamDto.getName());
         team.setTeamLogoFileName(teamDto.getTeamLogoFileName());
         team = teamService.editTeam(team);

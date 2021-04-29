@@ -6,6 +6,9 @@ import com.freetonleague.core.exception.model.ApiError;
 import com.freetonleague.core.exception.model.ValidationError;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.ConstraintViolationException;
 import javax.validation.constraints.NotNull;
 import java.util.Collections;
@@ -28,6 +32,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.nonNull;
 
 @ControllerAdvice
+@Order(Ordered.HIGHEST_PRECEDENCE + 5)
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @Value("${debug-rest:false}")
@@ -166,6 +171,15 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         List<String> errors = enableStackTrace && nonNull(ex.getCause()) ? Collections.singletonList(ex.getCause().toString()) : null;
         ApiError apiError = new ApiError(ex.getMessage(), debugMessage, errors);
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Object> conflict(HttpServletRequest req, DataIntegrityViolationException ex) {
+        String debugMessage = enableDebugMessage() ? ex.getMessage() : null;
+        List<String> errors = enableStackTrace && nonNull(ex.getCause()) ? Collections.singletonList(ex.getCause().toString()) : null;
+
+        ApiError apiError = new ApiError(ExceptionMessages.METHOD_ARGUMENT_VALIDATION_ERROR, debugMessage, errors);
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
     }
     //</editor-fold>
 }
