@@ -58,8 +58,6 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
     /**
      * Returns list of all teams
      * Available only base info
-     *
-     * @return list of team entities
      */
     @Override
     public List<TeamBaseDto> getTeamList(User user) {

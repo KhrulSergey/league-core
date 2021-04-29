@@ -1,6 +1,5 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDiscordInfoListDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
@@ -24,15 +23,6 @@ public interface RestTournamentFacade {
      * @return tournament entity
      */
     TournamentDto getTournament(long id, User user);
-
-    /**
-     * Returns founded tournament by id
-     *
-     * @param id   of tournament to search
-     * @param user current user from Session
-     * @return tournament entity
-     */
-    TournamentBaseDto getBaseTournament(long id, User user);
 
     /**
      * Returns list of all teams filtered by requested params with detailed info

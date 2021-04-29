@@ -8,6 +8,7 @@ import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +49,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     @Lazy
     @Autowired
     private RestTournamentTeamFacade restTournamentTeamFacade;
+
     /**
      * Returns founded tournament by id
      */
@@ -57,17 +59,9 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     }
 
     /**
-     * Returns founded tournament by id
-     */
-    @Override
-    public TournamentBaseDto getBaseTournament(long id, User user) {
-        return tournamentMapper.toBaseDto(this.getVerifiedTournamentById(id, user, false));
-    }
-
-    /**
      * Returns list of all teams filtered by requested params with detailed info
      */
-    //TODO make available only for admin and orgs
+    @CanManageSystem
     @Override
     public Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<TournamentStatusType> statusList) {
         User creatorUser = null;
@@ -88,6 +82,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     /**
      * Add new tournament to DB.
      */
+    @CanManageSystem
     @Override
     public TournamentDto addTournament(TournamentDto tournamentDto, User user) {
         tournamentDto.setId(null);
@@ -114,6 +109,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     /**
      * Edit tournament in DB.
      */
+    @CanManageSystem
     @Override
     public TournamentDto editTournament(TournamentDto tournamentDto, User user) {
         Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
@@ -164,7 +160,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      * Delete (mark) tournament in DB.
      * Accessible only for admin
      */
-    //TODO access only for admin
+    @CanManageSystem
     @Override
     public TournamentDto deleteTournament(long id, User user) {
         Tournament tournament = this.getVerifiedTournamentById(id, user, true);

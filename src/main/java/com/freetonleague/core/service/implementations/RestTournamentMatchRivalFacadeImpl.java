@@ -11,6 +11,7 @@ import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchRivalMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +59,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     /**
      * Add new tournament series to DB.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentMatchRivalDto addMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto) {
         return null;
@@ -67,7 +68,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     /**
      * Edit tournament series in DB.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentMatchRivalDto editMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto) {
         return null;
@@ -140,7 +141,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     /**
      * Mark 'deleted' tournament series in DB.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentMatchRivalDto deleteMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto) {
         return null;
