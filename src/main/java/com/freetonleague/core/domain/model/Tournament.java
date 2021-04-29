@@ -105,8 +105,8 @@ public class Tournament extends ExtendedBaseEntity {
     private Boolean isForcedFinished = false;
 
     //Base settings
-    @Column(name = "discord_channel_name")
-    private String discordChannelName;
+    @Column(name = "discord_channel_id")
+    private String discordChannelId;
 
     @Column(name = "sign_up_start_at")
     private LocalDateTime signUpStartDate;

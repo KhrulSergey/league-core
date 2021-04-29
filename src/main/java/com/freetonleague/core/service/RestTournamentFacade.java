@@ -1,6 +1,7 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentBaseDto;
+import com.freetonleague.core.domain.dto.TournamentDiscordInfoListDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
@@ -80,6 +81,11 @@ public interface RestTournamentFacade {
      * @return deleted tournament
      */
     TournamentDto deleteTournament(long id, User user);
+
+    /**
+     * Returns discord info for active tournament list with embedded data of approved tournament team participants
+     */
+    TournamentDiscordInfoListDto getDiscordChannelsForActiveTournament();
 
     /**
      * Getting tournament by id and user with privacy check
