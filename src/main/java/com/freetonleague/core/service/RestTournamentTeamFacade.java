@@ -67,7 +67,7 @@ public interface RestTournamentTeamFacade {
     /**
      * Returns tournament team proposal by id and user with privacy check
      */
-    TournamentTeamProposal getVerifiedTeamProposalById(long id, User user);
+    TournamentTeamProposal getVerifiedTeamProposalById(long id, User user, boolean checkUser);
 
     /**
      * Getting participant by TournamentTeamParticipantDto, verify team membership

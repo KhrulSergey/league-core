@@ -2,7 +2,6 @@ package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentDto;
-import com.freetonleague.core.domain.dto.TournamentWinnerDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentFacade;
@@ -87,12 +86,5 @@ public class TournamentController {
     public ResponseEntity<TournamentDto> deleteTournament(@PathVariable("tournament_id") long id,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentFacade.deleteTournament(id, user), HttpStatus.OK);
-    }
-
-    @ApiOperation("Define winners of tournament")
-    @PostMapping(path = PATH_DEFINE_WINNERS)
-    public ResponseEntity<TournamentDto> defineTournamentWinners(@RequestBody List<TournamentWinnerDto> tournamentWinnerList,
-                                                                 @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentFacade.defineTournamentWinners(tournamentWinnerList, user), HttpStatus.OK);
     }
 }

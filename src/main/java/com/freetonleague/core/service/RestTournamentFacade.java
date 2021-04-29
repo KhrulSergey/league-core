@@ -2,7 +2,6 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentBaseDto;
 import com.freetonleague.core.domain.dto.TournamentDto;
-import com.freetonleague.core.domain.dto.TournamentWinnerDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.User;
@@ -81,15 +80,6 @@ public interface RestTournamentFacade {
      * @return deleted tournament
      */
     TournamentDto deleteTournament(long id, User user);
-
-    /**
-     * Define tournament winners and it's places.
-     *
-     * @param tournamentWinnerList winner list of tournament
-     * @param user                 current user from Session
-     * @return deleted tournament
-     */
-    TournamentDto defineTournamentWinners(List<TournamentWinnerDto> tournamentWinnerList, User user);
 
     /**
      * Getting tournament by id and user with privacy check

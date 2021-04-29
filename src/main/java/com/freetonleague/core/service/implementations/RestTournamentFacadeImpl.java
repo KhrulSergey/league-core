@@ -11,6 +11,8 @@ import com.freetonleague.core.mapper.TournamentMapper;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,8 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
@@ -35,10 +39,13 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     private final TournamentService tournamentService;
     private final TournamentOrganizerService tournamentOrganizerService;
     private final RestUserFacade restUserFacade;
-
     private final TournamentMapper tournamentMapper;
     private final RestGameDisciplineFacade gameDisciplineFacade;
     private final Validator validator;
+
+    @Lazy
+    @Autowired
+    private RestTournamentTeamFacade restTournamentTeamFacade;
 
     /**
      * Returns founded tournament by id
@@ -115,8 +122,8 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament id",
                     "parameter 'tournament id' is not set for editTournament");
         }
-        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId(), user, true);
 
+        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId(), user, true);
         if (tournamentDto.getStatus().isDeleted()) {
             log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
@@ -134,7 +141,14 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                     "parameter 'tournament settings' is not match by id to tournament for editTournament");
         }
 
-        newTournament.setCreatedBy(tournament.getCreatedBy());
+        //Match can be finished only with setting the winner of the match
+        if (this.verifyTournamentStatusBadlyFinished(tournamentDto.getStatus(), tournamentDto.getTournamentWinnerList(),
+                tournamentDto.getIsForcedFinished())) {
+            log.warn("~ tournament can be finished only with setting the winners of the tournament and flag isForcedFinished. " +
+                    "Request to set status {} and winners {} was rejected.", tournamentDto.getStatus(), tournamentDto.getTournamentWinnerList());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_FINISHED_ERROR,
+                    "Modifying tournament was rejected. Check requested params and method.");
+        }
         newTournament = tournamentService.editTournament(newTournament);
         if (isNull(newTournament)) {
             log.error("!> error while modifying tournament from dto {} for user {}.", tournamentDto, user);
@@ -143,6 +157,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         return tournamentMapper.toDto(newTournament);
     }
+
 
     /**
      * Delete (mark) tournament in DB.
@@ -160,14 +175,6 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                     "Tournament was not deleted on Portal. Check requested params.");
         }
         return tournamentMapper.toDto(tournament);
-    }
-
-    /**
-     * Define tournament winners and it's places.
-     */
-    @Override
-    public TournamentDto defineTournamentWinners(List<TournamentWinnerDto> tournamentWinnerList, User user) {
-        return null;
     }
 
     /**
@@ -211,7 +218,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         //Verify Tournament organizers
         List<TournamentOrganizerDto> tournamentOrganizerDtoList = tournamentDto.getTournamentOrganizerList();
         List<TournamentOrganizer> tournamentOrganizers = null;
-        if (nonNull(tournamentOrganizerDtoList) && !tournamentOrganizerDtoList.isEmpty()) {
+        if (isNotEmpty(tournamentOrganizerDtoList)) {
             Set<String> organizerUserLeagueId = tournamentOrganizerDtoList.stream().map(TournamentOrganizerDto::getUserLeagueId).collect(Collectors.toSet());
             if (organizerUserLeagueId.size() != tournamentOrganizerDtoList.size()) {
                 log.warn("~ parameter 'tournament organizers' is not correctly set for getVerifiedTournamentByDto. " +
@@ -223,6 +230,32 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                     .map(this::getVerifiedTournamentOrganizerByDto).filter(Objects::nonNull).collect(Collectors.toList());
         }
 
+        //Verify Tournament winner list
+        List<TournamentWinnerDto> tournamentWinnerDtoList = tournamentDto.getTournamentWinnerList();
+        List<TournamentWinner> tournamentWinnerList = null;
+        if (isNotEmpty(tournamentWinnerDtoList)) {
+            if (isNull(tournamentDto.getId())) {
+                log.warn("~ parameter 'tournament id' is not set to verify tournament winner list in getVerifiedTournamentByDto. " +
+                        "Can't set winner to undefined tournament");
+                throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament id",
+                        "parameter 'tournament id' is not set to verify tournament winner list in getVerifiedTournamentByDto." +
+                                " Can't set winner to undefined tournament.");
+            }
+
+            Set<Long> winnerTeamProposalIdList = tournamentWinnerDtoList.parallelStream()
+                    .map(TournamentWinnerDto::getTeamProposalId).collect(Collectors.toSet());
+            if (winnerTeamProposalIdList.size() != tournamentWinnerDtoList.size()) {
+                log.warn("~ parameter 'tournament winner list' is not correctly set for getVerifiedTournamentByDto. " +
+                        "There are duplicates by Team Proposal Id in winner list");
+                throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament winners",
+                        "parameter 'tournament winner' is not correctly set for getVerifiedTournamentByDto. There are duplicates by teamProposal.id in winner list.");
+            }
+
+            tournamentWinnerList = tournamentWinnerDtoList.parallelStream()
+                    .map(winner -> this.getVerifiedTournamentWinnerByDto(winner, tournamentDto.getId()))
+                    .filter(Objects::nonNull).collect(Collectors.toList());
+        }
+
         //Verify Discipline and its Settings for Tournament
         GameDiscipline gameDiscipline = gameDisciplineFacade.getVerifiedDiscipline(tournamentDto.getGameDisciplineId(), user);
         GameDisciplineSettings gameDisciplineSettings = gameDisciplineFacade.getVerifiedDisciplineSettings(
@@ -231,9 +264,11 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         // Collect all data for Tournament and save it
         Tournament newTournament = tournamentMapper.fromDto(tournamentDto);
         newTournament.setTournamentOrganizerList(tournamentOrganizers);
+        newTournament.setTournamentWinnerList(tournamentWinnerList);
         if (nonNull(tournamentOrganizers)) {
             tournamentOrganizers.parallelStream().forEach(tOrg -> tOrg.setTournament(newTournament));
         }
+
         newTournament.setGameDiscipline(gameDiscipline);
         newTournament.setGameDisciplineSettings(gameDisciplineSettings);
         // Connect tournament settings with tournament
@@ -303,6 +338,41 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     /**
      * Getting tournament organizer by DTO with entity and privacy check
      */
+    private TournamentWinner getVerifiedTournamentWinnerByDto(TournamentWinnerDto winnerDto, Long tournamentId) {
+        if (isNull(winnerDto)) {
+            log.error("^ requested getVerifiedTournamentWinnerByDto for NULL winnerDto. Check evoking clients");
+            return null;
+        }
+        Set<ConstraintViolation<TournamentWinnerDto>> settingsViolations = validator.validate(winnerDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament with embedded TournamentWinnerDto: {} have constraint violations: {}",
+                    winnerDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+
+        TournamentTeamProposal tournamentTeamProposal = restTournamentTeamFacade
+                .getVerifiedTeamProposalById(winnerDto.getTeamProposalId(), null, false);
+
+        if (!tournamentTeamProposal.getTournament().getId().equals(tournamentId)) {
+            log.warn("~ parameter 'tournamentTeamProposal' {} is not correctly set to verify tournament winner for tournament {}" +
+                            "  in getVerifiedTournamentByDto. Can't set winner with teamProposal to other tournament {}",
+                    tournamentTeamProposal.getId(), tournamentId, tournamentTeamProposal.getTournament().getId());
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournamentTeamProposal",
+                    "parameter 'tournamentTeamProposal' is not correctly set to verify tournament winner for tournament." +
+                            " Can't set winner with teamProposal to other tournament.");
+        }
+
+        //convert data from dto to entity
+        winnerDto.setTournamentId(null);
+        TournamentWinner tournamentWinner = tournamentMapper.fromDto(winnerDto);
+        tournamentWinner.setTeamProposal(tournamentTeamProposal);
+        tournamentWinner.setTournament(tournamentTeamProposal.getTournament());
+        return tournamentWinner;
+    }
+
+    /**
+     * Getting tournament organizer by DTO with entity and privacy check
+     */
     private TournamentOrganizer getVerifiedTournamentOrganizerByDto(TournamentOrganizerDto organizerDto) {
         if (isNull(organizerDto)) {
             log.error("^ requested getVerifiedTournamentOrganizerByDto for NULL organizerDto. Check evoking clients");
@@ -340,5 +410,18 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
             tournamentOrganizer.setUser(userOrg);
         }
         return tournamentOrganizer;
+    }
+
+    /**
+     * Returns sign of badly set finished status od Tournament
+     */
+    private boolean verifyTournamentStatusBadlyFinished(TournamentStatusType status,
+                                                        List<TournamentWinnerDto> tournamentWinnerList,
+                                                        Boolean isForcesFinished) {
+        boolean isFinishedButNotWithWinnerList = status.isFinished()
+                && (isEmpty(tournamentWinnerList) || isNull(isForcesFinished) || !isForcesFinished);
+        boolean isWinnerListSetButStatusNotFinished = isNotEmpty(tournamentWinnerList)
+                && (!status.isFinished() || isNull(isForcesFinished) || !isForcesFinished);
+        return isFinishedButNotWithWinnerList || isWinnerListSetButStatusNotFinished;
     }
 }

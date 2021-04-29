@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.enums.TournamentAccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -30,6 +31,7 @@ public class TournamentBaseDto {
     private GameDisciplineDto gameDiscipline;
 
     @NotNull
+    @ApiModelProperty(notes = "need to set isForcedFinished and tournamentWinnerList with 'FINISHED' status")
     private TournamentStatusType status;
 
     @NotNull
@@ -40,6 +42,7 @@ public class TournamentBaseDto {
 
     //Base settings
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ApiModelProperty(readOnly = true)
     private String discordChannelName;
 
     private LocalDateTime signUpStartDate;
@@ -48,12 +51,15 @@ public class TournamentBaseDto {
 
     private LocalDateTime startPlannedDate;
 
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ApiModelProperty(readOnly = true)
     private LocalDateTime finishedDate;
 
     @NotNull
     private Long gameDisciplineSettingsId;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    @ApiModelProperty(readOnly = true)
     private UserDto tournamentCreator;
 
     private List<TournamentOrganizerDto> tournamentOrganizerList;

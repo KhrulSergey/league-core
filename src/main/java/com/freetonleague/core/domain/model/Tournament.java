@@ -100,6 +100,10 @@ public class Tournament extends ExtendedBaseEntity {
     @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentWinner> tournamentWinnerList;
 
+    @Builder.Default
+    @Column(name = "is_forced_finished")
+    private Boolean isForcedFinished = false;
+
     //Base settings
     @Column(name = "discord_channel_name")
     private String discordChannelName;
