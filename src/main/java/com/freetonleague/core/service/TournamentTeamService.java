@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Set;
 
 public interface TournamentTeamService {
 
@@ -74,6 +75,11 @@ public interface TournamentTeamService {
      * @return team entity
      */
     TournamentTeamParticipant getTournamentTeamParticipantById(long id);
+
+    /**
+     * Returns list of discordId from user that specified in tournamentTeamProposal
+     */
+    Set<String> getUserDiscordIdListFromTeamProposal(TournamentTeamProposal tournamentTeamProposal);
 
     /**
      * Returns calculated participation fee for specified teamProposal
