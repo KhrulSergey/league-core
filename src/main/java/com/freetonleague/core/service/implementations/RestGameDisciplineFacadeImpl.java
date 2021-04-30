@@ -9,6 +9,7 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.GameDisciplineMapper;
 import com.freetonleague.core.mapper.GameDisciplineSettingsMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.GameDisciplineService;
 import com.freetonleague.core.service.RestGameDisciplineFacade;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +57,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Adding a new game discipline to DB.
      */
-    //TODO закрыть доступ для всех кроме админов
+    @CanManageSystem
     @Override
     public GameDisciplineDto addDiscipline(GameDisciplineDto disciplineDto, User user) {
         if (isNull(user)) {
@@ -87,6 +88,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Edit an existing game discipline in DB.
      */
+    @CanManageSystem
     @Override
     public GameDisciplineDto editDiscipline(GameDisciplineDto disciplineDto, User user) {
         return null;
@@ -95,6 +97,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Getting a primary game discipline settings for specific game discipline from DB.
      */
+    @CanManageSystem
     @Override
     public GameDisciplineSettingsDto getPrimaryDisciplineSettingsByDiscipline(long disciplineId, User user) {
         GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId, user);
@@ -105,7 +108,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Adding a new game discipline settings to DB.
      */
-    //TODO закрыть доступ для всех кроме админов
+    @CanManageSystem
     @Override
     public GameDisciplineSettingsDto addDisciplineSettings(GameDisciplineSettingsDto disciplineSettingsDto, User user) {
         Set<ConstraintViolation<GameDisciplineSettingsDto>> violations = validator.validate(disciplineSettingsDto);
@@ -133,11 +136,8 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
 
     /**
      * Edit an existing game discipline settings in DB.
-     *
-     * @param disciplineSettings data to be modified to the database
-     * @param user               current user from Session
-     * @return Edited game discipline settings
      */
+    @CanManageSystem
     @Override
     public GameDisciplineSettingsDto editDisciplineSettings(GameDisciplineSettingsDto disciplineSettings, User user) {
         return null;
@@ -146,6 +146,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Getting game discipline info by id and user with privacy check
      */
+    @Override
     public GameDiscipline getVerifiedDiscipline(long id, User user) {
         if (isNull(user)) {
             log.debug("^ user is not authenticate. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied");

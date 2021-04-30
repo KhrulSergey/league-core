@@ -8,6 +8,7 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.UnauthorizedException;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         return this.getVerifiedAccountByHolder(user.getLeagueId(), AccountHolderType.USER, user, false);
     }
 
-    //TODO make Only for orgs
+    @CanManageSystem
     @Override
     public AccountInfoDto getBalanceByUserLeagueId(String leagueId, User user) {
         User userByLeagueId = restUserFacade.getVerifiedUserByLeagueId(leagueId);
@@ -59,6 +60,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         return this.getVerifiedAccountByHolder(team.getCoreId(), AccountHolderType.TEAM, user, true);
     }
 
+    @CanManageSystem
     @Override
     public AccountInfoDto getBalanceByTournament(Long tournamentId, User user) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);

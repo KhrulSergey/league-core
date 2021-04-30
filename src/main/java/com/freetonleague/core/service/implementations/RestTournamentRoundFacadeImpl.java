@@ -10,6 +10,7 @@ import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentRoundMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.RestTournamentFacade;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
 import com.freetonleague.core.service.TournamentRoundService;
@@ -67,7 +68,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     /**
      * Add new tournament round.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentRoundDto addRound(TournamentRoundDto tournamentRoundDto, User user) {
         tournamentRoundDto.setId(null);
@@ -90,7 +91,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     /**
      * Generate all rounds for tournament and prototypes of series/matches.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public void generateRoundForTournament(long tournamentId, User user) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
@@ -105,7 +106,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     /**
      * Edit tournament round.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentRoundDto editRound(long id, TournamentRoundDto tournamentRoundDto, User user) {
         if (isNull(tournamentRoundDto) || tournamentRoundDto.getId() != id) {
@@ -132,7 +133,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     /**
      * Mark 'deleted' tournament round.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentRoundDto deleteRound(long id, User user) {
         TournamentRound tournamentRound = this.getVerifiedRoundById(id, user);
