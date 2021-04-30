@@ -123,7 +123,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        if (!team.isCaptain(user)) {
+        if (!team.isCaptain(user) && !user.isAdmin()) {
             log.warn("~ forbiddenException for modifying team from dto {} for user {}.", teamDto, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
         }
