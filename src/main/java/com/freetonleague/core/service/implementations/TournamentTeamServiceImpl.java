@@ -91,10 +91,6 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
 
         List<AccountTransactionInfoDto> paymentList = tournamentEventService.processTournamentTeamProposalStateChange(
                 tournamentTeamProposal, tournamentTeamProposal.getState());
-        if (isNull(paymentList)) {
-            log.error("^ paymentList for participate in tournament was NULL, add in DB new team proposal {} was rejected", tournamentTeamProposal);
-            return null;
-        }
         tournamentTeamProposal.setParticipatePaymentList(paymentList);
         return teamProposalRepository.save(tournamentTeamProposal);
     }
