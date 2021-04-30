@@ -3,7 +3,10 @@ package com.freetonleague.core.domain.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +15,10 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -53,12 +59,11 @@ public class User extends BaseEntity  implements UserDetails {
     @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
-    @Builder.Default
     @ManyToMany(targetEntity = Role.class, fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
