@@ -32,7 +32,7 @@ public class Tournament extends ExtendedBaseEntity {
     private String name;
 
     @Setter(AccessLevel.NONE)
-    @Column(name = "core_id", nullable = false)
+    @Column(name = "core_id", nullable = false, updatable = false)
     private UUID coreId;
 
     @NotNull
