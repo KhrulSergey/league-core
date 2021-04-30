@@ -1,11 +1,9 @@
 package com.freetonleague.core.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -14,10 +12,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -58,6 +53,13 @@ public class User extends BaseEntity  implements UserDetails {
     @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
+    @Builder.Default
+    @ManyToMany(targetEntity = Role.class, fetch = FetchType.EAGER)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
+    private Set<Role> roles = new HashSet<>();
+
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
      *
@@ -65,7 +67,7 @@ public class User extends BaseEntity  implements UserDetails {
      */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new HashSet<>();
+        return getRoles();
     }
 
     @Override
@@ -95,7 +97,10 @@ public class User extends BaseEntity  implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return UserStatusType.activeUserStatusList.contains(status);
     }
 
+    public boolean isAdmin() {
+        return roles.parallelStream().map(Role::getName).anyMatch(UserRoleType.ADMIN::equals);
+    }
 }
