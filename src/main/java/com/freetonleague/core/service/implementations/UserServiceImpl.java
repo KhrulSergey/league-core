@@ -2,11 +2,14 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
+import com.freetonleague.core.domain.model.Role;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
 import com.freetonleague.core.mapper.UserMapper;
+import com.freetonleague.core.repository.RoleRepository;
 import com.freetonleague.core.repository.UserRepository;
 import com.freetonleague.core.service.UserEventService;
 import com.freetonleague.core.service.UserService;
@@ -20,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
@@ -37,6 +41,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final UserMapper mapper;
     private final LeagueIdClientService leagueIdClientService;
     private final Validator validator;
@@ -53,6 +58,7 @@ public class UserServiceImpl implements UserService {
             throw new ConstraintViolationException(violations);
         }
         log.debug("^ User [ {} ] binding is successful", user);
+        user.setRoles(Collections.singleton(this.getRegularRole()));
         user.setStatus(UserStatusType.ACTIVE);
         user = userRepository.saveAndFlush(user);
         userEventService.processUserStatusChange(user, UserStatusType.CREATED);
@@ -173,5 +179,9 @@ public class UserServiceImpl implements UserService {
      */
     public boolean isUserExistedByUserName(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    private Role getRegularRole() {
+        return roleRepository.findByName(UserRoleType.REGULAR);
     }
 }

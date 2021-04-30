@@ -120,7 +120,6 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     /**
      * Edit team proposal to tournament (only state)
      */
-    //TODO make available only for orgs
     @Override
     public TournamentTeamProposalDto editProposalToTournament(Long tournamentId, Long teamId, Long teamProposalId,
                                                               TournamentTeamStateType teamProposalState, User user) {
@@ -136,7 +135,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
             teamProposal = this.getVerifiedTeamProposalById(teamProposalId, user, false);
         } else if (nonNull(teamId) && nonNull(tournamentId)) {
             Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-            if (!team.isCaptain(user)) {
+            if (!team.isCaptain(user) || user.isAdmin()) {
                 log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
                 throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
                         "Only captain can apply and modify proposals to tournaments from team.");

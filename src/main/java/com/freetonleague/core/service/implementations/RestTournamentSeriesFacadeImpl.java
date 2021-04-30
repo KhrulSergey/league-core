@@ -11,6 +11,7 @@ import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentSeriesMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.TournamentSeriesService;
@@ -53,6 +54,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         return tournamentSeriesMapper.toDto(tournamentSeries);
     }
 
+    //TODO delete until 01/07/21 if not needed
 //    /**
 //     * Returns list of all tournament series filtered by requested params
 //     */
@@ -65,7 +67,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     /**
      * Add new tournament series
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentSeriesDto addSeries(TournamentSeriesDto tournamentSeriesDto, User user) {
         tournamentSeriesDto.setId(null);
@@ -81,25 +83,10 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         return tournamentSeriesMapper.toDto(newTournamentSeries);
     }
 
-//    /**
-//     * Generate next active series for tournament.
-//     */
-//    //TODO make available only for orgs
-//    @Override
-//    public void generateSeriesForTournament(long tournamentId, User user) {
-//        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
-//        boolean result = tournamentSeriesService.generateSeriesForTournament(tournament);
-//        if (!result) {
-//            log.error("!> error while generated tournament series list for tournament id {} with user {}.", tournamentId, user);
-//            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR,
-//                    "Tournament series was not generated and saved on Portal. Check requested params.");
-//        }
-//    }
-
     /**
      * Edit tournament series.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentSeriesDto editSeries(long id, TournamentSeriesDto tournamentSeriesDto, User user) {
         if (isNull(tournamentSeriesDto) || tournamentSeriesDto.getId() != id) {
@@ -126,7 +113,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     /**
      * Mark 'deleted' tournament series.
      */
-    //TODO make available only for orgs
+    @CanManageSystem
     @Override
     public TournamentSeriesDto deleteSeries(long id, User user) {
         TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id, user);

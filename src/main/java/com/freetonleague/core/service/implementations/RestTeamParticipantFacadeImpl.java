@@ -141,10 +141,6 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
     /**
      * Returns new team participant by applying specified token
-     *
-     * @param inviteToken specified unique token from Invite Request entity
-     * @param currentUser current user from Session
-     * @return team participant Dto of new team member
      */
     @Override
     public TeamParticipantDto applyInviteRequest(String inviteToken, User currentUser) {
@@ -166,10 +162,6 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
 
     /**
      * Cancel invite request.
-     * Accessible only for a captain of a team or creator of invite request
-     *
-     * @param inviteToken specified unique token from Invite Request entity
-     * @param user        current user from Session
      */
     @Override
     public void cancelInviteRequest(String inviteToken, User user) {

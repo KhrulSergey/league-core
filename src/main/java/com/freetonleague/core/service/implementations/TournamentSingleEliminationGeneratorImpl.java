@@ -57,16 +57,13 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
             log.error("!> requesting generate tournament round for tournament with non-empty Round list. Check evoking clients");
             return null;
         }
+        //define vars for algorithm
         GameDisciplineSettings gameDisciplineSettings = tournament.getGameDisciplineSettings();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
         List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament);
         Integer matchRivalCountLimit = gameDisciplineSettings.getMatchRivalCount();
         Integer matchCountPerSeries = tournamentSettings.getMatchCountPerSeries();
-
-        //TODO delete mocking of data (getMinTeamCount()) to production
-        int teamProposalListSize = !teamProposalList.isEmpty() ?
-                teamProposalList.size() :
-                tournamentSettings.getMinTeamCount();
+        int teamProposalListSize = teamProposalList.size();
 
         if (!this.isPowerOfN(teamProposalListSize, matchRivalCountLimit)) {
             log.error("!> requesting generate tournament round for tournament with non-acceptable '{}' count of rivals" +
