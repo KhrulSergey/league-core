@@ -28,7 +28,7 @@ public class UserController {
 
     @ApiOperation("Get user info by league id")
     @GetMapping(path = PATH_GET)
-    public ResponseEntity<UserPublicDto> getDisciplineById(@PathVariable("league_id") String leagueId,
+    public ResponseEntity<UserPublicDto> getUserByLeagueId(@PathVariable("league_id") String leagueId,
                                                            @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.getUserByLeagueId(leagueId, user), HttpStatus.OK);
     }

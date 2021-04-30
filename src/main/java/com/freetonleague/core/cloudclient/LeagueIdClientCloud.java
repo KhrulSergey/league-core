@@ -8,15 +8,24 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
 
-/** Rest client for importing data from a LeagueId module*/
+/**
+ * Rest client for importing data from a LeagueId module
+ */
 @FeignClient(name = "league-id-client", url = "${freetonleague.service.leagueId.url}")
 public interface LeagueIdClientCloud {
 
     String AUTH_TOKEN = "X-Auth-Token";
 
-    @GetMapping("/user/current")
-    UserDto account(@RequestHeader(AUTH_TOKEN) String token);
+    String ACCESS_TOKEN = "access_token";
+
+    @GetMapping("/user/get-by-leagueId")
+    UserDto getUserByLeagueId(@RequestHeader(ACCESS_TOKEN) String accessToken,
+                              @RequestHeader("leagueId") String leagueId);
+
+    @GetMapping("/user/get-by-username")
+    UserDto getUserByUsername(@RequestHeader(ACCESS_TOKEN) String accessToken,
+                              @RequestHeader("username") String username);
 
     @PostMapping("/auth/session")
-    SessionDto session(@RequestHeader(AUTH_TOKEN) String token);
+    SessionDto getSession(@RequestHeader(AUTH_TOKEN) String token);
 }

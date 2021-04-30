@@ -3,7 +3,10 @@ package com.freetonleague.core.domain.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
-import lombok.*;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,7 +15,13 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -21,7 +30,7 @@ import java.util.*;
 @Entity
 @Table(name = "users")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "users_id_seq", allocationSize = 1)
-public class User extends BaseEntity  implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
     //Static parameters
     private static final long serialVersionUID = -6645357330555137758L;
@@ -53,12 +62,11 @@ public class User extends BaseEntity  implements UserDetails {
     @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
-    @Builder.Default
     @ManyToMany(targetEntity = Role.class, fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"))
-    private Set<Role> roles = new HashSet<>();
+    private Set<Role> roles;
 
     /**
      * Returns the authorities granted to the user. Cannot return <code>null</code>.
@@ -102,5 +110,11 @@ public class User extends BaseEntity  implements UserDetails {
 
     public boolean isAdmin() {
         return roles.parallelStream().map(Role::getName).anyMatch(UserRoleType.ADMIN::equals);
+    }
+
+    public List<String> getRoleList() {
+        return isNotEmpty(this.getRoles()) ?
+                this.getRoles().parallelStream().map(Role::getAuthority).collect(Collectors.toList())
+                : null;
     }
 }

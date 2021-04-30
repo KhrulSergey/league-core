@@ -16,7 +16,7 @@ public interface UserService extends UserDetailsService {
     User add(User user);
 
     /**
-     * Getting a specific user from DB.
+     * Returns User by LeagueID from DB or imported from League-Core module by leagueId.
      *
      * @param leagueId User's leagueID to search
      * @return User with a specific LeagueID, null - if the user is not found.
@@ -24,22 +24,12 @@ public interface UserService extends UserDetailsService {
     User findByLeagueId(UUID leagueId);
 
     /**
-     * Returns found user from DB by username.
-     * Searching ONLY in League-Core module
+     * Returns found user from DB or imported from League-Core module by username.
      *
      * @param username User's username to search
      * @return user entity, null - if the user is not found.
      */
     User findByUsername(String username);
-
-    /**
-     * Loading user from DB or import from LeagueId-module.
-     *
-     * @param leagueId     User's leagueID to search
-     * @param sessionToken Session token to request info from leagueID-module
-     * @return user entity, null - if the user is not found.
-     */
-    User loadWithLeagueId(String leagueId, String sessionToken);
 
     /**
      * Edit an existing user in DB.
