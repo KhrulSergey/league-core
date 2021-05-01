@@ -10,7 +10,7 @@ import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentMatchMapper;
-import com.freetonleague.core.security.permissions.CanManageSystem;
+import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.RestTournamentMatchFacade;
 import com.freetonleague.core.service.RestTournamentMatchRivalFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
@@ -68,7 +68,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
     /**
      * Add new tournament match.
      */
-    @CanManageSystem
+    @CanManageTournament
     @Override
     public TournamentMatchDto addMatch(TournamentMatchDto tournamentMatchDto, User user) {
 
@@ -89,7 +89,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
     /**
      * Edit tournament match.
      */
-    @CanManageSystem
+    @CanManageTournament
     @Override
     public TournamentMatchDto editMatch(long matchId, TournamentMatchDto tournamentMatchDto, User user) {
         if (isNull(tournamentMatchDto) || tournamentMatchDto.getId() != matchId) {
@@ -126,7 +126,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
     /**
      * Mark 'deleted' tournament matches in DB.
      */
-    @CanManageSystem
+    @CanManageTournament
     @Override
     public TournamentMatchDto deleteMatch(long matchId, User user) {
         TournamentMatch tournamentMatch = this.getVerifiedMatchById(matchId, user, true);

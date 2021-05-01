@@ -11,6 +11,7 @@ import java.util.List;
         unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = UserTeamParticipateHistoryMapper.class)
 public interface UserMapper {
 
+    @Mapping(target = "roleList", ignore = true)
     User fromDto(UserDto dto);
 
     @Named(value = "toDto")

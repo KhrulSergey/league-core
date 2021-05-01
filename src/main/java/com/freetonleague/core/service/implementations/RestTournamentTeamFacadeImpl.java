@@ -7,6 +7,7 @@ import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentTeamMapper;
+import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,6 +121,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     /**
      * Edit team proposal to tournament (only state)
      */
+    @CanManageTournament
     @Override
     public TournamentTeamProposalDto editProposalToTournament(Long tournamentId, Long teamId, Long teamProposalId,
                                                               TournamentTeamStateType teamProposalState, User user) {
@@ -135,11 +137,12 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
             teamProposal = this.getVerifiedTeamProposalById(teamProposalId, user, false);
         } else if (nonNull(teamId) && nonNull(tournamentId)) {
             Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-            if (!team.isCaptain(user) || user.isAdmin()) {
-                log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
-                throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
-                        "Only captain can apply and modify proposals to tournaments from team.");
-            }
+            //TODO enable editing proposal by Team Capitan
+//            if (!team.isCaptain(user) || user.isAdmin()) {
+//                log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
+//                throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
+//                        "Only captain can apply and modify proposals to tournaments from team.");
+//            }
             Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
             teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
         } else {
@@ -162,14 +165,16 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     /**
      * Quit team from tournament
      */
+    @CanManageTournament
     @Override
     public void quitFromTournament(long tournamentId, long teamId, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-        if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
-            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
-                    "Only captain can apply and modify proposals to tournaments from team.");
-        }
+        //TODO enable editing proposal by Team Capitan
+//        if (!team.isCaptain(user)) {
+//            log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
+//            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
+//                    "Only captain can apply and modify proposals to tournaments from team.");
+//        }
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
 
         // check if tournament is already started

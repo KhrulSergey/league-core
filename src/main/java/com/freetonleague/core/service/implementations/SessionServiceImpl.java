@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -61,7 +62,7 @@ public class SessionServiceImpl implements SessionService {
             if(nonNull(sessionDto)) {
                 log.debug("^ found session with token: '{}' in LeagueId-module", token);
                 //trying to find user in DB or import from LeagueId-module
-                User user = userService.loadWithLeagueId(sessionDto.getUserLeagueId(), token);
+                User user = userService.findByLeagueId(UUID.fromString(sessionDto.getUserLeagueId()));
                 if(nonNull(user)){
                     // create new session
                     log.debug("^ trying to save new session with token: '{}' for user: {}", token, user);
