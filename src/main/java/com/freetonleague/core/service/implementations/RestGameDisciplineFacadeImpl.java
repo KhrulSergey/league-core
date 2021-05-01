@@ -47,6 +47,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public List<GameDisciplineDto> getAllDisciplines(User user) {
+        //TODO delete until 01/06/21
 //        if (isNull(user)) {
 //            log.debug("^ user is not authenticate. 'getAllDisciplines' in RestGameDisciplineFacade request denied");
 //            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getAllDisciplines' request denied");
@@ -97,7 +98,6 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     /**
      * Getting a primary game discipline settings for specific game discipline from DB.
      */
-    @CanManageSystem
     @Override
     public GameDisciplineSettingsDto getPrimaryDisciplineSettingsByDiscipline(long disciplineId, User user) {
         GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId, user);

@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
@@ -40,13 +39,17 @@ public class SessionServiceImpl implements SessionService {
     @Value("${session.duration:604800}")
     private Long sessionDurationInSec;
 
+    @Value("${freetonleague.service.leagueFinance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    private String leagueFinanceAccessToken;
 
     @Override
     public Session get(String token) {
         return sessionRepository.findByToken(token);
     }
 
-    /** Returns session if it was found in DB or imported from LeagueId-module*/
+    /**
+     * Returns session if it was found in DB or imported from LeagueId-module
+     */
     @Override
     public Session loadByToken(String token) {
         if (isBlank(token)) {
@@ -59,11 +62,11 @@ public class SessionServiceImpl implements SessionService {
             // trying to find session in LeagueId-module
             log.debug("^ session with token: '{}' wasn't found in DB. Trying to load session from LeagueId-module", token);
             SessionDto sessionDto = leagueIdSessionClient.getSession(token);
-            if(nonNull(sessionDto)) {
+            if (nonNull(sessionDto)) {
                 log.debug("^ found session with token: '{}' in LeagueId-module", token);
                 //trying to find user in DB or import from LeagueId-module
                 User user = userService.findByLeagueId(UUID.fromString(sessionDto.getUserLeagueId()));
-                if(nonNull(user)){
+                if (nonNull(user)) {
                     // create new session
                     log.debug("^ trying to save new session with token: '{}' for user: {}", token, user);
                     session = this.saveFromLeagueId(sessionDto, user);
@@ -73,23 +76,24 @@ public class SessionServiceImpl implements SessionService {
         return session;
     }
 
+    /**
+     * Returns service session if token is correct
+     */
     @Override
-    public Session getByUser(User user) {
-        return sessionRepository.findByUserAndExpirationAfter(user, LocalDateTime.now());
-    }
-
-    /** Create new session from LeagueID-module info */
-    private Session saveFromLeagueId(SessionDto sessionDto, User user) {
-        if (isNull(sessionDto) || isNull(user)) {
-            log.error("!> error while creating new session for user {} and session data {} ", user, sessionDto);
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_SESSION_ERROR,
-                    "Some error while creating session in Core-module for " + user + " with data " + sessionDto);
+    public Session loadServiceByToken(String accessToken) {
+        if (isBlank(accessToken) || !accessToken.equals(this.leagueFinanceAccessToken)) {
+            log.error("!!> accessToken: {} for service session was Blank or not correct. Service authorize request rejected.", accessToken);
+            return null;
         }
-        Session session = mapper.fromDto(sessionDto);
-        session.setUser(user);
-        return sessionRepository.save(session);
+        log.debug("^ trying to find service session by accessToken: '{}'", accessToken);
+        User user = userService.findByUsername("SERVICE_" + accessToken);
+        Session session = this.getByUser(user);
+        if (isNull(session)) {
+            log.debug("^ active session for service user wasn't found in DB. trying to create new session for Service user {}", user);
+            session = this.createSessionForServiceUser(user);
+        }
+        return session;
     }
-
 
     @Override
     public void revoke(Session session) {
@@ -109,7 +113,39 @@ public class SessionServiceImpl implements SessionService {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    private List<Session> getValidByUser(User user) {
-        return sessionRepository.findAllByUserAndExpirationAfter(user, LocalDateTime.now());
+    /**
+     * Create new session from LeagueID-module info
+     */
+    private Session saveFromLeagueId(SessionDto sessionDto, User user) {
+        if (isNull(sessionDto) || isNull(user)) {
+            log.error("!> error while creating new session for user {} and session data {} ", user, sessionDto);
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_SESSION_ERROR,
+                    "Some error while creating session in Core-module for " + user + " with data " + sessionDto);
+        }
+        Session session = mapper.fromDto(sessionDto);
+        session.setUser(user);
+        return sessionRepository.save(session);
+    }
+
+    /**
+     * Create new session for service user onlye in Core-module
+     */
+    private Session createSessionForServiceUser(User user) {
+        if (isNull(user)) {
+            log.error("!> error while creating new session for NULL user. Check evoking params ");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_SESSION_ERROR,
+                    "Some error while creating session in Core-module for service user");
+        }
+        Session session = Session.builder()
+                .user(user)
+                .expiration(LocalDateTime.now().plusSeconds(sessionDurationInSec))
+                .authProvider("CORE")
+                .token(UUID.randomUUID().toString())
+                .build();
+        return sessionRepository.save(session);
+    }
+
+    private Session getByUser(User user) {
+        return sessionRepository.findByUserAndExpirationAfter(user, LocalDateTime.now());
     }
 }

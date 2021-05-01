@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Class for pre filtering request and search for token in header or JSESSIONID
@@ -41,19 +42,22 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
 
         String headerToken = request.getHeader("X-Auth-Token");
         String paramToken = request.getParameter("token");
+        String paramAccessToken = request.getParameter("access_token");
 
         String token = Objects.isNull(headerToken)
                 ? paramToken
                 : headerToken;
 
-
-        if (nonNull(token)) {
-            Session session = sessionService.loadByToken(token);
-            if (nonNull(session) && !session.isExpired()) {
-                User user = session.getUser();
-                if (nonNull(user)) {
-                    this.setUserToContext(user, session);
-                }
+        Session session = null;
+        if (!isBlank(token)) {
+            session = sessionService.loadByToken(token);
+        } else if (!isBlank(paramAccessToken)) {
+            session = sessionService.loadServiceByToken(paramAccessToken);
+        }
+        if (nonNull(session) && !session.isExpired()) {
+            User user = session.getUser();
+            if (nonNull(user)) {
+                this.setUserToContext(user, session);
             }
         }
         chain.doFilter(req, res);
@@ -65,4 +69,5 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(authentication);
     }
+
 }

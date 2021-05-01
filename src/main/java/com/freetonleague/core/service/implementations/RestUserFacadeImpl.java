@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
@@ -31,7 +32,12 @@ public class RestUserFacadeImpl implements RestUserFacade {
      */
     @Override
     public UserPublicDto getUserByLeagueId(String leagueId, User user) {
-        return userMapper.toPubicDto(this.getVerifiedUserByLeagueId(leagueId));
+        User foundUser = this.getVerifiedUserByLeagueId(leagueId);
+        //Hide service (hidden) users
+        if (nonNull(foundUser) && foundUser.isHidden()) {
+            foundUser = null;
+        }
+        return userMapper.toPubicDto(foundUser);
     }
 
     /**
@@ -45,6 +51,10 @@ public class RestUserFacadeImpl implements RestUserFacade {
                     "parameter username is required for getVerifiedUserByUsername");
         }
         User user = userService.findByUsername(username);
+        //Hide service (hidden) users
+        if (nonNull(user) && user.isHidden()) {
+            user = null;
+        }
         if (isNull(user)) {
             log.debug("^ User was not found for request parameter username {}", username);
             throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
@@ -64,6 +74,10 @@ public class RestUserFacadeImpl implements RestUserFacade {
                     "parameter leagueId is required for getVerifiedUserByLeagueId");
         }
         User user = userService.findByLeagueId(UUID.fromString(leagueId));
+        //Hide service (hidden) users
+        if (nonNull(user) && user.isHidden()) {
+            user = null;
+        }
         if (isNull(user)) {
             log.debug("^ User was not found for request parameter leagueId {}", leagueId);
             throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,

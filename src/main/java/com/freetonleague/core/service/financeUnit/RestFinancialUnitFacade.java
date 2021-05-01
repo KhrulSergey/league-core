@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.BankProviderType;
+import com.freetonleague.core.domain.model.User;
 
 import java.util.UUID;
 
@@ -16,10 +17,10 @@ public interface RestFinancialUnitFacade {
     /**
      * Process deposit transfer request to user account
      *
-     * @param token              security code to third-party trusted service
+     * @param user               current user (service) from Session
      * @param accountDepositInfo deposit info
      */
-    void processDeposit(String token, AccountDepositFinUnitDto accountDepositInfo, BankProviderType providerType);
+    void processDeposit(AccountDepositFinUnitDto accountDepositInfo, BankProviderType providerType, User user);
 
     /**
      * Returns account info for specified holder
