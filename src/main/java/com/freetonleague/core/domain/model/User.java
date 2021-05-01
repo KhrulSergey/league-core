@@ -19,6 +19,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -27,7 +30,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "users_id_seq", allocationSize = 1)
-public class User extends BaseEntity  implements UserDetails {
+public class User extends BaseEntity implements UserDetails {
 
     //Static parameters
     private static final long serialVersionUID = -6645357330555137758L;
@@ -59,6 +62,7 @@ public class User extends BaseEntity  implements UserDetails {
     @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
+    @EqualsAndHashCode.Exclude
     @ManyToMany(targetEntity = Role.class, fetch = FetchType.EAGER)
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
@@ -107,5 +111,11 @@ public class User extends BaseEntity  implements UserDetails {
 
     public boolean isAdmin() {
         return roles.parallelStream().map(Role::getName).anyMatch(UserRoleType.ADMIN::equals);
+    }
+
+    public List<String> getRoleList() {
+        return isNotEmpty(this.getRoles()) ?
+                this.getRoles().parallelStream().map(Role::getAuthority).collect(Collectors.toList())
+                : null;
     }
 }

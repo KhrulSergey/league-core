@@ -11,7 +11,7 @@ import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentSeriesMapper;
-import com.freetonleague.core.security.permissions.CanManageSystem;
+import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.TournamentSeriesService;
@@ -67,7 +67,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     /**
      * Add new tournament series
      */
-    @CanManageSystem
+    @CanManageTournament
     @Override
     public TournamentSeriesDto addSeries(TournamentSeriesDto tournamentSeriesDto, User user) {
         tournamentSeriesDto.setId(null);
@@ -86,7 +86,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     /**
      * Edit tournament series.
      */
-    @CanManageSystem
+    @CanManageTournament
     @Override
     public TournamentSeriesDto editSeries(long id, TournamentSeriesDto tournamentSeriesDto, User user) {
         if (isNull(tournamentSeriesDto) || tournamentSeriesDto.getId() != id) {
@@ -113,7 +113,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     /**
      * Mark 'deleted' tournament series.
      */
-    @CanManageSystem
+    @CanManageTournament
     @Override
     public TournamentSeriesDto deleteSeries(long id, User user) {
         TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id, user);

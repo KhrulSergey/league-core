@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
@@ -34,7 +33,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 /**
  * Implementation of the service for accessing User data from the repository.
  */
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -66,50 +65,48 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Getting User by LeagueID from DB.
+     * Returns User by LeagueID from DB or imported from League-Core module by leagueId.
      */
     @Override
     public User findByLeagueId(UUID leagueId) {
+        log.debug("^ trying to find user in BD with leagueId {}", leagueId);
         if (isNull(leagueId)) {
             log.error("!> requesting findByLeagueId for Blank leagueId. Check evoking clients");
             return null;
         }
         User user = userRepository.findByLeagueId(leagueId);
-        log.debug("^ getting user: {}", user);
+        if (isNull(user)) {
+            log.debug("^ trying to load user from LeagueId-module with id '{}'", leagueId);
+            UserDto userDto = leagueIdClientService.getUserByLeagueId(leagueId.toString());
+            if (nonNull(userDto)) {
+                //create new user
+                return this.add(userDto);
+            } else {
+                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+            }
+        }
         return user;
     }
 
     /**
-     * Returns found user from DB by username.
-     * Searching ONLY in League-Core module
-     *
-     * @param username User's username to search
-     * @return user entity, null - if the user is not found.
+     * Returns found user from DB or imported from League-Core module by username.
      */
     @Override
     public User findByUsername(String username) {
+        log.debug("^ trying to find user in BD with username {}", username);
         if (isBlank(username)) {
             log.error("!> requesting findByUsername for Blank username. Check evoking clients");
             return null;
         }
-        return userRepository.findByUsername(username);
-    }
-
-    /**
-     * Loading user from DB or import from LeagueId-module.
-     */
-    @Override
-    public User loadWithLeagueId(String leagueId, String sessionToken) {
-        log.debug("^ trying to find user on BD with leagueId {}", leagueId);
-        User user = this.findByLeagueId(UUID.fromString(leagueId));
+        User user = userRepository.findByUsername(username);
         if (isNull(user)) {
-            log.debug("^ trying to load user from LeagueId {}", leagueId);
-            UserDto userDto = leagueIdClientService.getUser(sessionToken);
+            log.debug("^ trying to load user from LeagueId-module with username '{}'", username);
+            UserDto userDto = leagueIdClientService.getUserByUserName(username);
             if (nonNull(userDto)) {
                 //create new user
                 user = this.add(userDto);
             } else {
-                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+                log.warn("~ No user with username {} found in LeagueId-module", username);
             }
         }
         return user;
@@ -147,31 +144,12 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("!> try to find user by login: {}", username);
-        User user = userRepository.findByUsername(username);
+        log.debug("!> try to find user by login: {} for Spring Auth", username);
+        User user = this.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
-
         return user;
-    }
-
-    /**
-     * Add user to DB from LeagueId source data
-     */
-    private User add(UserDto userDto) {
-        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
-        if (violations.isEmpty()) {
-            if (!isBlank(userDto.getUsername()) && this.isUserExistedByUserName(userDto.getUsername())) {
-                log.error("^ user with username already exists on core module: {} but with DIFFERENT GUID. Check data!", userDto.getUsername());
-                throw new UserManageException(ExceptionMessages.USER_DUPLICATE_FOUND_ERROR,
-                        String.format("Found duplicates by username '%s' on auth and data modules", userDto.getUsername()));
-            }
-            return this.add(mapper.fromDto(userDto));
-        } else {
-            log.warn("~ user: {} have constraint violations: {}", userDto, violations);
-            throw new ConstraintViolationException(violations);
-        }
     }
 
     /**
@@ -179,6 +157,23 @@ public class UserServiceImpl implements UserService {
      */
     public boolean isUserExistedByUserName(String username) {
         return userRepository.existsByUsername(username);
+    }
+
+    /**
+     * Add user to DB from LeagueId source data
+     */
+    private User add(UserDto userDto) {
+        Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
+        if (!violations.isEmpty()) {
+            log.warn("~ user: {} have constraint violations: {}", userDto, violations);
+            throw new ConstraintViolationException(violations);
+        }
+        if (!isBlank(userDto.getUsername()) && this.isUserExistedByUserName(userDto.getUsername())) {
+            log.error("^ user with username already exists on core module: {} but with DIFFERENT GUID. Check data!", userDto.getUsername());
+            throw new UserManageException(ExceptionMessages.USER_DUPLICATE_FOUND_ERROR,
+                    String.format("Found duplicates by username '%s' on auth and data modules", userDto.getUsername()));
+        }
+        return this.add(mapper.fromDto(userDto));
     }
 
     private Role getRegularRole() {

@@ -27,7 +27,6 @@ import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Service-facade for provide data from inner DB and process requests (incl. callback from bank-providers) to save data
@@ -175,12 +174,15 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         if (nonNull(accountHolder)) {
             log.debug("^  requesting createVerifiedAccountHolder with holderGUID {} for already existed holder {}. Returns existed holder", holderExternalGUID, accountHolder);
             return accountHolder;
+        } else {
+            accountHolder = AccountHolder.builder()
+                    .holderExternalGUID(holderExternalGUID)
+                    .holderType(holderType)
+                    .holderName(holderName)
+                    .build();
+            accountHolder.generateGUID();
         }
-        return AccountHolder.builder()
-                .holderExternalGUID(holderExternalGUID)
-                .holderType(holderType)
-                .holderName(holderName)
-                .build();
+        return accountHolder;
     }
 
     private AccountTransaction composeVerifiedTransferTransaction(Account sourceAccount, Account targetAccount,
@@ -191,13 +193,15 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
             //TODO process negative deposit operation
         }
 
-        return AccountTransaction.builder()
+        AccountTransaction accountTransaction = AccountTransaction.builder()
                 .amount(amount)
                 .sourceAccount(sourceAccount)
                 .targetAccount(targetAccount)
                 .transactionType(type)
                 .transactionTemplateType(templateType)
                 .build();
+        accountTransaction.generateGUID();
+        return accountTransaction;
     }
 
     private AccountTransaction composeVerifiedDepositTransaction(Account account, Double amount) {
@@ -207,12 +211,14 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
             //TODO process negative deposit operation
         }
 
-        return AccountTransaction.builder()
+        AccountTransaction accountTransaction = AccountTransaction.builder()
                 .amount(amount)
                 .targetAccount(account)
                 .transactionType(TransactionType.DEPOSIT)
                 .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
                 .build();
+        accountTransaction.generateGUID();
+        return accountTransaction;
     }
 
     private Account getVerifiedAccountByHolder(UUID holderGUID, AccountHolderType holderType) {
@@ -245,12 +251,14 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
             throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_ACCOUNT_NOT_FOUND_ERROR,
                     "Financial account with requested id " + accountGUID + " was not found");
         }
-        if (!isBlank(externalAddress) && !account.getExternalAddress().equals(externalAddress)) {
-            log.error("!!> Specified account address {} is not match saved in DB exteral address for user account {}. Request denied",
-                    externalAddress, accountGUID);
-            throw new ValidationException(ExceptionMessages.FINANCE_UNIT_TOKEN_VALIDATION_ERROR, "account address",
-                    "parameter account address is not match saved in DB exteral address for user account in processDeposit");
-        }
+        // TODO temporary off validating of extAddress
+        //  Есть формат в HEX который как ты прислал. А есть в base64. То есть один адрес кодироваться в тоне может по разному
+//        if (!isBlank(externalAddress) && !account.getExternalAddress().equals(externalAddress)) {
+//            log.error("!!> Specified account address {} is not match saved in DB exteral address for user account {}. Request denied",
+//                    externalAddress, accountGUID);
+//            throw new ValidationException(ExceptionMessages.FINANCE_UNIT_TOKEN_VALIDATION_ERROR, "account address",
+//                    "parameter account address is not match saved in DB exteral address for user account in processDeposit");
+//        }
         if (!account.getStatus().isActive()) {
             log.error("!!> Specified account with address {} and GUID {} is not active. Request passed, but be aware",
                     externalAddress, accountGUID);

@@ -10,6 +10,7 @@ import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TeamMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.RestTeamFacade;
 import com.freetonleague.core.service.RestTeamParticipantFacade;
 import com.freetonleague.core.service.TeamService;
@@ -72,6 +73,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      * Registry new team on platform
      */
     @Override
+    @CanManageSystem
     public TeamDto addTeam(TeamBaseDto teamDto, User user) {
         if (isNull(user)) {
             log.debug("^ user is not authenticate. 'addTeam' request denied");
@@ -121,7 +123,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        if (!team.isCaptain(user)) {
+        if (!team.isCaptain(user) && !user.isAdmin()) {
             log.warn("~ forbiddenException for modifying team from dto {} for user {}.", teamDto, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
         }
