@@ -93,9 +93,6 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User findByUsername(String username) {
-
-        Role role = this.getRegularRole();
-
         log.debug("^ trying to find user in BD with username {}", username);
         if (isBlank(username)) {
             log.error("!> requesting findByUsername for Blank username. Check evoking clients");
