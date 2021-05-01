@@ -75,6 +75,11 @@ public interface TeamService {
     void disbandTeam(Team team);
 
     /**
+     * Returns a sign of team activity on active tournaments on platform
+     */
+    boolean isTeamParticipateInActiveTournament(Team team);
+
+    /**
      * Returns participant entity by user in the specified team
      */
     TeamParticipant getParticipantOfTeamByUser(Team team, User user);

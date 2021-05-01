@@ -31,6 +31,7 @@ public class ExceptionMessages {
     public static final String TEAM_FORBIDDEN_ERROR = "Need proper team status to manage team settings. Please check your rights.";
     public static final String TEAM_EXPELLING_ERROR = "Need proper status to exclude from team. Please check your rights.";
     public static final String TEAM_EXPELLING_PARTICIPANT_ERROR = "Only active participant and not captain can be excluded from a team.";
+    public static final String TEAM_DISBAND_ERROR = "Team is participate in active tournament. Wait for tournament is finished or contact to organizers.";
     public static final String TEAM_DISABLE_ERROR = "Team is not active and modification forbidden. Please contact to organizers.";
 
     public static final String TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Participant was not found. Please check request parameters";
