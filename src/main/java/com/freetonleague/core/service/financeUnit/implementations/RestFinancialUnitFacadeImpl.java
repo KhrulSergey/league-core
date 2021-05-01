@@ -7,12 +7,13 @@ import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.Account;
 import com.freetonleague.core.domain.model.AccountHolder;
 import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.FinancialUnitManageException;
-import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.AccountFinUnitMapper;
 import com.freetonleague.core.mapper.AccountTransactionFinUnitMapper;
+import com.freetonleague.core.security.permissions.CanManageDepositFinUnit;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
@@ -45,16 +46,11 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
     /**
      * Process deposit transfer request to user account
      */
+    @CanManageDepositFinUnit
     @Override
-    public void processDeposit(String token, AccountDepositFinUnitDto accountDepositInfo, BankProviderType providerType) {
-        log.info("New deposit request with token '{}' from external provider '{}' with data: {}",
-                token, providerType, accountDepositInfo);
-
-        if (!financialUnitService.validateFinanceTokenForDeposit(token)) {
-            log.error("!!> Specified token {} is not valid for operate with deposit transactions. Request denied", token);
-            throw new ValidationException(ExceptionMessages.FINANCE_UNIT_TOKEN_VALIDATION_ERROR, "token",
-                    "parameter token is not valid for processDeposit");
-        }
+    public void processDeposit(AccountDepositFinUnitDto accountDepositInfo, BankProviderType providerType, User user) {
+        log.info("New deposit request from service-user'{}' from external provider '{}' with data: {}",
+                user.getUsername(), providerType, accountDepositInfo);
 
         Set<ConstraintViolation<AccountDepositFinUnitDto>> settingsViolations = validator.validate(accountDepositInfo);
         if (!settingsViolations.isEmpty()) {
