@@ -109,6 +109,10 @@ public class User extends BaseEntity implements UserDetails {
         return UserStatusType.activeUserStatusList.contains(status);
     }
 
+    public boolean isHidden() {
+        return status.isHidden();
+    }
+
     public boolean isAdmin() {
         return roles.parallelStream().map(Role::getName).anyMatch(UserRoleType.ADMIN::equals);
     }

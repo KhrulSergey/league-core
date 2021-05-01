@@ -49,7 +49,7 @@ public class GameDisciplineController {
         return new ResponseEntity<>(restFacade.addDiscipline(disciplineDto, user), HttpStatus.CREATED);
     }
 
-    @ApiOperation("Get game discipline settings by id")
+    @ApiOperation("Get primary game discipline settings by id")
     @GetMapping(path = PATH_GET_SETTINGS)
     public ResponseEntity<GameDisciplineSettingsDto> getSettingsByDisciplineId(@PathVariable("discipline_id") long id,
                                                                                @ApiIgnore @AuthenticationPrincipal User user) {

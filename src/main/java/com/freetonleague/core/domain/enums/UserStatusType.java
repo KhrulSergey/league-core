@@ -6,14 +6,20 @@ public enum UserStatusType {
     ACTIVE,
     CREATED,
     BANNED,
-    DELETED;
+    DELETED,
+    HIDDEN;
 
     public static List<UserStatusType> activeUserStatusList = List.of(
             ACTIVE,
-            CREATED
+            CREATED,
+            HIDDEN
     );
 
     public boolean isCreated() {
         return this == CREATED;
+    }
+
+    public boolean isHidden() {
+        return this == HIDDEN;
     }
 }
