@@ -2,13 +2,13 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TeamStateType;
+import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamParticipant;
+import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TeamRepository;
-import com.freetonleague.core.service.TeamEventService;
-import com.freetonleague.core.service.TeamParticipantService;
-import com.freetonleague.core.service.TeamService;
+import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -37,6 +38,14 @@ public class TeamServiceImpl implements TeamService {
     @Lazy
     @Autowired
     private TeamEventService teamEventService;
+
+    @Lazy
+    @Autowired
+    private TournamentService tournamentService;
+
+    @Lazy
+    @Autowired
+    private TournamentTeamService tournamentTeamService;
 
     /**
      * Add new team to DB.
@@ -163,6 +172,21 @@ public class TeamServiceImpl implements TeamService {
                 .forEach(p -> teamParticipantService.expelParticipant(p, false));
         team.setStatus(TeamStateType.DELETED);
         teamRepository.saveAndFlush(team); // save changes to team
+    }
+
+    /**
+     * Returns a sign of team activity on active tournaments on platform
+     */
+    @Override
+    public boolean isTeamParticipateInActiveTournament(Team team) {
+        // from all active tournament
+        return tournamentService.getAllActiveTournament().parallelStream()
+                // find team proposal if exists
+                .map(t -> tournamentTeamService.getProposalByTeamAndTournament(team, t))
+                .filter(Objects::nonNull)
+                // check if any of proposal is approved (active)
+                .map(TournamentTeamProposal::getState)
+                .anyMatch(TournamentTeamStateType::isApproved);
     }
 
     /**

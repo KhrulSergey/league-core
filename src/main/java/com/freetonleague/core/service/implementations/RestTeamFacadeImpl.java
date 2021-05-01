@@ -179,8 +179,12 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
     public void disband(long id, User user) {
         Team team = this.getVerifiedTeamById(id, user, true);
         if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for disband team {} for user {}.", team, user);
+            log.warn("~ forbiddenException for disband team id {} for user {}.", id, user);
             throw new ForbiddenException(ExceptionMessages.TEAM_FORBIDDEN_ERROR);
+        }
+        if (teamService.isTeamParticipateInActiveTournament(team)) {
+            log.debug("^ Team is participate in active tournament. Team id {} can' be disband.", id);
+            throw new TeamManageException(ExceptionMessages.TEAM_DISBAND_ERROR, "Team was not disband on Portal. Check requested params.");
         }
         teamService.disbandTeam(team);
     }
@@ -231,6 +235,4 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         }
         return team;
     }
-
-
 }

@@ -62,6 +62,20 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     }
 
     /**
+     * Returns list of approved team proposal list for specified tournament.
+     */
+    @Override
+    public List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament) {
+        if (isNull(tournament)) {
+            log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get Approved team proposal list by tournament with id: {}", tournament.getId());
+
+        return teamProposalRepository.findAllByTournamentAndState(tournament, TournamentTeamStateType.APPROVE);
+    }
+
+    /**
      * Returns list of all tournament team proposal filtered by requested params
      */
     @Override
@@ -138,20 +152,6 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
             this.handleTeamProposalStateChanged(tournamentTeamProposal);
         }
         return teamProposalRepository.save(tournamentTeamProposal);
-    }
-
-    /**
-     * Returns list of approved team proposal list for specified tournament.
-     */
-    @Override
-    public List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament) {
-        if (isNull(tournament)) {
-            log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
-            return null;
-        }
-        log.debug("^ trying to get Approved team proposal list by tournament with id: {}", tournament.getId());
-
-        return teamProposalRepository.findAllByTournamentAndState(tournament, TournamentTeamStateType.APPROVE);
     }
 
     /**
