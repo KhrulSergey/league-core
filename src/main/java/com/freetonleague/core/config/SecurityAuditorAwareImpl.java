@@ -23,7 +23,7 @@ public class SecurityAuditorAwareImpl implements AuditorAware<User> {
 
     private final SessionService sessionService;
 
-    @Value("${freetonleague.service.leagueFinance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    @Value("${freetonleague.service.league-finance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
     private String leagueFinanceAccessToken;
 
     @Override

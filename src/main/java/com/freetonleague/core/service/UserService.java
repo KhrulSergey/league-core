@@ -32,6 +32,11 @@ public interface UserService extends UserDetailsService {
     User findByUsername(String username);
 
     /**
+     * Loading user from DB or import from LeagueId-module.
+     */
+    User loadWithLeagueId(String leagueId, String sessionToken);
+
+    /**
      * Edit an existing user in DB.
      *
      * @param user Updated User's data to be added to the database
