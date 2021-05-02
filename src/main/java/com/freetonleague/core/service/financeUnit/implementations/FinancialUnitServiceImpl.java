@@ -45,10 +45,10 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private final AccountTransactionRepository accountTransactionRepository;
     private final Validator validator;
 
-    @Value("${freetonleague.service.leagueFinance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    @Value("${freetonleague.service.league-finance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
     private String leagueFinanceAccessToken;
 
-    @Value("${freetonleague.service.leagueFinance.balance-update-timeout-in-sec:600}")
+    @Value("${freetonleague.service.league-finance.balance-update-timeout-in-sec:600}")
     private Long leagueFinanceBalanceUpdateTimeout;
 
     /**

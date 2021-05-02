@@ -11,21 +11,24 @@ import org.springframework.web.bind.annotation.RequestHeader;
 /**
  * Rest client for importing data from a LeagueId module
  */
-@FeignClient(name = "league-id-client", url = "${freetonleague.service.leagueId.url}")
+@FeignClient(name = "league-id-client", url = "${freetonleague.service.league-id.url}")
 public interface LeagueIdClientCloud {
 
     String AUTH_TOKEN = "X-Auth-Token";
 
-    String ACCESS_TOKEN = "access_token";
+    String SERVICE_TOKEN = "service_token";
 
     @GetMapping("/user/get-by-leagueId")
-    UserDto getUserByLeagueId(@RequestHeader(ACCESS_TOKEN) String accessToken,
+    UserDto getUserByLeagueId(@RequestHeader(SERVICE_TOKEN) String serviceToken,
                               @RequestHeader("leagueId") String leagueId);
 
     @GetMapping("/user/get-by-username")
-    UserDto getUserByUsername(@RequestHeader(ACCESS_TOKEN) String accessToken,
+    UserDto getUserByUsername(@RequestHeader(SERVICE_TOKEN) String serviceToken,
                               @RequestHeader("username") String username);
 
     @PostMapping("/auth/session")
     SessionDto getSession(@RequestHeader(AUTH_TOKEN) String token);
+
+    @GetMapping("/user/current")
+    UserDto account(@RequestHeader(AUTH_TOKEN) String token);
 }

@@ -39,7 +39,7 @@ public class SessionServiceImpl implements SessionService {
     @Value("${session.duration:604800}")
     private Long sessionDurationInSec;
 
-    @Value("${freetonleague.service.leagueFinance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    @Value("${freetonleague.service.league-finance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
     private String leagueFinanceAccessToken;
 
     @Override
@@ -65,7 +65,7 @@ public class SessionServiceImpl implements SessionService {
             if (nonNull(sessionDto)) {
                 log.debug("^ found session with token: '{}' in LeagueId-module", token);
                 //trying to find user in DB or import from LeagueId-module
-                User user = userService.findByLeagueId(UUID.fromString(sessionDto.getUserLeagueId()));
+                User user = userService.loadWithLeagueId(sessionDto.getUserLeagueId(), token);
                 if (nonNull(user)) {
                     // create new session
                     log.debug("^ trying to save new session with token: '{}' for user: {}", token, user);

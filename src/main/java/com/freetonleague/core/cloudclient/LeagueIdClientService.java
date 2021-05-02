@@ -21,8 +21,8 @@ public class LeagueIdClientService {
 
     private final LeagueIdClientCloud leagueIdClientCloud;
 
-    @Value("${freetonleague.service.leagueId.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
-    private String leagueIdAccessToken;
+    @Value("${freetonleague.service.league-id.service-token::Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    private String leagueIdServiceToken;
 
     public SessionDto getSession(String token) {
         SessionDto sessionFromLeagueId = null;
@@ -39,11 +39,27 @@ public class LeagueIdClientService {
         return sessionFromLeagueId;
     }
 
+    public UserDto getUser(String token) {
+        UserDto userInfo = null;
+        if (!isBlank(token)) {
+            try {
+                userInfo = leagueIdClientCloud.account(token);
+            } catch (FeignClientException exc) {
+                //TODO habdle exception
+                log.error("New FeignClientException exc {}", exc, exc);
+            } catch (FeignException exc) {
+                log.error("New FeignException exc {}", exc, exc);
+            }
+        }
+        return userInfo;
+    }
+
     public UserDto getUserByLeagueId(String leagueId) {
+        log.debug("^ try to getUserByLeagueId in LeagueIdClientService by serviceToken {} and leagueId {}", leagueIdServiceToken, leagueId);
         UserDto userInfo = null;
         if (!isBlank(leagueId)) {
             try {
-                userInfo = leagueIdClientCloud.getUserByLeagueId(leagueIdAccessToken, leagueId);
+                userInfo = leagueIdClientCloud.getUserByLeagueId(leagueIdServiceToken, leagueId);
             } catch (FeignClientException exc) {
                 //TODO habdle exception
                 log.error("New FeignClientException exc {}", exc, exc);
@@ -58,7 +74,7 @@ public class LeagueIdClientService {
         UserDto userInfo = null;
         if (!isBlank(username)) {
             try {
-                userInfo = leagueIdClientCloud.getUserByUsername(leagueIdAccessToken, username);
+                userInfo = leagueIdClientCloud.getUserByUsername(leagueIdServiceToken, username);
             } catch (FeignClientException exc) {
                 //TODO habdle exception
                 log.error("New FeignClientException exc {}", exc, exc);
