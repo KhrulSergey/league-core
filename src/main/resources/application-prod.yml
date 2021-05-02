@@ -11,7 +11,7 @@ spring:
   datasource: #JPA / HIBERNATE
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/league_core
-    password: postgres
+    password: ra8ta0n6i2fiVo2buHit6evukir87uk3am
     username: postgres
   session:
     token-name: X-Auth-Token
@@ -54,18 +54,17 @@ spring:
       ack-mode: manual_immediate
       idle-event-interval: 200000
 
-
 config:
   broxus-client:
     debug: false # change to true for mock Client use
-    url: http://49.12.10.52:3383
-    token: XXXXXXXXXXXXXXXXXXXXXXXXX
+    url: https://broxusapi.beta.freetonleague.com
+    token: 1c7u81TIf7ubap02orukukaL4Oz4akofun
 
 freetonleague:
   service:
     league-id:
-      url: http://localhost:7700/api
-      service-token: ifU#AxWveGwSAHevjJFx5S*d8K
+      url: league-id:7700/api
+      service-token: za#2#b.:ePo6yOko68T$a8Hoqe4ra7r!i6
     league-finance:
       access-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
       balance-update-timeout-in-sec: 300
@@ -98,7 +97,7 @@ logging:
     com:
       freetonleague: DEBUG
   file:
-    name: \Users\Khsa\FreetonLeague\logs\League_Core_Tournament.log
+    name: /app/App.log
 # ===============================
 #Configuring Feign
 # ===============================

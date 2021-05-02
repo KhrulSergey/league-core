@@ -113,6 +113,26 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Loading user from DB or import from LeagueId-module.
+     */
+    @Override
+    public User loadWithLeagueId(String leagueId, String sessionToken) {
+        log.debug("^ trying to find user on BD with leagueId {}", leagueId);
+        User user = this.findByLeagueId(UUID.fromString(leagueId));
+        if (isNull(user)) {
+            log.debug("^ trying to load user from LeagueId {}", leagueId);
+            UserDto userDto = leagueIdClientService.getUser(sessionToken);
+            if (nonNull(userDto)) {
+                //create new user
+                user = this.add(userDto);
+            } else {
+                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+            }
+        }
+        return user;
+    }
+
+    /**
      * Edit an existing user in DB.
      */
     @Override

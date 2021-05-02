@@ -4,7 +4,11 @@ import com.freetonleague.core.exception.BadRequestException;
 import com.freetonleague.core.exception.NotFoundException;
 import feign.Response;
 import feign.codec.ErrorDecoder;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
+@Slf4j
+@Component
 public class FeignErrorDecoder implements ErrorDecoder {
 
     //TODO отладить работу декодера
@@ -27,7 +31,10 @@ public class FeignErrorDecoder implements ErrorDecoder {
 
     @Override
     public Exception decode(String methodKey, Response response) {
-        switch (response.status()){
+        log.error("!> Got error while feign http request. Method key '{}'. Response body from resource: {}, reason {}. " +
+                        "Full response from resource: {}",
+                methodKey, response.body(), response.reason(), response);
+        switch (response.status()) {
             case 400:
                 return new BadRequestException();
             case 404:

@@ -54,18 +54,18 @@ spring:
       ack-mode: manual_immediate
       idle-event-interval: 200000
 
-
 config:
   broxus-client:
-    debug: false
+    debug: false # change to true for mock Client use
     url: http://49.12.10.52:3383
     token: XXXXXXXXXXXXXXXXXXXXXXXXX
 
 freetonleague:
   service:
-    leagueId:
-      url: http://lid.realgrace.me:7700/api
-    leagueFinance:
+    league-id:
+      url: league-id:7700/api
+      service-token: ifU#AxWveGwSAHevjJFx5S*d8K
+    league-finance:
       access-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
       balance-update-timeout-in-sec: 300
   team:
@@ -97,7 +97,7 @@ logging:
     com:
       freetonleague: DEBUG
   file:
-    name: \Users\Khsa\FreetonLeague\logs\League_Core_Tournament.log
+    name: \FreetonLeague\logs\League_Core_Tournament.log
 # ===============================
 #Configuring Feign
 # ===============================
