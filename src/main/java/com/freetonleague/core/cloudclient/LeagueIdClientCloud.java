@@ -6,6 +6,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 
 /**
@@ -19,12 +20,12 @@ public interface LeagueIdClientCloud {
     String SERVICE_TOKEN = "service_token";
 
     @GetMapping("/user/get-by-leagueId")
-    UserDto getUserByLeagueId(@RequestHeader(SERVICE_TOKEN) String serviceToken,
-                              @RequestHeader("leagueId") String leagueId);
+    UserDto getUserByLeagueId(@RequestParam(SERVICE_TOKEN) String serviceToken,
+                              @RequestParam("leagueId") String leagueId);
 
     @GetMapping("/user/get-by-username")
-    UserDto getUserByUsername(@RequestHeader(SERVICE_TOKEN) String serviceToken,
-                              @RequestHeader("username") String username);
+    UserDto getUserByUsername(@RequestParam(SERVICE_TOKEN) String serviceToken,
+                              @RequestParam("username") String username);
 
     @PostMapping("/auth/session")
     SessionDto getSession(@RequestHeader(AUTH_TOKEN) String token);
