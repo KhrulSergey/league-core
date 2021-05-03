@@ -5,8 +5,8 @@ import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * Service-facade for managing teams
@@ -29,7 +29,14 @@ public interface RestTeamFacade {
      *
      * @return list of team entities
      */
-    List<TeamBaseDto> getTeamList(User user);
+    Page<TeamBaseDto> getTeamList(Pageable pageable, User user);
+
+    /**
+     * Get the list of teams for current user
+     *
+     * @param user current user from Session
+     */
+    Page<TeamExtendedDto> getUserTeamList(Pageable pageable, User user);
 
     /**
      * Registry new team on platform
@@ -76,13 +83,6 @@ public interface RestTeamFacade {
      * @param user current user from Session
      */
     void quitUserFromTeam(long id, User user);
-
-    /**
-     * Get the list of teams for current user
-     *
-     * @param user current user from Session
-     */
-    List<TeamExtendedDto> getUserTeamList(User user);
 
     /**
      * Getting team by id and user with privacy check

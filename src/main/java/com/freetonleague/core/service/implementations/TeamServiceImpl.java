@@ -13,12 +13,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -111,22 +112,22 @@ public class TeamServiceImpl implements TeamService {
      * Returns list of all teams
      */
     @Override
-    public List<Team> getTeamList() {
+    public Page<Team> getTeamList(Pageable pageable) {
         log.debug("^ trying to get list of all teams");
-        return teamRepository.findAll();
+        return teamRepository.findAll(pageable);
     }
 
     /**
      * Get the list of teams for current user
      */
     @Override
-    public List<Team> getTeamListByUser(User user) {
+    public Page<Team> getTeamListByUser(Pageable pageable, User user) {
         log.debug("^ trying to get list of all teams, where user is a participant");
         if (isNull(user)) {
             log.error("!> requesting getListByUser for NULL user. Check evoking clients");
             return null;
         }
-        return teamRepository.findAllByUserParticipation(user);
+        return teamRepository.findAllByUserParticipation(pageable, user);
     }
 
     /**

@@ -4,8 +4,8 @@ import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface TeamService {
     /**
@@ -46,14 +46,14 @@ public interface TeamService {
      *
      * @return list of team entities
      */
-    List<Team> getTeamList();
+    Page<Team> getTeamList(Pageable pageable);
 
     /**
      * Get the list of teams for current user
      *
      * @param user current user from Session
      */
-    List<Team> getTeamListByUser(User user);
+    Page<Team> getTeamListByUser(Pageable pageable, User user);
 
     /**
      * Expel (exclude) from requested team the specified participant.
