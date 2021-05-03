@@ -13,7 +13,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "roles")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "roles_id_seq", allocationSize = 1)
-public class Role extends ExtendedBaseEntity implements GrantedAuthority {
+public class Role extends BaseEntity implements GrantedAuthority {
 
     private static final long serialVersionUID = -2824687278436636781L;
 
