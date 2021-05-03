@@ -1,5 +1,6 @@
 package com.freetonleague.core.controller;
 
+import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
@@ -8,13 +9,14 @@ import com.freetonleague.core.service.RestTeamFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(path = TeamController.BASE_PATH)
@@ -43,8 +45,17 @@ public class TeamController {
 
     @ApiOperation("Get team list info")
     @GetMapping(path = PATH_GET_LIST)
-    public ResponseEntity<List<TeamBaseDto>> getList(@ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTeamFacade.getTeamList(user), HttpStatus.OK);
+    public ResponseEntity<Page<TeamBaseDto>> getList(@PageableDefault Pageable pageable,
+                                                     @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTeamFacade.getTeamList(pageable, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Get all team with my participation")
+    @ApiPageable
+    @GetMapping(path = PATH_LIST_MY)
+    public ResponseEntity<Page<TeamExtendedDto>> getMyTeamList(@PageableDefault Pageable pageable,
+                                                               @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTeamFacade.getUserTeamList(pageable, user), HttpStatus.OK);
     }
 
     @ApiOperation("Register new team on platform")
@@ -57,7 +68,7 @@ public class TeamController {
     @ApiOperation("Edit team info (only for captain)")
     @PutMapping(path = PATH_EDIT)
     public ResponseEntity<TeamExtendedDto> edit(@PathVariable("id") long id, @RequestBody TeamBaseDto teamDto,
-                             @ApiIgnore @AuthenticationPrincipal User user) {
+                                                @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.editTeam(id, teamDto, user), HttpStatus.OK);
     }
 
@@ -83,11 +94,5 @@ public class TeamController {
                                                @ApiIgnore @AuthenticationPrincipal User user) {
         restTeamFacade.quitUserFromTeam(id, user);
         return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @ApiOperation("Get all team with my participation")
-    @GetMapping(path = PATH_LIST_MY)
-    public ResponseEntity<List<TeamExtendedDto>> getMyTeamList(@ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTeamFacade.getUserTeamList(user), HttpStatus.OK);
     }
 }

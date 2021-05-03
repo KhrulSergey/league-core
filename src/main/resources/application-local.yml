@@ -64,7 +64,7 @@ config:
 freetonleague:
   service:
     league-id:
-      url: league-id:7700/api
+      url: http://localhost:7700/api
       service-token: ifU#AxWveGwSAHevjJFx5S*d8K
     league-finance:
       access-token: QPhMMkF4GFEL5Vn6F45PHSaC1496

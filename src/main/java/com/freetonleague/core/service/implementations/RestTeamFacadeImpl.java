@@ -15,6 +15,8 @@ import com.freetonleague.core.service.RestTeamParticipantFacade;
 import com.freetonleague.core.service.TeamService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
@@ -22,7 +24,6 @@ import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -60,12 +61,24 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      * Available only base info
      */
     @Override
-    public List<TeamBaseDto> getTeamList(User user) {
+    public Page<TeamBaseDto> getTeamList(Pageable pageable, User user) {
         if (isNull(user)) {
             log.debug("^ user is not authenticate. 'getTeamList' request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getTeamList' request denied");
         }
-        return teamMapper.toBaseDto(teamService.getTeamList());
+        return teamService.getTeamList(pageable).map(teamMapper::toBaseDto);
+    }
+
+    /**
+     * Get the list of teams for current user
+     */
+    @Override
+    public Page<TeamExtendedDto> getUserTeamList(Pageable pageable, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getUserTeamList' request denied");
+        }
+        return teamService.getTeamListByUser(pageable, user).map(teamMapper::toExtendedDto);
     }
 
     /**
@@ -168,7 +181,6 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         return teamDto;
     }
 
-
     /**
      * Disband all the band.
      * Accessible only for a captain of the team
@@ -199,18 +211,6 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             throw new TeamManageException(ExceptionMessages.TEAM_EXPELLING_ERROR, "Only active members can be excluded from team: captain, invited or deleted participant can't.");
         }
         teamService.expelParticipant(team, teamParticipant, true);
-    }
-
-    /**
-     * Get the list of teams for current user
-     */
-    @Override
-    public List<TeamExtendedDto> getUserTeamList(User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getUserTeamList' request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getUserTeamList' request denied");
-        }
-        return teamMapper.toExtendedDto(teamService.getTeamListByUser(user));
     }
 
     /**
