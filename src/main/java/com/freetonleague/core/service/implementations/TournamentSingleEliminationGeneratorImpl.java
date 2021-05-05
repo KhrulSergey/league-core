@@ -23,6 +23,8 @@ import java.util.stream.IntStream;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -115,9 +117,16 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
             log.error("!> requesting composeNewRoundForTournament for round with non-empty Series list. Check evoking clients");
             return null;
         }
+
         // compose updates series list with filled rivals
         List<TournamentSeries> updatedTournamentSeriesList = tournamentRound.getSeriesList().parallelStream()
-                .map(this::composeAndFillRivalsOfTournamentSeries).collect(Collectors.toList());
+                .map(this::composeAndFillRivalsOfTournamentSeries).filter(Objects::nonNull).collect(Collectors.toList());
+        if (isEmpty(updatedTournamentSeriesList)
+                || updatedTournamentSeriesList.size() != tournamentRound.getSeriesList().size()) {
+            log.error("!> requesting composeNewRoundForTournament for errors in series list for round.id {}. " +
+                    "Check stack trace and evoking clients", tournamentRound.getId());
+            throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
+        }
         tournamentRound.setSeriesList(updatedTournamentSeriesList);
         return tournamentRound;
     }
@@ -127,8 +136,13 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      * Only for already initiated Tournament wit prototypes of Series (for composeNextRoundForTournament)
      */
     private TournamentSeries composeAndFillRivalsOfTournamentSeries(TournamentSeries currentSeries) {
+        if (isNotEmpty(currentSeries.getRivalList())) {
+            log.error("!> requesting composeAndFillRivalsOfTournamentSeries in composeNewRoundForTournament for not empty " +
+                    "list of series rival for series {}. Check evoking clients.", currentSeries);
+            return null;
+        }
         // collect and build series rival for current series
-        Set<TournamentSeriesRival> rivalList = currentSeries.getParentSeriesList().parallelStream()
+        Set<TournamentSeriesRival> rivalList = currentSeries.getParentSeriesList().stream()
                 .map(parentSeries -> this.generateSeriesRival(currentSeries, parentSeries, parentSeries.getTeamProposalWinner()))
                 .collect(Collectors.toSet());
         // update series rivals in current series
