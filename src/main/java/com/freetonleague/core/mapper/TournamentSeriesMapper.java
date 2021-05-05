@@ -18,6 +18,7 @@ public interface TournamentSeriesMapper {
     @Mapping(target = "matchList", source = "entity.matchList", qualifiedByName = "toDto")
     @Mapping(target = "teamProposalList", source = "entity.teamProposalList", qualifiedByName = "toDtoList")
     @Mapping(target = "teamProposalWinner", source = "entity.teamProposalWinner", qualifiedByName = "toBaseDto")
+    @Mapping(target = "parentSeriesList", source = "entity.parentSeriesList", qualifiedByName = "toParentDtoSet")
     @Named(value = "toDto")
     TournamentSeriesDto toDto(TournamentSeries entity);
 

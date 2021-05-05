@@ -237,6 +237,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             log.error("!> requesting getNextOpenRound for EMPTY tournamentRoundList. Check evoking clients");
             return null;
         }
+        log.debug("^ trying to define open round for tournament.id {}", tournament.getId());
         return tournamentRoundList.stream()
                 .sorted(Comparator.comparingInt(TournamentRound::getRoundNumber))
                 .filter(round -> round.getStatus().isCreated())
