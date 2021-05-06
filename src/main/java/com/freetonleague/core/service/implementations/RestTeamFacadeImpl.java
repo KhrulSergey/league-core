@@ -10,6 +10,7 @@ import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TeamMapper;
+import com.freetonleague.core.security.permissions.FreeAccess;
 import com.freetonleague.core.service.RestTeamFacade;
 import com.freetonleague.core.service.RestTeamParticipantFacade;
 import com.freetonleague.core.service.TeamService;
@@ -44,29 +45,21 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      * If current user is participant, then returns all data about team
      * Else - only standard info
      */
+    @FreeAccess
     @Override
-    public TeamBaseDto getTeamById(long id, User user) {
-        Team team = this.getVerifiedTeamById(id, user, true);
-        TeamBaseDto teamDto;
-        if (nonNull(teamService.getUserParticipantStatusOfTeam(team, user))) {
-            teamDto = teamMapper.toExtendedDto(team);
-        } else {
-            teamDto = teamMapper.toDto(team);
-        }
-        return teamDto;
+    public TeamExtendedDto getTeamById(long id, User user) {
+        Team team = this.getVerifiedTeamById(id, user, false);
+        return teamMapper.toExtendedDto(team);
     }
 
     /**
      * Returns list of all teams
      * Available only base info
      */
+    @FreeAccess
     @Override
-    public Page<TeamBaseDto> getTeamList(Pageable pageable, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getTeamList' request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getTeamList' request denied");
-        }
-        return teamService.getTeamList(pageable).map(teamMapper::toBaseDto);
+    public Page<TeamExtendedDto> getTeamList(Pageable pageable, User user) {
+        return teamService.getTeamList(pageable).map(teamMapper::toExtendedDto);
     }
 
     /**

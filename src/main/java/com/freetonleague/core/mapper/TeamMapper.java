@@ -25,6 +25,7 @@ public interface TeamMapper {
     TeamBaseDto toBaseDto(Team entity);
 
     @Named(value = "toExtendedDto")
+    @Mapping(target = "participantList", source = "entity.participantList", qualifiedByName = "toDtoList")
     TeamExtendedDto toExtendedDto(Team entity);
 
     @IterableMapping(qualifiedByName = "toDto")
