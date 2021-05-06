@@ -59,7 +59,7 @@ public class User extends BaseEntity implements UserDetails {
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    @ManyToMany(mappedBy = "team", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
     @EqualsAndHashCode.Exclude

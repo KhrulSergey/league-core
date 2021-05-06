@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -191,6 +192,16 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
         return teamInviteRequestRepository.existsByInvitedUserAndStatus(user, TeamInviteRequestStatusType.OPENED);
     }
 
+    /**
+     * Returns list of filtered TeamParticipant list to view in public
+     */
+    @Override
+    public List<TeamParticipant> filterTeamParticipantFoPublic(List<TeamParticipant> teamParticipantList) {
+        return teamParticipantList.parallelStream()
+                .filter(p -> TeamParticipantStatusType.activeStatusList.contains(p.getStatus()))
+                .filter(p -> TeamStateType.activeStatusList.contains(p.getTeam().getStatus()))
+                .collect(Collectors.toList());
+    }
 
     /**
      * Add user as a participant to team.

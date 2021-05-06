@@ -189,7 +189,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
     @Override
     public boolean isAllRoundsFinishedByTournament(Tournament tournament) {
         return tournament.getTournamentRoundList().parallelStream()
-                .map(TournamentRound::getStatus).allMatch(TournamentStatusType.getFinishedStatusList()::contains);
+                .map(TournamentRound::getStatus).allMatch(TournamentStatusType.finishedStatusList::contains);
     }
 
     /**
