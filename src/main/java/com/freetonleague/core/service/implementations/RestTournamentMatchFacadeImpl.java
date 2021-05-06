@@ -4,6 +4,7 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.TournamentMatchDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentSeries;
@@ -27,9 +28,11 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 /**
  * Service-facade for managing tournament match
@@ -182,22 +185,31 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
             }
         }
 
-        //TODO Check embedded collections of tournament match rivals
-        TournamentMatchRivalDto rivalWinnerDto = tournamentMatchDto.getMatchWinner();
-        TournamentMatchRival rivalMatchRival = null;
-        if (nonNull(rivalWinnerDto)) {
-            if (isNull(rivalWinnerDto.getId())) {
-                log.warn("~ parameter 'rivalWinnerDto.id' is NULL for getVerifiedTournamentMatchByDto");
-                throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "rivalWinnerDto.id",
-                        "parameter 'rivalWinnerDto.id' is not set for get or modify tournament match rival");
+        // check and compose match rival winner (modify only WonPlaceInMatch for rival)
+        TournamentMatchRivalDto matchRivalWinnerDto = tournamentMatchDto.getMatchWinner();
+        TournamentMatchRival matchRivalWinner = null;
+        if (nonNull(matchRivalWinnerDto)) {
+            matchRivalWinner = this.getVerifiedMatchRivalWinnerByDto(matchRivalWinnerDto);
+            matchRivalWinner.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
+        }
+
+        // check and compose match rival list (modify only WonPlaceInMatch for rival)
+        Set<TournamentMatchRivalDto> tournamentMatchRivalDtoList = tournamentMatchDto.getMatchRivalList();
+        Set<TournamentMatchRival> tournamentMatchRivalList = null;
+        if (isNotEmpty(tournamentMatchRivalDtoList)) {
+            tournamentMatchRivalList = tournamentMatchRivalDtoList.parallelStream()
+                    .map(this::getVerifiedMatchRivalWinnerByDto)
+                    .collect(Collectors.toSet());
+            if (nonNull(matchRivalWinner)) {
+                TournamentMatchRival finalMatchRivalWinner = matchRivalWinner;
+                tournamentMatchRivalList.removeIf(rival -> rival.getId().equals(finalMatchRivalWinner.getId()));
             }
-            rivalMatchRival = restTournamentMatchRivalFacade.getVerifiedMatchRivalByDto(rivalWinnerDto, user);
         }
 
         TournamentMatch tournamentMatch = tournamentMatchMapper.fromDto(tournamentMatchDto);
         tournamentMatch.setTournamentSeries(tournamentSeries);
-        tournamentMatch.setMatchWinner(rivalMatchRival);
-
+        tournamentMatch.setMatchWinner(matchRivalWinner);
+        tournamentMatch.setMatchRivalList(tournamentMatchRivalList);
         return tournamentMatch;
     }
 
@@ -216,5 +228,17 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_DISABLE_ERROR, "Active tournament match with requested id " + id + " was not found");
         }
         return tournamentMatch;
+    }
+
+    /**
+     * Returns match rival winner by dto with privacy check and modify only WonPlaceInMatch for rival
+     */
+    private TournamentMatchRival getVerifiedMatchRivalWinnerByDto(TournamentMatchRivalDto rivalWinnerDto) {
+        if (isNull(rivalWinnerDto.getId())) {
+            log.warn("~ parameter 'rivalWinnerDto.id' is NULL for getVerifiedMatchRivalWinnerByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "rivalWinnerDto.id",
+                    "parameter 'rivalWinnerDto.id' is not set for get or modify tournament match rival winner");
+        }
+        return restTournamentMatchRivalFacade.getVerifiedMatchRivalByDto(rivalWinnerDto);
     }
 }

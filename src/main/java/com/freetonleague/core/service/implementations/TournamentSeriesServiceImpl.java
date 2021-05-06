@@ -141,9 +141,10 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     @Override
     public boolean isAllSeriesFinishedByRound(TournamentRound tournamentRound) {
         return tournamentRound.getSeriesList().parallelStream()
-                .map(TournamentSeries::getStatus).allMatch(TournamentStatusType.getFinishedStatusList()::contains);
+                .map(TournamentSeries::getStatus).allMatch(TournamentStatusType.finishedStatusList::contains);
     }
 
+    //TODO calculate all winners of series (from 1 to 8 place)
     private TournamentSeriesRival getCalculatedSeriesWinner(TournamentSeries tournamentSeries) {
         Map<TournamentTeamProposal, Long> matchRivalWinnerMap = tournamentSeries.getMatchList().parallelStream()
                 .filter(m -> m.getStatus().isFinished())

@@ -86,7 +86,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         }
         // find Match and Rival entities
         TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId, user, true);
-        TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(rivalId, user);
+        TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(rivalId);
         TournamentTeamProposal tournamentTeamProposal = tournamentMatchRival.getTeamProposal();
 
         // Check if specified MatchRival corresponds to specified Match
@@ -151,7 +151,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
      * Returns tournament rival by id and user with privacy check
      */
     @Override
-    public TournamentMatchRival getVerifiedMatchRivalById(long id, User user) {
+    public TournamentMatchRival getVerifiedMatchRivalById(long id) {
         TournamentMatchRival tournamentMatchRival = tournamentMatchRivalService.getMatchRival(id);
         if (isNull(tournamentMatchRival)) {
             log.debug("^ Tournament rival with requested id {} was not found. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied", id);
@@ -166,7 +166,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
      */
     //TODO verify fileds for check embedded entities rivalParticipantList, tournamentMatchId, teamProposalId
     @Override
-    public TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto, User user) {
+    public TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto) {
         if (isNull(matchRivalDto)) {
             log.warn("~ parameter 'matchRivalDto' is NULL for getVerifiedMatchRivalByDto");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchRivalDto",
@@ -180,7 +180,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         }
         TournamentMatchRival tournamentMatchRival = null;
         if (nonNull(matchRivalDto.getId())) {
-            tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId(), user);
+            tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId());
             if (!matchRivalDto.getTournamentMatchId().equals(tournamentMatchRival.getTournamentMatch().getId())) {
                 log.warn("~ parameter 'matchRivalDto.tournamentMatchId' isn't fit existed ref from matchRival to match. " +
                         "Request to change reference from matchRival to other match is prohibited in getVerifiedMatchRivalByDto");
