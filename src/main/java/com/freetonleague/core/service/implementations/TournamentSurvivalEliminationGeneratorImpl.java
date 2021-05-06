@@ -1,9 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
-import com.freetonleague.core.domain.enums.TournamentRoundType;
-import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.ExceptionMessages;
@@ -28,8 +25,8 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
-@Component("singleEliminationGenerator")
-public class TournamentSingleEliminationGeneratorImpl implements TournamentGenerator {
+@Component("survivalEliminationGenerator")
+public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGenerator {
 
     private final TournamentTeamService tournamentTeamService;
 
@@ -52,28 +49,28 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     @Override
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
         if (!tournamentService.getTournamentActiveStatusList().contains(tournament.getStatus())) {
-            log.error("!> requesting generate tournament round for non-active tournament. Check evoking clients");
+            log.error("!> requesting generate survival tournament rounds for non-active tournament. Check evoking clients");
             return null;
         }
         if (!tournament.getTournamentRoundList().isEmpty()) {
-            log.error("!> requesting generate tournament round for tournament with non-empty Round list. Check evoking clients");
+            log.error("!> requesting generate survival tournament rounds for tournament with non-empty Round list. Check evoking clients");
             return null;
         }
         //define vars for algorithm
         GameDisciplineSettings gameDisciplineSettings = tournament.getGameDisciplineSettings();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
         List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament);
-        Integer matchRivalCountLimit = gameDisciplineSettings.getMatchRivalCount();
+        Integer matchRivalCount = gameDisciplineSettings.getMatchRivalCount();
         Integer matchCountPerSeries = tournamentSettings.getMatchCountPerSeries();
         int teamProposalListSize = teamProposalList.size();
 
-        if (!this.isPowerOfN(teamProposalListSize, matchRivalCountLimit)) {
-            log.error("!> requesting generate tournament round for tournament with non-acceptable '{}' count of rivals" +
+        if (!this.isValidTeamCountForSurvival(teamProposalListSize, matchRivalCount)) {
+            log.error("!> requesting generate survival tournament rounds for tournament with non-acceptable '{}' count of rivals" +
                     " (approved team proposals). Check evoking clients", teamProposalListSize);
             return null;
         }
 
-        int roundsCount;
+        int seriesCountInRound;
         int currentRoundNumber = 1;
         List<Set<TournamentTeamProposal>> rivalCombinations;
         List<TournamentSeries> parentTournamentSeriesList = new ArrayList<>();
@@ -83,18 +80,18 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         //for round #2+ series(and inner matches) will be only prototypes, they will be filled with rivals as soon as first round finish
         do {
             // count round based upon discipline/tournament settings and teamProposalList size
-            roundsCount = this.calculateSeriesCountForRound(teamProposalListSize, matchRivalCountLimit);
+            seriesCountInRound = this.calculateSeriesCountForRound(currentRoundNumber, teamProposalListSize, matchRivalCount);
             // get rival combinations or empty list for 2+ round
-            rivalCombinations = this.composeRivalCombinationsFromTeamProposal(roundsCount,
-                    matchRivalCountLimit, teamProposalList);
-            TournamentRound newRound = this.generateRound(rivalCombinations, parentTournamentSeriesList, currentRoundNumber, matchCountPerSeries);
+            rivalCombinations = this.composeRivalCombinationsFromTeamProposals(seriesCountInRound,
+                    matchRivalCount, teamProposalList);
+            TournamentRound newRound = this.generateRound(rivalCombinations, parentTournamentSeriesList,
+                    currentRoundNumber, matchCountPerSeries);
             newRound.setTournament(tournament);
             newTournamentRoundList.add(newRound);
             parentTournamentSeriesList = newRound.getSeriesList();
-            teamProposalListSize = newRound.getSeriesList().size();
             currentRoundNumber++;
 
-        } while (roundsCount > 1);
+        } while (seriesCountInRound > 1);
 
         return newTournamentRoundList;
     }
@@ -106,21 +103,69 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     @Override
     public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
         if (!TournamentStatusType.activeStatusList.contains(tournamentRound.getStatus())) {
-            log.error("!> requesting composeNewRoundForTournament for not active tournament round status. Check evoking clients");
+            log.error("!> requesting composeNewRoundForTournament for not active survival tournament round status. Check evoking clients");
             return null;
         }
         if (tournamentRound.getRoundNumber() == 1) {
-            log.error("!> requesting composeNewRoundForTournament not initiated tournament with no finished round. Check evoking clients");
+            log.error("!> requesting composeNewRoundForTournament not initiated survival tournament with no finished round. Check evoking clients");
             return null;
         }
         if (tournamentRound.getSeriesList().isEmpty()) {
-            log.error("!> requesting composeNewRoundForTournament for round with non-empty Series list. Check evoking clients");
+            log.error("!> requesting composeNewRoundForTournament for survival round with non-empty Series list. Check evoking clients");
             return null;
         }
 
+        GameDisciplineSettings gameDisciplineSettings = tournamentRound.getTournament().getGameDisciplineSettings();
+        int matchRivalWinners = gameDisciplineSettings.getMatchRivalWinnersCount();
+        int matchRivalCount = gameDisciplineSettings.getMatchRivalCount();
+        int matchCountPerSeries = tournamentRound.getTournament().getTournamentSettings().getMatchCountPerSeries();
+        List<TournamentWinnerPlaceType> winnerPlaceTypeToPassedList = TournamentWinnerPlaceType
+                .getPlaceListWithLimit(matchRivalWinners);
+
+        if (isEmpty(winnerPlaceTypeToPassedList)) {
+            log.error("!> requesting composeNewRoundForTournament for survival round for non-existed " +
+                    "winnerPlaceTypeToPassed list. Check evoking clients");
+            return null;
+        }
+
+        List<TournamentSeries> roundSeriesList = tournamentRound.getSeriesList();
+        List<TournamentTeamProposal> roundRivalList = roundSeriesList.parallelStream()
+                .map(TournamentSeries::getParentSeriesList)
+                .flatMap(Collection::stream)
+                .map(TournamentSeries::getRivalList)
+                .flatMap(Collection::stream)
+                .filter(rival -> winnerPlaceTypeToPassedList.contains(rival.getWonPlaceInSeries()))
+                .map(TournamentSeriesRival::getTeamProposal)
+                .collect(Collectors.toList());
+
+        if (!this.isValidTeamCountForSurvival(roundRivalList.size(), matchRivalCount)) {
+            log.error("!> requesting composeNewRoundForTournament for survival round with not valid team rivals count " +
+                    "(winners of prev round) '{}'. Check evoking clients", roundRivalList.size());
+            return null;
+        }
+
+        int seriesCountInRound = this.calculateSeriesCountForRound(tournamentRound.getRoundNumber(),
+                roundRivalList.size(), matchRivalCount);
+//        int seriesCountInRound = roundSeriesList.size();
+
         // compose updates series list with filled rivals
-        List<TournamentSeries> updatedTournamentSeriesList = tournamentRound.getSeriesList().parallelStream()
-                .map(this::composeAndFillRivalsOfTournamentSeries).filter(Objects::nonNull).collect(Collectors.toList());
+        List<Set<TournamentTeamProposal>> rivalCombinations = this.composeRivalCombinationsFromTeamProposals(seriesCountInRound,
+                matchRivalCount, roundRivalList);
+
+        if (isEmpty(rivalCombinations)) {
+            log.error("!> round compose with TournamentSingleEliminationGeneratorImpl caused error. " +
+                    "RivalCombinations is NULL. Check evoking params");
+            throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
+        }
+
+//        List<TournamentSeries> tournamentSeriesList = IntStream.range(0, seriesCountInRound).parallel()
+        List<TournamentSeries> updatedTournamentSeriesList = IntStream.range(0, rivalCombinations.size()).parallel()
+                .mapToObj(index -> this.composeAndFillRivalsOfTournamentSurvivalSeries(roundSeriesList.get(index),
+                        rivalCombinations.get(index), matchCountPerSeries)
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         if (isEmpty(updatedTournamentSeriesList)
                 || updatedTournamentSeriesList.size() != tournamentRound.getSeriesList().size()) {
             log.error("!> requesting composeNewRoundForTournament for errors in series list for round.id {}. " +
@@ -135,25 +180,28 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      * Update series and fill rivals in series and matches
      * Only for already initiated Tournament wit prototypes of Series (for composeNextRoundForTournament)
      */
-    private TournamentSeries composeAndFillRivalsOfTournamentSeries(TournamentSeries currentSeries) {
+    private TournamentSeries composeAndFillRivalsOfTournamentSurvivalSeries(TournamentSeries currentSeries,
+                                                                            Set<TournamentTeamProposal> rivalCombinations,
+                                                                            int matchCountPerSeries) {
         if (isNotEmpty(currentSeries.getRivalList())) {
-            log.error("!> requesting composeAndFillRivalsOfTournamentSeries in composeNewRoundForTournament for not empty " +
+            log.error("!> requesting composeAndFillRivalsOfTournamentSurvivalSeries in composeNewRoundForTournament for not empty " +
                     "list of series rival for series {}. Check evoking clients.", currentSeries);
             return null;
         }
-        // collect and build series rival for current series
-        Set<TournamentSeriesRival> rivalList = currentSeries.getParentSeriesList().stream()
-                .map(parentSeries -> this.generateSeriesRival(currentSeries, parentSeries, parentSeries.getTeamProposalWinner()))
-                .collect(Collectors.toSet());
-        // update series rivals in current series
-        currentSeries.setRivalList(rivalList);
-        // update match list for series and fill each match with rivals (from TournamentSeriesRival list above)
-        List<TournamentMatch> newTournamentMatchList = currentSeries.getMatchList().parallelStream()
-                .peek(match -> match.setMatchRivalList(rivalList.parallelStream()
-                        .map(rival -> this.generateMatchRival(match, rival.getTeamProposal()))
-                        .collect(Collectors.toSet()))).collect(Collectors.toList());
+        List<TournamentSeries> parentSeriesList = currentSeries.getParentSeriesList();
 
-        currentSeries.setMatchList(newTournamentMatchList);
+        Set<TournamentSeriesRival> rivalList = rivalCombinations.parallelStream()
+                .map(rival -> this.generateSeriesRival(currentSeries,
+                        parentSeriesList.get(randomGenerator(parentSeriesList.size())), rival))
+                .collect(Collectors.toSet());
+
+        currentSeries.setRivalList(rivalList);
+
+        List<TournamentMatch> tournamentMatchList = IntStream.range(1, matchCountPerSeries + 1).parallel()
+                .mapToObj(index -> this.generateMatch(index, currentSeries, rivalCombinations))
+                .collect(Collectors.toList());
+
+        currentSeries.setMatchList(tournamentMatchList);
         return currentSeries;
     }
 
@@ -163,7 +211,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     private TournamentRound generateRound(List<Set<TournamentTeamProposal>> rivalCombinations,
                                           List<TournamentSeries> parentTournamentSeriesList,
                                           Integer roundNumber, int matchCountPerSeries) {
-        if (isNull(rivalCombinations)) {
+        if (isEmpty(rivalCombinations)) {
             log.error("!> round generation with TournamentSingleEliminationGeneratorImpl caused error. RivalCombinations is NULL. Check evoking params");
             throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
         }
@@ -176,7 +224,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
 
         List<TournamentSeries> tournamentSeriesList = IntStream.range(0, rivalCombinations.size()).parallel()
                 .mapToObj(index -> this.generateSeries(tournamentRound,
-                        this.getParentSeries(index, parentTournamentSeriesList),
+                        getParentSeries(index, parentTournamentSeriesList),
                         rivalCombinations.get(index), matchCountPerSeries)
                 )
                 .collect(Collectors.toList());
@@ -288,17 +336,17 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     /**
      * Returns match count for requested parameters of series and primary team count (team proposals)
      */
-    private int calculateSeriesCountForRound(int teamProposalListSize, Integer matchRivalsCount) {
-        // team count divide by count of rival per match
-        return (teamProposalListSize / matchRivalsCount);
+    private int calculateSeriesCountForRound(int roundIndex, int teamProposalListSize, Integer matchRivalsCount) {
+        // team count divide by current round index and by count of rival per match
+        return teamProposalListSize / (matchRivalsCount * (int) Math.pow(2, roundIndex - 1));
     }
 
     /**
      * Returns collection of random generated rival teams (TournamentTeamProposal) for further processing
      */
-    private List<Set<TournamentTeamProposal>> composeRivalCombinationsFromTeamProposal(Integer rivalCombinationCount,
-                                                                                       Integer rivalCountPerMatch,
-                                                                                       List<TournamentTeamProposal> teamProposalList) {
+    private List<Set<TournamentTeamProposal>> composeRivalCombinationsFromTeamProposals(Integer rivalCombinationCount,
+                                                                                        Integer rivalCountPerMatch,
+                                                                                        List<TournamentTeamProposal> teamProposalList) {
         if (isNull(rivalCombinationCount) || isNull(rivalCountPerMatch) || isNull(teamProposalList)) {
             log.error("!> requesting generate rival combination for NULL rivalCombinationCount {} " +
                             "or NULL matchRivalCount {} or NULL teamProposalList {}. Check evoking clients",
@@ -328,12 +376,13 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     /**
      * Returns sign if 'value' is power of specified number N
      */
-    private boolean isPowerOfN(int value, int N) {
-        if (value == 0 || value < N) {
+    private boolean isValidTeamCountForSurvival(int teamCount, int countRivalPerMatch) {
+        if (teamCount == 0 || teamCount < countRivalPerMatch) {
             return false;
         }
-        while (value % N == 0) {
-            value /= N;
+        int value = teamCount / countRivalPerMatch;
+        while (value % 2 == 0) {
+            value /= 2;
         }
         return value == 1;
     }

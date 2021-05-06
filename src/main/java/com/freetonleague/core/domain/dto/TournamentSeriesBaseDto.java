@@ -8,7 +8,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class TournamentSeriesBaseDto {
@@ -36,5 +36,5 @@ public class TournamentSeriesBaseDto {
     private LocalDateTime finishedDate;
 
     @ApiModelProperty(required = true)
-    private Set<TournamentSeriesParentDto> parentSeriesList;
+    private List<TournamentSeriesParentDto> parentSeriesList;
 }
