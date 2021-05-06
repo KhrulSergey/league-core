@@ -21,7 +21,7 @@ public interface RestTeamFacade {
      * @param user current user from Session
      * @return team entity
      */
-    TeamBaseDto getTeamById(long id, User user);
+    TeamExtendedDto getTeamById(long id, User user);
 
     /**
      * Returns list of all teams
@@ -29,7 +29,7 @@ public interface RestTeamFacade {
      *
      * @return list of team entities
      */
-    Page<TeamBaseDto> getTeamList(Pageable pageable, User user);
+    Page<TeamExtendedDto> getTeamList(Pageable pageable, User user);
 
     /**
      * Get the list of teams for current user
