@@ -11,13 +11,11 @@ public enum TransactionType {
 
     ;
 
-    public static List<TransactionType> getWithdrawTransactionTypeList() {
-        return List.of(
-                TransactionType.WITHDRAW,
-                TransactionType.PAYMENT,
-                TransactionType.TRANSFER
-        );
-    }
+    public static List<TransactionType> withdrawTransactionTypeList = List.of(
+            TransactionType.WITHDRAW,
+            TransactionType.PAYMENT,
+            TransactionType.TRANSFER
+    );
 
     public boolean isTransfer() {
         return this == TRANSFER;

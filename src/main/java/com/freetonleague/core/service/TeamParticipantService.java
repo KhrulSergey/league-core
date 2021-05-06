@@ -95,4 +95,9 @@ public interface TeamParticipantService {
      * @return true is Active invite request exists, false - if not
      */
     boolean isExistsActiveInviteRequestByInvitedUser(User user);
+
+    /**
+     * Returns list of filtered TeamParticipant list to view in public
+     */
+    List<TeamParticipant> filterTeamParticipantFoPublic(List<TeamParticipant> teamParticipantList);
 }

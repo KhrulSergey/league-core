@@ -180,8 +180,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         }
         Account sourceAccount = transaction.getSourceAccount();
         // check if source account is defined BUT there is no fund of transaction amount
-        if (TransactionType.getWithdrawTransactionTypeList()
-                .contains(transaction.getTransactionType())) {
+        if (TransactionType.withdrawTransactionTypeList.contains(transaction.getTransactionType())) {
             if (isNull(sourceAccount)) {
                 log.error("!!> requesting saveTransaction for 'withdraw' transaction {} with NULL source account. Request denied. Check evoking clients",
                         transaction);
