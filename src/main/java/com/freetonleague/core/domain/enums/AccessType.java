@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.enums;
 
-public enum TournamentAccessType {
+public enum AccessType {
     FREE_ACCESS,
     PAID_ACCESS;
 

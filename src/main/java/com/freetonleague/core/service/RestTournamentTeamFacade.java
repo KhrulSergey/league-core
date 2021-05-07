@@ -3,7 +3,7 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
 import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
@@ -53,7 +53,7 @@ public interface RestTournamentTeamFacade {
      * @return Modified team proposal
      */
     TournamentTeamProposalDto editProposalToTournament(Long tournamentId, Long teamId, Long teamProposalId,
-                                                       TournamentTeamStateType teamProposalState, User user);
+                                                       ParticipationStateType teamProposalState, User user);
 
     /**
      * Quit team from tournament

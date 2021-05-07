@@ -94,7 +94,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         }
 
         TournamentTeamProposal newTeamProposal = TournamentTeamProposal.builder()
-                .state(TournamentTeamStateType.CREATED)
+                .state(ParticipationStateType.CREATED)
                 .type(TournamentTeamType.SOLID)
                 .team(team)
                 .tournament(tournament)
@@ -124,7 +124,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     @CanManageTournament
     @Override
     public TournamentTeamProposalDto editProposalToTournament(Long tournamentId, Long teamId, Long teamProposalId,
-                                                              TournamentTeamStateType teamProposalState, User user) {
+                                                              ParticipationStateType teamProposalState, User user) {
         //check if user is org
         if (isNull(user) || user.getStatus() != UserStatusType.ACTIVE) {
             log.warn("~ forbiddenException for modify proposal to tournament for user {}.", user);
@@ -187,7 +187,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         TournamentTeamProposal teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
 
         // check if proposal is active
-        if (!TournamentTeamStateType.activeProposalStateList.contains(teamProposal.getState())) {
+        if (!ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
             log.warn("~ forbiddenException for modify non-active proposal with state {} to tournament.id {} for user {} from team {}.",
                     teamProposal.getState(), tournament.getId(), user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,

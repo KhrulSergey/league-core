@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.model;
 
-import com.freetonleague.core.domain.enums.TournamentAccessType;
+import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
 import lombok.*;
@@ -73,7 +73,7 @@ public class Tournament extends ExtendedBaseEntity {
     @NotNull
     @Column(name = "access_type")
     @Enumerated(EnumType.STRING)
-    private TournamentAccessType accessType;
+    private AccessType accessType;
 
     /**
      * Type of grid generation algorithm for creating matches

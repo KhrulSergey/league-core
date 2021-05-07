@@ -155,7 +155,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public List<AccountTransactionInfoDto> processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
-                                                                                    TournamentTeamStateType newTournamentTeamState) {
+                                                                                    ParticipationStateType newTournamentTeamState) {
         log.debug("^ state of team proposal was changed from {} to {}. Process team proposal state change in Tournament Event Service.",
                 tournamentTeamProposal.getPrevState(), newTournamentTeamState);
         List<AccountTransactionInfoDto> paymentList = null;
@@ -176,9 +176,9 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     private boolean needToPaidParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
         return (isNull(tournamentTeamProposal.getPrevState())
-                || TournamentTeamStateType.disabledProposalStateList
+                || ParticipationStateType.disabledProposalStateList
                 .contains(tournamentTeamProposal.getPrevState()))
-                && TournamentTeamStateType.activeProposalStateList.contains(tournamentTeamProposal.getState());
+                && ParticipationStateType.activeProposalStateList.contains(tournamentTeamProposal.getState());
     }
 
     /**
@@ -186,8 +186,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     private boolean needToRefundParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
         return nonNull(tournamentTeamProposal.getPrevState())
-                && TournamentTeamStateType.activeProposalStateList.contains(tournamentTeamProposal.getPrevState())
-                && TournamentTeamStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState());
+                && ParticipationStateType.activeProposalStateList.contains(tournamentTeamProposal.getPrevState())
+                && ParticipationStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState());
     }
 
     //TODO delete method

@@ -3,7 +3,7 @@ package com.freetonleague.core.controller;
 import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentTeamFacade;
 import io.swagger.annotations.Api;
@@ -48,7 +48,7 @@ public class TournamentTeamController {
     public ResponseEntity<TournamentTeamProposalDto> editTeamProposal(@RequestParam(value = "tournament_id", required = false) Long tournamentId,
                                                                       @RequestParam(value = "team_id", required = false) Long teamId,
                                                                       @RequestParam(value = "team_poposal_id", required = false) Long teamProposalId,
-                                                                      @RequestParam(value = "team_poposal_state", required = true) TournamentTeamStateType teamProposalState,
+                                                                      @RequestParam(value = "team_poposal_state", required = true) ParticipationStateType teamProposalState,
                                                                       @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentTeamFacade.editProposalToTournament(tournamentId, teamId, teamProposalId, teamProposalState, user), HttpStatus.OK);
     }
