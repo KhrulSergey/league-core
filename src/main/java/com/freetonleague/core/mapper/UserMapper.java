@@ -18,7 +18,8 @@ public interface UserMapper {
     UserDto toDto(User entity);
 
     @Named(value = "toPubicDto")
-    @Mapping(target = "userTeamParticipateHistoryList", source = "entity.userTeamParticipantList")
+    @Mapping(target = "userTeamParticipateHistoryList", source = "entity.userTeamParticipantList",
+            qualifiedByName = "toUserTeamParticipateHistoryDto")
     UserPublicDto toPubicDto(User entity);
 
     List<User> fromDto(List<UserDto> dtoList);

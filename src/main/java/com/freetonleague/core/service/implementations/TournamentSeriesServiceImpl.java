@@ -141,7 +141,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     @Override
     public boolean isAllSeriesFinishedByRound(TournamentRound tournamentRound) {
         return tournamentRound.getSeriesList().parallelStream()
-                .map(TournamentSeries::getStatus).allMatch(TournamentStatusType.getFinishedStatusList()::contains);
+                .map(TournamentSeries::getStatus).allMatch(TournamentStatusType.finishedStatusList::contains);
     }
 
     private TournamentSeriesRival getCalculatedSeriesWinner(TournamentSeries tournamentSeries) {

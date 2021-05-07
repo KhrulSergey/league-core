@@ -35,13 +35,11 @@ public enum TournamentStatusType {
         return this == DELETED;
     }
 
-    public static List<TournamentStatusType> getFinishedStatusList() {
-        return List.of(
-                TournamentStatusType.FINISHED,
-                TournamentStatusType.DECLINED,
-                TournamentStatusType.DELETED
-        );
-    }
+    public static List<TournamentStatusType> finishedStatusList = List.of(
+            TournamentStatusType.FINISHED,
+            TournamentStatusType.DECLINED,
+            TournamentStatusType.DELETED
+    );
 
     public boolean isCreated() {
         return this == CREATED;

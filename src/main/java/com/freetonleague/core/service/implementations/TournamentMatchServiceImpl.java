@@ -143,7 +143,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
 //                tournamentSeries, this.finishedMatchStatusList);
 //        int allMatchCount = tournamentMatchRepository.countByTournamentSeries(tournamentSeries);
         return tournamentSeries.getMatchList().parallelStream()
-                .map(TournamentMatch::getStatus).allMatch(TournamentStatusType.getFinishedStatusList()::contains);
+                .map(TournamentMatch::getStatus).allMatch(TournamentStatusType.finishedStatusList::contains);
     }
 
     /**
