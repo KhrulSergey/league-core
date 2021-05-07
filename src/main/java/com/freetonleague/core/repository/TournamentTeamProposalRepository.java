@@ -1,6 +1,6 @@
 package com.freetonleague.core.repository;
 
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentTeamProposal;
@@ -18,7 +18,7 @@ public interface TournamentTeamProposalRepository extends JpaRepository<Tourname
 
     TournamentTeamProposal findByTeamAndTournament(Team team, Tournament tournament);
 
-    Page<TournamentTeamProposal> findAllByTournamentAndStateIn(@PageableDefault Pageable pageable, Tournament tournament, List<TournamentTeamStateType> state);
+    Page<TournamentTeamProposal> findAllByTournamentAndStateIn(@PageableDefault Pageable pageable, Tournament tournament, List<ParticipationStateType> state);
 
-    List<TournamentTeamProposal> findAllByTournamentAndState(Tournament tournament, TournamentTeamStateType state);
+    List<TournamentTeamProposal> findAllByTournamentAndState(Tournament tournament, ParticipationStateType state);
 }

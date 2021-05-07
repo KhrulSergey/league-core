@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.dto;
 
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,7 +19,7 @@ public class TournamentTeamProposalBaseDto {
 
     private TeamBaseDto team;
 
-    private TournamentTeamStateType state;
+    private ParticipationStateType state;
 
     private TournamentTeamType type;
 }

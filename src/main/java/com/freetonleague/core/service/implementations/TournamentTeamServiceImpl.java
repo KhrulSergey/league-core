@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -62,20 +62,6 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     }
 
     /**
-     * Returns list of approved team proposal list for specified tournament.
-     */
-    @Override
-    public List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament) {
-        if (isNull(tournament)) {
-            log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
-            return null;
-        }
-        log.debug("^ trying to get Approved team proposal list by tournament with id: {}", tournament.getId());
-
-        return teamProposalRepository.findAllByTournamentAndState(tournament, TournamentTeamStateType.APPROVE);
-    }
-
-    /**
      * Returns list of all tournament team proposal filtered by requested params
      */
     @Override
@@ -85,10 +71,34 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
                     pageable, tournament);
             return null;
         }
-        List<TournamentTeamStateType> filteredProposalStateList = List.of(TournamentTeamStateType.values());
+        List<ParticipationStateType> filteredProposalStateList = List.of(ParticipationStateType.values());
         log.debug("^ trying to get tournament team proposal list with pageable params: {} and for tournament {}",
                 pageable, tournament.getId());
         return teamProposalRepository.findAllByTournamentAndStateIn(pageable, tournament, filteredProposalStateList);
+    }
+
+    /**
+     * Quit requested team (in team proposal) from tournament.
+     * TournamentTeamProposal marked as CANCELLED
+     */
+    @Override
+    public TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
+        if (isNull(tournamentTeamProposal) || isNull(tournamentTeamProposal.getTournament())) {
+            log.error("!> requesting addProposal for NULL tournamentTeamProposal {} or embedded Tournament {}. Check evoking clients",
+                    tournamentTeamProposal, tournamentTeamProposal != null ? tournamentTeamProposal.getTournament() : null);
+            return null;
+        }
+        if (!tournamentService.getTournamentActiveStatusList().contains(tournamentTeamProposal.getTournament().getStatus())) {
+            log.error("!> requesting quitFromTournament for tournament that is not active. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to quit team with proposal {} form tournament", tournamentTeamProposal);
+        tournamentTeamProposal.setState(ParticipationStateType.CANCELLED);
+
+        if (tournamentTeamProposal.isStateChanged()) {
+            this.handleTeamProposalStateChanged(tournamentTeamProposal);
+        }
+        return teamProposalRepository.save(tournamentTeamProposal);
     }
 
     /**
@@ -131,27 +141,17 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     }
 
     /**
-     * Quit requested team (in team proposal) from tournament.
-     * TournamentTeamProposal marked as CANCELLED
+     * Returns list of approved team proposal list for specified tournament.
      */
     @Override
-    public TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
-        if (isNull(tournamentTeamProposal) || isNull(tournamentTeamProposal.getTournament())) {
-            log.error("!> requesting addProposal for NULL tournamentTeamProposal {} or embedded Tournament {}. Check evoking clients",
-                    tournamentTeamProposal, tournamentTeamProposal != null ? tournamentTeamProposal.getTournament() : null);
+    public List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament) {
+        if (isNull(tournament)) {
+            log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
             return null;
         }
-        if (!tournamentService.getTournamentActiveStatusList().contains(tournamentTeamProposal.getTournament().getStatus())) {
-            log.error("!> requesting quitFromTournament for tournament that is not active. Check evoking clients");
-            return null;
-        }
-        log.debug("^ trying to quit team with proposal {} form tournament", tournamentTeamProposal);
-        tournamentTeamProposal.setState(TournamentTeamStateType.CANCELLED);
+        log.debug("^ trying to get Approved team proposal list by tournament with id: {}", tournament.getId());
 
-        if (tournamentTeamProposal.isStateChanged()) {
-            this.handleTeamProposalStateChanged(tournamentTeamProposal);
-        }
-        return teamProposalRepository.save(tournamentTeamProposal);
+        return teamProposalRepository.findAllByTournamentAndState(tournament, ParticipationStateType.APPROVE);
     }
 
     /**

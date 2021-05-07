@@ -5,5 +5,6 @@ public enum AccountHolderType {
     ORGANIZER,
     TEAM,
     TOURNAMENT,
+    DOCKET,
     COMMISSION_FEES
 }
