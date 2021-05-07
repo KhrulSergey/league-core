@@ -46,7 +46,7 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     private Integer matchRivalCount = 2;
 
     /**
-     * Hash map of indicators with optimal values
+     * List of indicators with optimal values (serialized)
      */
     @NotNull
     @NotEmpty

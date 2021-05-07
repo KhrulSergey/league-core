@@ -1,7 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.GameIndicatorTypeDto;
+import com.freetonleague.core.domain.dto.MatchPropertyTypeDto;
 import com.freetonleague.core.domain.enums.GameIndicatorType;
+import com.freetonleague.core.domain.enums.MatchPropertyType;
 import com.freetonleague.core.mapper.NsiMapper;
 import com.freetonleague.core.service.RestNsiFacade;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,15 @@ public class RestNsiFacadeImpl implements RestNsiFacade {
     public List<GameIndicatorTypeDto> getGameIndicatorList() {
         log.debug("^ trying to get GameIndicatorType entries of size: {}", GameIndicatorType.values().length);
         return mapper.toDto(GameIndicatorType.values());
+    }
+
+    /**
+     * Returns all entries of Match Property Type
+     */
+    @Override
+    public List<MatchPropertyTypeDto> getMatchPropertyList() {
+        log.debug("^ trying to get GameIndicatorType entries of size: {}", GameIndicatorType.values().length);
+        return mapper.toDto(MatchPropertyType.values());
     }
 
 }

@@ -8,6 +8,7 @@ import com.freetonleague.core.repository.TournamentMatchRepository;
 import com.freetonleague.core.service.TournamentEventService;
 import com.freetonleague.core.service.TournamentMatchRivalService;
 import com.freetonleague.core.service.TournamentMatchService;
+import com.freetonleague.core.util.MatchPropertyConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -69,6 +71,9 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (!this.verifyTournamentMatch(tournamentMatch)) {
             return null;
         }
+        if (isNotEmpty(tournamentMatch.getMatchPropertyList())) {
+            tournamentMatch.setMatchPropertyList(MatchPropertyConverter.convertAndValidate(tournamentMatch.getMatchPropertyList()));
+        }
         log.debug("^ trying to add new tournament match {}", tournamentMatch);
         return tournamentMatchRepository.save(tournamentMatch);
     }
@@ -99,6 +104,10 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (tournamentMatch.getStatus().isFinished()) {
             tournamentMatch.setFinishedDate(LocalDateTime.now());
         }
+        if (isNotEmpty(tournamentMatch.getMatchPropertyList())) {
+            tournamentMatch.setMatchPropertyList(MatchPropertyConverter.convertAndValidate(tournamentMatch.getMatchPropertyList()));
+        }
+
         tournamentMatch = tournamentMatchRepository.save(tournamentMatch);
         if (tournamentMatch.isStatusChanged()) {
             this.handleTournamentMatchStatusChanged(tournamentMatch);
