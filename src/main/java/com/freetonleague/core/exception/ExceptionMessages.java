@@ -91,6 +91,7 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_MATCH_MODIFICATION_ERROR = "Tournament match modifying failed. Please try again";
     public static final String TOURNAMENT_MATCH_DISABLE_ERROR = "Tournament match is not active and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_MATCH_VALIDATION_ERROR = "Tournament match was specified with errors. Please check request parameters";
+    public static final String TOURNAMENT_MATCH_PROPERTIES_CONVERTED_ERROR = "Tournament match properties was badly saved. Please try to modify or create new one";
 
     public static final String TOURNAMENT_MATCH_RIVAL_FORBIDDEN_ERROR = "Need proper team status to manage match settings for team. Please check your rights.";
     public static final String TOURNAMENT_MATCH_RIVAL_NOT_FOUND_ERROR = "Tournament match rival was not found. Please check request parameters";

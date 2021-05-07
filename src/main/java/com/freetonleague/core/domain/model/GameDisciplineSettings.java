@@ -53,7 +53,7 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     }
 
     /**
-     * Hash map of indicators with optimal values
+     * List of indicators with optimal values (serialized)
      */
     @NotNull
     @NotEmpty

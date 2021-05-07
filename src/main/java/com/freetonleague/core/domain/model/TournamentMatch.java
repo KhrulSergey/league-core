@@ -1,12 +1,15 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.dto.MatchPropertyDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
@@ -68,6 +71,13 @@ public class TournamentMatch extends ExtendedBaseEntity {
 
     @Column(name = "finished_at")
     private LocalDateTime finishedDate;
+
+    /**
+     * List of indicators with optimal values (serialized)
+     */
+    @Type(type = "jsonb")
+    @Column(name = "match_properties", columnDefinition = "jsonb")
+    private List<MatchPropertyDto> matchPropertyList;
 
     public void setStatus(TournamentStatusType status) {
         prevStatus = this.status;

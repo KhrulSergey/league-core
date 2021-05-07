@@ -1,9 +1,9 @@
 package com.freetonleague.core.domain.enums;
 
 /**
- * All Possible game indicators
+ * All Possible indicators value classes
  */
-public enum GameIndicatorValueClassType {
+public enum IndicatorValueClassType {
     INTEGER,
     BOOLEAN,
     DOUBLE,

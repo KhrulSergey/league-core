@@ -8,6 +8,7 @@ import lombok.Data;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 public class TournamentMatchBaseDto {
@@ -35,4 +36,6 @@ public class TournamentMatchBaseDto {
     @ApiModelProperty(required = false, readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime finishedDate;
+
+    private List<MatchPropertyDto> matchPropertyList;
 }

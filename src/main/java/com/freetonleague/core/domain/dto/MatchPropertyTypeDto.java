@@ -4,16 +4,14 @@ import com.freetonleague.core.domain.enums.IndicatorValueClassType;
 import lombok.Data;
 
 /**
- * Dto for game indicators (enum) entry
+ * Dto for match property (enum) entry
  */
 @Data
-public class GameIndicatorTypeDto {
+public class MatchPropertyTypeDto {
 
     private String name;
 
     private String description;
 
     private IndicatorValueClassType valueClassType;
-
-    private Long gameDisciplineId;
 }
