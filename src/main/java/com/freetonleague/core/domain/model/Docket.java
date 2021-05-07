@@ -63,7 +63,7 @@ public class Docket extends ExtendedBaseEntity {
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "docket", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<DocketUserProposal> tournamentTeamProposalList;
+    private List<DocketUserProposal> userProposalList;
 
     @Column(name = "sign_up_start_at")
     private LocalDateTime signUpStartDate;

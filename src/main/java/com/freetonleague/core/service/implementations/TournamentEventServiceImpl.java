@@ -36,7 +36,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private final EventService eventService;
     private final FinancialClientService financialClientService;
     private final TournamentService tournamentService;
-    private final TournamentTeamService tournamentTeamService;
+    private final TournamentProposalService tournamentProposalService;
 
     @Lazy
     @Autowired
@@ -204,7 +204,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         User teamCapitan = teamProposal.getTeam().getCaptain().getUser();
         Tournament tournament = teamProposal.getTournament();
 
-        double teamParticipationFee = tournamentTeamService.calculateTeamParticipationFee(teamProposal);
+        double teamParticipationFee = tournamentProposalService.calculateTeamParticipationFee(teamProposal);
         AccountInfoDto teamCapitanAccountDto = financialClientService.getAccountByHolderInfo(teamCapitan.getLeagueId(),
                 AccountHolderType.USER);
         if (teamCapitanAccountDto.getAmount() < teamParticipationFee) {

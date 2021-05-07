@@ -8,8 +8,8 @@ import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.service.TournamentGenerator;
+import com.freetonleague.core.service.TournamentProposalService;
 import com.freetonleague.core.service.TournamentService;
-import com.freetonleague.core.service.TournamentTeamService;
 import com.freetonleague.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +31,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 @Component("singleEliminationGenerator")
 public class TournamentSingleEliminationGeneratorImpl implements TournamentGenerator {
 
-    private final TournamentTeamService tournamentTeamService;
+    private final TournamentProposalService tournamentProposalService;
 
     @Lazy
     @Autowired
@@ -51,7 +51,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      */
     @Override
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
-        if (!tournamentService.getTournamentActiveStatusList().contains(tournament.getStatus())) {
+        if (!TournamentStatusType.activeStatusList.contains(tournament.getStatus())) {
             log.error("!> requesting generate tournament round for non-active tournament. Check evoking clients");
             return null;
         }
@@ -62,7 +62,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         //define vars for algorithm
         GameDisciplineSettings gameDisciplineSettings = tournament.getGameDisciplineSettings();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
-        List<TournamentTeamProposal> teamProposalList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament);
+        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament);
         Integer matchRivalCountLimit = gameDisciplineSettings.getMatchRivalCount();
         Integer matchCountPerSeries = tournamentSettings.getMatchCountPerSeries();
         int teamProposalListSize = teamProposalList.size();
