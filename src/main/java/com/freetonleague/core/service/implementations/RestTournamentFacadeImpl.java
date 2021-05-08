@@ -39,7 +39,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestTournamentFacadeImpl implements RestTournamentFacade {
 
     private final TournamentService tournamentService;
-    private final TournamentTeamService tournamentTeamService;
+    private final TournamentProposalService tournamentProposalService;
     private final TournamentOrganizerService tournamentOrganizerService;
     private final RestUserFacade restUserFacade;
     private final TournamentMapper tournamentMapper;
@@ -208,9 +208,9 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     }
 
     private TournamentDiscordChannelDto composeDiscordChannelInfoForTournament(Tournament tournament) {
-        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentTeamService.getActiveTeamProposalListByTournament(tournament)
+        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament)
                 .parallelStream()
-                .map(tournamentTeamService::getUserDiscordIdListFromTeamProposal)
+                .map(tournamentProposalService::getUserDiscordIdListFromTeamProposal)
                 .flatMap(Collection::stream)
                 .collect(Collectors.toSet());
         return TournamentDiscordChannelDto.builder()

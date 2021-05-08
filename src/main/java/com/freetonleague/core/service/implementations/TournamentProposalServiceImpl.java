@@ -2,6 +2,7 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -9,8 +10,7 @@ import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.repository.TournamentTeamParticipantRepository;
 import com.freetonleague.core.repository.TournamentTeamProposalRepository;
 import com.freetonleague.core.service.TournamentEventService;
-import com.freetonleague.core.service.TournamentService;
-import com.freetonleague.core.service.TournamentTeamService;
+import com.freetonleague.core.service.TournamentProposalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,11 +27,10 @@ import static java.util.Objects.isNull;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class TournamentTeamServiceImpl implements TournamentTeamService {
+public class TournamentProposalServiceImpl implements TournamentProposalService {
 
     private final TournamentTeamProposalRepository teamProposalRepository;
     private final TournamentTeamParticipantRepository tournamentTeamParticipantRepository;
-    private final TournamentService tournamentService;
 
     @Lazy
     @Autowired
@@ -56,7 +55,7 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
                     team, tournament);
             return null;
         }
-        log.debug("^ trying to get tournament team proposal list for team: {} and tournament {}",
+        log.debug("^ trying to get tournament team proposal for team: {} and tournament {}",
                 team.getId(), tournament.getId());
         return teamProposalRepository.findByTeamAndTournament(team, tournament);
     }
@@ -78,23 +77,20 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     }
 
     /**
-     * Quit requested team (in team proposal) from tournament.
-     * TournamentTeamProposal marked as CANCELLED
+     * Edit tournament team proposal in DB.
      */
     @Override
-    public TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
-        if (isNull(tournamentTeamProposal) || isNull(tournamentTeamProposal.getTournament())) {
-            log.error("!> requesting addProposal for NULL tournamentTeamProposal {} or embedded Tournament {}. Check evoking clients",
-                    tournamentTeamProposal, tournamentTeamProposal != null ? tournamentTeamProposal.getTournament() : null);
+    public TournamentTeamProposal editProposal(TournamentTeamProposal tournamentTeamProposal) {
+        if (isNull(tournamentTeamProposal)) {
+            log.error("!> requesting modify tournament team proposal with editProposal for NULL tournamentTeamProposal. Check evoking clients");
             return null;
         }
-        if (!tournamentService.getTournamentActiveStatusList().contains(tournamentTeamProposal.getTournament().getStatus())) {
-            log.error("!> requesting quitFromTournament for tournament that is not active. Check evoking clients");
+        if (!this.isExistsTournamentTeamProposalById(tournamentTeamProposal.getId())) {
+            log.error("!> requesting modify tournament team proposal for non-existed tournament team proposal.id {}. Check evoking clients",
+                    tournamentTeamProposal.getId());
             return null;
         }
-        log.debug("^ trying to quit team with proposal {} form tournament", tournamentTeamProposal);
-        tournamentTeamProposal.setState(ParticipationStateType.CANCELLED);
-
+        log.debug("^ trying to modify tournament team proposal {}", tournamentTeamProposal);
         if (tournamentTeamProposal.isStateChanged()) {
             this.handleTeamProposalStateChanged(tournamentTeamProposal);
         }
@@ -120,20 +116,23 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
     }
 
     /**
-     * Edit tournament team proposal in DB.
+     * Quit requested team (in team proposal) from tournament.
+     * TournamentTeamProposal marked as CANCELLED
      */
     @Override
-    public TournamentTeamProposal editProposal(TournamentTeamProposal tournamentTeamProposal) {
-        if (isNull(tournamentTeamProposal)) {
-            log.error("!> requesting modify tournament team proposal with editProposal for NULL tournamentTeamProposal. Check evoking clients");
+    public TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
+        if (isNull(tournamentTeamProposal) || isNull(tournamentTeamProposal.getTournament())) {
+            log.error("!> requesting addProposal for NULL tournamentTeamProposal {} or embedded Tournament {}. Check evoking clients",
+                    tournamentTeamProposal, tournamentTeamProposal != null ? tournamentTeamProposal.getTournament() : null);
             return null;
         }
-        if (!this.isExistsTournamentTeamParticipantById(tournamentTeamProposal.getId())) {
-            log.error("!> requesting modify tournament team proposal {} for non-existed tournament team proposal. Check evoking clients",
-                    tournamentTeamProposal.getId());
+        if (!TournamentStatusType.activeStatusList.contains(tournamentTeamProposal.getTournament().getStatus())) {
+            log.error("!> requesting quitFromTournament for tournament that is not active. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to modify tournament team proposal {}", tournamentTeamProposal);
+        log.debug("^ trying to quit team with proposal {} form tournament", tournamentTeamProposal);
+        tournamentTeamProposal.setState(ParticipationStateType.CANCELLED);
+
         if (tournamentTeamProposal.isStateChanged()) {
             this.handleTeamProposalStateChanged(tournamentTeamProposal);
         }
@@ -185,7 +184,7 @@ public class TournamentTeamServiceImpl implements TournamentTeamService {
         return participationFee * tournamentTeamParticipantCount;
     }
 
-    private boolean isExistsTournamentTeamParticipantById(long id) {
+    private boolean isExistsTournamentTeamProposalById(long id) {
         return teamProposalRepository.existsById(id);
     }
 

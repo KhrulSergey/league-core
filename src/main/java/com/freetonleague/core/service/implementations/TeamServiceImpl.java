@@ -46,7 +46,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Lazy
     @Autowired
-    private TournamentTeamService tournamentTeamService;
+    private TournamentProposalService tournamentProposalService;
 
     /**
      * Add new team to DB.
@@ -183,7 +183,7 @@ public class TeamServiceImpl implements TeamService {
         // from all active tournament
         return tournamentService.getAllActiveTournament().parallelStream()
                 // find team proposal if exists
-                .map(t -> tournamentTeamService.getProposalByTeamAndTournament(team, t))
+                .map(t -> tournamentProposalService.getProposalByTeamAndTournament(team, t))
                 .filter(Objects::nonNull)
                 // check if any of proposal is approved (active)
                 .map(TournamentTeamProposal::getState)
