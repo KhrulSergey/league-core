@@ -7,10 +7,13 @@ import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Universal docket (lists) for different purpose
@@ -45,7 +48,7 @@ public class Docket extends ExtendedBaseEntity {
     private String textLabel;
 
     @Builder.Default
-    @NotBlank
+    @NotNull
     @Column(name = "status")
     private DocketStatusType status = DocketStatusType.CREATED;
 
@@ -53,7 +56,7 @@ public class Docket extends ExtendedBaseEntity {
     private DocketStatusType prevStatus;
 
     @Builder.Default
-    @NotBlank
+    @NotNull
     @Column(name = "access_type")
     private AccessType accessType = AccessType.FREE_ACCESS;
 
@@ -90,5 +93,9 @@ public class Docket extends ExtendedBaseEntity {
 
     public boolean isStatusChanged() {
         return !this.status.equals(this.prevStatus);
+    }
+
+    public boolean hasTextLabel() {
+        return !isBlank(textLabel);
     }
 }

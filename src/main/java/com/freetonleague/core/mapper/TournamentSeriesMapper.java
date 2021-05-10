@@ -9,7 +9,7 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {TournamentMatchMapper.class, TournamentTeamMapper.class})
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {TournamentMatchMapper.class, TournamentProposalMapper.class})
 public interface TournamentSeriesMapper {
     TournamentSeries fromDto(TournamentSeriesDto dto);
 

@@ -15,6 +15,8 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+
 /**
  * User proposals to Universal docket (lists)
  */
@@ -69,5 +71,9 @@ public class DocketUserProposal extends BaseEntity {
 
     public boolean isStateChanged() {
         return !this.state.equals(this.prevState);
+    }
+
+    public boolean hasTextLabelAnswer() {
+        return !isBlank(textLabelAnswer);
     }
 }

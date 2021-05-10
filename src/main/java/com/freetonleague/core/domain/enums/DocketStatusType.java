@@ -12,6 +12,14 @@ public enum DocketStatusType {
         return this == CREATED;
     }
 
+    public boolean isDeleted() {
+        return this == DELETED;
+    }
+
+    public boolean isFinished() {
+        return this == FINISHED;
+    }
+
     /**
      * Returns "active" statuses for tournaments
      */
@@ -19,8 +27,4 @@ public enum DocketStatusType {
             DocketStatusType.CREATED,
             DocketStatusType.ACTIVE
     );
-
-    public boolean isFinished() {
-        return this == FINISHED;
-    }
 }
