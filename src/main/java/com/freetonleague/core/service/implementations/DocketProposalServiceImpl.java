@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.Docket;
 import com.freetonleague.core.domain.model.DocketUserProposal;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -83,10 +85,9 @@ public class DocketProposalServiceImpl implements DocketProposalService {
             return null;
         }
         log.debug("^ trying to add new user proposal to docket {}", userProposal);
-        //TODO implement paymments
-//        List<AccountTransactionInfoDto> paymentList = tournamentEventService.processTournamentTeamProposalStateChange(
-//                tournamentTeamProposal, tournamentTeamProposal.getState());
-//        userProposal.setParticipatePaymentList(paymentList);
+        List<AccountTransactionInfoDto> paymentList = docketEventService.processDocketUserProposalStateChange(
+                userProposal, userProposal.getState());
+        userProposal.setParticipatePaymentList(paymentList);
         return docketProposalRepository.save(userProposal);
     }
 
@@ -140,7 +141,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
     @Override
     public double calculateUserParticipationFee(DocketUserProposal userProposal) {
         Docket docket = userProposal.getDocket();
-        return docket.getParticipationFee();
+        return nonNull(docket.getParticipationFee()) ? docket.getParticipationFee() : 0.0;
     }
 
     private boolean isExistsDocketUserProposalById(long id) {

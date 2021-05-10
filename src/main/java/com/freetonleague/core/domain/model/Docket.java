@@ -49,6 +49,7 @@ public class Docket extends ExtendedBaseEntity {
 
     @Builder.Default
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private DocketStatusType status = DocketStatusType.CREATED;
 
@@ -57,6 +58,7 @@ public class Docket extends ExtendedBaseEntity {
 
     @Builder.Default
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "access_type")
     private AccessType accessType = AccessType.FREE_ACCESS;
 

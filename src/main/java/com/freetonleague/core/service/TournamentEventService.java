@@ -39,7 +39,7 @@ public interface TournamentEventService {
     void processSeriesDeadHead(TournamentSeries tournamentSeries);
 
     /**
-     * Process tournament status changing
+     * Process tournament team proposal status changing
      */
     List<AccountTransactionInfoDto> processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
                                                                              ParticipationStateType newTournamentTeamState);
