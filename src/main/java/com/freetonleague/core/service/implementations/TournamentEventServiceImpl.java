@@ -151,7 +151,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
-     * Process tournament status changing
+     * Process tournament team proposal status changing
      */
     @Override
     public List<AccountTransactionInfoDto> processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
@@ -172,7 +172,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
-     * if prev status was non-active and new status is active we need to debit money from team
+     * Returns sign: if prev status was non-active and new status is active we need to debit money from team
      */
     private boolean needToPaidParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
         return (isNull(tournamentTeamProposal.getPrevState())
