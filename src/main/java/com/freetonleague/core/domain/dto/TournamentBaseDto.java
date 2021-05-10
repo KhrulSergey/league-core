@@ -2,7 +2,7 @@ package com.freetonleague.core.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.freetonleague.core.domain.enums.TournamentAccessType;
+import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
 import io.swagger.annotations.ApiModelProperty;
@@ -35,7 +35,7 @@ public class TournamentBaseDto {
     private TournamentStatusType status;
 
     @NotNull
-    private TournamentAccessType accessType;
+    private AccessType accessType;
 
     @NotNull
     private TournamentSystemType systemType;

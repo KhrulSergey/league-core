@@ -36,7 +36,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private final EventService eventService;
     private final FinancialClientService financialClientService;
     private final TournamentService tournamentService;
-    private final TournamentTeamService tournamentTeamService;
+    private final TournamentProposalService tournamentProposalService;
 
     @Lazy
     @Autowired
@@ -151,11 +151,11 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
-     * Process tournament status changing
+     * Process tournament team proposal status changing
      */
     @Override
     public List<AccountTransactionInfoDto> processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
-                                                                                    TournamentTeamStateType newTournamentTeamState) {
+                                                                                    ParticipationStateType newTournamentTeamState) {
         log.debug("^ state of team proposal was changed from {} to {}. Process team proposal state change in Tournament Event Service.",
                 tournamentTeamProposal.getPrevState(), newTournamentTeamState);
         List<AccountTransactionInfoDto> paymentList = null;
@@ -172,13 +172,13 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
-     * if prev status was non-active and new status is active we need to debit money from team
+     * Returns sign: if prev status was non-active and new status is active we need to debit money from team
      */
     private boolean needToPaidParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
         return (isNull(tournamentTeamProposal.getPrevState())
-                || TournamentTeamStateType.disabledProposalStateList
+                || ParticipationStateType.disabledProposalStateList
                 .contains(tournamentTeamProposal.getPrevState()))
-                && TournamentTeamStateType.activeProposalStateList.contains(tournamentTeamProposal.getState());
+                && ParticipationStateType.activeProposalStateList.contains(tournamentTeamProposal.getState());
     }
 
     /**
@@ -186,8 +186,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     private boolean needToRefundParticipationFee(TournamentTeamProposal tournamentTeamProposal) {
         return nonNull(tournamentTeamProposal.getPrevState())
-                && TournamentTeamStateType.activeProposalStateList.contains(tournamentTeamProposal.getPrevState())
-                && TournamentTeamStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState());
+                && ParticipationStateType.activeProposalStateList.contains(tournamentTeamProposal.getPrevState())
+                && ParticipationStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState());
     }
 
     //TODO delete method
@@ -204,7 +204,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         User teamCapitan = teamProposal.getTeam().getCaptain().getUser();
         Tournament tournament = teamProposal.getTournament();
 
-        double teamParticipationFee = tournamentTeamService.calculateTeamParticipationFee(teamProposal);
+        double teamParticipationFee = tournamentProposalService.calculateTeamParticipationFee(teamProposal);
         AccountInfoDto teamCapitanAccountDto = financialClientService.getAccountByHolderInfo(teamCapitan.getLeagueId(),
                 AccountHolderType.USER);
         if (teamCapitanAccountDto.getAmount() < teamParticipationFee) {

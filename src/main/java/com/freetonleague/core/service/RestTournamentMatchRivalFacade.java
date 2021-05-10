@@ -62,10 +62,10 @@ public interface RestTournamentMatchRivalFacade {
     /**
      * Returns tournament rival by id and user with privacy check
      */
-    TournamentMatchRival getVerifiedMatchRivalById(long id, User user);
+    TournamentMatchRival getVerifiedMatchRivalById(long id);
 
     /**
      * Returns tournament rival by dto and user with privacy check
      */
-    TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto, User user);
+    TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto);
 }

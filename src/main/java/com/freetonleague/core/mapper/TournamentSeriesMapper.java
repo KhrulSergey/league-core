@@ -7,10 +7,9 @@ import com.freetonleague.core.domain.model.TournamentSeries;
 import org.mapstruct.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {TournamentMatchMapper.class, TournamentTeamMapper.class})
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {TournamentMatchMapper.class, TournamentProposalMapper.class})
 public interface TournamentSeriesMapper {
     TournamentSeries fromDto(TournamentSeriesDto dto);
 
@@ -42,5 +41,5 @@ public interface TournamentSeriesMapper {
 
     @Named(value = "toParentDtoSet")
     @IterableMapping(qualifiedByName = "toParentDto")
-    Set<TournamentSeriesParentDto> toParentDtoSet(Set<TournamentSeries> entity);
+    List<TournamentSeriesParentDto> toParentDtoSet(List<TournamentSeries> entity);
 }

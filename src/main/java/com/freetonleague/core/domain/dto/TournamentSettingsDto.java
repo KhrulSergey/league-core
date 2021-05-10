@@ -43,6 +43,9 @@ public class TournamentSettingsDto {
     @Min(0)
     private Integer maxTeamReserveParticipantCount;
 
+    @Min(1)
+    private Integer matchCountPerSeries;
+
     @Min(0)
     private Double prizeFund;
 

@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TeamStateType;
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.TournamentTeamProposal;
@@ -46,7 +46,7 @@ public class TeamServiceImpl implements TeamService {
 
     @Lazy
     @Autowired
-    private TournamentTeamService tournamentTeamService;
+    private TournamentProposalService tournamentProposalService;
 
     /**
      * Add new team to DB.
@@ -183,11 +183,11 @@ public class TeamServiceImpl implements TeamService {
         // from all active tournament
         return tournamentService.getAllActiveTournament().parallelStream()
                 // find team proposal if exists
-                .map(t -> tournamentTeamService.getProposalByTeamAndTournament(team, t))
+                .map(t -> tournamentProposalService.getProposalByTeamAndTournament(team, t))
                 .filter(Objects::nonNull)
                 // check if any of proposal is approved (active)
                 .map(TournamentTeamProposal::getState)
-                .anyMatch(TournamentTeamStateType::isApproved);
+                .anyMatch(ParticipationStateType::isApproved);
     }
 
     /**

@@ -49,6 +49,9 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
     @Autowired
     @Qualifier("doubleEliminationGenerator")
     private TournamentGenerator doubleEliminationGenerator;
+    @Autowired
+    @Qualifier("survivalEliminationGenerator")
+    private TournamentGenerator survivalEliminationGenerator;
 
     /**
      * Returns founded tournament round by id
@@ -116,6 +119,9 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             case DOUBLE_ELIMINATION:
                 tournamentRoundList = doubleEliminationGenerator.generateRoundsForTournament(tournament);
                 break;
+            case SURVIVAL_ELIMINATION:
+                tournamentRoundList = survivalEliminationGenerator.generateRoundsForTournament(tournament);
+                break;
             default:
                 break;
         }
@@ -148,6 +154,9 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
                 break;
             case DOUBLE_ELIMINATION:
                 tournamentRound = doubleEliminationGenerator.composeNextRoundForTournament(tournamentRound);
+                break;
+            case SURVIVAL_ELIMINATION:
+                tournamentRound = survivalEliminationGenerator.composeNextRoundForTournament(tournamentRound);
                 break;
             default:
                 break;

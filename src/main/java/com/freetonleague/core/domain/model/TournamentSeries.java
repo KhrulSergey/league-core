@@ -72,7 +72,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @JoinTable(name = "tournament_series_parents",
             joinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "series_id", referencedColumnName = "id"))
-    private Set<TournamentSeries> parentSeriesList;
+    private List<TournamentSeries> parentSeriesList;
 
     @Column(name = "start_planned_at")
     private LocalDateTime startPlannedDate;

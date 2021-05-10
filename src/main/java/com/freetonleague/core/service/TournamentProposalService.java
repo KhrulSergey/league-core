@@ -11,7 +11,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.List;
 import java.util.Set;
 
-public interface TournamentTeamService {
+public interface TournamentProposalService {
 
     /**
      * Returns tournament team proposal (request to participate on tournament) by id.
@@ -35,7 +35,7 @@ public interface TournamentTeamService {
      *
      * @param pageable   filtered params to search tournament team proposal
      * @param tournament params to search tournament team proposal
-     * @return list of team entities
+     * @return list of tournament team proposal entities
      */
     Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament);
 
@@ -59,7 +59,7 @@ public interface TournamentTeamService {
      * Quit requested team (in team proposal) from tournament.
      * TournamentTeamProposal marked as CANCELLED
      *
-     * @param tournamentTeamProposal data to get info about team / tournament and delete team proposal
+     * @param tournamentTeamProposal changed team proposal to tournament
      */
     TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal);
 

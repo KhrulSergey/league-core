@@ -13,7 +13,6 @@ public enum GameIndicatorType {
     CHECK_POINT_PASSED("check point passed", IndicatorValueClassType.BOOLEAN, null),
     KEY_WORD_DETECTED("found key word", IndicatorValueClassType.STRING, null)
     // end::common indicators[]
-
     ;
 
     private final String description;

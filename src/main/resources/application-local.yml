@@ -57,7 +57,7 @@ spring:
 
 config:
   broxus-client:
-    debug: false # change to true for mock Client use
+    debug: true # change to true for mock Client use
     url: http://49.12.10.52:3383
     token: XXXXXXXXXXXXXXXXXXXXXXXXX
 

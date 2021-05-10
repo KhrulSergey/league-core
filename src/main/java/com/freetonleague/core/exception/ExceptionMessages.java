@@ -59,6 +59,7 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_VISIBLE_ERROR = "Tournament is not visible and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_STATUS_DELETE_ERROR = "Tournament delete should be done with specific request. Please try again with other method.";
     public static final String TOURNAMENT_CREATION_ERROR = "Tournament creation failed. Please try again";
+    public static final String TOURNAMENT_VALIDATION_ERROR = "Tournament was specified with errors. Please check request parameters";
     public static final String TOURNAMENT_STATUS_FINISHED_ERROR = "Tournament can be finished only with setting winner list of the tournament. Please try to set winners and finished status simultaneously.";
     public static final String TOURNAMENT_MODIFICATION_ERROR = "Tournament modifying failed. Please try again";
 
@@ -114,7 +115,24 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_TEAM_PARTICIPANT_VALIDATION_ERROR = "Tournament team participant was specified with errors. Please check request parameters";
     public static final String TOURNAMENT_TEAM_PARTICIPANT_NOT_FOUND_ERROR = "Tournament team participant was not found. Please check request parameters";
 
-    public static final String ACCOUNT_INFO_NOT_FOUND_ERROR = "Account info was not found. Please check request parameters";
+    public static final String DOCKET_NOT_FOUND_ERROR = "Docket was not found. Please check request parameters";
+    public static final String DOCKET_VISIBLE_ERROR = "Docket is not visible and modification forbidden. Please contact to organizers.";
+    public static final String DOCKET_STATUS_DELETE_ERROR = "Docket delete should be done with specific request. Please try again with other method.";
+    public static final String DOCKET_CREATION_ERROR = "Docket creation failed. Please try again";
+    public static final String DOCKET_VALIDATION_ERROR = "Docket was specified with errors. Please check request parameters";
+    public static final String DOCKET_STATUS_FINISHED_ERROR = "Docket can be finished only with setting winner list of the docket. Please try to set winners and finished status simultaneously.";
+    public static final String DOCKET_MODIFICATION_ERROR = "Docket modifying failed. Please try again";
+
+    public static final String DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR = "User proposal to Docket was not found. Please check request parameters";
+    public static final String DOCKET_USER_PROPOSAL_EXIST_ERROR = "User proposal to Docket already existed. Creation duplicates is prohibited";
+    public static final String DOCKET_USER_PROPOSAL_QUIT_ERROR = "Quit from specified docket is prohibited. Request is rejected. Please contact to organizers to get more information.";
+    public static final String DOCKET_USER_PROPOSAL_VISIBLE_ERROR = "User proposal to Docket is not visible and modification forbidden. Please contact to organizers.";
+    public static final String DOCKET_USER_PROPOSAL_VALIDATION_ERROR = "User proposal to Docket was specified with errors. Please check request parameters";
+    public static final String DOCKET_USER_PROPOSAL_VERIFICATION_ERROR = "User can't participate in specified docket. Please check account balance or contact to organizers";
+    public static final String DOCKET_USER_PROPOSAL_CREATION_ERROR = "User proposal to Docket creation failed. Please try again";
+    public static final String DOCKET_USER_PROPOSAL_MODIFICATION_ERROR = "User proposal to Docket modifying failed. Please try again";
+
+    public static final String ACCOUNT_INFO_NOT_FOUND_ERROR = "Financial account info was not found. Please check request parameters";
 
     //---//
     public static final String FINANCE_UNIT_ACCOUNT_NOT_FOUND_ERROR = "Financial account was not found. Please check request parameters";

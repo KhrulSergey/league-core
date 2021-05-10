@@ -6,6 +6,7 @@ package com.freetonleague.core.domain.enums;
 public enum TournamentSystemType {
     SINGLE_ELIMINATION,
     DOUBLE_ELIMINATION,
+    SURVIVAL_ELIMINATION,
     TRIPLE_ELIMINATION,
     GROUP_FIXTURES,
     MULTI_STAGE

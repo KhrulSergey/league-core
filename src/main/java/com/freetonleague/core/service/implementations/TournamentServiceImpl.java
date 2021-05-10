@@ -41,19 +41,6 @@ public class TournamentServiceImpl implements TournamentService {
     @Autowired
     private TournamentEventService tournamentEventService;
 
-    private final List<TournamentStatusType> activeStatusList = List.of(
-            TournamentStatusType.CREATED,
-            TournamentStatusType.SIGN_UP,
-            TournamentStatusType.ADJUSTMENT,
-            TournamentStatusType.STARTED,
-            TournamentStatusType.PAUSE
-    );
-
-    private final List<TournamentStatusType> startedStatusList = List.of(
-            TournamentStatusType.STARTED,
-            TournamentStatusType.PAUSE,
-            TournamentStatusType.FINISHED
-    );
 
     /**
      * Returns founded tournament by id
@@ -93,7 +80,7 @@ public class TournamentServiceImpl implements TournamentService {
      */
     @Override
     public List<Tournament> getAllActiveTournament() {
-        return tournamentRepository.findAllActive(activeStatusList);
+        return tournamentRepository.findAllActive(TournamentStatusType.activeStatusList);
     }
 
 
@@ -203,22 +190,6 @@ public class TournamentServiceImpl implements TournamentService {
             return false;
         }
         return tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
-    }
-
-    /**
-     * Returns "active" statuses for tournaments
-     */
-    @Override
-    public List<TournamentStatusType> getTournamentActiveStatusList() {
-        return activeStatusList;
-    }
-
-    /**
-     * Returns "started" statuses for tournaments
-     */
-    @Override
-    public List<TournamentStatusType> getTournamentStartedStatusList() {
-        return startedStatusList;
     }
 
     /**

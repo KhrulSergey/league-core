@@ -38,15 +38,16 @@ public class TeamController {
 
     @ApiOperation("Get team by id")
     @GetMapping(path = PATH_GET)
-    public ResponseEntity<TeamBaseDto> getTeamById(@PathVariable("team_id") long id,
-                                                   @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<TeamExtendedDto> getTeamById(@PathVariable("team_id") long id,
+                                                       @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.getTeamById(id, user), HttpStatus.OK);
     }
 
     @ApiOperation("Get team list info")
+    @ApiPageable
     @GetMapping(path = PATH_GET_LIST)
-    public ResponseEntity<Page<TeamBaseDto>> getList(@PageableDefault Pageable pageable,
-                                                     @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<Page<TeamExtendedDto>> getList(@PageableDefault Pageable pageable,
+                                                         @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.getTeamList(pageable, user), HttpStatus.OK);
     }
 

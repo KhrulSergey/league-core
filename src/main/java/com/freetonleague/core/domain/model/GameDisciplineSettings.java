@@ -12,6 +12,8 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
+import static java.util.Objects.nonNull;
+
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
@@ -44,6 +46,11 @@ public class GameDisciplineSettings extends ExtendedBaseEntity {
     @Builder.Default
     @Column(name = "match_rival_count")
     private Integer matchRivalCount = 2;
+
+    @Transient
+    public int getMatchRivalWinnersCount() {
+        return nonNull(matchRivalCount) ? matchRivalCount / 2 : 0;
+    }
 
     /**
      * List of indicators with optimal values (serialized)

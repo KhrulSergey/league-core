@@ -3,10 +3,13 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
-import com.freetonleague.core.domain.enums.*;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
+import com.freetonleague.core.domain.enums.TournamentTeamType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
-import com.freetonleague.core.mapper.TournamentTeamMapper;
+import com.freetonleague.core.mapper.TournamentProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
@@ -29,13 +32,13 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @Slf4j
 @RequiredArgsConstructor
 @Service
-public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
+public class RestTournamentProposalFacadeImpl implements RestTournamentProposalFacade {
 
     private final RestTeamFacade restTeamFacade;
     private final TournamentService tournamentService;
     private final RestTournamentFacade restTournamentFacade;
-    private final TournamentTeamService tournamentTeamService;
-    private final TournamentTeamMapper tournamentTeamMapper;
+    private final TournamentProposalService tournamentProposalService;
+    private final TournamentProposalMapper tournamentProposalMapper;
 
     /**
      * Get team proposal for tournament
@@ -43,14 +46,9 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     @Override
     public TournamentTeamProposalDto getProposalFromTeamForTournament(long tournamentId, long teamId, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-        if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
-            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
-                    "Only captain can apply and modify proposals to tournaments from team.");
-        }
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
-        TournamentTeamProposal teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
-        return tournamentTeamMapper.toDto(teamProposal);
+        TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
+        return tournamentProposalMapper.toDto(teamProposal);
     }
 
     /**
@@ -59,24 +57,25 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     @Override
     public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId, User user) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
-        return tournamentTeamService.getProposalListForTournament(pageable, tournament).map(tournamentTeamMapper::toDto);
+        return tournamentProposalService.getProposalListForTournament(pageable, tournament).map(tournamentProposalMapper::toDto);
     }
 
     /**
      * Registry new team to tournament
      */
     @Override
-    public TournamentTeamProposalDto createProposalToTournament(long tournamentId, long teamId, TournamentTeamProposalDto teamProposalDto, User user) {
+    public TournamentTeamProposalDto createProposalToTournament(long tournamentId, long teamId,
+                                                                TournamentTeamProposalDto teamProposalDto, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
         if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
+            log.warn("~ forbiddenException for create proposal to tournament for user {} from team {}.", user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
                     "Only captain can apply and modify proposals to tournaments from team.");
         }
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
 
         //check if proposal already existed
-        TournamentTeamProposal teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
+        TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         if (nonNull(teamProposal)) {
             log.warn("~ forbiddenException for create duplicate proposal from user {}. Already existed proposal {}.", user, teamProposal);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR,
@@ -94,7 +93,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         }
 
         TournamentTeamProposal newTeamProposal = TournamentTeamProposal.builder()
-                .state(TournamentTeamStateType.CREATED)
+                .state(ParticipationStateType.CREATED)
                 .type(TournamentTeamType.SOLID)
                 .team(team)
                 .tournament(tournament)
@@ -109,13 +108,13 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         // Verify team participants, team bank account balance and other business staff
         this.verifyBusinessLogicOnTeamToParticipateTournament(tournament, team, tournamentTeamParticipantList);
         //save proposal
-        newTeamProposal = tournamentTeamService.addProposal(newTeamProposal);
+        newTeamProposal = tournamentProposalService.addProposal(newTeamProposal);
         if (isNull(newTeamProposal)) {
             log.error("!> error while creating tournament team proposal by team {} for tournament {} by user {}.", teamId, tournamentId, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
         }
-        return tournamentTeamMapper.toDto(newTeamProposal);
+        return tournamentProposalMapper.toDto(newTeamProposal);
     }
 
     /**
@@ -124,15 +123,8 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
     @CanManageTournament
     @Override
     public TournamentTeamProposalDto editProposalToTournament(Long tournamentId, Long teamId, Long teamProposalId,
-                                                              TournamentTeamStateType teamProposalState, User user) {
-        //check if user is org
-        if (isNull(user) || user.getStatus() != UserStatusType.ACTIVE) {
-            log.warn("~ forbiddenException for modify proposal to tournament for user {}.", user);
-            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
-                    "Only captain can apply and modify proposals to tournaments from team.");
-        }
+                                                              ParticipationStateType teamProposalState, User user) {
         TournamentTeamProposal teamProposal;
-
         if (nonNull(teamProposalId)) {
             teamProposal = this.getVerifiedTeamProposalById(teamProposalId, user, false);
         } else if (nonNull(teamId) && nonNull(tournamentId)) {
@@ -144,22 +136,27 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
 //                        "Only captain can apply and modify proposals to tournaments from team.");
 //            }
             Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
-            teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
+            teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         } else {
             log.warn("~ forbiddenException for modify proposal to tournament for user {}. " +
                     "No valid parameters of team proposal was specified", user);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VALIDATION_ERROR,
                     "No valid parameters of team proposal was specified. Request rejected.");
         }
+        if (isNull(teamProposal)) {
+            log.debug("^ Tournament team proposal with requested parameters tournamentId {}, teamId {}, teamProposalId {} was not found. " +
+                    "'editProposalToTournament' in RestTournamentTeamFacadeImpl request denied", tournamentId, teamId, teamProposalId);
+            throw new TeamManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR, "Tournament team proposal with requested id " + teamProposalId + " was not found");
+        }
 
         teamProposal.setState(teamProposalState);
-        TournamentTeamProposal savedTeamProposal = tournamentTeamService.editProposal(teamProposal);
+        TournamentTeamProposal savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
         if (isNull(savedTeamProposal)) {
             log.error("!> error while modifying tournament team proposal {} for user {}.", teamProposal, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
         }
-        return tournamentTeamMapper.toDto(savedTeamProposal);
+        return tournamentProposalMapper.toDto(savedTeamProposal);
     }
 
     /**
@@ -178,16 +175,16 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
 
         // check if tournament is already started
-        if (tournamentService.getTournamentStartedStatusList().contains(tournament.getStatus())) {
+        if (TournamentStatusType.startedStatusList.contains(tournament.getStatus())) {
             log.warn("~ forbiddenException for modify proposal to started tournament.id {} for user {} from team {}.",
                     tournament.getId(), user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
                     "Quit from already started or finished tournament is prohibited. Request is rejected.");
         }
-        TournamentTeamProposal teamProposal = tournamentTeamService.getProposalByTeamAndTournament(team, tournament);
+        TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
 
         // check if proposal is active
-        if (!TournamentTeamStateType.activeProposalStateList.contains(teamProposal.getState())) {
+        if (!ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
             log.warn("~ forbiddenException for modify non-active proposal with state {} to tournament.id {} for user {} from team {}.",
                     teamProposal.getState(), tournament.getId(), user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
@@ -195,7 +192,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
                             teamProposal.getState()));
         }
 
-        teamProposal = tournamentTeamService.quitFromTournament(teamProposal);
+        teamProposal = tournamentProposalService.quitFromTournament(teamProposal);
         if (isNull(teamProposal)) {
             log.error("!> error while quiting from tournament id {} for team id {} by user {}.", tournament.getId(), team.getId(), user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
@@ -213,7 +210,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamProposalById' request denied");
         }
 
-        TournamentTeamProposal tournamentTeamProposal = tournamentTeamService.getProposalById(id);
+        TournamentTeamProposal tournamentTeamProposal = tournamentProposalService.getProposalById(id);
         if (isNull(tournamentTeamProposal)) {
             log.debug("^ Tournament team proposal with requested id {} was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR, "Tournament team proposal  with requested id " + id + " was not found");
@@ -243,7 +240,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
             log.error("^ requested getVerifiedTournamentTeamParticipant for NULL tournamentTeamProposal. Check evoking clients");
             return null;
         }
-        TournamentTeamParticipant tournamentTeamParticipant = tournamentTeamService.getTournamentTeamParticipantById(tournamentTeamParticipantId);
+        TournamentTeamParticipant tournamentTeamParticipant = tournamentProposalService.getTournamentTeamParticipantById(tournamentTeamParticipantId);
         if (isNull(tournamentTeamParticipant)) {
             log.debug("^ Tournament team participant with requested id {} was not found. 'getVerifiedTournamentTeamParticipant' request denied",
                     tournamentTeamParticipantId);
@@ -334,7 +331,7 @@ public class RestTournamentTeamFacadeImpl implements RestTournamentTeamFacade {
 //        if (nonNull(tournamentTeamProposalDto.getId())) {
 //            TournamentTeamProposal existedTournamentTeamProposal = this.getVerifiedTeamProposalById(tournamentTeamProposalDto.getId(), user);
 //        }
-//        TournamentTeamProposal tournamentTeamProposal = tournamentTeamMapper.fromBaseDto(tournamentTeamProposalDto);
+//        TournamentTeamProposal tournamentTeamProposal = tournamentProposalMapper.fromBaseDto(tournamentTeamProposalDto);
 //        tournamentRound.setTournament(tournament);
 //        return tournamentRound;
 //    }

@@ -3,9 +3,9 @@ package com.freetonleague.core.controller;
 import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.RestTournamentTeamFacade;
+import com.freetonleague.core.service.RestTournamentProposalFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
-@RequestMapping(path = TournamentTeamController.BASE_PATH)
+@RequestMapping(path = TournamentProposalController.BASE_PATH)
 @RequiredArgsConstructor
 @Api(value = "Tournament Activity From Team Management Controller")
-public class TournamentTeamController {
+public class TournamentProposalController {
 
     public static final String BASE_PATH = "/api/tournament";
     public static final String BASE_PROPOSALS_POSTFIX_PATH = "/proposal";
@@ -32,7 +32,7 @@ public class TournamentTeamController {
     public static final String PATH_EDIT_TEAM_PROPOSAL = "/";
     public static final String PATH_GET_LIST_FOR_TOURNAMENT = "/list";
 
-    private final RestTournamentTeamFacade restTournamentTeamFacade;
+    private final RestTournamentProposalFacade restTournamentProposalFacade;
 
     @ApiOperation("Apply to participate in tournament by id")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_APPLY_TO_TOURNAMENT)
@@ -40,7 +40,7 @@ public class TournamentTeamController {
                                                                            @RequestParam(value = "team_id", required = true) long teamId,
                                                                            @ApiIgnore @RequestBody(required = false) TournamentTeamProposalDto teamProposalDto,
                                                                            @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentTeamFacade.createProposalToTournament(tournamentId, teamId, teamProposalDto, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentProposalFacade.createProposalToTournament(tournamentId, teamId, teamProposalDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Change team proposal to tournament by teamProposalId or by tournamentId + teamId (available edit only state, for orgs)")
@@ -48,9 +48,9 @@ public class TournamentTeamController {
     public ResponseEntity<TournamentTeamProposalDto> editTeamProposal(@RequestParam(value = "tournament_id", required = false) Long tournamentId,
                                                                       @RequestParam(value = "team_id", required = false) Long teamId,
                                                                       @RequestParam(value = "team_poposal_id", required = false) Long teamProposalId,
-                                                                      @RequestParam(value = "team_poposal_state", required = true) TournamentTeamStateType teamProposalState,
+                                                                      @RequestParam(value = "team_poposal_state", required = true) ParticipationStateType teamProposalState,
                                                                       @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentTeamFacade.editProposalToTournament(tournamentId, teamId, teamProposalId, teamProposalState, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentProposalFacade.editProposalToTournament(tournamentId, teamId, teamProposalId, teamProposalState, user), HttpStatus.OK);
     }
 
     @ApiOperation("Quit team from tournament by tournament and team id")
@@ -58,7 +58,7 @@ public class TournamentTeamController {
     public ResponseEntity<Void> quitFromTournamentById(@RequestParam(value = "tournament_id", required = true) long tournamentId,
                                                        @RequestParam(value = "team_id", required = true) long teamId,
                                                        @ApiIgnore @AuthenticationPrincipal User user) {
-        restTournamentTeamFacade.quitFromTournament(tournamentId, teamId, user);
+        restTournamentProposalFacade.quitFromTournament(tournamentId, teamId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
@@ -67,7 +67,7 @@ public class TournamentTeamController {
     public ResponseEntity<TournamentTeamProposalDto> getTournamentProposalByTeamId(@RequestParam(value = "tournament_id", required = true) long tournamentId,
                                                                                    @RequestParam(value = "team_id", required = true) long teamId,
                                                                                    @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restTournamentTeamFacade.getProposalFromTeamForTournament(tournamentId, teamId, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentProposalFacade.getProposalFromTeamForTournament(tournamentId, teamId, user), HttpStatus.OK);
     }
 
     @ApiPageable
@@ -77,6 +77,6 @@ public class TournamentTeamController {
                                                                                          @RequestParam(value = "tournament_id", required = true) long tournamentId,
                                                                                          @ApiIgnore @AuthenticationPrincipal User user) {
 
-        return new ResponseEntity<>(restTournamentTeamFacade.getProposalListForTournament(pageable, tournamentId, user), HttpStatus.OK);
+        return new ResponseEntity<>(restTournamentProposalFacade.getProposalListForTournament(pageable, tournamentId, user), HttpStatus.OK);
     }
 }

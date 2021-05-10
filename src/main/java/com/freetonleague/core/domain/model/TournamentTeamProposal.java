@@ -1,15 +1,17 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
-import com.freetonleague.core.domain.enums.TournamentTeamStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -29,6 +31,7 @@ import static java.util.Objects.isNull;
 @Getter
 @Setter
 @Entity
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(schema = "public", name = "tournament_team_proposal")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_team_proposal_id_seq", schema = "public", allocationSize = 1)
 public class TournamentTeamProposal extends BaseEntity {
@@ -48,10 +51,10 @@ public class TournamentTeamProposal extends BaseEntity {
     @NotNull
     @Column(name = "state")
     @Enumerated(EnumType.STRING)
-    private TournamentTeamStateType state;
+    private ParticipationStateType state;
 
     @Transient
-    private TournamentTeamStateType prevState;
+    private ParticipationStateType prevState;
 
     @Type(type = "jsonb")
     @Column(name = "participate_payment_list", columnDefinition = "jsonb")
@@ -84,7 +87,7 @@ public class TournamentTeamProposal extends BaseEntity {
         return mainTournamentTeamParticipantList;
     }
 
-    public void setState(TournamentTeamStateType state) {
+    public void setState(ParticipationStateType state) {
         prevState = this.state;
         this.state = state;
     }

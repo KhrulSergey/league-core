@@ -13,7 +13,7 @@ import java.util.Set;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
-public interface TournamentTeamMapper {
+public interface TournamentProposalMapper {
 
     @Named(value = "toDto")
     @Mapping(target = "tournamentId", source = "entity.tournament.id")
