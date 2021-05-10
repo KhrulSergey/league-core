@@ -41,7 +41,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentService tournamentService;
     private final TournamentMatchRivalMapper tournamentMatchRivalMapper;
-    private final RestTournamentTeamFacade restTournamentTeamFacade;
+    private final RestTournamentProposalFacade restTournamentProposalFacade;
     private final Validator validator;
 
     @Lazy
@@ -107,7 +107,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
 
         // Check if all specified rivalParticipantList corresponds to specified tournamentMatchRival
         List<TournamentTeamParticipant> tournamentTeamParticipants = rivalParticipantList.parallelStream()
-                .map(p -> restTournamentTeamFacade.getVerifiedTournamentTeamParticipantByDto(p, tournamentTeamProposal))
+                .map(p -> restTournamentProposalFacade.getVerifiedTournamentTeamParticipantByDto(p, tournamentTeamProposal))
                 .filter(Objects::nonNull).collect(Collectors.toList());
 
         Set<TournamentMatchRivalParticipant> currentTournamentMatchRivalParticipants = tournamentMatchRival.getRivalParticipantList();

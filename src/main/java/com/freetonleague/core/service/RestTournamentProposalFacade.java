@@ -13,7 +13,7 @@ import org.springframework.data.domain.Pageable;
 /**
  * Service-facade for managing tournament team proposal and team composition
  */
-public interface RestTournamentTeamFacade {
+public interface RestTournamentProposalFacade {
 
 
     /**

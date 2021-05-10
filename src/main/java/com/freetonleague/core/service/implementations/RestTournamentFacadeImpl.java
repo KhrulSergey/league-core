@@ -48,7 +48,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
 
     @Lazy
     @Autowired
-    private RestTournamentTeamFacade restTournamentTeamFacade;
+    private RestTournamentProposalFacade restTournamentProposalFacade;
 
     /**
      * Returns founded tournament by id
@@ -116,7 +116,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
 
         if (isNull(tournamentDto.getId())) {
             log.warn("~ parameter 'tournament id' is not set for editTournament");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournament id",
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_VALIDATION_ERROR, "tournament id",
                     "parameter 'tournament id' is not set for editTournament");
         }
 
@@ -374,7 +374,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
             throw new ConstraintViolationException(settingsViolations);
         }
 
-        TournamentTeamProposal tournamentTeamProposal = restTournamentTeamFacade
+        TournamentTeamProposal tournamentTeamProposal = restTournamentProposalFacade
                 .getVerifiedTeamProposalById(winnerDto.getTeamProposalId(), null, false);
 
         if (!tournamentTeamProposal.getTournament().getId().equals(tournamentId)) {
