@@ -136,17 +136,17 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      * Only for already initiated Tournament wit prototypes of Series (for composeNextRoundForTournament)
      */
     private TournamentSeries composeAndFillRivalsOfTournamentSeries(TournamentSeries currentSeries) {
-        if (isNotEmpty(currentSeries.getRivalList())) {
+        if (isNotEmpty(currentSeries.getSeriesRivalList())) {
             log.error("!> requesting composeAndFillRivalsOfTournamentSeries in composeNewRoundForTournament for not empty " +
                     "list of series rival for series {}. Check evoking clients.", currentSeries);
             return null;
         }
         // collect and build series rival for current series
-        Set<TournamentSeriesRival> rivalList = currentSeries.getParentSeriesList().stream()
+        List<TournamentSeriesRival> rivalList = currentSeries.getParentSeriesList().stream()
                 .map(parentSeries -> this.generateSeriesRival(currentSeries, parentSeries, parentSeries.getTeamProposalWinner()))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         // update series rivals in current series
-        currentSeries.setRivalList(rivalList);
+        currentSeries.setSeriesRivalList(rivalList);
         // update match list for series and fill each match with rivals (from TournamentSeriesRival list above)
         List<TournamentMatch> newTournamentMatchList = currentSeries.getMatchList().parallelStream()
                 .peek(match -> match.setMatchRivalList(rivalList.parallelStream()
@@ -203,12 +203,12 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                 .parentSeriesList(parentSeriesList)
                 .build();
 
-        Set<TournamentSeriesRival> rivalList = rivalCombinations.parallelStream().map(rival ->
+        List<TournamentSeriesRival> rivalList = rivalCombinations.parallelStream().map(rival ->
                 this.generateSeriesRival(tournamentSeries,
                         nonNull(parentSeriesList) ? parentSeriesList.iterator().next() : null,
                         rival)
-        ).collect(Collectors.toSet());
-        tournamentSeries.setRivalList(rivalList);
+        ).collect(Collectors.toList());
+        tournamentSeries.setSeriesRivalList(rivalList);
 
         List<TournamentMatch> tournamentMatchList = IntStream.range(1, matchCount + 1).parallel()
                 .mapToObj(index -> this.generateMatch(index, tournamentSeries, rivalCombinations))

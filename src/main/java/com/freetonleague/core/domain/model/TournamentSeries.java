@@ -12,7 +12,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.nonNull;
@@ -44,10 +43,10 @@ public class TournamentSeries extends ExtendedBaseEntity {
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentSeries", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<TournamentSeriesRival> rivalList;
+    private List<TournamentSeriesRival> seriesRivalList;
 
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "winner_series_rival_id")
     private TournamentSeriesRival seriesWinner;
 
@@ -92,10 +91,10 @@ public class TournamentSeries extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 
-    public Set<TournamentTeamProposal> getTeamProposalList() {
-        return nonNull(rivalList) ? rivalList.parallelStream()
+    public List<TournamentTeamProposal> getTeamProposalList() {
+        return nonNull(seriesRivalList) ? seriesRivalList.parallelStream()
                 .map(TournamentSeriesRival::getTeamProposal)
-                .collect(Collectors.toSet())
+                .collect(Collectors.toList())
                 : null;
     }
 

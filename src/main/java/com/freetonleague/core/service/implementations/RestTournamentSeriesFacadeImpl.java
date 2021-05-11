@@ -2,9 +2,11 @@ package com.freetonleague.core.service.implementations;
 
 
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
+import com.freetonleague.core.domain.dto.TournamentSeriesRivalDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TeamManageException;
@@ -14,6 +16,7 @@ import com.freetonleague.core.mapper.TournamentSeriesMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
+import com.freetonleague.core.service.RestTournamentSeriesRivalFacade;
 import com.freetonleague.core.service.TournamentSeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,10 +27,13 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 /**
  * Service-facade for managing tournament series
@@ -39,6 +45,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
 
     private final TournamentSeriesService tournamentSeriesService;
     private final TournamentSeriesMapper tournamentSeriesMapper;
+    private final RestTournamentSeriesRivalFacade restTournamentSeriesRivalFacade;
     private final Validator validator;
 
     @Lazy
@@ -100,7 +107,17 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_STATUS_DELETE_ERROR,
                     "Modifying tournament series was rejected. Check requested params and method.");
         }
-        //Match can be finished only with setting the winner of the match
+
+        //Series can be finished only with setting winner places in list of rivals
+        if (tournamentSeries.getStatus().isFinished() &&
+                !(nonNull(tournamentSeries.getSeriesWinner()) || nonNull(tournamentSeries.getSeriesRivalList()))) {
+            log.warn("~ tournament series can be finished only with setting the winner of the series " +
+                            "or set winner places in series rivals. Request to set status {}, winner {} and rivals {} was rejected.",
+                    tournamentSeries.getStatus(), tournamentSeries.getSeriesWinner(), tournamentSeries.getSeriesRivalList());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_STATUS_FINISHED_ERROR,
+                    "Modifying tournament series was rejected. Check requested params and method.");
+        }
+
         tournamentSeries = tournamentSeriesService.editSeries(tournamentSeries);
         if (isNull(tournamentSeries)) {
             log.error("!> error while editing tournament series from dto {} for user {}.", tournamentSeriesDto, user);
@@ -168,12 +185,13 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
                     tournamentSeriesDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
-        if (tournamentSeriesDto.getStatus().isFinished()) {
-            log.warn("~ tournament series can be finished only automatically when all match is finished." +
-                    "Request to set status was rejected.");
-            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_FINISHED_ERROR,
-                    "Modifying tournament match was rejected. Check requested params and method.");
-        }
+        //TODO delete until 01/09/21 if no needed
+//        if (tournamentSeriesDto.getStatus().isFinished()) {
+//            log.warn("~ tournament series can be finished only automatically when all match is finished." +
+//                    "Request to set status was rejected.");
+//            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_FINISHED_ERROR,
+//                    "Modifying tournament match was rejected. Check requested params and method.");
+//        }
 
         TournamentSeries tournamentSeries = tournamentSeriesMapper.fromDto(tournamentSeriesDto);
 
@@ -184,7 +202,23 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             tournamentSeries.setMatchList(existedSeries.getMatchList());
         }
 
+        // check and compose match rival list (modify only WonPlaceInMatch for rival)
+        List<TournamentSeriesRivalDto> tournamentSeriesRivalDtoList = tournamentSeriesDto.getSeriesRivalList();
+        List<TournamentSeriesRival> tournamentSeriesRivalList = null;
+        if (isNotEmpty(tournamentSeriesRivalDtoList)) {
+            tournamentSeriesRivalList = tournamentSeriesRivalDtoList.parallelStream()
+                    .map(restTournamentSeriesRivalFacade::getVerifiedSeriesRivalByDto)
+                    .collect(Collectors.toList());
+
+            //try to find series winner (first place)
+            TournamentSeriesRival seriesWinner = tournamentSeriesRivalList.parallelStream()
+                    .filter(s -> s.getWonPlaceInSeries().isWinner()).findFirst().orElse(null);
+            tournamentSeries.setSeriesWinner(seriesWinner);
+        }
         tournamentSeries.setTournamentRound(tournamentRound);
+        if (nonNull(tournamentSeriesRivalList)) {
+            tournamentSeries.setSeriesRivalList(tournamentSeriesRivalList);
+        }
         return tournamentSeries;
     }
 }

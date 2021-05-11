@@ -3,6 +3,7 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -76,4 +77,12 @@ public interface TournamentSeriesService {
      * Returns sign of all series for round was finished.
      */
     boolean isAllSeriesFinishedByRound(TournamentRound tournamentRound);
+
+    /**
+     * Returns founded tournament series rival by id
+     *
+     * @param id of tournament series rival to search
+     * @return tournament series rival entity or NULL of not found
+     */
+    TournamentSeriesRival getSeriesRival(long id);
 }

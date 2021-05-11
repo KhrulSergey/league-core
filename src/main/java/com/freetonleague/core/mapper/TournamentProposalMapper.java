@@ -9,7 +9,6 @@ import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import org.mapstruct.*;
 
 import java.util.List;
-import java.util.Set;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -43,5 +42,5 @@ public interface TournamentProposalMapper {
 
     @Named(value = "toDtoList")
     @IterableMapping(qualifiedByName = "toDto")
-    Set<TournamentTeamProposalDto> toDto(Set<TournamentTeamProposal> entity);
+    List<TournamentTeamProposalDto> toDto(List<TournamentTeamProposal> entity);
 }
