@@ -287,11 +287,4 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         return matchRivalParticipant;
     }
 
-    /**
-     * Verify tournament match rival info with validation and business check
-     */
-    @Override
-    public boolean verifyTournamentMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto) {
-        return false;
-    }
 }

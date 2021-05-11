@@ -144,6 +144,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
                 .map(TournamentSeries::getStatus).allMatch(TournamentStatusType.finishedStatusList::contains);
     }
 
+    /**
+     * Returns founded tournament series rival by id
+     */
+    @Override
+    public TournamentSeriesRival getSeriesRival(long id) {
+        return tournamentSeriesRivalRepository.findById(id).orElse(null);
+    }
+
     //TODO calculate all winners of series (from 1 to 8 place)
     private TournamentSeriesRival getCalculatedSeriesWinner(TournamentSeries tournamentSeries) {
         Map<TournamentTeamProposal, Long> matchRivalWinnerMap = tournamentSeries.getMatchList().parallelStream()

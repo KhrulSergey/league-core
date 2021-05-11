@@ -37,7 +37,7 @@ public class TournamentMatch extends ExtendedBaseEntity {
      * Winner of current (finished) match. If null - then there were a dead heat
      */
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "winner_match_rival_id")
     private TournamentMatchRival matchWinner;
 

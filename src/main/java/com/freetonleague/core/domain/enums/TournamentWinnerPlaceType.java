@@ -36,4 +36,8 @@ public enum TournamentWinnerPlaceType {
     public int getPlaceNumber() {
         return placeNumber;
     }
+
+    public boolean isWinner() {
+        return this == FIRST;
+    }
 }

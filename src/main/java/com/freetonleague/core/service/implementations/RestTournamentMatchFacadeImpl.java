@@ -184,6 +184,8 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
                                 "Request denied in getVerifiedTournamentMatchByDto");
             }
         }
+        TournamentMatch tournamentMatch = tournamentMatchMapper.fromDto(tournamentMatchDto);
+        tournamentMatch.setTournamentSeries(tournamentSeries);
 
         // check and compose match rival winner (modify only WonPlaceInMatch for rival)
         TournamentMatchRivalDto matchRivalWinnerDto = tournamentMatchDto.getMatchWinner();
@@ -192,6 +194,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
             matchRivalWinner = this.getVerifiedMatchRivalWinnerByDto(matchRivalWinnerDto);
             matchRivalWinner.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
         }
+        tournamentMatch.setMatchWinner(matchRivalWinner);
 
         // check and compose match rival list (modify only WonPlaceInMatch for rival)
         Set<TournamentMatchRivalDto> tournamentMatchRivalDtoList = tournamentMatchDto.getMatchRivalList();
@@ -200,16 +203,9 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
             tournamentMatchRivalList = tournamentMatchRivalDtoList.parallelStream()
                     .map(this::getVerifiedMatchRivalWinnerByDto)
                     .collect(Collectors.toSet());
-            if (nonNull(matchRivalWinner)) {
-                TournamentMatchRival finalMatchRivalWinner = matchRivalWinner;
-                tournamentMatchRivalList.removeIf(rival -> rival.getId().equals(finalMatchRivalWinner.getId()));
-            }
         }
-
-        TournamentMatch tournamentMatch = tournamentMatchMapper.fromDto(tournamentMatchDto);
-        tournamentMatch.setTournamentSeries(tournamentSeries);
-        tournamentMatch.setMatchWinner(matchRivalWinner);
         tournamentMatch.setMatchRivalList(tournamentMatchRivalList);
+
         return tournamentMatch;
     }
 

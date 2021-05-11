@@ -9,5 +9,10 @@ public enum TournamentSystemType {
     SURVIVAL_ELIMINATION,
     TRIPLE_ELIMINATION,
     GROUP_FIXTURES,
-    MULTI_STAGE
+    MULTI_STAGE;
+
+    public boolean isAutoFinishSeriesEnabled() {
+        return this != SURVIVAL_ELIMINATION;
+    }
+
 }
