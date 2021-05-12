@@ -41,13 +41,13 @@ public interface TournamentSeriesService {
      */
     TournamentSeries addSeries(TournamentSeries tournamentSeries);
 
-//    /**
-//     * Generate tournament series list for specified tournament and save to DB.
-//     *
-//     * @param tournament to generate series for
-//     * @return Sign of series list was created
-//     */
-//    boolean generateSeriesForTournament(Tournament tournament);
+    /**
+     * Generate tournament match (OMT) for specified series and returns updated series.
+     *
+     * @param tournamentSeries to generate OMT (match) for
+     * @return updated series with OMT match
+     */
+    TournamentSeries generateOmtForSeries(TournamentSeries tournamentSeries);
 
     /**
      * Edit tournament series in DB.

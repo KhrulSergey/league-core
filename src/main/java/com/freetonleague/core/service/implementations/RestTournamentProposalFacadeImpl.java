@@ -46,7 +46,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     @Override
     public TournamentTeamProposalDto getProposalFromTeamForTournament(long tournamentId, long teamId, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         return tournamentProposalMapper.toDto(teamProposal);
     }
@@ -56,7 +56,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
      */
     @Override
     public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         return tournamentProposalService.getProposalListForTournament(pageable, tournament).map(tournamentProposalMapper::toDto);
     }
 
@@ -72,7 +72,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
                     "Only captain can apply and modify proposals to tournaments from team.");
         }
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
 
         //check if proposal already existed
         TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
@@ -135,7 +135,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 //                throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
 //                        "Only captain can apply and modify proposals to tournaments from team.");
 //            }
-            Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+            Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
             teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         } else {
             log.warn("~ forbiddenException for modify proposal to tournament for user {}. " +
@@ -172,7 +172,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 //            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
 //                    "Only captain can apply and modify proposals to tournaments from team.");
 //        }
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
 
         // check if tournament is already started
         if (TournamentStatusType.startedStatusList.contains(tournament.getStatus())) {

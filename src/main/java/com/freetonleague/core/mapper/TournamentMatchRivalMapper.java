@@ -31,7 +31,7 @@ public interface TournamentMatchRivalMapper {
 
     @Named(value = "toDtoList")
     @IterableMapping(qualifiedByName = "toDto")
-    Set<TournamentMatchRivalDto> toDto(Set<TournamentMatchRival> entities);
+    List<TournamentMatchRivalDto> toDto(List<TournamentMatchRival> entities);
 
     @IterableMapping(qualifiedByName = "fromRivalDto")
     List<TournamentMatchRival> fromDto(List<TournamentMatchRivalDto> dtoList);
