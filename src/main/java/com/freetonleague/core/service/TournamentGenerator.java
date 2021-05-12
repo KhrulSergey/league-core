@@ -2,7 +2,9 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentRound;
+import com.freetonleague.core.domain.model.TournamentSeries;
 
 import java.util.List;
 
@@ -25,4 +27,12 @@ public interface TournamentGenerator {
      * @return tournament round with embedded list of series and matches
      */
     TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound);
+
+    /**
+     * Generate new match (OMT) for series.
+     *
+     * @param tournamentSeries to compose series for
+     * @return tournament match with the same settings as others in series
+     */
+    TournamentMatch generateOmtForSeries(TournamentSeries tournamentSeries);
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import javax.validation.constraints.NotNull;
-import java.util.Set;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -16,7 +16,7 @@ public class TournamentMatchDto extends TournamentMatchBaseDto {
     private Long tournamentSeriesId;
 
     @ApiModelProperty(readOnly = true)
-    private Set<TournamentMatchRivalDto> matchRivalList;
+    private List<TournamentMatchRivalDto> matchRivalList;
 
     private TournamentMatchRivalDto matchWinner;
 }

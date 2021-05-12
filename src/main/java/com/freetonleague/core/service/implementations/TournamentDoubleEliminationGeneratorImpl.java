@@ -2,7 +2,9 @@ package com.freetonleague.core.service.implementations;
 
 
 import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentRound;
+import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentProposalService;
 import com.freetonleague.core.service.TournamentService;
@@ -38,6 +40,17 @@ public class TournamentDoubleEliminationGeneratorImpl implements TournamentGener
      */
     @Override
     public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
+        return null;
+    }
+
+    /**
+     * Generate new match (OMT) for series.
+     *
+     * @param tournamentSeries to compose series for
+     * @return tournament match with the same settings as others in series
+     */
+    @Override
+    public TournamentMatch generateOmtForSeries(TournamentSeries tournamentSeries) {
         return null;
     }
 }
