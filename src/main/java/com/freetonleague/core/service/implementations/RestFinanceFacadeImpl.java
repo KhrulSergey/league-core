@@ -63,7 +63,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     @CanManageSystem
     @Override
     public AccountInfoDto getBalanceByTournament(Long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         return this.getVerifiedAccountByHolder(tournament.getCoreId(), AccountHolderType.TOURNAMENT, user, true);
     }
 

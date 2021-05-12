@@ -187,7 +187,7 @@ public class TeamServiceImpl implements TeamService {
                 .filter(Objects::nonNull)
                 // check if any of proposal is approved (active)
                 .map(TournamentTeamProposal::getState)
-                .anyMatch(ParticipationStateType::isApproved);
+                .anyMatch(ParticipationStateType.activeProposalStateList::contains);
     }
 
     /**

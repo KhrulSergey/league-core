@@ -43,13 +43,13 @@ public interface RestTournamentSeriesFacade {
      */
     TournamentSeriesDto addSeries(TournamentSeriesDto tournamentSeriesDto, User user);
 
-//    /**
-//     * Generate all series for tournament.
-//     *
-//     * @param tournamentId specified tournament to generate tournament series list
-//     * @param user         current user from Session
-//     */
-//    void generateSeriesForTournament(long tournamentId, User user);
+    /**
+     * Generate OMT (match) for specified series.
+     *
+     * @param id   of tournament series to generate OMT (match)
+     * @param user current user from Session
+     */
+    TournamentSeriesDto generateOmtForSeries(long id, User user);
 
     /**
      * Edit tournament series.
@@ -73,10 +73,10 @@ public interface RestTournamentSeriesFacade {
     /**
      * Returns tournament series by id and user with privacy check
      */
-    TournamentSeries getVerifiedSeriesById(long id, User user);
+    TournamentSeries getVerifiedSeriesById(long id);
 
     /**
      * Getting tournament settings by DTO with privacy check
      */
-    TournamentSeries getVerifiedSeriesByDto(TournamentSeriesDto tournamentSeriesDto, User user);
+    TournamentSeries getVerifiedSeriesByDto(TournamentSeriesDto tournamentSeriesDto);
 }

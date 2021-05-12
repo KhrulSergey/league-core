@@ -75,10 +75,10 @@ public interface RestTournamentRoundFacade {
     /**
      * Returns tournament round by id and user with privacy check
      */
-    TournamentRound getVerifiedRoundById(long id, User user);
+    TournamentRound getVerifiedRoundById(long id);
 
     /**
      * Getting tournament settings by DTO with privacy check
      */
-    TournamentRound getVerifiedRoundByDto(TournamentRoundDto tournamentRoundDto, User user);
+    TournamentRound getVerifiedRoundByDto(TournamentRoundDto tournamentRoundDto);
 }

@@ -57,7 +57,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
      */
     @Override
     public TournamentSeriesDto getSeries(long id, User user) {
-        TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id, user);
+        TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id);
         return tournamentSeriesMapper.toDto(tournamentSeries);
     }
 
@@ -79,7 +79,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     public TournamentSeriesDto addSeries(TournamentSeriesDto tournamentSeriesDto, User user) {
         tournamentSeriesDto.setId(null);
         tournamentSeriesDto.setStatus(TournamentStatusType.CREATED);
-        TournamentSeries newTournamentSeries = this.getVerifiedSeriesByDto(tournamentSeriesDto, user);
+        TournamentSeries newTournamentSeries = this.getVerifiedSeriesByDto(tournamentSeriesDto);
 
         newTournamentSeries = tournamentSeriesService.addSeries(newTournamentSeries);
         if (isNull(newTournamentSeries)) {
@@ -88,6 +88,22 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
                     "Tournament series was not saved on Portal. Check requested params.");
         }
         return tournamentSeriesMapper.toDto(newTournamentSeries);
+    }
+
+    /**
+     * Generate OMT (match) for specified series.
+     */
+    @CanManageTournament
+    @Override
+    public TournamentSeriesDto generateOmtForSeries(long id, User user) {
+        TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id);
+        tournamentSeries = tournamentSeriesService.generateOmtForSeries(tournamentSeries);
+        if (isNull(tournamentSeries)) {
+            log.error("!> error while generate Omt match for tournament series.id {}.", id);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR,
+                    "OMT match was not generated and saved for tournament series " + id + ". Check requested params.");
+        }
+        return tournamentSeriesMapper.toDto(tournamentSeries);
     }
 
     /**
@@ -101,7 +117,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournamentSeriesDto.id",
                     "parameter 'tournamentSeriesDto.id' is not match specified id in parameters for editSeries");
         }
-        TournamentSeries tournamentSeries = this.getVerifiedSeriesByDto(tournamentSeriesDto, user);
+        TournamentSeries tournamentSeries = this.getVerifiedSeriesByDto(tournamentSeriesDto);
         if (tournamentSeries.getStatus().isDeleted()) {
             log.warn("~ tournament series deleting was declined in editSeries. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_STATUS_DELETE_ERROR,
@@ -133,7 +149,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     @CanManageTournament
     @Override
     public TournamentSeriesDto deleteSeries(long id, User user) {
-        TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id, user);
+        TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id);
         tournamentSeries = tournamentSeriesService.deleteSeries(tournamentSeries);
 
         if (isNull(tournamentSeries)) {
@@ -148,7 +164,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
      * Returns tournament series by id and user with privacy check
      */
     @Override
-    public TournamentSeries getVerifiedSeriesById(long id, User user) {
+    public TournamentSeries getVerifiedSeriesById(long id) {
         TournamentSeries tournamentSeries = tournamentSeriesService.getSeries(id);
         if (isNull(tournamentSeries)) {
             log.debug("^ Tournament series with requested id {} was not found. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied", id);
@@ -165,7 +181,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
      * Getting tournament settings by DTO with privacy check
      */
     @Override
-    public TournamentSeries getVerifiedSeriesByDto(TournamentSeriesDto tournamentSeriesDto, User user) {
+    public TournamentSeries getVerifiedSeriesByDto(TournamentSeriesDto tournamentSeriesDto) {
         if (isNull(tournamentSeriesDto)) {
             log.warn("~ parameter 'tournamentSeriesDto' is NULL for getVerifiedSeriesByDto");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournamentSeriesDto",
@@ -176,8 +192,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournament round id",
                     "parameter 'tournament round id' is not set in tournamentSeriesDto for get or modify tournament series");
         }
-        TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId(),
-                user);
+        TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId());
 
         Set<ConstraintViolation<TournamentSeriesDto>> settingsViolations = validator.validate(tournamentSeriesDto);
         if (!settingsViolations.isEmpty()) {
@@ -197,7 +212,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
 
         //Check existence of tournament series and it's status
         if (nonNull(tournamentSeriesDto.getId())) {
-            TournamentSeries existedSeries = getVerifiedSeriesById(tournamentSeriesDto.getId(), user);
+            TournamentSeries existedSeries = getVerifiedSeriesById(tournamentSeriesDto.getId());
             tournamentSeries.setParentSeriesList(existedSeries.getParentSeriesList());
             tournamentSeries.setMatchList(existedSeries.getMatchList());
         }
