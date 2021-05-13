@@ -62,6 +62,9 @@ public class Docket extends ExtendedBaseEntity {
     @Column(name = "access_type")
     private AccessType accessType = AccessType.FREE_ACCESS;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Builder.Default
     @Column(name = "participation_fee")
     private Double participationFee = 0.0;
