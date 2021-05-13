@@ -40,6 +40,9 @@ public class DocketDto {
     @NotNull
     private AccessType accessType = AccessType.FREE_ACCESS;
 
+    @Size(max = 450)
+    private String imageUrl;
+
     @Builder.Default
     private Double participationFee = 0.0;
 

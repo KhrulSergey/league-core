@@ -6,7 +6,6 @@ import com.freetonleague.core.domain.model.Docket;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.DocketManageException;
 import com.freetonleague.core.exception.ExceptionMessages;
-import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.DocketMapper;
 import com.freetonleague.core.security.permissions.CanManageDocket;
@@ -89,7 +88,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
         if (isNull(docketDto.getId())) {
             log.warn("~ parameter 'docket.id' is not set for editDocket");
             throw new ValidationException(ExceptionMessages.DOCKET_VALIDATION_ERROR, "docket id",
-                    "parameter 'docket id' is not set for editTournament");
+                    "parameter 'docket id' is not set for editDocket");
         }
 
         if (docketDto.getStatus().isDeleted()) {
@@ -100,9 +99,9 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
 
         modifiedDocket = docketService.editDocket(modifiedDocket);
         if (isNull(modifiedDocket)) {
-            log.error("!> error while modifying tournament from dto {}.", docketDto);
+            log.error("!> error while modifying Media resource from dto {}.", docketDto);
             throw new DocketManageException(ExceptionMessages.DOCKET_MODIFICATION_ERROR,
-                    "Tournament was not updated on Portal. Check requested params.");
+                    "Media resource was not updated on Portal. Check requested params.");
         }
         return docketMapper.toDto(modifiedDocket);
     }
@@ -118,7 +117,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
 
         if (isNull(docket)) {
             log.error("!> error while deleting docket with id {}.", id);
-            throw new TournamentManageException(ExceptionMessages.DOCKET_MODIFICATION_ERROR,
+            throw new DocketManageException(ExceptionMessages.DOCKET_MODIFICATION_ERROR,
                     "Docket was not deleted on Portal. Check requested params.");
         }
         return docketMapper.toDto(docket);
@@ -132,11 +131,11 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
         Docket docket = docketService.getDocket(id);
         if (isNull(docket)) {
             log.debug("^ Docket with requested id {} was not found. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id);
-            throw new DocketManageException(ExceptionMessages.TOURNAMENT_NOT_FOUND_ERROR, "Tournament with requested id " + id + " was not found");
+            throw new DocketManageException(ExceptionMessages.DOCKET_NOT_FOUND_ERROR, "Media resource with requested id " + id + " was not found");
         }
         if (docket.getStatus().isDeleted()) {
             log.debug("^ Docket with requested id {} was {}. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id, docket.getStatus());
-            throw new DocketManageException(ExceptionMessages.TOURNAMENT_VISIBLE_ERROR, "Visible docket with requested id " + id + " was not found");
+            throw new DocketManageException(ExceptionMessages.DOCKET_VISIBLE_ERROR, "Visible docket with requested id " + id + " was not found");
         }
         return docket;
     }
