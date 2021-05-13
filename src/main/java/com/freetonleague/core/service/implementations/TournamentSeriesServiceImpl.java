@@ -7,10 +7,13 @@ import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentSeriesRepository;
 import com.freetonleague.core.repository.TournamentSeriesRivalRepository;
 import com.freetonleague.core.service.TournamentEventService;
+import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentMatchService;
 import com.freetonleague.core.service.TournamentSeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -36,6 +39,16 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     private final TournamentMatchService tournamentMatchService;
     private final TournamentEventService tournamentEventService;
     private final Validator validator;
+
+    @Autowired
+    @Qualifier("singleEliminationGenerator")
+    private TournamentGenerator singleEliminationGenerator;
+    @Autowired
+    @Qualifier("doubleEliminationGenerator")
+    private TournamentGenerator doubleEliminationGenerator;
+    @Autowired
+    @Qualifier("survivalEliminationGenerator")
+    private TournamentGenerator survivalEliminationGenerator;
 
     /**
      * Returns founded tournament series by id
@@ -70,6 +83,41 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             return null;
         }
         log.debug("^ trying to add new tournament series {}", tournamentSeries);
+        return tournamentSeriesRepository.save(tournamentSeries);
+    }
+
+    /**
+     * Generate tournament match (OMT) for specified series and returns updated series.
+     */
+    @Override
+    public TournamentSeries generateOmtForSeries(TournamentSeries tournamentSeries) {
+        if (isNull(tournamentSeries)) {
+            log.error("!> requesting generateOmtForSeries for NULL tournamentSeries. Check evoking clients");
+            return null;
+        }
+        Tournament tournament = tournamentSeries.getTournamentRound().getTournament();
+        TournamentMatch OmtMatch = null;
+        switch (tournament.getSystemType()) {
+            case SINGLE_ELIMINATION:
+                OmtMatch = singleEliminationGenerator.generateOmtForSeries(tournamentSeries);
+                break;
+            case DOUBLE_ELIMINATION:
+                OmtMatch = doubleEliminationGenerator.generateOmtForSeries(tournamentSeries);
+                break;
+            case SURVIVAL_ELIMINATION:
+                OmtMatch = survivalEliminationGenerator.generateOmtForSeries(tournamentSeries);
+                break;
+            default:
+                break;
+        }
+        if (isNull(OmtMatch)) {
+            log.error("!> error while generateOmtForSeries. Check stack trace");
+            return null;
+        }
+        List<TournamentMatch> matchList = tournamentSeries.getMatchList();
+        matchList.add(OmtMatch);
+        tournamentSeries.setMatchList(matchList);
+        log.debug("^ trying to save updated series with embedded new match {}", tournamentSeries);
         return tournamentSeriesRepository.save(tournamentSeries);
     }
 
@@ -142,6 +190,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     public boolean isAllSeriesFinishedByRound(TournamentRound tournamentRound) {
         return tournamentRound.getSeriesList().parallelStream()
                 .map(TournamentSeries::getStatus).allMatch(TournamentStatusType.finishedStatusList::contains);
+    }
+
+    /**
+     * Returns founded tournament series rival by id
+     */
+    @Override
+    public TournamentSeriesRival getSeriesRival(long id) {
+        return tournamentSeriesRivalRepository.findById(id).orElse(null);
     }
 
     //TODO calculate all winners of series (from 1 to 8 place)

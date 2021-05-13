@@ -55,7 +55,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      */
     @Override
     public TournamentDto getTournament(long id, User user) {
-        return tournamentMapper.toDto(this.getVerifiedTournamentById(id, user, false));
+        return tournamentMapper.toDto(this.getVerifiedTournamentById(id));
     }
 
     /**
@@ -120,7 +120,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                     "parameter 'tournament id' is not set for editTournament");
         }
 
-        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId(), user, true);
+        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId());
         if (tournamentDto.getStatus().isDeleted()) {
             log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
@@ -163,7 +163,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     @CanManageTournament
     @Override
     public TournamentDto deleteTournament(long id, User user) {
-        Tournament tournament = this.getVerifiedTournamentById(id, user, true);
+        Tournament tournament = this.getVerifiedTournamentById(id);
         tournament = tournamentService.deleteTournament(tournament);
 
         if (isNull(tournament)) {
@@ -190,11 +190,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      * Getting tournament by id and user with privacy check
      */
     @Override
-    public Tournament getVerifiedTournamentById(long id, User user, boolean checkUser) {
-        if (checkUser && isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTournamentById' request denied");
-        }
+    public Tournament getVerifiedTournamentById(long id) {
         Tournament tournament = tournamentService.getTournament(id);
         if (isNull(tournament)) {
             log.debug("^ Tournament with requested id {} was not found. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id);

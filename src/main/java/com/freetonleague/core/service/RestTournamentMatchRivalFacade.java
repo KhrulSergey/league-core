@@ -55,11 +55,6 @@ public interface RestTournamentMatchRivalFacade {
     TournamentMatchRivalDto deleteMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto);
 
     /**
-     * Verify tournament match rival info with validation and business check
-     */
-    boolean verifyTournamentMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto);
-
-    /**
      * Returns tournament rival by id and user with privacy check
      */
     TournamentMatchRival getVerifiedMatchRivalById(long id);

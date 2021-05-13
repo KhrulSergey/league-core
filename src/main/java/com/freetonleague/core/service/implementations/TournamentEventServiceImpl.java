@@ -106,7 +106,9 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 tournamentMatch.getPrevStatus(), newTournamentMatchStatus);
         // check all match is finished to finish the series
         if (newTournamentMatchStatus.isFinished()
-                && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())) {
+                && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())
+                //TODO switch on auto closing series for all type of Tournament System Template
+                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isAutoFinishSeriesEnabled()) {
             this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
         }
     }

@@ -58,6 +58,7 @@ public class TournamentSeriesRival extends ExtendedBaseEntity {
     /**
      * Indicators (score) of team on current series
      */
+    @EqualsAndHashCode.Exclude
     @Type(type = "jsonb")
     @Column(name = "indicators", columnDefinition = "jsonb")
     private List<GameDisciplineIndicatorDto> seriesIndicatorList;

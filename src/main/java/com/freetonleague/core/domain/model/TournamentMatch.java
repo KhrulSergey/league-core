@@ -10,7 +10,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -31,13 +30,13 @@ public class TournamentMatch extends ExtendedBaseEntity {
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private Set<TournamentMatchRival> matchRivalList;
+    private List<TournamentMatchRival> matchRivalList;
 
     /**
      * Winner of current (finished) match. If null - then there were a dead heat
      */
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "winner_match_rival_id")
     private TournamentMatchRival matchWinner;
 

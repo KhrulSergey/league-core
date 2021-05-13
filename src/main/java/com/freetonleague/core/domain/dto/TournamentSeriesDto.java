@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.util.List;
-import java.util.Set;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
@@ -18,7 +17,10 @@ public class TournamentSeriesDto extends TournamentSeriesBaseDto {
 
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Set<TournamentTeamProposalDto> teamProposalList;
+    private List<TournamentTeamProposalDto> teamProposalList;
+
+    @ApiModelProperty(notes = "Required for set winners of series and finish series")
+    private List<TournamentSeriesRivalDto> seriesRivalList;
 
     @ApiModelProperty(required = false, readOnly = true, notes = "The field is set automatically")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

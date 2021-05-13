@@ -80,5 +80,5 @@ public interface RestTournamentFacade {
     /**
      * Getting tournament by id and user with privacy check
      */
-    Tournament getVerifiedTournamentById(long id, User user, boolean checkUser);
+    Tournament getVerifiedTournamentById(long id);
 }

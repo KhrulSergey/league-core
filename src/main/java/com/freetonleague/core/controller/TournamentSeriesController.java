@@ -20,7 +20,7 @@ import springfox.documentation.annotations.ApiIgnore;
 public class TournamentSeriesController {
 
     public static final String BASE_PATH = "/api/tournament/series";
-    //    public static final String PATH_GENERATE = "/generate-next-for-round/{tournament_round_id}";
+    public static final String PATH_GENERATE_OMT = "/generate-omt-for-series/{series_id}";
     public static final String PATH_GET = "/{series_id}";
     //    public static final String PATH_GET_LIST_BY_TOURNAMENT_ROUND = "/list-by-tournament-round/{tournament_id}";
     public static final String PATH_ADD = "/";
@@ -44,13 +44,12 @@ public class TournamentSeriesController {
 //        return new ResponseEntity<>(restTournamentSeriesService.getSeriesList(pageable, tournamentId, user), HttpStatus.OK);
 //    }
 
-//    @ApiOperation("Generate tournament next (active) series for tournament (only for orgs)")
-//    @PostMapping(path = PATH_GENERATE)
-//    public ResponseEntity<Void> generateSeries(@PathVariable("tournament_round_id") long tournamentRoundId,
-//                                               @ApiIgnore @AuthenticationPrincipal User user) {
-//        restTournamentSeriesService.generateSeriesForTournament(tournamentRoundId, user);
-//        return new ResponseEntity<>(HttpStatus.CREATED);
-//    }
+    @ApiOperation("Generate one more match (OMT) for series (only for orgs)")
+    @PostMapping(path = PATH_GENERATE_OMT)
+    public ResponseEntity<TournamentSeriesDto> generateOmtForSeries(@PathVariable("series_id") long id,
+                                                                    @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentSeriesFacade.generateOmtForSeries(id, user), HttpStatus.CREATED);
+    }
 
     @ApiOperation("Create new series with specified params (only for orgs)")
     @PostMapping(path = PATH_ADD)

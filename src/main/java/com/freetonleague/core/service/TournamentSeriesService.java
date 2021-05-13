@@ -3,6 +3,7 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -40,13 +41,13 @@ public interface TournamentSeriesService {
      */
     TournamentSeries addSeries(TournamentSeries tournamentSeries);
 
-//    /**
-//     * Generate tournament series list for specified tournament and save to DB.
-//     *
-//     * @param tournament to generate series for
-//     * @return Sign of series list was created
-//     */
-//    boolean generateSeriesForTournament(Tournament tournament);
+    /**
+     * Generate tournament match (OMT) for specified series and returns updated series.
+     *
+     * @param tournamentSeries to generate OMT (match) for
+     * @return updated series with OMT match
+     */
+    TournamentSeries generateOmtForSeries(TournamentSeries tournamentSeries);
 
     /**
      * Edit tournament series in DB.
@@ -76,4 +77,12 @@ public interface TournamentSeriesService {
      * Returns sign of all series for round was finished.
      */
     boolean isAllSeriesFinishedByRound(TournamentRound tournamentRound);
+
+    /**
+     * Returns founded tournament series rival by id
+     *
+     * @param id of tournament series rival to search
+     * @return tournament series rival entity or NULL of not found
+     */
+    TournamentSeriesRival getSeriesRival(long id);
 }

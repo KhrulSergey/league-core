@@ -43,7 +43,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @Override
     public TournamentRoundDto getRound(long id, User user) {
-        TournamentRound tournamentRound = this.getVerifiedRoundById(id, user);
+        TournamentRound tournamentRound = this.getVerifiedRoundById(id);
         return tournamentRoundMapper.toDto(tournamentRound);
     }
 
@@ -52,7 +52,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @Override
     public Page<TournamentRoundDto> getRoundList(Pageable pageable, long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         return tournamentRoundService.getRoundList(pageable, tournament).map(tournamentRoundMapper::toDto);
     }
 
@@ -61,7 +61,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @Override
     public TournamentRoundDto getActiveRoundForTournament(long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, false);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         return tournamentRoundMapper.toDto(tournamentRoundService.getActiveRoundForTournament(tournament));
     }
 
@@ -73,7 +73,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     public TournamentRoundDto addRound(TournamentRoundDto tournamentRoundDto, User user) {
         tournamentRoundDto.setId(null);
         tournamentRoundDto.setStatus(TournamentStatusType.CREATED);
-        TournamentRound tournamentRound = this.getVerifiedRoundByDto(tournamentRoundDto, user);
+        TournamentRound tournamentRound = this.getVerifiedRoundByDto(tournamentRoundDto);
 
         // allow to add only next round (with number = last + 1).
         int lastNumber = tournamentRoundService.getLastActiveRoundNumberForTournament(tournamentRound.getTournament());
@@ -94,7 +94,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     @CanManageTournament
     @Override
     public void generateRoundForTournament(long tournamentId, User user) {
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         boolean result = tournamentRoundService.generateRoundListForTournament(tournament);
         if (!result) {
             log.error("!> error while generated tournament round list for tournament id {} with user {}.", tournamentId, user);
@@ -114,7 +114,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
             throw new ValidationException(ExceptionMessages.TOURNAMENT_ROUND_VALIDATION_ERROR, "tournamentRoundDto.id",
                     "parameter 'tournamentRoundDto.id' is not match specified id in parameters for editRound");
         }
-        TournamentRound tournamentRound = this.getVerifiedRoundByDto(tournamentRoundDto, user);
+        TournamentRound tournamentRound = this.getVerifiedRoundByDto(tournamentRoundDto);
 
         if (tournamentRound.getStatus().isDeleted()) {
             log.warn("~ tournament round deleting was declined in editRound. This operation should be done with specific method.");
@@ -136,7 +136,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     @CanManageTournament
     @Override
     public TournamentRoundDto deleteRound(long id, User user) {
-        TournamentRound tournamentRound = this.getVerifiedRoundById(id, user);
+        TournamentRound tournamentRound = this.getVerifiedRoundById(id);
         tournamentRound = tournamentRoundService.deleteRound(tournamentRound);
 
         if (isNull(tournamentRound)) {
@@ -151,7 +151,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      * Returns tournament round by id and user with privacy check
      */
     @Override
-    public TournamentRound getVerifiedRoundById(long id, User user) {
+    public TournamentRound getVerifiedRoundById(long id) {
         TournamentRound tournamentRound = tournamentRoundService.getRound(id);
         if (isNull(tournamentRound)) {
             log.debug("^ Tournament round with requested id {} was not found. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id);
@@ -168,7 +168,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      * Getting tournament settings by DTO with privacy check
      */
     @Override
-    public TournamentRound getVerifiedRoundByDto(TournamentRoundDto tournamentRoundDto, User user) {
+    public TournamentRound getVerifiedRoundByDto(TournamentRoundDto tournamentRoundDto) {
         if (isNull(tournamentRoundDto)) {
             log.warn("~ parameter 'tournamentRoundDto' is NULL for getVerifiedRoundByDto");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_ROUND_VALIDATION_ERROR, "tournamentRoundDto",
@@ -179,8 +179,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
             throw new ValidationException(ExceptionMessages.TOURNAMENT_ROUND_VALIDATION_ERROR, "tournament id",
                     "parameter 'tournament id' is not set in tournamentRoundDto for get or modify tournament round");
         }
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentRoundDto.getTournamentId(),
-                user, true);
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentRoundDto.getTournamentId());
 
         Set<ConstraintViolation<TournamentRoundDto>> violations = validator.validate(tournamentRoundDto);
         if (!violations.isEmpty()) {
@@ -192,7 +191,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
         // Check existence of tournament series and it's status
         // Set round number to
         if (nonNull(tournamentRoundDto.getId())) {
-            TournamentRound existedTournamentRound = this.getVerifiedRoundById(tournamentRoundDto.getId(), user);
+            TournamentRound existedTournamentRound = this.getVerifiedRoundById(tournamentRoundDto.getId());
             tournamentRoundDto.setRoundNumber(existedTournamentRound.getRoundNumber());
         }
         TournamentRound tournamentRound = tournamentRoundMapper.fromDto(tournamentRoundDto);
