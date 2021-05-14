@@ -18,19 +18,9 @@ public class UserDto {
     @Size(max = 25)
     private String username;
 
-    private String name;
-
     private String avatarFileName;
 
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @ApiModelProperty(access = "hidden")
-    private String email;
-
     private String discordId;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    @ApiModelProperty(access = "hidden")
-    private String utmSource;
 
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

@@ -9,8 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
-
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = TeamMapper.class)
 public abstract class UserTeamParticipateHistoryMapper {
@@ -23,9 +21,7 @@ public abstract class UserTeamParticipateHistoryMapper {
 
     @Named(value = "toUserTeamParticipateHistoryDto")
     public List<UserTeamParticipateHistoryDto> toUserTeamParticipateHistoryDto(List<TeamParticipant> entityList) {
-        List<TeamParticipant> filteredTeamParticipant = teamParticipantService.filterTeamParticipantFoPublic(entityList);
-        return isNotEmpty(filteredTeamParticipant) ? filteredTeamParticipant.parallelStream()
-                .map(this::fromParticipant).collect(Collectors.toList())
-                : null;
+        return teamParticipantService.filterTeamParticipantFoPublic(entityList).parallelStream()
+                .map(this::fromParticipant).collect(Collectors.toList());
     }
 }

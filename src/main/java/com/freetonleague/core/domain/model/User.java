@@ -40,10 +40,6 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "league_id", nullable = false)
     private UUID leagueId;
 
-    @Size(max = 40)
-    @Column(name = "name")
-    private String name;
-
     @NotBlank
     @Size(max = 32)
     @Column(name = "username", unique = true)
@@ -56,15 +52,9 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "discord_id")
     private String discordId;
 
-    @Column(name = "email")
-    private String email;
-
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
-
-    @Column(name = "utm_source")
-    private String utmSource;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude

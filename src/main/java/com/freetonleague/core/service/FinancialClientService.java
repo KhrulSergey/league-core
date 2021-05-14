@@ -3,7 +3,6 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.model.User;
 
 import java.util.UUID;
 
@@ -32,21 +31,4 @@ public interface FinancialClientService {
      * Returns info for created transaction from source to target holder GUID
      */
     AccountTransactionInfoDto createTransactionFromSourceToTargetHolder(AccountTransactionInfoDto accountTransactionInfoDto);
-
-    /**
-     * Apply coupon by advertisement company hash for user from session
-     *
-     * @param couponHash advertisement company hash
-     * @param user       from current session
-     * @return updated Account Balance
-     */
-    AccountInfoDto applyCouponForUser(String couponHash, User user);
-
-    /**
-     * Verify advertisement company by coupon hash
-     *
-     * @param couponHash advertisement company hash
-     * @return updated Account Balance
-     */
-    AccountInfoDto getVerifiedAdvertisementCompany(String couponHash);
 }

@@ -39,7 +39,6 @@ public class DocketUserProposalDto {
 
     @Builder.Default
     @NotNull
-    @ApiModelProperty(required = true)
     private ParticipationStateType state = ParticipationStateType.CREATED;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
