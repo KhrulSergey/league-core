@@ -17,4 +17,13 @@ public interface RestFinanceFacade {
     AccountInfoDto getBalanceByTeam(Long teamId, User user);
 
     AccountInfoDto getBalanceByTournament(Long tournamentId, User user);
+
+    /**
+     * Apply coupon by advertisement company hash for user from session
+     *
+     * @param couponHash advertisement company hash
+     * @param user       from current session
+     * @return updated Account Balance
+     */
+    AccountInfoDto applyCouponByHashForUser(String couponHash, User user);
 }

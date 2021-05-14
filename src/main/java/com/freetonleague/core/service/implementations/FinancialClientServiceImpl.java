@@ -3,6 +3,7 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.FinancialClientService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
@@ -101,6 +102,25 @@ public class FinancialClientServiceImpl implements FinancialClientService {
 
         log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
         return restFinancialUnitFacade.createTransaction(accountTransactionInfoDto);
+    }
+
+    /**
+     * Apply coupon by advertisement company hash for user from session
+     */
+    @Override
+    public AccountInfoDto applyCouponForUser(String couponHash, User user) {
+        return null;
+    }
+
+    /**
+     * Verify advertisement company by coupon hash
+     *
+     * @param couponHash advertisement company hash
+     * @return updated Account Balance
+     */
+    @Override
+    public AccountInfoDto getVerifiedAdvertisementCompany(String couponHash) {
+        return null;
     }
 
     private boolean verifyAccountInfoDto(AccountInfoDto accountInfo) {

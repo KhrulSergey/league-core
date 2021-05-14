@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -197,10 +198,11 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
      */
     @Override
     public List<TeamParticipant> filterTeamParticipantFoPublic(List<TeamParticipant> teamParticipantList) {
-        return teamParticipantList.parallelStream()
+        return isNotEmpty(teamParticipantList) ? teamParticipantList.parallelStream()
                 .filter(p -> TeamParticipantStatusType.activeStatusList.contains(p.getStatus()))
                 .filter(p -> TeamStateType.activeStatusList.contains(p.getTeam().getStatus()))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList())
+                : null;
     }
 
     /**

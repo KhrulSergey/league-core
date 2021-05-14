@@ -5,8 +5,8 @@ import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.exception.AccountFinanceManageException;
 import com.freetonleague.core.exception.ExceptionMessages;
-import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.*;
@@ -68,6 +68,32 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     }
 
     /**
+     * Apply coupon by advertisement company hash for user from session
+     */
+    @Override
+    public AccountInfoDto applyCouponByHashForUser(String couponHash, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'applyCouponForUser' in RestFinanceFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'applyCouponForUser' request denied");
+        }
+        AccountInfoDto advertisementCompanyAccount = financialClientService.getVerifiedAdvertisementCompany(couponHash);
+        if (isNull(advertisementCompanyAccount)) {
+            log.warn("~ Applying coupon with hash {} was unsuccessful for user. " +
+                    "Active advertisement company was not found. Request denied in RestFinanceFacade", couponHash);
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_COUPON_APPLY_ERROR,
+                    "Active advertisement company was not found. Applying coupon with hash " + couponHash + " was unsuccessful");
+        }
+        AccountInfoDto account = financialClientService.applyCouponForUser(couponHash, user);
+        if (isNull(account)) {
+            log.warn("~ Applying coupon with hash {} was unsuccessful for user {}. " +
+                    "ApplyCouponForUser in RestFinanceFacade request denied", couponHash, user);
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_COUPON_APPLY_ERROR,
+                    "Applying coupon with hash " + couponHash + " was unsuccessful");
+        }
+        return account;
+    }
+
+    /**
      * Returns account info by account GUID and user with privacy check
      */
     public AccountInfoDto getVerifiedAccountByGUID(String GUID, User user, boolean checkUser) {
@@ -78,7 +104,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         AccountInfoDto account = financialClientService.getAccountByGUID(GUID);
         if (isNull(account)) {
             log.debug("^ Account for requested GUID {} was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
-            throw new TeamManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id " + GUID + " was not found");
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id " + GUID + " was not found");
         }
         return account;
     }
@@ -94,7 +120,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         AccountInfoDto account = financialClientService.getAccountByHolderInfo(GUID, accountHolderType);
         if (isNull(account)) {
             log.debug("^ Account for requested GUID {} was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
-            throw new TeamManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id " + GUID + " was not found");
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id " + GUID + " was not found");
         }
         return account;
     }
