@@ -9,10 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -27,6 +24,8 @@ public class FinancialAccountsController {
     public static final String PATH_GET = "/balance-by-account-GUID/{GUID}";
     public static final String PATH_GET_TEAM = "/balance-by-team/{team_id}";
     public static final String PATH_GET_TOURNAMENT = "/balance-by-tournament/{tournament_id}";
+
+    public static final String PATH_APPLY_COUPON = "/apply-coupon/";
 
     private final RestFinanceFacade restFinanceFacade;
 
@@ -62,5 +61,12 @@ public class FinancialAccountsController {
     public ResponseEntity<AccountInfoDto> getBalanceByGUID(@PathVariable("GUID") String GUID,
                                                            @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFinanceFacade.getBalanceByGUID(GUID, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Apply coupon by hash for user from session")
+    @PostMapping(path = PATH_APPLY_COUPON)
+    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash", required = true) String couponHash,
+                                                             @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restFinanceFacade.applyCouponByHashForUser(couponHash, user), HttpStatus.OK);
     }
 }
