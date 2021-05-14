@@ -53,6 +53,7 @@ public class TournamentSettings extends ExtendedBaseEntity {
     private Integer maxTeamReserveParticipantCount;
 
     @Builder.Default
+    @NotNull
     @Column(name = "match_count_per_series")
     private Integer matchCountPerSeries = 3;
 

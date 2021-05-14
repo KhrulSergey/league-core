@@ -48,6 +48,7 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
      */
     @Override
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
+        log.debug("^ trying to generate rounds for tournament.id {} with Survival Elimination algorithm", tournament.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournament.getStatus())) {
             log.error("!> requesting generate survival tournament rounds for non-active tournament. Check evoking clients");
             return null;
@@ -102,6 +103,8 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
      */
     @Override
     public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
+        log.debug("^ trying to compose matches for new round for tournamentRound.id {} with Survival Elimination algorithm",
+                tournamentRound.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournamentRound.getStatus())) {
             log.error("!> requesting composeNewRoundForTournament for not active survival tournament round status. Check evoking clients");
             return null;
