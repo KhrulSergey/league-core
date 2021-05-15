@@ -15,6 +15,8 @@ import com.freetonleague.core.service.UserEventService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,7 +47,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final LeagueIdClientService leagueIdClientService;
     private final Validator validator;
-    private final UserEventService userEventService;
+
+    @Lazy
+    @Autowired
+    private UserEventService userEventService;
 
     /**
      * Adding a new user to DB.
@@ -139,19 +145,28 @@ public class UserServiceImpl implements UserService {
     public User edit(User user) {
         User updatedUser;
         Set<ConstraintViolation<User>> violations = validator.validate(user);
-        if (userRepository.existsByLeagueId(user.getLeagueId())) {
-            if (violations.isEmpty()) {
-                log.debug("user: {} is edited", user);
-                updatedUser = userRepository.saveAndFlush(user);
-            } else {
-                log.warn("edited user: {} have constraint violations: {}", user, violations);
-                throw new ConstraintViolationException(violations);
-            }
-        } else {
+
+        if (!userRepository.existsByLeagueId(user.getLeagueId())) {
             log.warn("user: {} is not exist", user);
+            throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
+                    "user with leagueId " + user.getLeagueId() + " is not exist");
+        }
+        if (!violations.isEmpty()) {
+            log.warn("edited user: {} have constraint violations: {}", user, violations);
             throw new ConstraintViolationException(violations);
         }
+        log.debug("user: {} is edited", user);
+        updatedUser = userRepository.saveAndFlush(user);
+        userEventService.processUserStatusChange(user, user.getStatus());
         return updatedUser;
+    }
+
+    /**
+     * Returns list of all initiated users on portal
+     */
+    @Override
+    public List<User> getInitiatedUserList() {
+        return userRepository.findAllInitiatedUsers();
     }
 
     /**
@@ -171,6 +186,7 @@ public class UserServiceImpl implements UserService {
         }
         return user;
     }
+
 
     /**
      * Check if user already existed on platform

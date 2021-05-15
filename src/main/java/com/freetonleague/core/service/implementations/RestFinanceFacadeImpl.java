@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.AccountInfoDto;
+import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
@@ -76,14 +77,15 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
             log.debug("^ user is not authenticate. 'applyCouponForUser' in RestFinanceFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'applyCouponForUser' request denied");
         }
-        AccountInfoDto advertisementCompanyAccount = financialClientService.getVerifiedAdvertisementCompany(couponHash);
+        CouponInfoDto advertisementCompanyAccount = financialClientService.getVerifiedAdvertisementCompany(couponHash);
         if (isNull(advertisementCompanyAccount)) {
             log.warn("~ Applying coupon with hash {} was unsuccessful for user. " +
                     "Active advertisement company was not found. Request denied in RestFinanceFacade", couponHash);
             throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_COUPON_APPLY_ERROR,
                     "Active advertisement company was not found. Applying coupon with hash " + couponHash + " was unsuccessful");
         }
-        AccountInfoDto account = financialClientService.applyCouponForUser(couponHash, user);
+
+        AccountInfoDto account = financialClientService.applyCouponForUser(advertisementCompanyAccount, user);
         if (isNull(account)) {
             log.warn("~ Applying coupon with hash {} was unsuccessful for user {}. " +
                     "ApplyCouponForUser in RestFinanceFacade request denied", couponHash, user);

@@ -3,10 +3,7 @@ package com.freetonleague.core.domain.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -45,7 +42,7 @@ public class User extends BaseEntity implements UserDetails {
     private String name;
 
     @NotBlank
-    @Size(max = 32)
+    @Size(max = 36)
     @Column(name = "username", unique = true)
     private String username;
 
@@ -62,6 +59,10 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
+
+    @Builder.Default
+    @Column(name = "is_hidden")
+    private boolean isHidden = false;
 
     @Column(name = "utm_source")
     private String utmSource;
@@ -117,10 +118,6 @@ public class User extends BaseEntity implements UserDetails {
     @Override
     public boolean isEnabled() {
         return UserStatusType.activeUserStatusList.contains(status);
-    }
-
-    public boolean isHidden() {
-        return status.isHidden();
     }
 
     public boolean isAdmin() {

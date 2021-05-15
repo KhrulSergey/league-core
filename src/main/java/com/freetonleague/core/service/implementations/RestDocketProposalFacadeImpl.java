@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.DocketUserProposalBonusDto;
 import com.freetonleague.core.domain.dto.DocketUserProposalDto;
 import com.freetonleague.core.domain.enums.DocketStatusType;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
@@ -8,6 +9,7 @@ import com.freetonleague.core.domain.model.DocketUserProposal;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.DocketProposalMapper;
+import com.freetonleague.core.security.permissions.CanManageDepositFinUnit;
 import com.freetonleague.core.security.permissions.CanManageDocket;
 import com.freetonleague.core.service.DocketProposalService;
 import com.freetonleague.core.service.RestDocketFacade;
@@ -22,6 +24,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -42,7 +45,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
      * Get currentUser proposal for docket
      */
     @Override
-    public DocketUserProposalDto getProposalFromUserForDocket(long docketId, String leagueId) {
+    public DocketUserProposalDto getProposalByUserAndDocket(long docketId, String leagueId) {
         User user = restUserFacade.getVerifiedUserByLeagueId(leagueId);
         Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
         DocketUserProposal docketUserProposal = docketProposalService.getProposalByUserAndDocket(user, docket);
@@ -53,9 +56,20 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
      * Get currentUser proposal list for docket
      */
     @Override
-    public Page<DocketUserProposalDto> getProposalListForDocket(Pageable pageable, long docketId) {
+    public Page<DocketUserProposalDto> getProposalListByDocket(Pageable pageable, long docketId) {
         Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
         return docketProposalService.getProposalListForDocket(pageable, docket).map(docketProposalMapper::toDto);
+    }
+
+    /**
+     * Get user proposal list by docket for bonus payments
+     */
+    @Override
+    @CanManageDepositFinUnit
+    public List<DocketUserProposalBonusDto> getProposalListByDocketForBonus(String accessToken, long docketId) {
+        Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
+        List<DocketUserProposal> docketUserProposals = docketProposalService.getActiveUserProposalListByDocket(docket);
+        return docketProposalMapper.toBonusDto(docketUserProposals);
     }
 
     /**

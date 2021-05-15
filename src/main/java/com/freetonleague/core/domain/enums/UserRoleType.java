@@ -4,5 +4,6 @@ public enum UserRoleType {
     ADMIN,
     MANAGER,
     REGULAR,
-    EXTERNAL_SERVICE
+    EXTERNAL_SERVICE,
+    INNER_SYSTEM
 }
