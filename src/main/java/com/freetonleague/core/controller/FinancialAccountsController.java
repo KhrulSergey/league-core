@@ -9,7 +9,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -63,10 +66,11 @@ public class FinancialAccountsController {
         return new ResponseEntity<>(restFinanceFacade.getBalanceByGUID(GUID, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Apply coupon by hash for user from session")
-    @PostMapping(path = PATH_APPLY_COUPON)
-    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash", required = true) String couponHash,
-                                                             @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restFinanceFacade.applyCouponByHashForUser(couponHash, user), HttpStatus.OK);
-    }
+    //TODO delete bonus payments method if no need until 01/09/2021
+//    @ApiOperation("Apply coupon by hash for user from session")
+//    @PostMapping(path = PATH_APPLY_COUPON)
+//    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash", required = true) String couponHash,
+//                                                             @ApiIgnore @AuthenticationPrincipal User user) {
+//        return new ResponseEntity<>(restFinanceFacade.applyCouponByHashForUser(couponHash, user), HttpStatus.OK);
+//    }
 }
