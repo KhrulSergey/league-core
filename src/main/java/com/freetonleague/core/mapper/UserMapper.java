@@ -1,5 +1,6 @@
 package com.freetonleague.core.mapper;
 
+import com.freetonleague.core.domain.dto.UserBonusDto;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.model.User;
@@ -25,6 +26,9 @@ public interface UserMapper {
     @Mapping(target = "email", ignore = true)
     @Mapping(target = "utmSource", ignore = true)
     UserPublicDto toPubicDto(User entity);
+
+    @Named(value = "toBonusDto")
+    UserBonusDto toBonusDto(User entity);
 
     List<User> fromDto(List<UserDto> dtoList);
 
