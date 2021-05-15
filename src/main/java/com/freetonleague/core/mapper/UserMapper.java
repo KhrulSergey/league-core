@@ -15,17 +15,20 @@ public interface UserMapper {
     User fromDto(UserDto dto);
 
     @Named(value = "toDto")
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "utmSource", ignore = true)
     UserDto toDto(User entity);
 
     @Named(value = "toPubicDto")
     @Mapping(target = "userTeamParticipateHistoryList", source = "entity.userTeamParticipantList",
             qualifiedByName = "toUserTeamParticipateHistoryDto")
+    @Mapping(target = "email", ignore = true)
+    @Mapping(target = "utmSource", ignore = true)
     UserPublicDto toPubicDto(User entity);
 
     List<User> fromDto(List<UserDto> dtoList);
 
     @IterableMapping(qualifiedByName = "toDto")
     List<UserDto> toDto(List<User> entities);
-
 }
 
