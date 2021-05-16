@@ -3,6 +3,7 @@ package com.freetonleague.core.domain.enums;
 import java.util.List;
 
 public enum UserStatusType {
+    INITIATED,
     ACTIVE,
     CREATED,
     BANNED,
@@ -21,5 +22,9 @@ public enum UserStatusType {
 
     public boolean isHidden() {
         return this == HIDDEN;
+    }
+
+    public boolean isInitiated() {
+        return this == INITIATED;
     }
 }

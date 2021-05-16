@@ -2,8 +2,13 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.TransactionTemplateType;
+import com.freetonleague.core.domain.enums.TransactionType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.FinancialClientService;
+import com.freetonleague.core.service.financeUnit.FinancialCouponService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +35,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
 
     //call rest of Financial unit
     private final RestFinancialUnitFacade restFinancialUnitFacade;
+    private final FinancialCouponService financialCouponService;
     private final Validator validator;
 
     /**
@@ -77,7 +83,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
      * Returns info for created transaction from source to target holder GUID
      */
     @Override
-    public AccountTransactionInfoDto createTransactionFromSourceToTargetHolder(AccountTransactionInfoDto accountTransactionInfoDto) {
+    public AccountTransactionInfoDto applyTransactionFromSourceToTargetHolder(AccountTransactionInfoDto accountTransactionInfoDto) {
         if (isNull(accountTransactionInfoDto)) {
             log.error("!!> requesting createTransactionFromSourceToTargetHolder for NULL accountTransactionInfoDto. Check evoking clients");
             return null;
@@ -101,6 +107,46 @@ public class FinancialClientServiceImpl implements FinancialClientService {
 
         log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
         return restFinancialUnitFacade.createTransaction(accountTransactionInfoDto);
+    }
+
+    /**
+     * Apply coupon by advertisement company hash for user from session
+     */
+    @Override
+    public AccountInfoDto applyCouponForUser(CouponInfoDto couponInfo, User user) {
+        //TODO freeze user account
+        AccountInfoDto userAccount = this.getAccountByHolderInfo(user.getLeagueId(), AccountHolderType.USER);
+        AccountTransactionInfoDto transferTransaction = this.composeCouponPaymentTransaction(
+                couponInfo.getCouponAccount(), userAccount, couponInfo.getCouponAmount());
+        AccountTransactionInfoDto savedTransaction = this.applyTransactionFromSourceToTargetHolder(transferTransaction);
+        return savedTransaction.getTargetAccount();
+    }
+
+    /**
+     * Verify advertisement company by coupon hash
+     */
+    @Override
+    public CouponInfoDto getVerifiedAdvertisementCompany(String couponHash) {
+        if (isBlank(couponHash)) {
+            log.error("!!> requesting getVerifiedAdvertisementCompany for BLANK couponHash. Check evoking clients");
+            return null;
+        }
+        return financialCouponService.getVerifiedAdvertisementCompany(couponHash);
+    }
+
+    /**
+     * transfer transaction from bonusAccount to userAccount
+     */
+    private AccountTransactionInfoDto composeCouponPaymentTransaction(AccountInfoDto accountSourceDto,
+                                                                      AccountInfoDto accountTargetDto,
+                                                                      double tournamentFundAmount) {
+        return AccountTransactionInfoDto.builder()
+                .amount(tournamentFundAmount)
+                .sourceAccount(accountSourceDto)
+                .targetAccount(accountTargetDto)
+                .transactionType(TransactionType.PAYMENT)
+                .transactionTemplateType(TransactionTemplateType.DOCKET_ENTRANCE_FEE)
+                .build();
     }
 
     private boolean verifyAccountInfoDto(AccountInfoDto accountInfo) {

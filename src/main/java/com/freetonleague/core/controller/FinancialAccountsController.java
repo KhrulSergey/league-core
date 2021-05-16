@@ -28,6 +28,8 @@ public class FinancialAccountsController {
     public static final String PATH_GET_TEAM = "/balance-by-team/{team_id}";
     public static final String PATH_GET_TOURNAMENT = "/balance-by-tournament/{tournament_id}";
 
+    public static final String PATH_APPLY_COUPON = "/apply-coupon/";
+
     private final RestFinanceFacade restFinanceFacade;
 
     @ApiOperation("Get account info for current user")
@@ -63,4 +65,12 @@ public class FinancialAccountsController {
                                                            @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFinanceFacade.getBalanceByGUID(GUID, user), HttpStatus.OK);
     }
+
+    //TODO delete bonus payments method if no need until 01/09/2021
+//    @ApiOperation("Apply coupon by hash for user from session")
+//    @PostMapping(path = PATH_APPLY_COUPON)
+//    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash", required = true) String couponHash,
+//                                                             @ApiIgnore @AuthenticationPrincipal User user) {
+//        return new ResponseEntity<>(restFinanceFacade.applyCouponByHashForUser(couponHash, user), HttpStatus.OK);
+//    }
 }

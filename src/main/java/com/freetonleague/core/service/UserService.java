@@ -4,6 +4,7 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
@@ -44,4 +45,10 @@ public interface UserService extends UserDetailsService {
      */
     User edit(User user);
 
+    /**
+     * Returns list of all initiated users on portal
+     *
+     * @return list of user entities
+     */
+    List<User> getInitiatedUserList();
 }

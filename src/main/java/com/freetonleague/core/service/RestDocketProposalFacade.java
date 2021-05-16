@@ -1,11 +1,14 @@
 package com.freetonleague.core.service;
 
+import com.freetonleague.core.domain.dto.DocketUserProposalBonusDto;
 import com.freetonleague.core.domain.dto.DocketUserProposalDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.DocketUserProposal;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * Service-facade for managing docket user proposal
@@ -14,19 +17,27 @@ public interface RestDocketProposalFacade {
 
 
     /**
-     * Get user proposal for docket
+     * Get user proposal by user and docket
      *
      * @param docketId identify of docket
      * @param leagueId identify of user
      */
-    DocketUserProposalDto getProposalFromUserForDocket(long docketId, String leagueId);
+    DocketUserProposalDto getProposalByUserAndDocket(long docketId, String leagueId);
 
     /**
-     * Get user proposal list for docket
+     * Get user proposal list by docket
      *
      * @param docketId identify of docket
      */
-    Page<DocketUserProposalDto> getProposalListForDocket(Pageable pageable, long docketId);
+    Page<DocketUserProposalDto> getProposalListByDocket(Pageable pageable, long docketId);
+
+    /**
+     * Get user proposal list by docket for bonus payments
+     *
+     * @param accessToken access token to method
+     * @param docketId    identify of docket
+     */
+    List<DocketUserProposalBonusDto> getProposalListByDocketForBonus(String accessToken, long docketId);
 
     /**
      * Registry new user to docket
