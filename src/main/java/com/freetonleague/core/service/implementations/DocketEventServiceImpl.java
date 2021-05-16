@@ -99,7 +99,7 @@ public class DocketEventServiceImpl implements DocketEventService {
         AccountInfoDto docketAccountDto = financialClientService.getAccountByHolderInfo(
                 docket.getCoreId(), AccountHolderType.DOCKET);
 
-        AccountTransactionInfoDto result = financialClientService.createTransactionFromSourceToTargetHolder(
+        AccountTransactionInfoDto result = financialClientService.applyTransactionFromSourceToTargetHolder(
                 this.composeParticipationFeeTransaction(userAccountDto, docketAccountDto, userParticipationFeeAmount));
         if (isNull(result)) {
             log.warn("~ forbiddenException for create new proposal for user.id {} to docket id {}. " +

@@ -43,6 +43,7 @@ public class TournamentSettingsDto {
     @Min(0)
     private Integer maxTeamReserveParticipantCount;
 
+    @NotNull
     @Min(1)
     private Integer matchCountPerSeries;
 

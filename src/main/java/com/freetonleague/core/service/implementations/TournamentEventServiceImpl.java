@@ -59,12 +59,12 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         return null;
     }
 
-    //every 10 minutes
-    @Scheduled(fixedRateString = "600000")
+    //every 10 minutes, timout before start 1 min
+    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
     void monitor() {
         log.debug("^ Run TournamentEventService monitor");
 
-        final Map<Long, Tournament> idToTournament = getIdToTournamentMap();
+        final Map<Long, Tournament> idToTournament = this.getIdToTournamentMap();
         final Set<Long> keys = new HashSet<>(idToTournament.keySet());
 
         if (idToTournament.isEmpty()) {
@@ -229,7 +229,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 tournament.getCoreId(), AccountHolderType.TOURNAMENT);
 
         List<AccountTransactionInfoDto> participatePaymentList = new ArrayList<>();
-        AccountTransactionInfoDto result = financialClientService.createTransactionFromSourceToTargetHolder(
+        AccountTransactionInfoDto result = financialClientService.applyTransactionFromSourceToTargetHolder(
                 this.composeParticipationFeeTransaction(teamCapitanAccountDto, tournamentAccountDto, tournamentFundAmount));
         if (isNull(result)) {
             log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
@@ -240,7 +240,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         }
         participatePaymentList.add(result);
 
-        result = financialClientService.createTransactionFromSourceToTargetHolder(
+        result = financialClientService.applyTransactionFromSourceToTargetHolder(
                 this.composeParticipationCommissionTransaction(teamCapitanAccountDto, tournamentOwnerAccountDto, commissionAmount));
         if (isNull(result)) {
             log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
@@ -319,6 +319,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .createdDate(LocalDateTime.now())
                 .build();
         try {
+            log.debug("Not implement to send kafka event in handleTournamentStatusChange: {}", event);
 //            eventService.sendEvent(event);
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: {}", exc.getMessage());
