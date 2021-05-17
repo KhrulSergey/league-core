@@ -49,8 +49,10 @@ public class DocketDto {
     @ApiModelProperty(allowableValues = "range[0, 450]")
     private String imageUrl;
 
-    @Builder.Default
-    private Double participationFee = 0.0;
+    private Double participationFee;
+
+    @ApiModelProperty(notes = "optional")
+    private Integer maxProposalCount;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<DocketUserProposalDto> userProposalList;
