@@ -90,9 +90,11 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
                     "User can apply to docket only by himself. Session user not equals specified leagueId.");
         }
 
+        Docket docket = newUserProposal.getDocket();
+
         //check if proposal already existed
         DocketUserProposal existedUserProposal = docketProposalService.getProposalByUserAndDocket(
-                newUserProposal.getUser(), newUserProposal.getDocket());
+                newUserProposal.getUser(), docket);
         if (nonNull(existedUserProposal)) {
             log.warn("~ forbiddenException for create duplicate proposal from user {}. Already existed proposal.id {}.",
                     newUserProposal.getUser(), existedUserProposal.getId());
@@ -100,17 +102,34 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
                     "Duplicate proposal from user to the one docket is prohibited. Request rejected.");
         }
 
-        //check status of tournament
-        if (!DocketStatusType.activeStatusList.contains(newUserProposal.getDocket().getStatus())) {
+        //check status of docket
+        if (!DocketStatusType.activeStatusList.contains(docket.getStatus())) {
             log.warn("~ forbiddenException for create new proposal for user {} to docket.id {} with status {}. " +
                             "Docket is closed for new proposals",
-                    userProposalDto.getLeagueId(), newUserProposal.getDocket().getId(), newUserProposal.getDocket().getStatus());
+                    userProposalDto.getLeagueId(), docket.getId(), docket.getStatus());
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
                     String.format("Docket '%s' is closed for new proposals and have status '%s'. Request rejected.",
-                            newUserProposal.getDocket().getId(), newUserProposal.getDocket().getStatus()));
+                            docket.getId(), docket.getStatus()));
         }
 
-        if (newUserProposal.getDocket().hasTextLabel() && !newUserProposal.hasTextLabelAnswer()) {
+        //check exceed max proposal count to docket
+        if (docket.hasProposalCountLimit()) {
+            int docketProposalCount = docketProposalService.countActiveUserProposalListByDocket(docket);
+            log.warn("~ For docket {} with limit {} we have proposalList.size {}, from repo we have proposal count {}, " +
+                            "proposal size is {} equal",
+                    docket.getId(), docket.getMaxProposalCount(), docket.getUserProposalList().size(),
+                    docketProposalCount, docketProposalCount == docket.getUserProposalList().size());
+            if (docketProposalCount > docket.getMaxProposalCount()) {
+                log.warn("~ forbiddenException for create new proposal for user {} to docket.id {}. " +
+                                "User proposal's to Docket can't be created. Docket proposal's limit exceeded",
+                        userProposalDto.getLeagueId(), docket.getId());
+                throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_LIMIT_EXCEED_ERROR,
+                        String.format("Docket '%s' is closed for new proposals because limit '%s' is exceeded. Request rejected.",
+                                docket.getId(), docket.getMaxProposalCount()));
+            }
+        }
+
+        if (docket.hasTextLabel() && !newUserProposal.hasTextLabelAnswer()) {
             log.warn("~ parameter 'textLabelAnswer' is not set for proposal to createProposalToDocket");
             throw new ValidationException(ExceptionMessages.DOCKET_USER_PROPOSAL_VALIDATION_ERROR, "textLabelAnswer",
                     "parameter textLabelAnswer is required for createProposalToDocket");

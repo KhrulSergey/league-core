@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -65,9 +66,11 @@ public class Docket extends ExtendedBaseEntity {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @Builder.Default
     @Column(name = "participation_fee")
-    private Double participationFee = 0.0;
+    private Double participationFee;
+
+    @Column(name = "max_proposal_count")
+    private Integer maxProposalCount;
 
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "docket", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -102,5 +105,9 @@ public class Docket extends ExtendedBaseEntity {
 
     public boolean hasTextLabel() {
         return !isBlank(textLabel);
+    }
+
+    public boolean hasProposalCountLimit() {
+        return nonNull(maxProposalCount);
     }
 }

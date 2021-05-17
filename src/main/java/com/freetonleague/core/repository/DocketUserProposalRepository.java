@@ -21,4 +21,6 @@ public interface DocketUserProposalRepository extends JpaRepository<DocketUserPr
                                                        Docket docket, List<ParticipationStateType> state);
 
     List<DocketUserProposal> findAllByDocketAndState(Docket docket, ParticipationStateType state);
+
+    Integer countByDocketAndState(Docket docket, ParticipationStateType state);
 }
