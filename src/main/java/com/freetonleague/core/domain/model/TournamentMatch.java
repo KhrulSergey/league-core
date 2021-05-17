@@ -29,7 +29,7 @@ public class TournamentMatch extends ExtendedBaseEntity {
     private TournamentSeries tournamentSeries;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TournamentMatchRival> matchRivalList;
 
     /**

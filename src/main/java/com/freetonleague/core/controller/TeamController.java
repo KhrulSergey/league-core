@@ -46,8 +46,8 @@ public class TeamController {
     @ApiOperation("Get team list info")
     @ApiPageable
     @GetMapping(path = PATH_GET_LIST)
-    public ResponseEntity<Page<TeamExtendedDto>> getList(@PageableDefault Pageable pageable,
-                                                         @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<Page<TeamExtendedDto>> getTeamList(@PageableDefault Pageable pageable,
+                                                             @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.getTeamList(pageable, user), HttpStatus.OK);
     }
 
@@ -61,30 +61,30 @@ public class TeamController {
 
     @ApiOperation("Register new team on platform")
     @PostMapping(path = PATH_REGISTER)
-    public ResponseEntity<TeamDto> register(@RequestBody TeamBaseDto teamDto,
-                                            @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<TeamDto> registerTeam(@RequestBody TeamBaseDto teamDto,
+                                                @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.addTeam(teamDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Edit team info (only for captain)")
     @PutMapping(path = PATH_EDIT)
-    public ResponseEntity<TeamExtendedDto> edit(@PathVariable("id") long id, @RequestBody TeamBaseDto teamDto,
-                                                @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<TeamExtendedDto> editTeam(@PathVariable("id") long id, @RequestBody TeamBaseDto teamDto,
+                                                    @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.editTeam(id, teamDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Expel participant from team (only for captain)")
     @PutMapping(path = PATH_EXPEL)
-    public ResponseEntity<TeamExtendedDto> expel(@PathVariable("team_id") long id,
-                                                 @PathVariable("participant_id") long participantId,
-                                                 @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<TeamExtendedDto> expelFromTeam(@PathVariable("team_id") long id,
+                                                         @PathVariable("participant_id") long participantId,
+                                                         @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.expel(id, participantId, user), HttpStatus.OK);
     }
 
     @ApiOperation("Disband (archive) all the team (only for captain)")
     @DeleteMapping(path = PATH_DISBAND)
-    public ResponseEntity<Void> disband(@PathVariable("team_id") long id,
-                                        @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<Void> disbandTeam(@PathVariable("team_id") long id,
+                                            @ApiIgnore @AuthenticationPrincipal User user) {
         restTeamFacade.disband(id, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
