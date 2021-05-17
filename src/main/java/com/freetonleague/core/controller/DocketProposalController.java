@@ -37,6 +37,11 @@ public class DocketProposalController {
 
     private final RestDocketProposalFacade restDocketProposalFacade;
 
+    /**
+     * The same value as from "${freetonleague.session.service-token-name:service_token}"
+     */
+    private final String staticServiceTokenName = "access_token";
+
     @ApiOperation("Get user proposal for docket")
     @GetMapping(path = PATH_GET_BY_USER_AND_DOCKET)
     public ResponseEntity<DocketUserProposalDto> getDocketProposalByUser(@RequestParam(value = "docket_id") long docketId,
@@ -55,7 +60,7 @@ public class DocketProposalController {
     @ApiOperation("Get active user proposal list by docket for bonus payments")
     @GetMapping(path = PATH_GET_LIST_BY_DOCKET_FOR_BONUS)
     public ResponseEntity<List<DocketUserProposalBonusDto>> getDocketProposalBonusList(
-            @RequestParam(value = "access_token") String token,
+            @RequestParam(value = staticServiceTokenName, required = false) String token,
             @RequestParam(value = "docket_id") long docketId) {
         return new ResponseEntity<>(restDocketProposalFacade.getProposalListByDocketForBonus(token, docketId), HttpStatus.OK);
     }

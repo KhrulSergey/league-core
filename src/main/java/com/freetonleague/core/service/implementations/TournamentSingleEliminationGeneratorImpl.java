@@ -54,6 +54,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      */
     @Override
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
+        log.debug("^ trying to generate rounds for tournament.id {} with Single Elimination algorithm", tournament.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournament.getStatus())) {
             log.error("!> requesting generate tournament round for non-active tournament. Check evoking clients");
             return null;
@@ -108,6 +109,8 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      */
     @Override
     public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
+        log.debug("^ trying to compose matches for new round for tournamentRound.id {} with Single Elimination algorithm",
+                tournamentRound.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournamentRound.getStatus())) {
             log.error("!> requesting composeNewRoundForTournament for not active tournament round status. Check evoking clients");
             return null;

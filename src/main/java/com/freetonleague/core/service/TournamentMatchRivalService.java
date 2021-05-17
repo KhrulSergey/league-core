@@ -1,48 +1,59 @@
 package com.freetonleague.core.service;
 
 
+import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentMatchRivalParticipant;
+
+import java.util.List;
 
 public interface TournamentMatchRivalService {
 
     /**
-     * Returns founded tournament match by id
+     * Returns founded tournament match rival by id
      *
-     * @param id of tournament match to search
-     * @return tournament match entity or NULL of not found
+     * @param id of tournament match rival to search
+     * @return tournament match rival entity or NULL of not found
      */
     TournamentMatchRival getMatchRival(long id);
 
     /**
-     * Add new tournament series to DB.
+     * Returns founded tournament match by id
+     *
+     * @param match of tournament match to search
+     * @return tournament match entity or NULL of not found
+     */
+    List<TournamentMatchRival> getMatchRivalByMatch(TournamentMatch match);
+
+    /**
+     * Add new tournament match rival to DB.
      *
      * @param tournamentMatchRival to be added
-     * @return Added tournament series
+     * @return Added tournament match rival
      */
     TournamentMatchRival addMatchRival(TournamentMatchRival tournamentMatchRival);
 
     /**
-     * Edit tournament series in DB.
+     * Edit tournament match rival in DB.
      *
      * @param tournamentMatchRival to be edited
-     * @return Edited tournament series
+     * @return Edited tournament match rival
      */
     TournamentMatchRival editMatchRival(TournamentMatchRival tournamentMatchRival);
 
     /**
-     * Mark 'deleted' tournament series in DB.
+     * Mark 'deleted' tournament match rival in DB.
      *
      * @param tournamentMatchRival to be deleted
-     * @return tournament series with updated fields and deleted status
+     * @return tournament match rival with updated fields and deleted status
      */
     TournamentMatchRival deleteMatchRival(TournamentMatchRival tournamentMatchRival);
 
     /**
-     * Returns sign of tournament series existence for specified id.
+     * Returns sign of tournament match rival existence for specified id.
      *
-     * @param id for which tournament series will be find
-     * @return true is tournament series exists, false - if not
+     * @param id for which tournament match rival will be find
+     * @return true is tournament match rival exists, false - if not
      */
     boolean isExistsTournamentMatchRivalById(long id);
 

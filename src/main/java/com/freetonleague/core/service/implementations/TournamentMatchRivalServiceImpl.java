@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
+import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentMatchRivalParticipant;
 import com.freetonleague.core.repository.TournamentMatchRivalParticipantRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -35,6 +37,22 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
     public TournamentMatchRival getMatchRival(long id) {
         log.debug("^ trying to get match rival by id: {}", id);
         return tournamentMatchRivalRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Returns founded tournament match by id
+     *
+     * @param match of tournament match to search
+     * @return tournament match entity or NULL of not found
+     */
+    @Override
+    public List<TournamentMatchRival> getMatchRivalByMatch(TournamentMatch match) {
+        if (isNull(match)) {
+            log.error("!> requesting get tournament rival with getMatchRivalByMatch for NULL match. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get match rival by match.id: {}", match.getId());
+        return tournamentMatchRivalRepository.findAllByTournamentMatch(match);
     }
 
     /**
