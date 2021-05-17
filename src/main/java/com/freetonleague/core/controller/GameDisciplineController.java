@@ -38,28 +38,28 @@ public class GameDisciplineController {
 
     @ApiOperation("Get discipline list info")
     @GetMapping(path = PATH_GET_LIST)
-    public ResponseEntity<List<GameDisciplineDto>> getList(@ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<List<GameDisciplineDto>> getDisciplineList(@ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.getAllDisciplines(user), HttpStatus.OK);
     }
 
     @ApiOperation("Create new game discipline on platform")
     @PostMapping(path = PATH_CREATE)
-    public ResponseEntity<GameDisciplineDto> create(@RequestBody GameDisciplineDto disciplineDto,
-                                                    @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<GameDisciplineDto> createDiscipline(@RequestBody GameDisciplineDto disciplineDto,
+                                                              @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.addDiscipline(disciplineDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Get primary game discipline settings by id")
     @GetMapping(path = PATH_GET_SETTINGS)
-    public ResponseEntity<GameDisciplineSettingsDto> getSettingsByDisciplineId(@PathVariable("discipline_id") long id,
-                                                                               @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<GameDisciplineSettingsDto> getDisciplineSettingsByDisciplineId(@PathVariable("discipline_id") long id,
+                                                                                         @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.getPrimaryDisciplineSettingsByDiscipline(id, user), HttpStatus.OK);
     }
 
     @ApiOperation("Create new game discipline settings")
     @PostMapping(path = PATH_CREATE_SETTINGS)
-    public ResponseEntity<GameDisciplineSettingsDto> createSettings(@RequestBody GameDisciplineSettingsDto disciplineSettingsDto,
-                                                                    @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<GameDisciplineSettingsDto> createDisciplineSettings(@RequestBody GameDisciplineSettingsDto disciplineSettingsDto,
+                                                                              @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.addDisciplineSettings(disciplineSettingsDto, user), HttpStatus.CREATED);
     }
 

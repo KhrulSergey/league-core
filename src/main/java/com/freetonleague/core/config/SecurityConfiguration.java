@@ -23,10 +23,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final SessionService sessionService;
 
     @Value("${freetonleague.session.header-token-name:X-Auth-Token}")
-    private final String headerTokenName;
+    private String headerTokenName;
 
     @Value("${freetonleague.session.service-token-name:service_token}")
-    private final String serviceTokenName;
+    private String serviceTokenName;
 
     //Initialization of request filtering component
     @Bean
