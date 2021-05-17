@@ -62,9 +62,14 @@ public interface DocketProposalService {
     DocketUserProposal quitFromDocket(DocketUserProposal userProposal);
 
     /**
-     * Returns list of approved user proposal list for specified docket.
+     * Returns list of approved user proposal for specified docket.
      */
     List<DocketUserProposal> getActiveUserProposalListByDocket(Docket docket);
+
+    /**
+     * Returns count of approved user proposal's list for specified docket.
+     */
+    int countActiveUserProposalListByDocket(Docket docket);
 
     /**
      * Returns calculated participation fee for specified user proposal to docket
