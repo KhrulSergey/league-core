@@ -20,10 +20,15 @@ public class FinancialUnitController {
 
     private final RestFinancialUnitFacade restFinancialUnitFacade;
 
+    /**
+     * The same value as from "${freetonleague.session.service-token-name:service_token}"
+     */
+    private final String staticServiceTokenName = "access_token";
+
     @ApiOperation("Callback method for deposit to user accounts")
     @PostMapping(path = PATH_DEPOSIT)
-    public ResponseEntity<Void> getDisciplineById(@RequestParam(value = "access_token", required = true) String token,
-                                                  @RequestBody AccountDepositFinUnitDto accountDepositInfo) {
+    public ResponseEntity<Void> processDepositOperation(@RequestParam(value = staticServiceTokenName, required = false) String token,
+                                                        @RequestBody AccountDepositFinUnitDto accountDepositInfo) {
         restFinancialUnitFacade.processDeposit(token, accountDepositInfo, BankProviderType.BROXUS);
         return new ResponseEntity<>(HttpStatus.OK);
     }

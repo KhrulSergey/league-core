@@ -2,7 +2,6 @@ package com.freetonleague.core.config;
 
 import com.freetonleague.core.security.AuthenticationCustomFilter;
 import com.freetonleague.core.service.SessionService;
-import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -21,16 +20,19 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final UserService userService;
     private final SessionService sessionService;
 
-    @Value("${spring.session.token-name}")
-    private final String headerAuthTokenName = "token";
+    @Value("${freetonleague.session.header-token-name:X-Auth-Token}")
+    private final String headerTokenName;
+
+    @Value("${freetonleague.session.service-token-name:service_token}")
+    private final String serviceTokenName;
 
     //Initialization of request filtering component
     @Bean
     public AuthenticationCustomFilter authenticationTokenFilterBean() throws Exception {
-        AuthenticationCustomFilter authenticationTokenFilter = new AuthenticationCustomFilter(sessionService, userService);
+        AuthenticationCustomFilter authenticationTokenFilter = new AuthenticationCustomFilter(sessionService,
+                headerTokenName, serviceTokenName);
         authenticationTokenFilter.setAuthenticationManager(authenticationManagerBean());
         return authenticationTokenFilter;
     }
