@@ -63,13 +63,13 @@ freetonleague:
   system-user-prefix: SYSTEM_
   session:
     header-token-name: X-Auth-Token
-    service-token-name: access_token
+    service-token-name: access_token #if change, than also change variable 'staticServiceTokenName'
   service:
     league-id:
       url: league-id:7700/api
       service-token: za#2#b.:ePo6yOko68T$a8Hoqe4ra7r!i6
     league-finance:
-      access-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
+      service-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
       balance-update-timeout-in-sec: 300
       system-bonus-user-login: KdnIgwRY0qzedOZ6R2X6T9GtNDz # name of similar service-user from V025__fin_service_user_and_role.sql
       first-ton-bonus-name: first_ton_2021 # name bonus advertisement company (equals utm_source)
@@ -77,7 +77,7 @@ freetonleague:
     invitation:
       token-duration-in-sec: 432000
   tournament:
-    auto-start: true
+    auto-start: false
 
 #LOGGING CONFIG
 debug: false
