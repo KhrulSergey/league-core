@@ -13,8 +13,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/league_core
     password: ra8ta0n6i2fiVo2buHit6evukir87uk3am
     username: postgres
-  session:
-    token-name: X-Auth-Token
   # ===============================
   # Kafka configuration
   # ===============================
@@ -63,6 +61,9 @@ config:
 freetonleague:
   service-user-prefix: SERVICE_
   system-user-prefix: SYSTEM_
+  session:
+    header-token-name: X-Auth-Token
+    service-token-name: access_token
   service:
     league-id:
       url: league-id:7700/api

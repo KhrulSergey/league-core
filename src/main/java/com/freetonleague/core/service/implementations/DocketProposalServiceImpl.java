@@ -16,12 +16,15 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
+@Transactional
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -78,10 +81,16 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      * Returns user proposal to docket.
      */
     @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     public DocketUserProposal addProposal(DocketUserProposal userProposal) {
         if (isNull(userProposal) || isNull(userProposal.getDocket())) {
             log.error("!> requesting addProposal for NULL userProposal {} or NULL userProposal.docket. Check evoking clients",
                     userProposal);
+            return null;
+        }
+        Docket docket = userProposal.getDocket();
+        if (docket.hasProposalCountLimit() && this.countActiveUserProposalListByDocket(docket) > docket.getMaxProposalCount()) {
+            log.error("!> requesting addProposal for docket with proposal's limit exceeded. Check evoking clients");
             return null;
         }
         log.debug("^ trying to add new user proposal to docket {}", userProposal);
@@ -133,6 +142,20 @@ public class DocketProposalServiceImpl implements DocketProposalService {
         log.debug("^ trying to get Approved user proposal list by docket with id: {}", docket.getId());
 
         return docketProposalRepository.findAllByDocketAndState(docket, ParticipationStateType.APPROVE);
+    }
+
+    /**
+     * Returns count of approved user proposal's list for specified docket.
+     */
+    @Override
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public int countActiveUserProposalListByDocket(Docket docket) {
+        if (isNull(docket)) {
+            log.error("!> requesting countActiveUserProposalListByDocket for NULL docket. Check evoking clients");
+            return 0;
+        }
+        log.debug("^ trying to count Approved user proposal list by docket with id: {}", docket.getId());
+        return docketProposalRepository.countByDocketAndState(docket, ParticipationStateType.APPROVE);
     }
 
     /**

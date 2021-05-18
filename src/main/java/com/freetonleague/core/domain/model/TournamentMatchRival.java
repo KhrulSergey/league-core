@@ -36,10 +36,10 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
      * List of team participants on current match
      */
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentMatchRival", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "tournamentMatchRival", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     Set<TournamentMatchRivalParticipant> rivalParticipantList;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "match_id")
     private TournamentMatch tournamentMatch;
     /**

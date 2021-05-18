@@ -3,9 +3,7 @@ package com.freetonleague.core.security;
 import com.freetonleague.core.domain.model.Session;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.SessionService;
-import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -18,7 +16,6 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Objects;
 
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -31,26 +28,21 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFilter {
 
     private final SessionService sessionService;
-    private final UserService userService;
 
-    @Value("${spring.session.token-name:token}")
-    private String headerTokenName;
+    private final String headerTokenName;
+
+    private final String serviceTokenName;
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
         HttpServletRequest request = (HttpServletRequest) req;
 
-        String headerToken = request.getHeader("X-Auth-Token");
-        String paramToken = request.getParameter("token");
-        String paramAccessToken = request.getParameter("access_token");
-
-        String token = Objects.isNull(headerToken)
-                ? paramToken
-                : headerToken;
+        String headerToken = request.getHeader(headerTokenName);
+        String paramAccessToken = request.getParameter(serviceTokenName);
 
         Session session = null;
-        if (!isBlank(token)) {
-            session = sessionService.loadByToken(token);
+        if (!isBlank(headerToken)) {
+            session = sessionService.loadByToken(headerToken);
         } else if (!isBlank(paramAccessToken)) {
             session = sessionService.loadServiceByToken(paramAccessToken);
         }
@@ -69,5 +61,4 @@ public class AuthenticationCustomFilter extends UsernamePasswordAuthenticationFi
         SecurityContext securityContext = SecurityContextHolder.getContext();
         securityContext.setAuthentication(authentication);
     }
-
 }
