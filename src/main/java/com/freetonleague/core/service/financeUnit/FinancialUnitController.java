@@ -21,7 +21,7 @@ public class FinancialUnitController {
     private final RestFinancialUnitFacade restFinancialUnitFacade;
 
     /**
-     * The same value as from "${freetonleague.session.service-token-name:service_token}"
+     * The same value as from "${freetonleague.session.service-token-name}"
      */
     private final String staticServiceTokenName = "access_token";
 

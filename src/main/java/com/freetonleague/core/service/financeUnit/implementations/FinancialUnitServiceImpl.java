@@ -45,8 +45,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private final AccountTransactionRepository accountTransactionRepository;
     private final Validator validator;
 
-    @Value("${freetonleague.service.league-finance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
-    private String leagueFinanceAccessToken;
+    @Value("${freetonleague.service.league-finance.service-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    private String leagueFinanceServiceToken;
 
     @Value("${freetonleague.service.league-finance.balance-update-timeout-in-sec:600}")
     private Long leagueFinanceBalanceUpdateTimeout;
@@ -233,7 +233,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
      */
     @Override
     public boolean validateFinanceTokenForDeposit(String token) {
-        return token.equals(this.leagueFinanceAccessToken);
+        return token.equals(this.leagueFinanceServiceToken);
     }
 
     private boolean isAccountHaveFundAmount(Account account, Double amount) {

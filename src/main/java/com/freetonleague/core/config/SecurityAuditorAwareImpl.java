@@ -23,8 +23,8 @@ public class SecurityAuditorAwareImpl implements AuditorAware<User> {
 
     private final SessionService sessionService;
 
-    @Value("${freetonleague.service.league-finance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
-    private String leagueFinanceAccessToken;
+    @Value("${freetonleague.service.league-finance.service-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    private String leagueFinanceServiceToken;
 
     @Override
     public Optional<User> getCurrentAuditor() {
@@ -34,7 +34,7 @@ public class SecurityAuditorAwareImpl implements AuditorAware<User> {
         if (isNull(authentication)
                 || authentication.getPrincipal().equals("anonymousUser")
                 || !authentication.isAuthenticated()) {
-            Session session = sessionService.loadServiceByToken(leagueFinanceAccessToken);
+            Session session = sessionService.loadServiceByToken(leagueFinanceServiceToken);
             return nonNull(session) ?
                     Optional.of(session.getUser())
                     : Optional.empty();
