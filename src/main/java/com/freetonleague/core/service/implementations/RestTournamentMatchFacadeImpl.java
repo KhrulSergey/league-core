@@ -192,8 +192,8 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         TournamentMatchRivalDto matchRivalWinnerDto = tournamentMatchDto.getMatchWinner();
         TournamentMatchRival matchRivalWinner = null;
         if (nonNull(matchRivalWinnerDto)) {
+            matchRivalWinnerDto.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
             matchRivalWinner = this.getVerifiedMatchRivalWinnerByDto(matchRivalWinnerDto);
-            matchRivalWinner.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
         }
         tournamentMatch.setMatchWinner(matchRivalWinner);
 
