@@ -39,14 +39,14 @@ public class TournamentMatchRivalParticipant extends ExtendedBaseEntity {
     /**
      * Reference to tournament match rival (team)
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "match_rival_id")
     private TournamentMatchRival tournamentMatchRival;
 
     /**
      * Reference to team participant on current tournament
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne
     @JoinColumn(name = "tournament_team_participant_id")
     private TournamentTeamParticipant tournamentTeamParticipant;
 
