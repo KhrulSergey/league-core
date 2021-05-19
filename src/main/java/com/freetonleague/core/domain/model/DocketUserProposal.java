@@ -36,7 +36,7 @@ public class DocketUserProposal extends BaseEntity {
     @JoinColumn(name = "league_id", referencedColumnName = "league_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "docket_id")
     private Docket docket;
 
