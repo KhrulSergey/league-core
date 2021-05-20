@@ -15,7 +15,7 @@ public class UserDto {
     @NotNull(message = "leagueID must be not null")
     private UUID leagueId;
 
-    @Size(max = 25)
+    @Size(max = 50)
     private String username;
 
     private String name;
