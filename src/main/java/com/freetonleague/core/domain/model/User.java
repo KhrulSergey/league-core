@@ -42,7 +42,7 @@ public class User extends BaseEntity implements UserDetails {
     private String name;
 
     @NotBlank
-    @Size(max = 36)
+    @Size(max = 50)
     @Column(name = "username", unique = true)
     private String username;
 
