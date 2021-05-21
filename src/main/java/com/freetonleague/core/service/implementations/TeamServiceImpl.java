@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.cloudclient.LeagueStorageClientService;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TeamStateType;
@@ -34,6 +35,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class TeamServiceImpl implements TeamService {
     private final TeamRepository teamRepository;
     private final TeamParticipantService teamParticipantService;
+    private final LeagueStorageClientService leagueStorageClientService;
     private final Validator validator;
 
     @Lazy
@@ -59,6 +61,10 @@ public class TeamServiceImpl implements TeamService {
             return null;
         }
         log.debug("^ trying to add team in DB: {}", team);
+        team.generateGUID();
+        if (!isBlank(team.getLogoRawFile())) {
+            team.setLogoHashKey(leagueStorageClientService.saveTeamLogo(team));
+        }
         team = teamRepository.save(team);
         teamEventService.processTeamStatusChange(team, TeamStateType.CREATED);
         return team;
@@ -83,6 +89,9 @@ public class TeamServiceImpl implements TeamService {
             return null;
         }
         log.debug("^ trying to modify team in DB: {}", team);
+        if (!isBlank(team.getLogoRawFile())) {
+            team.setLogoHashKey(leagueStorageClientService.saveTeamLogo(team));
+        }
         return teamRepository.saveAndFlush(team);
     }
 

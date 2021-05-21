@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
 @EqualsAndHashCode(callSuper = true)
@@ -44,9 +45,13 @@ public class Team extends BaseEntity {
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<TeamParticipant> participantList;
 
-    //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @Transient
+    private String logoRawFile;
+
     @Column(name = "team_logo_file_name")
-    private String teamLogoFileName;
+    private String logoHashKey;
 
     @NotNull
     @Column(name = "status")
@@ -58,6 +63,12 @@ public class Team extends BaseEntity {
 
     @PrePersist
     public void prePersist() {
+        if (isNull(coreId)) {
+            this.generateGUID();
+        }
+    }
+
+    public void generateGUID() {
         byte[] uniqueTournamentTimeSlice = this.toString().concat(LocalDateTime.now().toString()).getBytes();
         coreId = UUID.nameUUIDFromBytes(uniqueTournamentTimeSlice);
     }
@@ -77,7 +88,7 @@ public class Team extends BaseEntity {
                 "name='" + name + '\'' +
                 capitanString +
                 participantListString +
-                ", teamLogoFileName='" + teamLogoFileName + '\'' +
+                ", teamLogoFileName='" + logoHashKey + '\'' +
                 ", status=" + status +
                 '}';
     }

@@ -281,6 +281,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         GameDisciplineSettings gameDisciplineSettings = gameDisciplineFacade.getVerifiedDisciplineSettings(
                 tournamentDto.getGameDisciplineSettingsId(), gameDiscipline, user);
 
+
         // Collect all data for Tournament and save it
         Tournament newTournament = tournamentMapper.fromDto(tournamentDto);
         newTournament.setTournamentOrganizerList(tournamentOrganizers);
@@ -288,7 +289,10 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         if (nonNull(tournamentOrganizers)) {
             tournamentOrganizers.parallelStream().forEach(tOrg -> tOrg.setTournament(newTournament));
         }
-
+        if (nonNull(tournamentDto.getId())) {
+            Tournament savedTournament = this.getVerifiedTournamentById(tournamentDto.getId());
+            newTournament.setCoreId(savedTournament.getCoreId());
+        }
         newTournament.setGameDiscipline(gameDiscipline);
         newTournament.setGameDisciplineSettings(gameDisciplineSettings);
         // Connect tournament settings with tournament

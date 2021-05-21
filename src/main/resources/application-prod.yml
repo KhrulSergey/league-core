@@ -68,6 +68,9 @@ freetonleague:
     league-id:
       url: league-id:7700/api
       service-token: za#2#b.:ePo6yOko68T$a8Hoqe4ra7r!i6
+    league-storage:
+      url: league-storage:7702/api
+      service-token: EqUEcXc3#iZCu5hQS!l33O6I3
     league-finance:
       service-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
       balance-update-timeout-in-sec: 300

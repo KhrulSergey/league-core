@@ -39,7 +39,7 @@ public class SessionServiceImpl implements SessionService {
     @Value("${session.duration:604800}")
     private Long sessionDurationInSec;
 
-    @Value("${freetonleague.service.league-finance.service-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    @Value("${freetonleague.service.league-finance.service-token}")
     private String leagueFinanceServiceToken;
 
     @Override
