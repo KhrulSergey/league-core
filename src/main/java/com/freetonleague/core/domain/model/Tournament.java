@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static java.util.Objects.isNull;
+
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
@@ -31,7 +33,6 @@ public class Tournament extends ExtendedBaseEntity {
     @Column(name = "name")
     private String name;
 
-    @Setter(AccessLevel.NONE)
     @Column(name = "core_id", nullable = false, updatable = false)
     private UUID coreId;
 
@@ -108,6 +109,14 @@ public class Tournament extends ExtendedBaseEntity {
     @Column(name = "discord_channel_id")
     private String discordChannelId;
 
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @Transient
+    private String logoRawFile;
+
+    @Column(name = "logo_file_name")
+    private String logoHashKey;
+
     @Column(name = "sign_up_start_at")
     private LocalDateTime signUpStartDate;
 
@@ -132,6 +141,12 @@ public class Tournament extends ExtendedBaseEntity {
 
     @PrePersist
     public void prePersist() {
+        if (isNull(coreId)) {
+            this.generateGUID();
+        }
+    }
+
+    public void generateGUID() {
         byte[] uniqueTournamentTimeSlice = this.toString().concat(LocalDateTime.now().toString()).getBytes();
         coreId = UUID.nameUUIDFromBytes(uniqueTournamentTimeSlice);
     }

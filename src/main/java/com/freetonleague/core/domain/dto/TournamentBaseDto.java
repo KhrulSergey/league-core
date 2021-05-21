@@ -7,6 +7,8 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -44,6 +46,16 @@ public class TournamentBaseDto {
     @NotNull
     @ApiModelProperty(required = true)
     private String discordChannelId;
+
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    @ApiModelProperty(readOnly = true)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private String logoHashKey;
+
+    @ApiModelProperty(notes = "write-only value, ignored for client get requests")
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String logoRawFile;
 
     private LocalDateTime signUpStartDate;
 

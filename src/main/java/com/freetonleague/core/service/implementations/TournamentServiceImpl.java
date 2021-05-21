@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 
+import com.freetonleague.core.cloudclient.LeagueStorageClientService;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.*;
@@ -28,12 +29,14 @@ import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
 @RequiredArgsConstructor
 @Service
 public class TournamentServiceImpl implements TournamentService {
 
+    private final LeagueStorageClientService leagueStorageClientService;
     private final TournamentRepository tournamentRepository;
     private final Validator validator;
 
@@ -50,7 +53,6 @@ public class TournamentServiceImpl implements TournamentService {
         log.debug("^ trying to get tournament by id: {}", id);
         return tournamentRepository.findById(id).orElse(null);
     }
-
 
     /**
      * Returns list of all teams filtered by requested params
@@ -93,6 +95,9 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to add new tournament {}", tournament);
+        if (!isBlank(tournament.getLogoRawFile())) {
+            tournament.setLogoHashKey(leagueStorageClientService.saveTournamentLogo(tournament));
+        }
         tournament = tournamentRepository.save(tournament);
         tournamentEventService.processTournamentStatusChange(tournament, tournament.getStatus());
         return tournament;
@@ -127,6 +132,9 @@ public class TournamentServiceImpl implements TournamentService {
         }
         if (tournament.isStatusChanged()) {
             this.handleTournamentStatusChanged(tournament);
+        }
+        if (!isBlank(tournament.getLogoRawFile())) {
+            tournament.setLogoHashKey(leagueStorageClientService.saveTournamentLogo(tournament));
         }
         return tournamentRepository.save(tournament);
     }

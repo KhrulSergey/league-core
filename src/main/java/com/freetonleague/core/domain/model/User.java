@@ -46,9 +46,8 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "username", unique = true)
     private String username;
 
-    //TODO сделать конвертер для сохранения и получения пути к файлу Лого (аналогично тому, который будет в league-id)
     @Column(name = "avatar_file_name")
-    private String avatarFileName;
+    private String avatarHashKey;
 
     @Column(name = "discord_id")
     private String discordId;

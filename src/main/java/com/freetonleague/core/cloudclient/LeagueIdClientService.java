@@ -21,7 +21,7 @@ public class LeagueIdClientService {
 
     private final LeagueIdClientCloud leagueIdClientCloud;
 
-    @Value("${freetonleague.service.league-id.service-token::Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
+    @Value("${freetonleague.service.league-id.service-token}")
     private String leagueIdServiceToken;
 
     public SessionDto getSession(String token) {
