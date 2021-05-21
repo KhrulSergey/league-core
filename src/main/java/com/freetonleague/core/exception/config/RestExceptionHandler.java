@@ -174,6 +174,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler({InnerServiceFeignException.class})
+    public ResponseEntity<Object> handleBaseDetailedException(InnerServiceFeignException ex) {
+        String debugMessage = enableDebugMessage() ? ex.getApiError().getDebugMessage() : null;
+        List<String> errors = enableStackTrace ? ex.getApiError().getErrors() : null;
+        ApiError processedApiError = new ApiError(ex.getMessage(), debugMessage, errors);
+        return new ResponseEntity<>(processedApiError, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<Object> conflict(HttpServletRequest req, DataIntegrityViolationException ex) {
         String debugMessage = enableDebugMessage() ? ex.getMessage() : null;

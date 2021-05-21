@@ -20,7 +20,7 @@ public class UserDto {
 
     private String name;
 
-    private String avatarFileName;
+    private String avatarHashKey;
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ApiModelProperty(access = "hidden")
