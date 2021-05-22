@@ -11,6 +11,8 @@ public enum GameIndicatorType {
     FLAG_CAPTURED("flag captured", IndicatorValueClassType.BOOLEAN, null),
     FLAG_CAPTURED_COUNT("flag captured count", IndicatorValueClassType.DOUBLE, null),
     CHECK_POINT_PASSED("check point passed", IndicatorValueClassType.BOOLEAN, null),
+    POINTS_FOR_PLACE("points for place", IndicatorValueClassType.INTEGER, null),
+    WWCD("winner winner chickend dinner", IndicatorValueClassType.INTEGER, null),
     KEY_WORD_DETECTED("found key word", IndicatorValueClassType.STRING, null)
     // end::common indicators[]
     ;
