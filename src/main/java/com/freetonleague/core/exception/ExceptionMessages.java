@@ -137,6 +137,7 @@ public class ExceptionMessages {
     public static final String DOCKET_USER_PROPOSAL_MODIFICATION_ERROR = "User proposal to Docket modifying failed. Please try again";
 
     public static final String ACCOUNT_INFO_NOT_FOUND_ERROR = "Financial account info was not found. Please check request parameters";
+    public static final String ACCOUNT_WITHDRAW_VALIDATION_ERROR = "Request for financial withdraw transaction was specified with errors. Please check request parameters";
     public static final String ACCOUNT_COUPON_APPLY_ERROR = "Applying coupon by advertisement company hash was unsuccessful." +
             "Please check request parameters or contact organizers";
 

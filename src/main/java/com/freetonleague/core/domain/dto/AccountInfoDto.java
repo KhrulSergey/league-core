@@ -22,6 +22,9 @@ public class AccountInfoDto {
     @NotBlank
     private String ownerGUID;
 
+    @NotBlank
+    private String ownerExternalGUID;
+
     private Double amount;
 
     private String externalAddress;

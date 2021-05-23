@@ -12,6 +12,7 @@ public interface AccountFinUnitMapper {
     @Mapping(target = "GUID", expression = "java(entity.getGUID().toString())")
     @Mapping(target = "ownerType", source = "entity.holder.holderType")
     @Mapping(target = "ownerGUID", expression = "java(entity.getHolder().getGUID().toString())")
+    @Mapping(target = "ownerExternalGUID", expression = "java(entity.getHolder().getHolderExternalGUID().toString())")
     AccountInfoDto toDto(Account entity);
 }
 

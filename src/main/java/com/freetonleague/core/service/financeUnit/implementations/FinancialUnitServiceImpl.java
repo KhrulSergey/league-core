@@ -17,18 +17,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
-import java.awt.print.Pageable;
 import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Service for save transactions and accounts in DB
@@ -99,6 +100,19 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     }
 
     /**
+     * Get account by external address.
+     */
+    @Override
+    public Account getAccountByExternalAddress(String externalAddress) {
+        if (isBlank(externalAddress)) {
+            log.error("!!>  requesting getAccountByExternalAddress for BLANK externalAddress. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get Account by external address:{}", externalAddress);
+        return accountsRepository.findByExternalAddress(externalAddress);
+    }
+
+    /**
      * Get account holder by external GUID and Holder type.
      */
     @Override
@@ -139,7 +153,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
             }
             accountHolder.setAccount(account);
             log.debug("^ send request to save account holder with embedded Account in DB: {}", accountHolder);
-            accountHolder = saveAccountHolder(accountHolder);
+            accountHolder = this.saveAccountHolder(accountHolder);
         } catch (Exception exc) {
             log.error("!!> requesting createAccountHolderWithAccount for holder {} cause unexpected Error {}." +
                     " Check stack trace", accountHolder, exc.getMessage());
@@ -148,26 +162,45 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     }
 
     /**
+     * Save new notTracking account
+     */
+    @Override
+    public Account createNotTrackingAccount(Account account) {
+        if (isNull(account)) {
+            log.error("!!>  requesting createNotTrackingAccount for NULL account. Check evoking clients");
+            return null;
+        }
+        Set<ConstraintViolation<Account>> violations = validator.validate(account);
+        if (!violations.isEmpty()) {
+            log.error("!> requesting createNotTrackingAccount for account {} with constraint violations: {}. " +
+                    "Check evoking clients", account, violations);
+            return null;
+        }
+        return accountsRepository.save(account);
+    }
+
+    /**
      * Get transaction by GUID.
      */
     @Override
     public AccountTransaction getTransaction(UUID GUID) {
-        return null;
+        return accountTransactionRepository.findByGUID(GUID);
     }
+
 
     /**
      * Get list of transactions for specified account. Search in both source and target.
      */
     @Override
     public Page<AccountTransaction> getTransactionList(Pageable pageable, Account account) {
-        return null;
+        return accountTransactionRepository.findAllByAccount(pageable, account);
     }
 
     /**
      * Save new transaction and update Accounts: source (if specified) and target
      */
     @Override
-    public AccountTransaction saveTransaction(AccountTransaction transaction) {
+    public AccountTransaction createTransaction(AccountTransaction transaction) {
         if (isNull(transaction)) {
             log.error("!> requesting saveTransaction for NULL accountTransaction. Check evoking clients");
             return null;
@@ -222,10 +255,28 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
                     "Specified source financial account can't be modified in DB. ");
         }
 
+        if (transaction.getTransactionType().isWithdraw()) {
+            //TODO save data to Broxus-cloud-client
+            bankAccountingClientService.requestTransaction(transaction);
+        }
+
         log.debug("^ trying to save new transaction {}  in DB: {}", transaction.getGUID(), transaction);
         AccountTransaction savedTransaction = accountTransactionRepository.save(transaction);
         log.debug("^ transaction is saved?:{} in DB with data: {}", nonNull(savedTransaction), savedTransaction);
         return savedTransaction;
+    }
+
+
+    /**
+     * Save new transaction and update Accounts: source (if specified) and target
+     */
+    @Override
+    public AccountTransaction editTransaction(AccountTransaction transaction) {
+        if (transaction.getTransactionType().isWithdraw()) {
+            //TODO save data to Broxus-cloud-client
+            bankAccountingClientService.requestTransaction(transaction);
+        }
+        return accountTransactionRepository.save(transaction);
     }
 
     /**
