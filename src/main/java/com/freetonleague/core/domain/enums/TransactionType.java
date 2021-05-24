@@ -22,6 +22,10 @@ public enum TransactionType {
     }
 
     public boolean isPayment() {
-        return this == TRANSFER;
+        return this == PAYMENT;
+    }
+
+    public boolean isWithdraw() {
+        return this == WITHDRAW;
     }
 }

@@ -27,6 +27,7 @@ import java.util.UUID;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Service-facade for provide data from inner DB and process requests (incl. callback from bank-providers) to save data
@@ -66,7 +67,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         AccountTransaction accountTransaction = this.composeVerifiedDepositTransaction(account, accountDepositInfo.getAmount());
 
         try {
-            AccountTransaction savedAccountTransaction = financialUnitService.saveTransaction(accountTransaction);
+            AccountTransaction savedAccountTransaction = financialUnitService.createTransaction(accountTransaction);
             if (isNull(savedAccountTransaction)) {
                 throw new CustomUnexpectedException("Saved transaction returned NULL from DB");
             }
@@ -104,6 +105,20 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
     }
 
     /**
+     * Returns account info for specified account guid
+     */
+    @Override
+    public AccountInfoDto findAccountByExternalAddress(String externalAddress) {
+        log.debug("^ requested findAccountByExternalAddress with externalAddress:'{}'", externalAddress);
+        Account account = this.getVerifiedAccountByExternalAddress(externalAddress);
+        if (isNull(account)) {
+            log.warn("~ account for externalAddress:'{}' was not found. Create new one!", externalAddress);
+            return this.createNotTrackingAccountByExternalAddress(externalAddress);
+        }
+        return accountMapper.toDto(account);
+    }
+
+    /**
      * Returns created account info for specified holder
      */
     @Override
@@ -129,9 +144,9 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
      * Returns created transaction info for specified data
      */
     @Override
-    public AccountTransactionInfoDto createTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
+    public AccountTransactionInfoDto createTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
         if (isNull(accountTransactionInfoDto)) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for NULL accountTransactionInfoDto. Check evoking clients");
+            log.error("!!> requesting createTransferTransaction for NULL accountTransactionInfoDto. Check evoking clients");
             return null;
         }
         Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
@@ -149,7 +164,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
 
         AccountTransaction savedAccountTransaction;
         try {
-            savedAccountTransaction = financialUnitService.saveTransaction(accountTransaction);
+            savedAccountTransaction = financialUnitService.createTransaction(accountTransaction);
             if (isNull(savedAccountTransaction)) {
                 throw new CustomUnexpectedException("Saved transaction returned NULL from DB");
             }
@@ -157,9 +172,72 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
             log.error("!!> saving transferring transaction {} from Dto {} cause error with message {}. Request denied",
                     accountTransaction, accountTransactionInfoDto, exc.getMessage());
             throw new CustomUnexpectedException("Saved transferring transaction returned NULL from DB");
-            //TODO process error while deposit operation
         }
         return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
+    }
+
+    /**
+     * Returns created transaction info for specified data
+     */
+    @Override
+    public AccountTransactionInfoDto createWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
+        if (isNull(accountTransactionInfoDto)) {
+            log.error("!!> requesting createWithdrawTransaction for NULL accountTransactionInfoDto. Check evoking clients");
+            return null;
+        }
+        Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
+        if (!violations.isEmpty()) {
+            log.error("!!> requesting createWithdrawTransaction for accountTransactionInfoDto:{} with ConstraintViolations {}. Check evoking clients",
+                    accountTransactionInfoDto, violations);
+            return null;
+        }
+        Account sourceAccount = this.getVerifyAccountByDto(accountTransactionInfoDto.getSourceAccount());
+        Account targetAccount = this.getVerifyAccountByDto(accountTransactionInfoDto.getTargetAccount());
+
+        AccountTransaction accountTransaction = this.composeVerifiedTransferTransaction(sourceAccount, targetAccount,
+                accountTransactionInfoDto.getAmount(), accountTransactionInfoDto.getTransactionType(),
+                accountTransactionInfoDto.getTransactionTemplateType());
+
+        AccountTransaction savedAccountTransaction;
+        try {
+            savedAccountTransaction = financialUnitService.createTransaction(accountTransaction);
+            if (isNull(savedAccountTransaction)) {
+                throw new CustomUnexpectedException("Saved transaction returned NULL from DB");
+            }
+        } catch (Exception exc) {
+            log.error("!!> saving transferring transaction {} from Dto {} cause error with message {}. Request denied",
+                    accountTransaction, accountTransactionInfoDto, exc.getMessage());
+            throw new CustomUnexpectedException("Saved transferring transaction returned NULL from DB");
+        }
+        return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
+    }
+
+
+    /**
+     * Returns created account info for specified holder
+     */
+    private AccountInfoDto createNotTrackingAccountByExternalAddress(String externalAddress) {
+        if (isBlank(externalAddress)) {
+            log.error("!!> requesting createNotTrackingAccountByExternalAddress for Blank externalAddress");
+            return null;
+        }
+        Account account = Account.builder()
+                .amount(0.0)
+                .holder(null)
+                .isNotTracking(true)
+                .externalAddress(externalAddress)
+                .accountType(AccountType.DEPOSIT)
+                .status(AccountStatusType.NOT_TRACKING)
+                .externalBankType(BankProviderType.UNKNOWN)
+                .build();
+
+        Account savedAccount = financialUnitService.createNotTrackingAccount(account);
+        if (isNull(savedAccount)) {
+            log.error("!!> creation of account for external address {} was interrupted. Check stack trace.", externalAddress);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_ACCOUNT_CREATION_ERROR,
+                    String.format("creation of account for external address '%s' was interrupted", externalAddress));
+        }
+        return accountMapper.toDto(account);
     }
 
     private AccountHolder composeVerifiedAccountHolder(UUID holderExternalGUID, AccountHolderType holderType, String holderName) {
@@ -241,6 +319,21 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         }
         return account;
     }
+
+    private Account getVerifiedAccountByExternalAddress(String externalAddress) {
+        if (isBlank(externalAddress)) {
+            log.error("!!> requesting getVerifiedAccountByExternalAddress for Blank externalAddress");
+            return null;
+        }
+        Account account = financialUnitService.getAccountByExternalAddress(externalAddress);
+        if (nonNull(account) && !account.getStatus().isActive()) {
+            log.error("!!> For specified externalAddress {} was found non-active Account with GUID {}. Request passed, but be aware",
+                    externalAddress, account.getGUID());
+            //TODO process deposit to non-active account
+        }
+        return account;
+    }
+
 
     private Account getVerifiedAccountByAccountDepositDto(String accountGUID, String externalAddress) {
         Account account = financialUnitService.getAccountByGUID(UUID.fromString(accountGUID));

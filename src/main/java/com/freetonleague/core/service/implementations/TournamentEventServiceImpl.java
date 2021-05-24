@@ -229,7 +229,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 tournament.getCoreId(), AccountHolderType.TOURNAMENT);
 
         List<AccountTransactionInfoDto> participatePaymentList = new ArrayList<>();
-        AccountTransactionInfoDto result = financialClientService.applyTransactionFromSourceToTargetHolder(
+        AccountTransactionInfoDto result = financialClientService.applyPurchaseTransaction(
                 this.composeParticipationFeeTransaction(teamCapitanAccountDto, tournamentAccountDto, tournamentFundAmount));
         if (isNull(result)) {
             log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
@@ -240,7 +240,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         }
         participatePaymentList.add(result);
 
-        result = financialClientService.applyTransactionFromSourceToTargetHolder(
+        result = financialClientService.applyPurchaseTransaction(
                 this.composeParticipationCommissionTransaction(teamCapitanAccountDto, tournamentOwnerAccountDto, commissionAmount));
         if (isNull(result)) {
             log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +

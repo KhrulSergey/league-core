@@ -25,14 +25,24 @@ public interface FinancialClientService {
     AccountInfoDto getAccountByGUID(String GUID);
 
     /**
+     * Returns account info by requested external address of account from request to Finance Unit
+     */
+    AccountInfoDto getAccountByExternalAddress(String externalAddress);
+
+    /**
      * Returns new account info by requested Holder type and GUID from request to Finance Unit
      */
     AccountInfoDto createAccountByHolderInfo(UUID holderGUID, AccountHolderType holderType, String holderName);
 
     /**
-     * Returns info for created transaction from source to target holder GUID
+     * Returns info for created transfer transaction from source to target account
      */
-    AccountTransactionInfoDto applyTransactionFromSourceToTargetHolder(AccountTransactionInfoDto accountTransactionInfoDto);
+    AccountTransactionInfoDto applyPurchaseTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+
+    /**
+     * Returns info for created withdraw transaction from user to target (external) account
+     */
+    AccountTransactionInfoDto applyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 
     /**
      * Apply coupon by advertisement company hash for user from session

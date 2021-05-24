@@ -13,4 +13,6 @@ public interface AccountRepository extends JpaRepository<Account, Long>,
     Account findByGUID(UUID GUID);
 
     Account findByHolder(AccountHolder accountHolder);
+
+    Account findByExternalAddress(String externalAddress);
 }

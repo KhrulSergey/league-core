@@ -2,8 +2,10 @@ package com.freetonleague.core.service.financeUnit.implementations;
 
 import com.freetonleague.core.domain.dto.AccountBroxusResponseDto;
 import com.freetonleague.core.domain.dto.AccountExternalInfoDto;
+import com.freetonleague.core.domain.dto.AccountTransactionExternalInfoDto;
 import com.freetonleague.core.domain.enums.BankProviderType;
 import com.freetonleague.core.domain.model.Account;
+import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.service.financeUnit.cloud.BroxusAccountingClientCloud;
 import feign.FeignException;
 import feign.FeignException.FeignClientException;
@@ -46,6 +48,9 @@ public class BankAccountingClientService {
         }
     }
 
+    /**
+     * Returns new external bank account for specified account
+     */
     public AccountExternalInfoDto createExternalBankAddressForAccount(Account coreAccount) {
         if (isNull(coreAccount) || isNull(coreAccount.getGUID())) {
             log.error("!> requesting createExternalBankAddress for NULL coreAccount {} or NULL account GUID {}. Check evoking clients",
@@ -94,13 +99,16 @@ public class BankAccountingClientService {
                 .build();
     }
 
+    /**
+     * Returns balance for specified account
+     */
     public AccountExternalInfoDto getAccountBalance(Account coreAccount) {
         if (isNull(coreAccount) || isNull(coreAccount.getGUID())) {
             log.error("!> requesting getAccountBalance for NULL coreAccount {} or NULL account GUID {}. Check evoking clients",
                     coreAccount, null);
             return null;
         }
-        AccountBroxusResponseDto externalAccountInfo = null;
+        AccountBroxusResponseDto externalAccountInfo;
         log.debug("^ try to get balance from external bank provider for specified core-account guid {} for holder {}",
                 coreAccount.getGUID(), coreAccount.getHolder());
 
@@ -140,4 +148,18 @@ public class BankAccountingClientService {
                 .build();
     }
 
+    /**
+     * Returns information for conducted transaction
+     */
+    public AccountTransactionExternalInfoDto requestTransaction(AccountTransaction accountTransaction) {
+        if (isNull(accountTransaction) || isNull(accountTransaction.getGUID())) {
+            log.error("!> requesting requestTransaction for NULL accountTransaction. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to send request transaction to Bank Client {}", accountTransaction.getGUID());
+        AccountTransactionExternalInfoDto externalTransactionInfoDto = AccountTransactionExternalInfoDto.builder()
+                .build();
+        log.debug("^ request transaction was successfully saved to Bank Client {}", accountTransaction.getGUID());
+        return externalTransactionInfoDto;
+    }
 }

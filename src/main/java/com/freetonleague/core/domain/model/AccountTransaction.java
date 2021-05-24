@@ -12,6 +12,7 @@ import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -63,4 +64,12 @@ public class AccountTransaction extends FinancialBaseEntity implements Serializa
     @Column(name = "template_type")
     @Enumerated(EnumType.STRING)
     private TransactionTemplateType transactionTemplateType;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "approved_by_league_id", referencedColumnName = "league_id", nullable = false)
+    private User approvedBy;
+
+    @Column(name = "finished_at", updatable = false)
+    private LocalDateTime finishedAt;
 }
