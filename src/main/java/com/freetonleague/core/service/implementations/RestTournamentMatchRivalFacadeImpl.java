@@ -13,6 +13,7 @@ import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchRivalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.*;
+import com.freetonleague.core.util.GameIndicatorConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -188,6 +189,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                         "parameter 'tournament organizer' is not match by id to tournament for getVerifiedMatchRivalByDto");
             }
             tournamentMatchRival.setWonPlaceInMatch(matchRivalDto.getWonPlaceInMatch());
+            tournamentMatchRival.setMatchIndicator(GameIndicatorConverter.convertAndValidate(matchRivalDto.getMatchIndicator()));
         }
         return tournamentMatchRival;
     }

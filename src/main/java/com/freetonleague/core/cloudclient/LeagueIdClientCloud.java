@@ -15,21 +15,28 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "league-id-client", url = "${freetonleague.service.league-id.url}")
 public interface LeagueIdClientCloud {
 
-    String AUTH_TOKEN = "X-Auth-Token";
+    /**
+     * The same value as from "${freetonleague.session.header-token-name}"
+     */
+    String headerTokenName = "X-Auth-Token";
 
-    String SERVICE_TOKEN = "service_token";
+    /**
+     * The same value as from "${freetonleague.session.service-token-name}"
+     */
+    String staticServiceTokenName = "service_token";
+
 
     @GetMapping("/user/get-by-leagueId")
-    UserDto getUserByLeagueId(@RequestParam(SERVICE_TOKEN) String serviceToken,
+    UserDto getUserByLeagueId(@RequestParam(staticServiceTokenName) String serviceToken,
                               @RequestParam("leagueId") String leagueId);
 
     @GetMapping("/user/get-by-username")
-    UserDto getUserByUsername(@RequestParam(SERVICE_TOKEN) String serviceToken,
+    UserDto getUserByUsername(@RequestParam(staticServiceTokenName) String serviceToken,
                               @RequestParam("username") String username);
 
     @PostMapping("/auth/session")
-    SessionDto getSession(@RequestHeader(AUTH_TOKEN) String token);
+    SessionDto getSession(@RequestHeader(headerTokenName) String token);
 
     @GetMapping("/user/current")
-    UserDto account(@RequestHeader(AUTH_TOKEN) String token);
+    UserDto account(@RequestHeader(headerTokenName) String token);
 }

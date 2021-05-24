@@ -39,8 +39,8 @@ public class SessionServiceImpl implements SessionService {
     @Value("${session.duration:604800}")
     private Long sessionDurationInSec;
 
-    @Value("${freetonleague.service.league-finance.access-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
-    private String leagueFinanceAccessToken;
+    @Value("${freetonleague.service.league-finance.service-token}")
+    private String leagueFinanceServiceToken;
 
     @Override
     public Session get(String token) {
@@ -81,7 +81,7 @@ public class SessionServiceImpl implements SessionService {
      */
     @Override
     public Session loadServiceByToken(String accessToken) {
-        if (isBlank(accessToken) || !accessToken.equals(this.leagueFinanceAccessToken)) {
+        if (isBlank(accessToken) || !accessToken.equals(this.leagueFinanceServiceToken)) {
             log.error("!!> accessToken: {} for service session was Blank or not correct. Service authorize request rejected.", accessToken);
             return null;
         }

@@ -24,19 +24,19 @@ public class TournamentMatch extends ExtendedBaseEntity {
     @Column(name = "name")
     private String name;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
 
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tournamentMatch", cascade = CascadeType.ALL)
     private List<TournamentMatchRival> matchRivalList;
 
     /**
      * Winner of current (finished) match. If null - then there were a dead heat
      */
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REFRESH)
+    @OneToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "winner_match_rival_id")
     private TournamentMatchRival matchWinner;
 

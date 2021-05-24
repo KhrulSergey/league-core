@@ -138,7 +138,7 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
         }
 
         team.setName(teamDto.getName());
-        team.setTeamLogoFileName(teamDto.getTeamLogoFileName());
+        team.setLogoRawFile(teamDto.getLogoRawFile());
         team = teamService.editTeam(team);
         if (isNull(team)) {
             log.error("!> error while modifying team from dto {} for user {}.", teamDto, user);
