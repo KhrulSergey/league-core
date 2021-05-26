@@ -88,7 +88,7 @@ public class FinancialAccountsController {
     //TODO delete bonus payments method if no need until 01/09/2021
 //    @ApiOperation("Apply coupon by hash for user from session")
 //    @PostMapping(path = PATH_APPLY_COUPON)
-//    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash", required = true) String couponHash,
+//    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash" ) String couponHash,
 //                                                             @ApiIgnore @AuthenticationPrincipal User user) {
 //        return new ResponseEntity<>(restFinanceFacade.applyCouponByHashForUser(couponHash, user), HttpStatus.OK);
 //    }
