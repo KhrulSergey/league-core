@@ -39,6 +39,14 @@ public interface RestFinancialUnitFacade {
     AccountInfoDto findAccountByGUID(String GUID);
 
     /**
+     * Returns account info for specified account guid
+     *
+     * @param externalAddress account external address for account to search
+     * @return account info
+     */
+    AccountInfoDto findAccountByExternalAddress(String externalAddress);
+
+    /**
      * Returns created account info for specified holder
      *
      * @param holderExternalGUID unique external identifier of holder
@@ -54,5 +62,13 @@ public interface RestFinancialUnitFacade {
      * @param accountTransactionInfoDto specified transaction data to process
      * @return transaction info
      */
-    AccountTransactionInfoDto createTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+    AccountTransactionInfoDto createTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+
+    /**
+     * Returns created withdraw transaction info (with pause status) for specified data
+     *
+     * @param accountTransactionInfoDto specified withdraw transaction data to process
+     * @return transaction info
+     */
+    AccountTransactionInfoDto createWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 }

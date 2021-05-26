@@ -1,6 +1,7 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.AccountInfoDto;
+import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.model.User;
 
 /**
@@ -17,6 +18,35 @@ public interface RestFinanceFacade {
     AccountInfoDto getBalanceByTeam(Long teamId, User user);
 
     AccountInfoDto getBalanceByTournament(Long tournamentId, User user);
+
+    /**
+     * Returns created withdraw fund transaction info (with pause status) for specified params
+     *
+     * @param amount            amount of withdraw
+     * @param sourceAccountGUID identifier of account to withdraw fund
+     * @param targetAddress     identifier of target account (to transfer fund)
+     * @param user              current user from session
+     * @return withdraw fund transaction info
+     */
+    AccountTransactionInfoDto createWithdrawRequest(Double amount, String sourceAccountGUID, String targetAddress, User user);
+
+    /**
+     * Returns edited withdraw fund transaction info (with pause status) for specified params (only for admin)
+     *
+     * @param transactionInfoDto new data of transactio
+     * @param user               current user from session
+     * @return updated withdraw transaction info
+     */
+    AccountTransactionInfoDto editWithdrawRequest(String transactionGUID, AccountTransactionInfoDto transactionInfoDto, User user);
+
+    /**
+     * Returns updated info of canceled withdraw transaction (not implemented)
+     *
+     * @param transactionGUID identifier of transaction
+     * @param user            current user from session
+     * @return cancelled withdraw transaction info
+     */
+    AccountTransactionInfoDto cancelWithdrawRequest(String transactionGUID, User user);
 
     /**
      * Apply coupon by advertisement company hash for user from session

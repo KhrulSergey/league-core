@@ -66,6 +66,21 @@ public class FinancialClientServiceImpl implements FinancialClientService {
     }
 
     /**
+     * Returns account info by requested external address of account from request to Finance Unit
+     *
+     * @param externalAddress address of external account
+     */
+    @Override
+    public AccountInfoDto getAccountByExternalAddress(String externalAddress) {
+        if (isBlank(externalAddress)) {
+            log.error("!> requesting getAccountByExternalAddress for Blank externalAddress. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get account info by externalAddress: {}", externalAddress);
+        return restFinancialUnitFacade.findAccountByExternalAddress(externalAddress);
+    }
+
+    /**
      * Returns new account info by requested Holder type and GUID from request to Finance Unit
      */
     @Override
@@ -80,12 +95,12 @@ public class FinancialClientServiceImpl implements FinancialClientService {
     }
 
     /**
-     * Returns info for created transaction from source to target holder GUID
+     * Returns info for created transfer transaction from source to target account
      */
     @Override
-    public AccountTransactionInfoDto applyTransactionFromSourceToTargetHolder(AccountTransactionInfoDto accountTransactionInfoDto) {
+    public AccountTransactionInfoDto applyPurchaseTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
         if (isNull(accountTransactionInfoDto)) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for NULL accountTransactionInfoDto. Check evoking clients");
+            log.error("!!> requesting applyPurchaseTransaction for NULL accountTransactionInfoDto. Check evoking clients");
             return null;
         }
         Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
@@ -106,8 +121,38 @@ public class FinancialClientServiceImpl implements FinancialClientService {
         }
 
         log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
-        return restFinancialUnitFacade.createTransaction(accountTransactionInfoDto);
+        return restFinancialUnitFacade.createTransferTransaction(accountTransactionInfoDto);
     }
+
+    /**
+     * Returns info for created withdraw transaction from user to target (external) account
+     */
+    public AccountTransactionInfoDto applyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
+        if (isNull(accountTransactionInfoDto)) {
+            log.error("!!> requesting applyWithdrawTransaction for NULL accountTransactionInfoDto. Check evoking clients");
+            return null;
+        }
+        Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
+        if (!violations.isEmpty()) {
+            log.error("!!> requesting createTransactionFromSourceToTargetHolder for accountTransactionInfoDto:{} with ConstraintViolations {}. Check evoking clients",
+                    accountTransactionInfoDto, violations);
+            return null;
+        }
+        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getSourceAccount())) {
+            log.error("!!> requesting createTransactionFromSourceToTargetHolder for sourceAccount {} with errors. Check evoking clients",
+                    accountTransactionInfoDto);
+            return null;
+        }
+        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getTargetAccount())) {
+            log.error("!!> requesting createTransactionFromSourceToTargetHolder for targetAccount {} with errors. Check evoking clients",
+                    accountTransactionInfoDto);
+            return null;
+        }
+
+        log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
+        return restFinancialUnitFacade.createTransferTransaction(accountTransactionInfoDto);
+    }
+
 
     /**
      * Apply coupon by advertisement company hash for user from session
@@ -118,7 +163,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
         AccountInfoDto userAccount = this.getAccountByHolderInfo(user.getLeagueId(), AccountHolderType.USER);
         AccountTransactionInfoDto transferTransaction = this.composeCouponPaymentTransaction(
                 couponInfo.getCouponAccount(), userAccount, couponInfo.getCouponAmount());
-        AccountTransactionInfoDto savedTransaction = this.applyTransactionFromSourceToTargetHolder(transferTransaction);
+        AccountTransactionInfoDto savedTransaction = this.applyPurchaseTransaction(transferTransaction);
         return savedTransaction.getTargetAccount();
     }
 

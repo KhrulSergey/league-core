@@ -1,6 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.domain.dto.AccountInfoDto;
+import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestFinanceFacade;
 import io.swagger.annotations.Api;
@@ -9,10 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
 @RestController
@@ -27,6 +25,10 @@ public class FinancialAccountsController {
     public static final String PATH_GET = "/balance-by-account-GUID/{GUID}";
     public static final String PATH_GET_TEAM = "/balance-by-team/{team_id}";
     public static final String PATH_GET_TOURNAMENT = "/balance-by-tournament/{tournament_id}";
+
+    public static final String PATH_CREATE_WITHDRAW = "/withdraw";
+    public static final String PATH_CANCEL_WITHDRAW = "/withdraw/{transaction_guid}";
+    public static final String PATH_MODERATE_WITHDRAW = "/withdraw/{transaction_guid}";
 
     public static final String PATH_APPLY_COUPON = "/apply-coupon/";
 
@@ -66,10 +68,27 @@ public class FinancialAccountsController {
         return new ResponseEntity<>(restFinanceFacade.getBalanceByGUID(GUID, user), HttpStatus.OK);
     }
 
+
+    @ApiOperation("Create withdraw request from user account")
+    @PostMapping(path = PATH_CREATE_WITHDRAW)
+    public ResponseEntity<AccountTransactionInfoDto> createWithdrawTransaction(@RequestParam(value = "amount") Double amount,
+                                                                               @RequestParam(value = "source_account_guid") String sourceAccountGUID,
+                                                                               @RequestParam(value = "target_address") String targetAddress,
+                                                                               @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restFinanceFacade.createWithdrawRequest(amount, sourceAccountGUID, targetAddress, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Modify withdraw transaction request with new data (only for admin")
+    @PutMapping(path = PATH_MODERATE_WITHDRAW)
+    public ResponseEntity<AccountTransactionInfoDto> moderateWithdrawTransaction(@PathVariable("transaction_guid") String transactionGUID,
+                                                                                 @RequestParam(value = "transactionDto") AccountTransactionInfoDto transactionDto,
+                                                                                 @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restFinanceFacade.editWithdrawRequest(transactionGUID, transactionDto, user), HttpStatus.OK);
+    }
     //TODO delete bonus payments method if no need until 01/09/2021
 //    @ApiOperation("Apply coupon by hash for user from session")
 //    @PostMapping(path = PATH_APPLY_COUPON)
-//    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash", required = true) String couponHash,
+//    public ResponseEntity<AccountInfoDto> applyCouponForUser(@RequestParam(value = "coupon_hash" ) String couponHash,
 //                                                             @ApiIgnore @AuthenticationPrincipal User user) {
 //        return new ResponseEntity<>(restFinanceFacade.applyCouponByHashForUser(couponHash, user), HttpStatus.OK);
 //    }

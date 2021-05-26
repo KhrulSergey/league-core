@@ -11,7 +11,10 @@ import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
-import com.freetonleague.core.service.*;
+import com.freetonleague.core.service.RestTeamFacade;
+import com.freetonleague.core.service.RestTournamentFacade;
+import com.freetonleague.core.service.RestTournamentProposalFacade;
+import com.freetonleague.core.service.TournamentProposalService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -35,7 +38,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestTournamentProposalFacadeImpl implements RestTournamentProposalFacade {
 
     private final RestTeamFacade restTeamFacade;
-    private final TournamentService tournamentService;
     private final RestTournamentFacade restTournamentFacade;
     private final TournamentProposalService tournamentProposalService;
     private final TournamentProposalMapper tournamentProposalMapper;
@@ -55,9 +57,11 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
      * Get team proposal list for tournament
      */
     @Override
-    public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId, User user) {
+    public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId,
+                                                                            List<ParticipationStateType> stateList) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-        return tournamentProposalService.getProposalListForTournament(pageable, tournament).map(tournamentProposalMapper::toDto);
+        return tournamentProposalService.getProposalListForTournament(pageable, tournament, stateList)
+                .map(tournamentProposalMapper::toDto);
     }
 
     /**

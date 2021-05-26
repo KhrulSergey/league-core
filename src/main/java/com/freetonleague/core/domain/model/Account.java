@@ -26,10 +26,15 @@ public class Account extends FinancialBaseEntity implements Serializable {
     private static final long serialVersionUID = 7314256271219020959L;
 
     //Properties
-    @NotNull
     @ManyToOne
-    @JoinColumn(name = "holder_guid", referencedColumnName = "guid", nullable = false)
+    @JoinColumn(name = "holder_guid", referencedColumnName = "guid")
     private AccountHolder holder;
+
+    /**
+     * For external fin account with unknown holder
+     */
+    @Column(name = "is_not_tracking")
+    private Boolean isNotTracking;
 
     @Column(name = "name")
     private String name;
