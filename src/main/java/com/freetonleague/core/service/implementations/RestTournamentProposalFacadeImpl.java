@@ -57,9 +57,11 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
      * Get team proposal list for tournament
      */
     @Override
-    public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId, User user) {
+    public Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId,
+                                                                            List<ParticipationStateType> stateList) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-        return tournamentProposalService.getProposalListForTournament(pageable, tournament).map(tournamentProposalMapper::toDto);
+        return tournamentProposalService.getProposalListForTournament(pageable, tournament, stateList)
+                .map(tournamentProposalMapper::toDto);
     }
 
     /**

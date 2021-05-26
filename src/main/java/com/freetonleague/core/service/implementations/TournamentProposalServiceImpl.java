@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -64,15 +65,18 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
      * Returns list of all tournament team proposal filtered by requested params
      */
     @Override
-    public Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament) {
+    public Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament,
+                                                                     List<ParticipationStateType> stateList) {
         if (isNull(pageable) || isNull(tournament)) {
             log.error("!> requesting getTournamentList for NULL pageable {} or NULL tournament {}. Check evoking clients",
                     pageable, tournament);
             return null;
         }
-        List<ParticipationStateType> filteredProposalStateList = List.of(ParticipationStateType.values());
-        log.debug("^ trying to get tournament team proposal list with pageable params: {} and for tournament {}",
-                pageable, tournament.getId());
+
+        List<ParticipationStateType> filteredProposalStateList = isNotEmpty(stateList) ? stateList
+                : List.of(ParticipationStateType.values());
+        log.debug("^ trying to get tournament team proposal list with pageable params: {} and for tournament.id {} and stateList {}",
+                pageable, tournament.getId(), filteredProposalStateList);
         return teamProposalRepository.findAllByTournamentAndStateIn(pageable, tournament, filteredProposalStateList);
     }
 
