@@ -6,6 +6,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -35,4 +36,12 @@ public class UserDto {
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private List<String> roleList;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ApiModelProperty(access = "hidden")
+    private LocalDateTime createdAt = null;
+
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    @ApiModelProperty(access = "hidden")
+    private LocalDateTime updatedAt = null;
 }

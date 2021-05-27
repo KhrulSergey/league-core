@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -54,12 +57,12 @@ public class LeagueIdClientService {
         return userInfo;
     }
 
-    public UserDto getUserByLeagueId(String leagueId) {
+    public UserDto getUserByLeagueId(UUID leagueId) {
         log.debug("^ try to getUserByLeagueId in LeagueIdClientService by serviceToken {} and leagueId {}", leagueIdServiceToken, leagueId);
         UserDto userInfo = null;
-        if (!isBlank(leagueId)) {
+        if (nonNull(leagueId)) {
             try {
-                userInfo = leagueIdClientCloud.getUserByLeagueId(leagueIdServiceToken, leagueId);
+                userInfo = leagueIdClientCloud.getUserByLeagueId(leagueIdServiceToken, leagueId.toString());
             } catch (FeignClientException exc) {
                 //TODO habdle exception
                 log.error("New FeignClientException exc {}", exc, exc);

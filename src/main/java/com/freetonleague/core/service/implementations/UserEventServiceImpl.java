@@ -1,6 +1,8 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.domain.dto.EventDto;
+import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.EventOperationType;
 import com.freetonleague.core.domain.enums.EventProducerModelType;
@@ -19,6 +21,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 @Slf4j
 @RequiredArgsConstructor
 @Service
@@ -26,9 +31,12 @@ public class UserEventServiceImpl implements UserEventService {
 
     private final EventService eventService;
     private final UserService userService;
+    private final LeagueIdClientService leagueIdClientService;
     private final FinancialClientService financialClientService;
 
-    private final Set<UUID> cachedUserLeagueId = Collections.synchronizedSet(new HashSet<>());
+    private final Set<UUID> cachedInitiatedUserLeagueId = Collections.synchronizedSet(new HashSet<>());
+
+    private final Set<UUID> cachedActiveUserLeagueId = Collections.synchronizedSet(new HashSet<>());
 
     @Override
     public EventDto add(EventDto event) {
@@ -36,29 +44,86 @@ public class UserEventServiceImpl implements UserEventService {
         return null;
     }
 
-    //every 2 hours, timeout before start 1 min
-    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 60 * 1000)
-    void monitor() {
-        log.debug("^ Run UserEventService monitor");
+    //every 10 minutes, timeout before start 1 min
+    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
+    private void monitorForActiveUsers() {
+        log.debug("^ Run UserEventService monitor For Update Active Users");
 
-        final Map<UUID, User> idToUserMap = this.getIdToUserMap();
-        final Set<UUID> keys = new HashSet<>(idToUserMap.keySet());
+        final Map<UUID, User> activeUserIdToUserMap = this.getActiveUserIdToUserMap();
+        final Set<UUID> keys = new HashSet<>(activeUserIdToUserMap.keySet());
 
-        if (idToUserMap.isEmpty()) {
-            log.debug("^ Initiated users were not found. UserEventService monitor waits.");
+        if (activeUserIdToUserMap.isEmpty()) {
+            log.debug("^ Initiated users were not found. UserEventService monitorForActiveUsers waits.");
             return;
         }
 
-        if (!cachedUserLeagueId.isEmpty() && cachedUserLeagueId.containsAll(keys)) {
-            log.debug("^ User events cache was cleaned");
-            cachedUserLeagueId.clear();
+        if (!cachedActiveUserLeagueId.isEmpty() && cachedActiveUserLeagueId.containsAll(keys)) {
+            log.debug("^ User update events cache was cleaned");
+            cachedActiveUserLeagueId.clear();
         } else {
-            keys.removeAll(cachedUserLeagueId);
+            keys.removeAll(cachedActiveUserLeagueId);
+        }
+
+        int countSelected = (int) Math.ceil(keys.size() * 0.15); //15%
+
+        List<UUID> selectedKeys = keys.stream().limit(countSelected).collect(Collectors.toList());
+
+        for (UUID selectedKey : selectedKeys) {
+            User user = activeUserIdToUserMap.get(selectedKey);
+            this.tryUpdateInfoFromLeagueIdModule(user);
+        }
+    }
+
+    //every 2 hours, timeout before start 2 min
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
+    private void monitorForInitiatedUsers() {
+        log.debug("^ Run UserEventService monitor For Initiated Users");
+
+        final Map<UUID, User> initiatedUserIdToUserMap = this.getInitiatedUserIdToUserMap();
+        final Set<UUID> keys = new HashSet<>(initiatedUserIdToUserMap.keySet());
+
+        if (initiatedUserIdToUserMap.isEmpty()) {
+            log.debug("^ Initiated users were not found. UserEventService monitorForInitiatedUsers waits.");
+            return;
+        }
+
+        if (!cachedInitiatedUserLeagueId.isEmpty() && cachedInitiatedUserLeagueId.containsAll(keys)) {
+            log.debug("^ User initiated events cache was cleaned");
+            cachedInitiatedUserLeagueId.clear();
+        } else {
+            keys.removeAll(cachedInitiatedUserLeagueId);
         }
 
         for (UUID selectedKey : keys) {
-            User user = idToUserMap.get(selectedKey);
+            User user = initiatedUserIdToUserMap.get(selectedKey);
             this.tryMakeStatusUpdateOperations(user);
+        }
+    }
+
+    private void tryUpdateInfoFromLeagueIdModule(User user) {
+        log.debug("^ try to define update events for user: {}", user.getLeagueId());
+        cachedInitiatedUserLeagueId.add(user.getLeagueId());
+        try {
+            UserDto updatedUser = leagueIdClientService.getUserByLeagueId(user.getLeagueId());
+            if (nonNull(updatedUser) && nonNull(updatedUser.getUpdatedAt())
+                    && updatedUser.getUpdatedAt().isAfter(user.getUpdatedAt())) {
+
+                log.debug("^ user.id {} were choose to updated info {} in monitorForActiveUsers", user.getLeagueId(), updatedUser);
+
+                user.setAvatarHashKey(updatedUser.getAvatarHashKey());
+                user.setEmail(updatedUser.getEmail());
+                user.setDiscordId(updatedUser.getDiscordId());
+                user.setName(updatedUser.getName());
+
+                User savedUser = userService.edit(user);
+                if (isNull(savedUser)) {
+                    log.debug("^ user.id {} were not saved in DB with data {}. Check stackTrace", user.getLeagueId(), updatedUser);
+                }
+            }
+
+        } finally {
+            log.debug("^ user.id {} were checked in monitorForActiveUsers and added to cache", user.getLeagueId());
+            cachedActiveUserLeagueId.add(user.getLeagueId());
         }
     }
 
@@ -70,12 +135,20 @@ public class UserEventServiceImpl implements UserEventService {
             this.handleUserStatusChange(user, UserStatusType.CREATED);
         }
         log.debug("^ user {} with status {} were checked, and added to cache", user.getLeagueId(), user.getStatus());
-        cachedUserLeagueId.add(user.getLeagueId());
+        cachedInitiatedUserLeagueId.add(user.getLeagueId());
     }
 
-    private Map<UUID, User> getIdToUserMap() {
+
+    private Map<UUID, User> getActiveUserIdToUserMap() {
         return Collections.unmodifiableMap(
-                userService.getInitiatedUserList()
+                userService.findActiveUserList()
+                        .stream()
+                        .collect(Collectors.toMap(User::getLeagueId, user -> user)));
+    }
+
+    private Map<UUID, User> getInitiatedUserIdToUserMap() {
+        return Collections.unmodifiableMap(
+                userService.findInitiatedUserList()
                         .stream()
                         .collect(Collectors.toMap(User::getLeagueId, user -> user)));
     }
@@ -115,5 +188,4 @@ public class UserEventServiceImpl implements UserEventService {
         user.setStatus(newUserStatusType);
         userService.edit(user);
     }
-
 }
