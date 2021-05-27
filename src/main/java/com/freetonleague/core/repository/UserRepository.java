@@ -36,4 +36,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query(value = "select u from User u where u.status = com.freetonleague.core.domain.enums.UserStatusType.INITIATED")
     List<User> findAllInitiatedUsers();
+
+    /**
+     * Find all users with status ACTIVE
+     */
+    @Query(value = "select u from User u where u.status = com.freetonleague.core.domain.enums.UserStatusType.ACTIVE " +
+            "AND u.isHidden = false")
+    List<User> findAllActiveUsers();
 }
