@@ -98,11 +98,11 @@ logging:
           wire: INFO
       springframework: WARN #for detailed debug set DEBUG
       hibernate:
-        SQL: DEBUG
+        SQL: INFO
         type:
           descriptor:
             sql:
-              BasicBinder: TRACE
+              BasicBinder: INFO
     com:
       freetonleague: DEBUG
   file:

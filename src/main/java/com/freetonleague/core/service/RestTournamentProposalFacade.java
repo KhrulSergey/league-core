@@ -1,7 +1,6 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
-import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -34,7 +33,7 @@ public interface RestTournamentProposalFacade {
      * @param tournamentId identify of tournament
      * @param stateList    filter params
      */
-    Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId, List<ParticipationStateType> stateList);
+    Page<TournamentTeamProposalDto> getProposalListForTournament(Pageable pageable, long tournamentId, List<ParticipationStateType> stateList);
 
     /**
      * Registry new team to tournament

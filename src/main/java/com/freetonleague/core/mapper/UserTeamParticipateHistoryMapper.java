@@ -18,7 +18,7 @@ public abstract class UserTeamParticipateHistoryMapper {
     @Autowired
     private TeamParticipantService teamParticipantService;
 
-    @Mapping(target = "team", source = "entity.team", qualifiedByName = "toBaseDto")
+    @Mapping(target = "team", source = "entity.team", qualifiedByName = "toDto")
     public abstract UserTeamParticipateHistoryDto fromParticipant(TeamParticipant entity);
 
     @Named(value = "toUserTeamParticipateHistoryDto")

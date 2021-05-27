@@ -8,7 +8,7 @@ public enum TeamParticipantStatusType {
     QUIT,
     CAPTAIN;
 
-    public static List<TeamParticipantStatusType> activeStatusList = List.of(
+    public static final List<TeamParticipantStatusType> activeStatusList = List.of(
             TeamParticipantStatusType.ACTIVE,
             TeamParticipantStatusType.CAPTAIN
     );

@@ -12,7 +12,7 @@ public enum TeamStateType {
         return this == CREATED;
     }
 
-    public static List<TeamStateType> activeStatusList = List.of(
+    public static final List<TeamStateType> activeStatusList = List.of(
             TeamStateType.CREATED,
             TeamStateType.ACTIVE
     );

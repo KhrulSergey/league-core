@@ -11,15 +11,15 @@ import org.hibernate.annotations.UpdateTimestamp;
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
+/**
+ * Base model for all project entities
+ */
 @EqualsAndHashCode
 @Setter
 @Getter
 @SuperBuilder
 @NoArgsConstructor
 @MappedSuperclass
-/**
- * Base model for all project entities
- * */
 public class BaseEntity {
 
     @Id

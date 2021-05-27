@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class UserTeamParticipateHistoryDto {
     private Long id;
 
-    private TeamBaseDto team;
+    private TeamDto team;
 
     private TeamParticipantStatusType status;
 

@@ -19,7 +19,7 @@ public class TournamentWinnerDto {
 
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private TeamBaseDto team;
+    private TeamDto team;
 
     @ApiModelProperty(required = true)
     @NotNull

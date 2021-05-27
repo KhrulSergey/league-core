@@ -262,7 +262,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
 
         log.debug("^ trying to save new transaction {}  in DB: {}", transaction.getGUID(), transaction);
         AccountTransaction savedTransaction = accountTransactionRepository.save(transaction);
-        log.debug("^ transaction is saved?:{} in DB with data: {}", nonNull(savedTransaction), savedTransaction);
+        log.debug("^ transaction is saved?:{} in DB with data: {}", true, savedTransaction);
         return savedTransaction;
     }
 
