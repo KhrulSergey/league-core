@@ -71,30 +71,6 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Returns User by LeagueID from DB or imported from League-Core module by leagueId.
-     */
-    @Override
-    public User findByLeagueId(UUID leagueId) {
-        log.debug("^ trying to find user in BD with leagueId {}", leagueId);
-        if (isNull(leagueId)) {
-            log.error("!> requesting findByLeagueId for Blank leagueId. Check evoking clients");
-            return null;
-        }
-        User user = userRepository.findByLeagueId(leagueId);
-        if (isNull(user)) {
-            log.debug("^ trying to load user from LeagueId-module with id '{}'", leagueId);
-            UserDto userDto = leagueIdClientService.getUserByLeagueId(leagueId.toString());
-            if (nonNull(userDto)) {
-                //create new user
-                return this.add(userDto);
-            } else {
-                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
-            }
-        }
-        return user;
-    }
-
-    /**
      * Returns found user from DB or imported from League-Core module by username.
      */
     @Override
@@ -139,6 +115,30 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * Returns User by LeagueID from DB or imported from League-Core module by leagueId.
+     */
+    @Override
+    public User findByLeagueId(UUID leagueId) {
+        log.debug("^ trying to find user in BD with leagueId {}", leagueId);
+        if (isNull(leagueId)) {
+            log.error("!> requesting findByLeagueId for Blank leagueId. Check evoking clients");
+            return null;
+        }
+        User user = userRepository.findByLeagueId(leagueId);
+        if (isNull(user)) {
+            log.debug("^ trying to load user from LeagueId-module with id '{}'", leagueId);
+            UserDto userDto = leagueIdClientService.getUserByLeagueId(leagueId);
+            if (nonNull(userDto)) {
+                //create new user
+                return this.add(userDto);
+            } else {
+                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+            }
+        }
+        return user;
+    }
+
+    /**
      * Edit an existing user in DB.
      */
     @Override
@@ -165,8 +165,16 @@ public class UserServiceImpl implements UserService {
      * Returns list of all initiated users on portal
      */
     @Override
-    public List<User> getInitiatedUserList() {
+    public List<User> findInitiatedUserList() {
         return userRepository.findAllInitiatedUsers();
+    }
+
+    /**
+     * Returns list of all active users on portal
+     */
+    @Override
+    public List<User> findActiveUserList() {
+        return userRepository.findAllActiveUsers();
     }
 
     /**
