@@ -12,7 +12,7 @@ public interface TournamentRoundMapper {
     TournamentRound fromDto(TournamentRoundDto dto);
 
     @Mapping(target = "tournamentId", source = "entity.tournament.id")
-    @Mapping(target = "seriesList", source = "entity.seriesList", qualifiedByName = "toBaseDtoList")
+    @Mapping(target = "seriesList", source = "entity.seriesList", qualifiedByName = "toDtoList")
     TournamentRoundDto toDto(TournamentRound entity);
 
     @Named(value = "toDto")

@@ -1,6 +1,5 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
 import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
@@ -78,14 +77,14 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      * Registry new team on platform
      */
     @Override
-    public TeamDto addTeam(TeamBaseDto teamDto, User user) {
+    public TeamDto addTeam(TeamDto teamDto, User user) {
         if (isNull(user)) {
             log.debug("^ user is not authenticate. 'addTeam' request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'addTeam' request denied");
         }
-        Set<ConstraintViolation<TeamBaseDto>> violations = validator.validate(teamDto);
+        Set<ConstraintViolation<TeamDto>> violations = validator.validate(teamDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
+            log.debug("^ transmitted TeamDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
         if (nonNull(teamService.getTeamByName(teamDto.getName()))) {
@@ -120,11 +119,11 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
      * Editable fields only logo, name
      */
     @Override
-    public TeamExtendedDto editTeam(long id, TeamBaseDto teamDto, User user) {
+    public TeamExtendedDto editTeam(long id, TeamDto teamDto, User user) {
         Team team = this.getVerifiedTeamById(id, user, true);
-        Set<ConstraintViolation<TeamBaseDto>> violations = validator.validate(teamDto);
+        Set<ConstraintViolation<TeamDto>> violations = validator.validate(teamDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted TeamBaseDto: {} have constraint violations: {}", teamDto, violations);
+            log.debug("^ transmitted TeamDto: {} have constraint violations: {}", teamDto, violations);
             throw new ConstraintViolationException(violations);
         }
         if (!team.isCaptain(user) && !user.isAdmin()) {

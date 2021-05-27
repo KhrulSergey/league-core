@@ -1,6 +1,6 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.TournamentMatchRivalBaseDto;
+
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalParticipantDto;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
@@ -15,10 +15,6 @@ import java.util.Set;
 public interface TournamentMatchRivalMapper {
 
     //region TournamentMatchRival mapping
-    @Mapping(target = "tournamentMatchId", source = "entity.tournamentMatch.id")
-    @Mapping(target = "teamProposalId", source = "entity.teamProposal.id")
-    TournamentMatchRivalBaseDto toBaseDto(TournamentMatchRival entity);
-
     @Named(value = "toDto")
     @Mapping(target = "tournamentMatchId", source = "entity.tournamentMatch.id")
     @Mapping(target = "teamProposalId", source = "entity.teamProposal.id")

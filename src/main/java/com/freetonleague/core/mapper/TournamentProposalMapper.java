@@ -1,7 +1,6 @@
 package com.freetonleague.core.mapper;
 
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
-import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -19,13 +18,7 @@ public interface TournamentProposalMapper {
     @Mapping(target = "tournamentTeamParticipantList", source = "entity.tournamentTeamParticipantList", qualifiedByName = "toDtoList")
     TournamentTeamProposalDto toDto(TournamentTeamProposal entity);
 
-    @Named(value = "toBaseDto")
-    @Mapping(target = "tournamentId", source = "entity.tournament.id")
-    TournamentTeamProposalBaseDto toBaseDto(TournamentTeamProposal entity);
-
     TournamentTeamProposal fromDto(TournamentTeamProposalDto dto);
-
-    TournamentTeamProposal fromBaseDto(TournamentTeamProposalBaseDto dto);
 
     TournamentTeamParticipantDto toDto(TeamParticipant entity);
 

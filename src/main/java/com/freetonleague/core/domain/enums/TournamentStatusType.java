@@ -35,7 +35,7 @@ public enum TournamentStatusType {
         return this == DELETED;
     }
 
-    public static List<TournamentStatusType> finishedStatusList = List.of(
+    public static final List<TournamentStatusType> finishedStatusList = List.of(
             TournamentStatusType.FINISHED,
             TournamentStatusType.DECLINED,
             TournamentStatusType.DELETED
@@ -44,7 +44,7 @@ public enum TournamentStatusType {
     /**
      * Returns "active" statuses for tournaments
      */
-    public static List<TournamentStatusType> activeStatusList = List.of(
+    public static final List<TournamentStatusType> activeStatusList = List.of(
             TournamentStatusType.CREATED,
             TournamentStatusType.SIGN_UP,
             TournamentStatusType.ADJUSTMENT,
@@ -55,7 +55,7 @@ public enum TournamentStatusType {
     /**
      * Returns "started" statuses for tournaments
      */
-    public static List<TournamentStatusType> startedStatusList = List.of(
+    public static final List<TournamentStatusType> startedStatusList = List.of(
             TournamentStatusType.STARTED,
             TournamentStatusType.PAUSE,
             TournamentStatusType.FINISHED

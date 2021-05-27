@@ -10,7 +10,7 @@ public enum UserStatusType {
     DELETED,
     HIDDEN;
 
-    public static List<UserStatusType> activeUserStatusList = List.of(
+    public static final List<UserStatusType> activeUserStatusList = List.of(
             ACTIVE,
             CREATED,
             HIDDEN

@@ -102,7 +102,7 @@ public class UserEventServiceImpl implements UserEventService {
                 .message("Change status of User")
                 .eventOperationType(EventOperationType.UPDATE_FIELDS)
                 .eventTopic(EventProducerModelType.USER)
-                .modelId(user.getId().toString())
+                .modelId(user.getLeagueId().toString())
                 .modelData(updateFields)
                 .createdDate(LocalDateTime.now())
                 .build();

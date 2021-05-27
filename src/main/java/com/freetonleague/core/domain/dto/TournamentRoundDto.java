@@ -23,9 +23,9 @@ public class TournamentRoundDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Integer roundNumber;
 
-    @ApiModelProperty(required = false, readOnly = true)
+    @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<TournamentSeriesBaseDto> seriesList;
+    private List<TournamentSeriesDto> seriesList;
 
     @ApiModelProperty(required = true)
     @NotNull
@@ -39,7 +39,7 @@ public class TournamentRoundDto {
 
     private LocalDateTime startDate;
 
-    @ApiModelProperty(required = false, readOnly = true)
+    @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime finishedDate;
 }
