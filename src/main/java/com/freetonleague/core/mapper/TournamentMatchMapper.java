@@ -1,6 +1,5 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.TournamentMatchBaseDto;
 import com.freetonleague.core.domain.dto.TournamentMatchDto;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import org.mapstruct.*;
@@ -19,14 +18,7 @@ public interface TournamentMatchMapper {
     @Mapping(target = "matchRivalList", source = "entity.matchRivalList", qualifiedByName = "toDtoList")
     TournamentMatchDto toDto(TournamentMatch entity);
 
-    @Named(value = "toBaseDto")
-    TournamentMatchBaseDto toBaseDto(TournamentMatch entity);
-
     @Named(value = "toDto")
     @IterableMapping(qualifiedByName = "toDto")
     List<TournamentMatchDto> toDto(List<TournamentMatch> entities);
-
-    @Named(value = "toBaseDto")
-    @IterableMapping(qualifiedByName = "toBaseDto")
-    List<TournamentMatchBaseDto> toBaseDto(List<TournamentMatch> entities);
 }

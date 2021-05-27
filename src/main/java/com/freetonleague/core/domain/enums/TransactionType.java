@@ -11,7 +11,7 @@ public enum TransactionType {
 
     ;
 
-    public static List<TransactionType> withdrawTransactionTypeList = List.of(
+    public static final List<TransactionType> withdrawTransactionTypeList = List.of(
             TransactionType.WITHDRAW,
             TransactionType.PAYMENT,
             TransactionType.TRANSFER

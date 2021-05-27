@@ -13,11 +13,10 @@ public class MockDataGenerator {
                 .id((long) (Math.random() * 100))
                 .leagueId(UUID.randomUUID())
                 .username(UUID.randomUUID().toString())
-                .avatarFileName(UUID.randomUUID().toString())
+                .avatarHashKey(UUID.randomUUID().toString())
                 .status(UserStatusType.ACTIVE)
                 .createdAt(LocalDateTime.now())
                 .updatedAt(LocalDateTime.now())
                 .build();
     }
-
 }

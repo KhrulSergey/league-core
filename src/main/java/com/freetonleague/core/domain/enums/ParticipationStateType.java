@@ -11,12 +11,12 @@ public enum ParticipationStateType {
     REJECT,
     CANCELLED;
 
-    public static List<ParticipationStateType> activeProposalStateList = List.of(
+    public static final List<ParticipationStateType> activeProposalStateList = List.of(
             APPROVE,
             CREATED
     );
 
-    public static List<ParticipationStateType> disabledProposalStateList = List.of(
+    public static final List<ParticipationStateType> disabledProposalStateList = List.of(
             REJECT,
             CANCELLED
     );

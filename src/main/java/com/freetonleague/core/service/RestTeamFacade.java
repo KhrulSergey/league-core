@@ -1,6 +1,5 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
 import com.freetonleague.core.domain.model.Team;
@@ -44,7 +43,7 @@ public interface RestTeamFacade {
      * @param teamDto Team to be added
      * @return Added team
      */
-    TeamDto addTeam(TeamBaseDto teamDto, User user);
+    TeamDto addTeam(TeamDto teamDto, User user);
 
     /**
      * Edit team on Portal.
@@ -55,7 +54,7 @@ public interface RestTeamFacade {
      * @param user    current user from Session
      * @return Edited team
      */
-    TeamExtendedDto editTeam(long id, TeamBaseDto teamDto, User user);
+    TeamExtendedDto editTeam(long id, TeamDto teamDto, User user);
 
     /**
      * Expel (exclude) from requested team the specified participant.
