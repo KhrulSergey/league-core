@@ -26,9 +26,10 @@ public class FinancialAccountsController {
     public static final String PATH_GET_TEAM = "/balance-by-team/{team_id}";
     public static final String PATH_GET_TOURNAMENT = "/balance-by-tournament/{tournament_id}";
 
-    public static final String PATH_CREATE_WITHDRAW = "/withdraw";
-    public static final String PATH_CANCEL_WITHDRAW = "/withdraw/{transaction_guid}";
-    public static final String PATH_MODERATE_WITHDRAW = "/withdraw/{transaction_guid}";
+    public static final String PATH_GET_TRANSACTION = "/transaction/{transaction_guid}";
+    public static final String PATH_CREATE_WITHDRAW = "/transaction/withdraw";
+    public static final String PATH_CANCEL_WITHDRAW = "/transaction/withdraw/{transaction_guid}";
+    public static final String PATH_MODERATE_WITHDRAW = "/transaction/withdraw/{transaction_guid}";
 
     public static final String PATH_APPLY_COUPON = "/apply-coupon/";
 
@@ -68,6 +69,12 @@ public class FinancialAccountsController {
         return new ResponseEntity<>(restFinanceFacade.getBalanceByGUID(GUID, user), HttpStatus.OK);
     }
 
+    @ApiOperation("Get transaction by GUID (only for admin")
+    @GetMapping(path = PATH_GET_TRANSACTION)
+    public ResponseEntity<AccountTransactionInfoDto> getTransactionByGUID(@PathVariable("transaction_guid") String transactionGUID,
+                                                                          @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restFinanceFacade.getTransactionByGUID(transactionGUID, user), HttpStatus.OK);
+    }
 
     @ApiOperation("Create withdraw request from user account")
     @PostMapping(path = PATH_CREATE_WITHDRAW)
@@ -81,10 +88,11 @@ public class FinancialAccountsController {
     @ApiOperation("Modify withdraw transaction request with new data (only for admin")
     @PutMapping(path = PATH_MODERATE_WITHDRAW)
     public ResponseEntity<AccountTransactionInfoDto> moderateWithdrawTransaction(@PathVariable("transaction_guid") String transactionGUID,
-                                                                                 @RequestParam(value = "transactionDto") AccountTransactionInfoDto transactionDto,
+                                                                                 @RequestBody AccountTransactionInfoDto transactionDto,
                                                                                  @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFinanceFacade.editWithdrawRequest(transactionGUID, transactionDto, user), HttpStatus.OK);
     }
+
     //TODO delete bonus payments method if no need until 01/09/2021
 //    @ApiOperation("Apply coupon by hash for user from session")
 //    @PostMapping(path = PATH_APPLY_COUPON)

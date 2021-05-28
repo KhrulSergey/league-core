@@ -210,14 +210,16 @@ public class TournamentServiceImpl implements TournamentService {
         }
         Set<ConstraintViolation<Tournament>> violations = validator.validate(tournament);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament {} with verifyTournament for tournament with ConstraintViolations. Check evoking clients", tournament.getId());
+            log.error("!> requesting modify tournament {} with verifyTournament for tournament with ConstraintViolations {}. Check evoking clients",
+                    tournament.getId(), violations);
             return false;
         }
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
         if (nonNull(tournamentSettings)) {
             Set<ConstraintViolation<TournamentSettings>> settingsViolations = validator.validate(tournamentSettings);
             if (!settingsViolations.isEmpty()) {
-                log.error("!> requesting modify tournament {} with verifyTournament for tournament settings with ConstraintViolations. Check evoking clients", tournament.getId());
+                log.error("!> requesting modify tournament {} with verifyTournament for tournament settings with ConstraintViolations {}. Check evoking clients",
+                        tournament.getId(), settingsViolations);
                 return false;
             }
         }

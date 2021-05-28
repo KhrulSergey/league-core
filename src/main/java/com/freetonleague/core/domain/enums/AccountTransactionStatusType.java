@@ -5,5 +5,18 @@ public enum AccountTransactionStatusType {
     FROZEN,
     LOCKED,
     FINISHED,
-    CANCELED,
+    ABORTED,
+    ;
+
+    public boolean isFrozen() {
+        return this == FROZEN;
+    }
+
+    public boolean isFinished() {
+        return this == FINISHED;
+    }
+
+    public boolean isAborted() {
+        return this == ABORTED;
+    }
 }

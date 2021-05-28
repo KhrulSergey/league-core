@@ -8,7 +8,6 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import static java.util.Objects.nonNull;
@@ -34,7 +33,6 @@ public class TeamDto {
 
     private TeamStateType status;
 
-    @NotNull
     private Long captainId;
 
     private TeamParticipantDto captain;

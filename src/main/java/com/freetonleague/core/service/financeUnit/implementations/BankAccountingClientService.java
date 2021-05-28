@@ -3,9 +3,11 @@ package com.freetonleague.core.service.financeUnit.implementations;
 import com.freetonleague.core.domain.dto.AccountBroxusResponseDto;
 import com.freetonleague.core.domain.dto.AccountExternalInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionExternalInfoDto;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.BankProviderType;
 import com.freetonleague.core.domain.model.Account;
 import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.exception.InnerServiceFeignException;
 import com.freetonleague.core.service.financeUnit.cloud.BroxusAccountingClientCloud;
 import feign.FeignException;
 import feign.FeignException.FeignClientException;
@@ -151,15 +153,39 @@ public class BankAccountingClientService {
     /**
      * Returns information for conducted transaction
      */
-    public AccountTransactionExternalInfoDto requestTransaction(AccountTransaction accountTransaction) {
+    public AccountTransactionExternalInfoDto registerBankTransferTransaction(AccountTransaction accountTransaction) {
         if (isNull(accountTransaction) || isNull(accountTransaction.getGUID())) {
-            log.error("!> requesting requestTransaction for NULL accountTransaction. Check evoking clients");
+            log.error("!> requesting registerBankTransferTransaction for NULL accountTransaction. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to send request transaction to Bank Client {}", accountTransaction.getGUID());
-        AccountTransactionExternalInfoDto externalTransactionInfoDto = AccountTransactionExternalInfoDto.builder()
+        log.debug("^ trying to send request to register transaction to Bank Client {}", accountTransaction.getGUID());
+        AccountBroxusResponseDto transactionInfo;
+        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
+                : broxusAccountingClientCloud;
+        try {
+            transactionInfo = currentBroxusClient.registerWithdrawTransaction(this.broxusClientToken,
+                    accountTransaction.getSourceAccount().getGUID().toString(),
+                    accountTransaction.getTargetAccount().getExternalAddress(),
+                    accountTransaction.getAmount());
+            log.debug("^ response from external bank client for specified core-accountTransaction with guid {} was {}",
+                    accountTransaction.getGUID(), transactionInfo);
+        } catch (InnerServiceFeignException exc) {
+            log.error("!!> Error while registerBankTransferTransaction in BankAccountingClientService. Transmitted data: {}. New FeignClientException exc {}",
+                    accountTransaction, exc, exc);
+            return null;
+        }
+
+        if (isNull(transactionInfo) || !transactionInfo.isSuccess()) {
+            //TODO handle errors with microservice
+            log.error("!!> Error in response from Broxus-Client while createExternalBankAddressForAccount in " +
+                            "BankAccountingClientService. Transmitted data: {}. Received data: {} ",
+                    accountTransaction, transactionInfo);
+            return null;
+        }
+        log.debug("^ transaction was successfully saved to Bank Client {}", accountTransaction.getGUID());
+        return AccountTransactionExternalInfoDto.builder()
+                .amount(accountTransaction.getAmount())
+                .status(AccountTransactionStatusType.FINISHED)
                 .build();
-        log.debug("^ request transaction was successfully saved to Bank Client {}", accountTransaction.getGUID());
-        return externalTransactionInfoDto;
     }
 }

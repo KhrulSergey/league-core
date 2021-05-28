@@ -107,7 +107,22 @@ public interface FinancialUnitService {
     AccountTransaction editTransaction(AccountTransaction accountTransaction);
 
     /**
+     * Abort transaction and update Accounts: source (if specified) and target
+     */
+    AccountTransaction abortTransaction(AccountTransaction transaction);
+
+    /**
      * Validate token for operate with finance unit
      */
     boolean validateFinanceTokenForDeposit(String token);
+
+    /**
+     * Returns sign of transaction existence for specified GUID.
+     */
+    boolean isExistsTransactionByGUID(UUID GUID);
+
+    /**
+     * Returns sign of transaction aborted for specified GUID.
+     */
+    boolean isAbortedTransactionByGUID(UUID GUID);
 }

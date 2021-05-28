@@ -1,7 +1,9 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
 import com.freetonleague.core.domain.dto.AccountExternalInfoDto;
+import com.freetonleague.core.domain.dto.AccountTransactionExternalInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.AccountType;
 import com.freetonleague.core.domain.enums.TransactionType;
 import com.freetonleague.core.domain.model.Account;
@@ -12,6 +14,7 @@ import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.repository.AccountHolderRepository;
 import com.freetonleague.core.repository.AccountRepository;
 import com.freetonleague.core.repository.AccountTransactionRepository;
+import com.freetonleague.core.service.UserService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
@@ -46,11 +50,24 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private final AccountTransactionRepository accountTransactionRepository;
     private final Validator validator;
 
+    private final UserService userService;
+
     @Value("${freetonleague.service.league-finance.service-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
     private String leagueFinanceServiceToken;
 
     @Value("${freetonleague.service.league-finance.balance-update-timeout-in-sec:600}")
     private Long leagueFinanceBalanceUpdateTimeout;
+
+    /**
+     * User login with system bonus account
+     */
+    @Value("${freetonleague.service.league-finance.system-bonus-user-login:#{null}}")
+    private String systemBonusUserLogin;
+
+    @Value("${freetonleague.service.league-finance.auto-abort-transaction:false}")
+    private Boolean autoAbortTransaction;
+
+    //region Accounts
 
     /**
      * Get account by GUID.
@@ -141,7 +158,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
                     "Check evoking clients", accountHolder, violations);
             return null;
         }
-
+        log.debug("^ trying to create account holder external guid '{}' and name '{}', with accountType {}",
+                accountHolder.getHolderExternalGUID(), accountHolder.getHolderName(), accountType);
         Account account = null;
         try {
             account = this.createAccountForHolder(accountHolder, accountType);
@@ -176,6 +194,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
                     "Check evoking clients", account, violations);
             return null;
         }
+        log.debug("^ trying to create not tracking account {}", account);
         return accountsRepository.save(account);
     }
 
@@ -184,9 +203,17 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
      */
     @Override
     public AccountTransaction getTransaction(UUID GUID) {
+        if (isNull(GUID)) {
+            log.error("!!> trying to get transaction for NULL GUID. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to find transaction with guid '{}'", GUID);
         return accountTransactionRepository.findByGUID(GUID);
     }
+    //endregion
 
+
+    //region Transactions
 
     /**
      * Get list of transactions for specified account. Search in both source and target.
@@ -199,16 +226,10 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     /**
      * Save new transaction and update Accounts: source (if specified) and target
      */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
     public AccountTransaction createTransaction(AccountTransaction transaction) {
-        if (isNull(transaction)) {
-            log.error("!> requesting saveTransaction for NULL accountTransaction. Check evoking clients");
-            return null;
-        }
-        Set<ConstraintViolation<AccountTransaction>> violations = validator.validate(transaction);
-        if (!violations.isEmpty()) {
-            log.error("!> requesting saveTransaction for transaction {} with constraint violations: {}. Check evoking clients",
-                    transaction, violations);
+        if (!this.verifyTransaction(transaction)) {
             return null;
         }
         Account sourceAccount = transaction.getSourceAccount();
@@ -222,8 +243,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
             }
             // check if source account doesn't have fund of transaction amount
             if (!this.isAccountHaveFundAmount(sourceAccount, transaction.getAmount())) {
-                log.error("!!> requesting saveTransaction for 'withdraw' transaction {} with source account. Request denied. Check evoking clients",
-                        transaction);
+                log.error("!!> requesting saveTransaction method for 'withdraw' transaction {} for source account with not enough fund. " +
+                        "Request denied. Check evoking clients", transaction);
                 throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_CREATION_ERROR,
                         "Specified source financial account doesn't have enough fund to execute transfer");
             }
@@ -231,7 +252,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
 
         transaction.generateGUID();
         if (nonNull(sourceAccount)) {
-            log.debug("^ trying to change balance of source account with GUID {} from transaction GUID: {}", sourceAccount.getGUID(), transaction.getGUID());
+            log.debug("^ trying to change (lower) balance of source account with GUID {} from transaction GUID: {}", sourceAccount.getGUID(), transaction.getGUID());
             double sourceBalance = sourceAccount.getAmount();
             sourceAccount.setAmount(sourceBalance - transaction.getAmount());
             sourceAccount = this.editAccount(sourceAccount);
@@ -252,31 +273,126 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
             log.error("!!> requesting edit target Account in saveTransaction {} cause error while saving in DB. Request denied. Check evoking clients",
                     transaction);
             throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_CREATION_ERROR,
-                    "Specified source financial account can't be modified in DB. ");
-        }
-
-        if (transaction.getTransactionType().isWithdraw()) {
-            //TODO save data to Broxus-cloud-client
-            bankAccountingClientService.requestTransaction(transaction);
+                    "Specified target financial account can't be modified in DB. ");
         }
 
         log.debug("^ trying to save new transaction {}  in DB: {}", transaction.getGUID(), transaction);
+        if (transaction.getStatus().isFinished()) {
+            log.debug("^ transaction.GUID was finished {}", transaction.getGUID());
+            transaction.setFinishedAt(LocalDateTime.now());
+        }
         AccountTransaction savedTransaction = accountTransactionRepository.save(transaction);
         log.debug("^ transaction is saved?:{} in DB with data: {}", true, savedTransaction);
         return savedTransaction;
     }
 
-
     /**
-     * Save new transaction and update Accounts: source (if specified) and target
+     * Update transaction data
      */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
     public AccountTransaction editTransaction(AccountTransaction transaction) {
-        if (transaction.getTransactionType().isWithdraw()) {
-            //TODO save data to Broxus-cloud-client
-            bankAccountingClientService.requestTransaction(transaction);
+        if (!this.verifyTransaction(transaction)) {
+            return null;
         }
-        return accountTransactionRepository.save(transaction);
+        if (!this.isExistsTransactionByGUID(transaction.getGUID())) {
+            log.error("!!> requesting modify transaction {} for non-existed transaction. Check evoking clients", transaction.getGUID());
+            return null;
+        }
+        if (transaction.getPrevStatus().isAborted()) {
+            log.error("!!> requesting modify for already aborted transaction {}. Request denied. Check evoking clients",
+                    transaction);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_MODIFY_ABORTED_ERROR,
+                    "Specified transaction was already aborted and can't be modified in DB. ");
+        }
+        if (transaction.getPrevStatus().isFinished()) {
+            log.error("!!> requesting modify already finished transaction {} in saveTransaction. Finished transaction can be only aborted. " +
+                    "Request denied. Check evoking clients", transaction);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_MODIFY_FINISHED_ERROR,
+                    "Specified financial account transaction can't be modified in DB. ");
+        }
+        if (transaction.getStatus().isAborted()) {
+            log.error("!!> requesting abort transaction with data {} in editTransaction. Call specific abortTransaction method to abort. " +
+                    "Request denied. Check evoking clients", transaction);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_ABORT_ERROR,
+                    "Specified financial account transaction can't be aborted with modifying method. ");
+        }
+        log.debug("^ trying to modify transaction {}", transaction);
+        if (transaction.getStatus().isFinished()) {
+            log.debug("^ transaction.GUID was finished {}", transaction.getGUID());
+            transaction.setFinishedAt(LocalDateTime.now());
+            if (transaction.getTransactionType().isWithdraw()) {
+                //save data to Broxus-cloud-client
+                AccountTransactionExternalInfoDto transactionExternalInfoDto =
+                        bankAccountingClientService.registerBankTransferTransaction(transaction);
+                if (isNull(transactionExternalInfoDto) && this.autoAbortTransaction) {
+                    log.error("!!> transaction.GUID {} was not registered in Broxus-client. Transaction will be aborted.", transaction.getGUID());
+                    return this.abortTransaction(transaction);
+                }
+            }
+        }
+
+        if (transaction.isStatusChanged()) {
+            this.handleTransactionStatusChanged(transaction);
+        }
+        transaction = accountTransactionRepository.save(transaction);
+        log.debug("^ successfully modified transaction {}", transaction.getGUID());
+        return transaction;
+    }
+
+    /**
+     * Abort transaction and update Accounts: source (if specified) and target
+     */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Override
+    public AccountTransaction abortTransaction(AccountTransaction transaction) {
+        if (!this.verifyTransaction(transaction)) {
+            return null;
+        }
+        if (!this.isExistsTransactionByGUID(transaction.getGUID())) {
+            log.error("!> requesting abort transaction {} for non-existed transaction. Check evoking clients", transaction.getGUID());
+            return null;
+        }
+        if (this.isAbortedTransactionByGUID(transaction.getGUID())) {
+            log.error("!> requesting abort transaction {} for already aborted transaction. Check evoking clients", transaction.getGUID());
+            return null;
+        }
+        log.debug("^ trying to abort transaction {}", transaction);
+
+        Account targetAccount = transaction.getTargetAccount();
+        log.debug("^ trying to abort (lower) balance of target account with GUID {} from transaction GUID: {}",
+                targetAccount.getGUID(), transaction.getGUID());
+        double targetBalance = targetAccount.getAmount();
+        targetAccount.setAmount(targetBalance - transaction.getAmount());
+        targetAccount = this.editAccount(targetAccount);
+        if (isNull(targetAccount)) {
+            log.error("!!> requesting abort target Account in abortTransaction {} cause error while saving in DB. Request denied. Check evoking clients",
+                    transaction);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_CREATION_ERROR,
+                    "Specified target financial account can't be modified in DB. ");
+        }
+
+        Account sourceAccount = transaction.getSourceAccount();
+        if (nonNull(sourceAccount)) {
+            log.debug("^ trying to abort (return) balance of source account with GUID {} from transaction GUID: {}",
+                    sourceAccount.getGUID(), transaction.getGUID());
+            double sourceBalance = sourceAccount.getAmount();
+            sourceAccount.setAmount(sourceBalance + transaction.getAmount());
+            sourceAccount = this.editAccount(sourceAccount);
+            if (isNull(sourceAccount)) {
+                log.error("!!> requesting edit source Account in saveTransaction {} cause error while saving in DB. Request denied. Check evoking clients",
+                        transaction);
+                throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_CREATION_ERROR,
+                        "Specified source financial account can't be modified in DB. ");
+            }
+        }
+        transaction.setAbortedAt(LocalDateTime.now());
+        transaction.setStatus(AccountTransactionStatusType.ABORTED);
+
+        this.handleTransactionStatusChanged(transaction);
+        transaction = accountTransactionRepository.save(transaction);
+        log.debug("^ successfully abort transaction {}", transaction.getGUID());
+        return transaction;
     }
 
     /**
@@ -287,9 +403,37 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         return token.equals(this.leagueFinanceServiceToken);
     }
 
-    private boolean isAccountHaveFundAmount(Account account, Double amount) {
-        return account.getAmount() >= amount;
+    /**
+     * Returns sign of transaction existence for specified GUID.
+     */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Override
+    public boolean isExistsTransactionByGUID(UUID GUID) {
+        return accountTransactionRepository.existsByGUID(GUID);
     }
+
+    /**
+     * Returns sign of transaction aborted for specified GUID.
+     */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    @Override
+    public boolean isAbortedTransactionByGUID(UUID GUID) {
+        return accountTransactionRepository.isAbortedByGUID(GUID);
+    }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public boolean isAccountHaveFundAmount(Account account, Double amount) {
+        if (isNull(account) || isNull(amount) || amount < 0) {
+            log.error("!> requesting isAccountHaveFundAmount for NULL account {} or NULL / NEGATIVE amount {}. Check evoking clients",
+                    account, amount);
+            return false;
+        }
+        log.debug("^ trying to define is account.GUID {} have specified fund amount", account.getGUID());
+        boolean result = accountsRepository.getAmountForAccount(account) >= amount;
+        log.debug("^ account with GUID {} have specified fund amount: ", result);
+        return result;
+    }
+    //endregion
 
     /**
      * Create new core-account with external address from trusted bank-provider
@@ -338,6 +482,32 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
 
         log.debug("^ trying to modify account in DB: {}", account);
         return accountsRepository.save(account);
+    }
+
+    /**
+     * Validate transaction parameters to modify
+     */
+    private boolean verifyTransaction(AccountTransaction transaction) {
+        if (isNull(transaction)) {
+            log.error("!> requesting modify transaction with verifyTransaction for NULL transaction. Check evoking clients");
+            return false;
+        }
+        Set<ConstraintViolation<AccountTransaction>> violations = validator.validate(transaction);
+        if (!violations.isEmpty()) {
+            log.error("!> requesting modify transaction {} with verifyTransaction for transaction with ConstraintViolations {}. Check evoking clients",
+                    transaction.getGUID(), violations);
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Prototype for handle transaction status
+     */
+    private void handleTransactionStatusChanged(AccountTransaction transaction) {
+        log.warn("~ status for transaction GUID {} was changed from {} to {} ",
+                transaction.getGUID(), transaction.getPrevStatus(), transaction.getStatus());
+        transaction.setPrevStatus(transaction.getStatus());
     }
 
 //    /** Update account balance from external provider */
