@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 
 @SuperBuilder
 @Data
@@ -31,6 +32,12 @@ public class AccountTransactionInfoDto {
     private String name;
 
     private AccountTransactionStatusType status;
+
+    private UserDto approvedBy;
+
+    private LocalDateTime finishedAt;
+
+    private LocalDateTime abortedAt;
 
     @NotNull
     private TransactionType transactionType;

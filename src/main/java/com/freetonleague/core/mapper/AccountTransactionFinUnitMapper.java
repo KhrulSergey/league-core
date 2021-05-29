@@ -21,4 +21,10 @@ public interface AccountTransactionFinUnitMapper {
     @Mapping(target = "sourceAccountGUID", expression = "java(entity.getSourceAccount().getGUID().toString())")
     @Mapping(target = "targetAccountGUID", expression = "java(entity.getTargetAccount().getGUID().toString())")
     AccountTransactionParentInfoDto toParentDto(AccountTransaction entity);
+
+    @Mapping(target = "GUID", ignore = true)
+    @Mapping(target = "sourceAccount", ignore = true)
+    @Mapping(target = "targetAccount", ignore = true)
+    @Mapping(target = "parentTransaction", ignore = true)
+    AccountTransaction fromDto(AccountTransactionInfoDto dto);
 }

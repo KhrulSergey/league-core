@@ -34,6 +34,12 @@ public interface FinancialClientService {
      */
     AccountInfoDto createAccountByHolderInfo(UUID holderGUID, AccountHolderType holderType, String holderName);
 
+
+    /**
+     * Returns found transaction by specified GUID
+     */
+    AccountTransactionInfoDto getTransactionByGUID(String transactionGUID);
+
     /**
      * Returns info for created transfer transaction from source to target account
      */
@@ -43,6 +49,11 @@ public interface FinancialClientService {
      * Returns info for created withdraw transaction from user to target (external) account
      */
     AccountTransactionInfoDto applyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+
+    /**
+     * Returns updated info for modified withdraw transaction
+     */
+    AccountTransactionInfoDto editWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 
     /**
      * Apply coupon by advertisement company hash for user from session

@@ -67,8 +67,6 @@ public class FinancialClientServiceImpl implements FinancialClientService {
 
     /**
      * Returns account info by requested external address of account from request to Finance Unit
-     *
-     * @param externalAddress address of external account
      */
     @Override
     public AccountInfoDto getAccountByExternalAddress(String externalAddress) {
@@ -95,31 +93,27 @@ public class FinancialClientServiceImpl implements FinancialClientService {
     }
 
     /**
+     * Returns found transaction by specified GUID
+     */
+    @Override
+    public AccountTransactionInfoDto getTransactionByGUID(String transactionGUID) {
+        if (isBlank(transactionGUID)) {
+            log.error("!> requesting getTransactionByGUID for Blank transactionGUID. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get transaction by GUID {} from finance unit", transactionGUID);
+        return restFinancialUnitFacade.findTransactionByGUID(transactionGUID);
+    }
+
+    /**
      * Returns info for created transfer transaction from source to target account
      */
     @Override
     public AccountTransactionInfoDto applyPurchaseTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
-        if (isNull(accountTransactionInfoDto)) {
-            log.error("!!> requesting applyPurchaseTransaction for NULL accountTransactionInfoDto. Check evoking clients");
+        if (!verifyWithdrawTransaction(accountTransactionInfoDto)) {
+            log.error("!!> requesting applyPurchaseTransaction for accountTransactionInfoDto with Errors. Check evoking clients");
             return null;
         }
-        Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
-        if (!violations.isEmpty()) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for accountTransactionInfoDto:{} with ConstraintViolations {}. Check evoking clients",
-                    accountTransactionInfoDto, violations);
-            return null;
-        }
-        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getSourceAccount())) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for sourceAccount {} with errors. Check evoking clients",
-                    accountTransactionInfoDto);
-            return null;
-        }
-        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getTargetAccount())) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for targetAccount {} with errors. Check evoking clients",
-                    accountTransactionInfoDto);
-            return null;
-        }
-
         log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
         return restFinancialUnitFacade.createTransferTransaction(accountTransactionInfoDto);
     }
@@ -128,31 +122,55 @@ public class FinancialClientServiceImpl implements FinancialClientService {
      * Returns info for created withdraw transaction from user to target (external) account
      */
     public AccountTransactionInfoDto applyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
-        if (isNull(accountTransactionInfoDto)) {
-            log.error("!!> requesting applyWithdrawTransaction for NULL accountTransactionInfoDto. Check evoking clients");
+        if (!verifyWithdrawTransaction(accountTransactionInfoDto)) {
+            log.error("!!> requesting applyWithdrawTransaction for accountTransactionInfoDto with Errors. Check evoking clients");
             return null;
         }
-        Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
-        if (!violations.isEmpty()) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for accountTransactionInfoDto:{} with ConstraintViolations {}. Check evoking clients",
-                    accountTransactionInfoDto, violations);
+        if (!accountTransactionInfoDto.getStatus().isFrozen()) {
+            log.error("!!> requesting applyWithdrawTransaction for error in transaction status '{}'. Check evoking clients",
+                    accountTransactionInfoDto.getStatus());
             return null;
         }
-        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getSourceAccount())) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for sourceAccount {} with errors. Check evoking clients",
-                    accountTransactionInfoDto);
-            return null;
-        }
-        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getTargetAccount())) {
-            log.error("!!> requesting createTransactionFromSourceToTargetHolder for targetAccount {} with errors. Check evoking clients",
-                    accountTransactionInfoDto);
-            return null;
-        }
-
-        log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
+        log.debug("^ trying to create new withdraw transaction and send request to Finance Unit {}", accountTransactionInfoDto);
         return restFinancialUnitFacade.createTransferTransaction(accountTransactionInfoDto);
     }
 
+    /**
+     * Returns updated info for modified withdraw transaction
+     */
+    @Override
+    public AccountTransactionInfoDto editWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
+        if (!verifyWithdrawTransaction(accountTransactionInfoDto)) {
+            log.error("!!> requesting editWithdrawTransaction for accountTransactionInfoDto with Errors. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to modify withdraw transaction and send request to Finance Unit {}", accountTransactionInfoDto);
+        return restFinancialUnitFacade.editTransferTransaction(accountTransactionInfoDto);
+    }
+
+    private boolean verifyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
+        if (isNull(accountTransactionInfoDto)) {
+            log.error("!!> requesting modify transaction for NULL accountTransactionInfoDto. Check evoking clients");
+            return false;
+        }
+        Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
+        if (!violations.isEmpty()) {
+            log.error("!!> requesting modify transaction for accountTransactionInfoDto:{} with ConstraintViolations {}. Check evoking clients",
+                    accountTransactionInfoDto, violations);
+            return false;
+        }
+        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getSourceAccount())) {
+            log.error("!!> requesting modify transaction for sourceAccount {} with errors. Check evoking clients",
+                    accountTransactionInfoDto);
+            return false;
+        }
+        if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getTargetAccount())) {
+            log.error("!!> requesting modify transaction for targetAccount {} with errors. Check evoking clients",
+                    accountTransactionInfoDto);
+            return false;
+        }
+        return true;
+    }
 
     /**
      * Apply coupon by advertisement company hash for user from session
@@ -204,6 +222,14 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!!> requesting verifyAccountInfoDto for accountInfo:{} with ConstraintViolations {}. Check evoking clients",
                     accountInfo, violations);
             return false;
+        }
+
+        if (!accountInfo.getIsNotTracking()) {
+            if (isBlank(accountInfo.getOwnerGUID()) || isNull(accountInfo.getOwnerType())) {
+                log.error("!!> requesting verifyAccountInfoDto for accountInfo:{} with BLANK ownerGUID or NULL ownerType {}. " +
+                        "Check evoking clients", accountInfo.getOwnerGUID(), accountInfo.getOwnerType());
+                return false;
+            }
         }
         return true;
     }

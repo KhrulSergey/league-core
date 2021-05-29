@@ -20,6 +20,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
  * Base model for all financial project entities
  */
 @EqualsAndHashCode
+@ToString
 @Setter
 @Getter
 @SuperBuilder

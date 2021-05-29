@@ -10,12 +10,17 @@ import com.freetonleague.core.domain.enums.TransactionType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.AccountFinanceManageException;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.UnauthorizedException;
+import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.security.permissions.CanManageFinTransaction;
 import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -37,6 +42,10 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     private final RestTournamentFacade restTournamentFacade;
     private final RestTeamFacade restTeamFacade;
     private final RestUserFacade restUserFacade;
+    private final UserMapper userMapper;
+    private final Double withdrawFundFractionStep = 0.1;
+    @Value("${freetonleague.service.league-finance.min-withdraw-value:12.0}")
+    private Double minWithdrawFundValue;
 
     @Override
     public AccountInfoDto getBalanceByGUID(String GUID, User user) {
@@ -73,46 +82,56 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     }
 
     /**
+     * Returns found transaction by specified GUID or Null
+     */
+    @CanManageFinTransaction
+    @Override
+    public AccountTransactionInfoDto getTransactionByGUID(String transactionGUID, User user) {
+        return this.getVerifiedTransactionByGUID(transactionGUID);
+    }
+
+    /**
      * Returns created withdraw fund transaction info (with pause status) for specified params
      */
     @Override
     public AccountTransactionInfoDto createWithdrawRequest(Double amount, String sourceAccountGUID, String targetAddress, User user) {
-        if (amount <= 0) {
-            log.warn("~ parameter 'amount' is negative or zero and rejected for createWithdrawRequest");
-            throw new ValidationException(ExceptionMessages.ACCOUNT_WITHDRAW_VALIDATION_ERROR, "amount",
-                    "parameter 'amount' is negative or zero and rejected for createWithdrawRequest");
+        if (amount < minWithdrawFundValue || amount % withdrawFundFractionStep == 0) {
+            log.warn("~ parameter 'amount' is less than minWithdrawFundValue or fractional step is illegal. Withdraw request is rejected");
+            throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "amount",
+                    "parameter 'amount' is less than minWithdrawFundValue or fractional step is illegal. Withdraw request is rejected");
         }
         if (isBlank(sourceAccountGUID)) {
             log.warn("~ parameter 'sourceAccountGUID' is blank and rejected for createWithdrawRequest");
-            throw new ValidationException(ExceptionMessages.ACCOUNT_WITHDRAW_VALIDATION_ERROR, "sourceAccountGUID",
+            throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "sourceAccountGUID",
                     "parameter 'sourceAccountGUID' is blank and rejected for createWithdrawRequest");
         }
         if (isBlank(targetAddress)) {
             log.warn("~ parameter 'targetAddress' is blank and rejected for createWithdrawRequest");
-            throw new ValidationException(ExceptionMessages.ACCOUNT_WITHDRAW_VALIDATION_ERROR, "targetAddress",
+            throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "targetAddress",
                     "parameter 'targetAddress' is blank and rejected for createWithdrawRequest");
         }
         AccountInfoDto userAccount = this.getVerifiedAccountByGUID(sourceAccountGUID, user, true);
         if (!userAccount.getOwnerExternalGUID().equals(user.getLeagueId().toString())) {
             log.warn("~ parameter 'sourceAccountGUID' is not belongs to current user. Create withdraw request was rejected");
-            throw new ValidationException(ExceptionMessages.ACCOUNT_WITHDRAW_VALIDATION_ERROR, "sourceAccountGUID",
+            throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "sourceAccountGUID",
                     "parameter 'sourceAccountGUID' is not belongs to current user. Create withdraw request was rejected");
         }
-
-        AccountInfoDto targetAccount = this.getVerifiedAccountByGUID(targetAddress, user, false);
+        // get external account by ExternalAddress (or create new one)
+        AccountInfoDto targetAccount = this.getVerifiedAccountByExternalAddress(targetAddress);
+        //Compose withdraw transaction
         AccountTransactionInfoDto accountTransactionInfoDto = AccountTransactionInfoDto.builder()
                 .sourceAccount(userAccount)
                 .targetAccount(targetAccount)
                 .amount(amount)
-                .status(AccountTransactionStatusType.FROZEN)
+                .status(AccountTransactionStatusType.FROZEN) //Pause transaction and wait for manager approve
                 .transactionType(TransactionType.WITHDRAW)
                 .transactionTemplateType(TransactionTemplateType.EXTERNAL_BANK)
                 .build();
         AccountTransactionInfoDto savedTransactionInfoDto = financialClientService.applyWithdrawTransaction(accountTransactionInfoDto);
-        if (isNull(accountTransactionInfoDto)) {
-
-            log.error("!> error while creating team from dto {} for user {}.", savedTransactionInfoDto, user);
-            throw new TeamManageException(ExceptionMessages.TEAM_CREATION_ERROR, "Team was not saved on Portal. Check requested params.");
+        if (isNull(savedTransactionInfoDto)) {
+            log.error("!> error while creating withdraw transaction from data {} for user {}.", accountTransactionInfoDto, user.getLeagueId());
+            throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_WITHDRAW_CREATION_ERROR,
+                    "Withdraw transaction was not finished and not saved on Portal. Check requested params.");
         }
         return savedTransactionInfoDto;
     }
@@ -124,7 +143,31 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     @CanManageFinTransaction
     @Override
     public AccountTransactionInfoDto editWithdrawRequest(String transactionGUID, AccountTransactionInfoDto transactionInfoDto, User user) {
-        return null;
+        if (isBlank(transactionInfoDto.getGUID()) || !transactionGUID.equals((transactionInfoDto.getGUID()))) {
+            log.debug("^ Transaction with requested GUID parameter {} is not match specified GUID in transactionInfoDto {} for." +
+                    " 'editWithdrawRequest' in RestFinanceFacade request denied", transactionGUID, transactionInfoDto.getGUID());
+            throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR,
+                    String.format("Transaction with requested GUID '%s' is not match specified GUID in transactionInfoDto '%s'", transactionGUID, transactionInfoDto.getGUID()));
+        }
+        if (isNull(transactionInfoDto.getStatus())) {
+            log.warn("~ parameter 'status' is not set for transactionInfoDto. Modifying transaction request was rejected");
+            throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "status",
+                    "parameter 'status' is is not set for transactionInfoDto. Modifying transaction request was rejected");
+        }
+        AccountTransactionInfoDto existedTransaction = this.getVerifiedTransactionByGUID(transactionGUID);
+        // Change only status of transaction
+        existedTransaction.setStatus(transactionInfoDto.getStatus());
+        if (transactionInfoDto.getStatus().isFinished()) {
+            existedTransaction.setApprovedBy(userMapper.toDto(user));
+        }
+
+        AccountTransactionInfoDto savedTransactionInfoDto = financialClientService.editWithdrawTransaction(existedTransaction);
+        if (isNull(savedTransactionInfoDto)) {
+            log.error("!> error while modifying withdraw transaction from data {} for user {}.", transactionInfoDto, user.getLeagueId());
+            throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_WITHDRAW_CREATION_ERROR,
+                    "Withdraw transaction was not finished and not saved on Portal. Check requested params.");
+        }
+        return savedTransactionInfoDto;
     }
 
     /**
@@ -174,23 +217,23 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         AccountInfoDto account = financialClientService.getAccountByGUID(GUID);
         if (isNull(account)) {
             log.debug("^ Account for requested GUID {} was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
-            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id " + GUID + " was not found");
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id '" + GUID + "' was not found");
         }
         return account;
     }
 
     /**
-     * Returns account info by account GUID and user with privacy check
+     * Returns account info by account External address with privacy check
      */
     public AccountInfoDto getVerifiedAccountByExternalAddress(String externalAddress) {
         if (isBlank(externalAddress)) {
             log.debug("^ requested getVerifiedAccountByExternalAddress for BLANK externalAddress. Request rejected");
-            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with external address " + externalAddress + " was not found");
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with external address '" + externalAddress + "' 'was not found");
         }
         AccountInfoDto account = financialClientService.getAccountByExternalAddress(externalAddress);
         if (isNull(account)) {
             log.debug("^ Account for requested external address {} was not found. 'getVerifiedAccountByExternalAddress' in RestFinanceFacade request denied", externalAddress);
-            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested external address " + externalAddress + " was not found");
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested external address '" + externalAddress + "' was not found");
         }
         return account;
     }
@@ -205,9 +248,20 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         }
         AccountInfoDto account = financialClientService.getAccountByHolderInfo(GUID, accountHolderType);
         if (isNull(account)) {
-            log.debug("^ Account for requested GUID {} was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
-            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id " + GUID + " was not found");
+            log.debug("^ Account for requested GUID '{}' was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id '" + GUID + "' was not found");
         }
         return account;
+    }
+
+    private AccountTransactionInfoDto getVerifiedTransactionByGUID(String transactionGUID) {
+        AccountTransactionInfoDto existedTransaction = financialClientService.getTransactionByGUID(transactionGUID);
+        if (isNull(existedTransaction)) {
+            log.debug("^ Transaction with requested GUID {} is not found for 'getVerifiedTransactionByGUID' in RestFinanceFacade request denied",
+                    transactionGUID);
+            throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_NOT_FOUND_ERROR,
+                    String.format("Transaction with requested GUID '%s' is not found. Request rejected.", transactionGUID));
+        }
+        return existedTransaction;
     }
 }

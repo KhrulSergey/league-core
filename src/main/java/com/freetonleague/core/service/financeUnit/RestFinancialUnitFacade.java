@@ -56,6 +56,15 @@ public interface RestFinancialUnitFacade {
      */
     AccountInfoDto createAccountForHolder(UUID holderExternalGUID, AccountHolderType holderType, String holderName);
 
+
+    /**
+     * Returns transaction info for specified guid
+     *
+     * @param transactionGUID unique identifier of transaction to search
+     * @return transaction info
+     */
+    AccountTransactionInfoDto findTransactionByGUID(String transactionGUID);
+
     /**
      * Returns created transaction info for specified data
      *
@@ -65,10 +74,18 @@ public interface RestFinancialUnitFacade {
     AccountTransactionInfoDto createTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 
     /**
-     * Returns created withdraw transaction info (with pause status) for specified data
+     * Returns modified transaction info for specified data
      *
-     * @param accountTransactionInfoDto specified withdraw transaction data to process
+     * @param accountTransactionInfoDto specified transaction data to modify
      * @return transaction info
      */
-    AccountTransactionInfoDto createWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+    AccountTransactionInfoDto editTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+
+//    /**
+//     * Returns created withdraw transaction info (with pause status) for specified data
+//     *
+//     * @param accountTransactionInfoDto specified withdraw transaction data to process
+//     * @return transaction info
+//     */
+//    AccountTransactionInfoDto createWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 }
