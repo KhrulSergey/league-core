@@ -18,4 +18,10 @@ public interface AccountTransactionRepository extends JpaRepository<AccountTrans
 
     @Query(value = "select t from AccountTransaction t where t.sourceAccount = :account or t.targetAccount = :account")
     Page<AccountTransaction> findAllByAccount(Pageable pageable, @Param("account") Account account);
+
+    boolean existsByGUID(UUID GUID);
+
+    @Query(value = "select case when count(a)> 0 then true else false end from " +
+            "AccountTransaction a where a.GUID = :GUID and a.status = com.freetonleague.core.domain.enums.AccountTransactionStatusType.ABORTED")
+    boolean isAbortedByGUID(@Param("GUID") UUID GUID);
 }

@@ -20,6 +20,15 @@ public interface RestFinanceFacade {
     AccountInfoDto getBalanceByTournament(Long tournamentId, User user);
 
     /**
+     * Returns found transaction by specified GUID or Null
+     *
+     * @param transactionGUID identifier of transaction to search
+     * @param user            current user from session
+     * @return updated withdraw transaction info
+     */
+    AccountTransactionInfoDto getTransactionByGUID(String transactionGUID, User user);
+
+    /**
      * Returns created withdraw fund transaction info (with pause status) for specified params
      *
      * @param amount            amount of withdraw

@@ -3,20 +3,22 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.enums.AccountStatusType;
 import com.freetonleague.core.domain.enums.AccountType;
 import com.freetonleague.core.domain.enums.BankProviderType;
-import lombok.Builder;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
+@ToString(callSuper = true)
 @Data
 @Entity
 @Table(schema = "league_finance", name = "accounts")
@@ -33,8 +35,9 @@ public class Account extends FinancialBaseEntity implements Serializable {
     /**
      * For external fin account with unknown holder
      */
+    @Builder.Default
     @Column(name = "is_not_tracking")
-    private Boolean isNotTracking;
+    private Boolean isNotTracking = false;
 
     @Column(name = "name")
     private String name;
@@ -60,6 +63,7 @@ public class Account extends FinancialBaseEntity implements Serializable {
     @Column(name = "status")
     private AccountStatusType status = AccountStatusType.ACTIVE;
 
+    private String signature;
     /**
      * External account number (id, address)
      */
@@ -72,4 +76,15 @@ public class Account extends FinancialBaseEntity implements Serializable {
 
     @Column(name = "external_bank_last_update_at")
     private LocalDateTime externalBankLastUpdate;
+
+    public Boolean getIsNotTracking() {
+        return nonNull(isNotTracking) ? isNotTracking : false;
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void calculateSignature() {
+        String stringToHash = String.valueOf(getGUID()) + getAmount();
+        this.signature = UUID.nameUUIDFromBytes(stringToHash.getBytes(StandardCharsets.UTF_8)).toString();
+    }
 }
