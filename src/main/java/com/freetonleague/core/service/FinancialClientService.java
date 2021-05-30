@@ -4,8 +4,12 @@ import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -34,11 +38,20 @@ public interface FinancialClientService {
      */
     AccountInfoDto createAccountByHolderInfo(UUID holderGUID, AccountHolderType holderType, String holderName);
 
-
     /**
      * Returns found transaction by specified GUID
      */
     AccountTransactionInfoDto getTransactionByGUID(String transactionGUID);
+
+    /**
+     * Returns found transaction history (list) for specified account and/or status list
+     *
+     * @param pageable       filtered params to search transactions
+     * @param statusList     status list to filter transactions
+     * @param accountInfoDto account to filter transactions
+     * @return transaction list filtered by specified params
+     */
+    Page<AccountTransactionInfoDto> getTransactionsHistory(Pageable pageable, List<AccountTransactionStatusType> statusList, AccountInfoDto accountInfoDto);
 
     /**
      * Returns info for created transfer transaction from source to target account

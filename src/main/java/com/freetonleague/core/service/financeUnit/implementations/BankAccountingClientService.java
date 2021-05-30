@@ -55,12 +55,12 @@ public class BankAccountingClientService {
      */
     public AccountExternalInfoDto createExternalBankAddressForAccount(Account coreAccount) {
         if (isNull(coreAccount) || isNull(coreAccount.getGUID())) {
-            log.error("!> requesting createExternalBankAddress for NULL coreAccount {} or NULL account GUID {}. Check evoking clients",
+            log.error("!> requesting createExternalBankAddress for NULL coreAccount '{}' or NULL account GUID '{}'. Check evoking clients",
                     coreAccount, null);
             return null;
         }
         AccountBroxusResponseDto externalAccountInfo;
-        log.debug("^ try to create external bank account (address) for specified core-account with guid {} for holder {}",
+        log.debug("^ try to create external bank account (address) for specified core-account with guid '{}' for holder '{}'",
                 coreAccount.getGUID(), coreAccount.getHolder());
 
         BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
@@ -68,15 +68,15 @@ public class BankAccountingClientService {
         try {
             externalAccountInfo = currentBroxusClient.createBroxusAccount(this.broxusClientToken,
                     coreAccount.getGUID().toString());
-            log.debug("^ response from external bank account for specified core-account with guid {} was {}",
+            log.debug("^ response from external bank account for specified core-account with guid '{}' was '{}'",
                     coreAccount.getGUID(), externalAccountInfo);
         } catch (FeignClientException exc) {
             //TODO handle exception
-            log.error("!!> Error while createExternalBankAddressForAccount in BankAccountingClientService. Transmitted data: {}. New FeignClientException exc {}",
+            log.error("!!> Error while createExternalBankAddressForAccount in BankAccountingClientService. Transmitted data: '{}'. New FeignClientException exc '{}'",
                     coreAccount, exc, exc);
             return null;
         } catch (FeignException exc) {
-            log.error("!!> Error while createExternalBankAddressForAccount in BankAccountingClientService. Transmitted data: {}. New FeignException exc {}",
+            log.error("!!> Error while createExternalBankAddressForAccount in BankAccountingClientService. Transmitted data: '{}'. New FeignException exc '{}'",
                     coreAccount, exc, exc);
             return null;
         }
@@ -84,14 +84,14 @@ public class BankAccountingClientService {
         if (isNull(externalAccountInfo) || !externalAccountInfo.isSuccess()) {
             //TODO handle errors with microservice
             log.error("!!> Error in response from Broxus-Client while createExternalBankAddressForAccount in " +
-                            "BankAccountingClientService. Transmitted data: {}. Received data: {} ",
+                            "BankAccountingClientService. Transmitted data: '{}'. Received data: '{}' ",
                     coreAccount, externalAccountInfo);
             return null;
         }
         if (isNull(externalAccountInfo.getData()) || isBlank(externalAccountInfo.getData().getAddress())) {
             //TODO handle errors with data from microservice
             log.error("!!> Error in data response while Broxus-Client while createExternalBankAddressForAccount in " +
-                            "BankAccountingClientService. Transmitted data: {}. Received data: {} ",
+                            "BankAccountingClientService. Transmitted data: '{}'. Received data: '{}' ",
                     coreAccount, externalAccountInfo);
         }
         return AccountExternalInfoDto.builder()
@@ -106,12 +106,12 @@ public class BankAccountingClientService {
      */
     public AccountExternalInfoDto getAccountBalance(Account coreAccount) {
         if (isNull(coreAccount) || isNull(coreAccount.getGUID())) {
-            log.error("!> requesting getAccountBalance for NULL coreAccount {} or NULL account GUID {}. Check evoking clients",
+            log.error("!> requesting getAccountBalance for NULL coreAccount '{}' or NULL account GUID '{}'. Check evoking clients",
                     coreAccount, null);
             return null;
         }
         AccountBroxusResponseDto externalAccountInfo;
-        log.debug("^ try to get balance from external bank provider for specified core-account guid {} for holder {}",
+        log.debug("^ try to get balance from external bank provider for specified core-account guid '{}' for holder '{}'",
                 coreAccount.getGUID(), coreAccount.getHolder());
 
         BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
@@ -121,11 +121,11 @@ public class BankAccountingClientService {
                     coreAccount.getGUID().toString());
         } catch (FeignClientException exc) {
             //TODO handle exception
-            log.error("!!> Error while getAccountBalance in BankAccountingClientService. Transmitted data: {}. New FeignClientException exc {}",
+            log.error("!!> Error while getAccountBalance in BankAccountingClientService. Transmitted data: '{}'. New FeignClientException exc '{}'",
                     coreAccount, exc, exc);
             return null;
         } catch (FeignException exc) {
-            log.error("!!> Error while getAccountBalance in BankAccountingClientService. Transmitted data: {}. New FeignException exc {}",
+            log.error("!!> Error while getAccountBalance in BankAccountingClientService. Transmitted data: '{}'. New FeignException exc '{}'",
                     coreAccount, exc, exc);
             return null;
         }
@@ -133,14 +133,14 @@ public class BankAccountingClientService {
         if (isNull(externalAccountInfo) || !externalAccountInfo.isSuccess()) {
             //TODO handle errors with microservice
             log.error("!!> Error in response from Broxus-Client while getAccountBalance in " +
-                            "BankAccountingClientService. Transmitted data: {}. Received data: {} ",
+                            "BankAccountingClientService. Transmitted data: '{}'. Received data: '{}' ",
                     coreAccount, externalAccountInfo);
             return null;
         }
         if (isNull(externalAccountInfo.getData()) || isNull(externalAccountInfo.getData().getBalance())) {
             //TODO handle errors with data from microservice
             log.error("!!> Error in data response while Broxus-Client while getAccountBalance in " +
-                            "BankAccountingClientService. Transmitted data: {}. Received data: {} ",
+                            "BankAccountingClientService. Transmitted data: '{}'. Received data: '{}' ",
                     coreAccount, externalAccountInfo);
         }
         return AccountExternalInfoDto.builder()
@@ -158,7 +158,7 @@ public class BankAccountingClientService {
             log.error("!> requesting registerBankTransferTransaction for NULL accountTransaction. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to send request to register transaction to Bank Client {}", accountTransaction.getGUID());
+        log.debug("^ trying to send request to register transaction to Bank Client '{}'", accountTransaction.getGUID());
         AccountBroxusResponseDto transactionInfo;
         BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
                 : broxusAccountingClientCloud;
@@ -167,10 +167,10 @@ public class BankAccountingClientService {
                     accountTransaction.getSourceAccount().getGUID().toString(),
                     accountTransaction.getTargetAccount().getExternalAddress(),
                     accountTransaction.getAmount());
-            log.debug("^ response from external bank client for specified core-accountTransaction with guid {} was {}",
+            log.debug("^ response from external bank client for specified core-accountTransaction with guid '{}' was '{}'",
                     accountTransaction.getGUID(), transactionInfo);
         } catch (InnerServiceFeignException exc) {
-            log.error("!!> Error while registerBankTransferTransaction in BankAccountingClientService. Transmitted data: {}. New FeignClientException exc {}",
+            log.error("!!> Error while registerBankTransferTransaction in BankAccountingClientService. Transmitted data: '{}'. New FeignClientException exc '{}'",
                     accountTransaction, exc, exc);
             return null;
         }
@@ -178,11 +178,11 @@ public class BankAccountingClientService {
         if (isNull(transactionInfo) || !transactionInfo.isSuccess()) {
             //TODO handle errors with microservice
             log.error("!!> Error in response from Broxus-Client while createExternalBankAddressForAccount in " +
-                            "BankAccountingClientService. Transmitted data: {}. Received data: {} ",
+                            "BankAccountingClientService. Transmitted data: '{}'. Received data: '{}' ",
                     accountTransaction, transactionInfo);
             return null;
         }
-        log.debug("^ transaction was successfully saved to Bank Client {}", accountTransaction.getGUID());
+        log.debug("^ transaction was successfully saved to Bank Client '{}'", accountTransaction.getGUID());
         return AccountTransactionExternalInfoDto.builder()
                 .amount(accountTransaction.getAmount())
                 .status(AccountTransactionStatusType.FINISHED)

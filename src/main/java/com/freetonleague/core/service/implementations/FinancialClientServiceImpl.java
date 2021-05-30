@@ -4,6 +4,7 @@ import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.TransactionTemplateType;
 import com.freetonleague.core.domain.enums.TransactionType;
 import com.freetonleague.core.domain.model.User;
@@ -12,11 +13,14 @@ import com.freetonleague.core.service.financeUnit.FinancialCouponService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -44,11 +48,11 @@ public class FinancialClientServiceImpl implements FinancialClientService {
     @Override
     public AccountInfoDto getAccountByHolderInfo(UUID holderGUID, AccountHolderType holderType) {
         if (isNull(holderGUID) || isNull(holderType)) {
-            log.error("!> requesting getAccountByHolderGUID for Blank holderGUID {} or for NULL accountHolderType {}. Check evoking clients",
+            log.error("!> requesting getAccountByHolderGUID for Blank holderGUID '{}' or for NULL accountHolderType '{}'. Check evoking clients",
                     holderGUID, holderType);
             return null;
         }
-        log.debug("^ trying to get account info by holder id: {} and type: {}", holderGUID, holderType);
+        log.debug("^ trying to get account info by holder id: '{}' and type: '{}'", holderGUID, holderType);
         return restFinancialUnitFacade.findAccountByHolder(holderGUID, holderType);
     }
 
@@ -61,7 +65,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!> requesting getAccountByGUID for Blank GUID. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get account info by GUID: {}", GUID);
+        log.debug("^ trying to get account info by GUID: '{}'", GUID);
         return restFinancialUnitFacade.findAccountByGUID(GUID);
     }
 
@@ -74,7 +78,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!> requesting getAccountByExternalAddress for Blank externalAddress. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get account info by externalAddress: {}", externalAddress);
+        log.debug("^ trying to get account info by externalAddress: '{}'", externalAddress);
         return restFinancialUnitFacade.findAccountByExternalAddress(externalAddress);
     }
 
@@ -84,11 +88,11 @@ public class FinancialClientServiceImpl implements FinancialClientService {
     @Override
     public AccountInfoDto createAccountByHolderInfo(UUID holderGUID, AccountHolderType holderType, String holderName) {
         if (isNull(holderGUID) || isNull(holderType)) {
-            log.error("!> requesting getAccountByHolderGUID for Blank holderGUID {} or for NULL accountHolderType {}. Check evoking clients",
+            log.error("!> requesting getAccountByHolderGUID for Blank holderGUID '{}' or for NULL accountHolderType '{}'. Check evoking clients",
                     holderGUID, holderType);
             return null;
         }
-        log.debug("^ trying to create account by holder GUID {} and type {}", holderGUID, holderType);
+        log.debug("^ trying to create account by holder GUID '{}' and type '{}'", holderGUID, holderType);
         return restFinancialUnitFacade.createAccountForHolder(holderGUID, holderType, holderName);
     }
 
@@ -101,8 +105,23 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!> requesting getTransactionByGUID for Blank transactionGUID. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get transaction by GUID {} from finance unit", transactionGUID);
+        log.debug("^ trying to get transaction by GUID '{}' from finance unit", transactionGUID);
         return restFinancialUnitFacade.findTransactionByGUID(transactionGUID);
+    }
+
+    /**
+     * Returns found transaction history (list) for specified account and/or status list
+     */
+    @Override
+    public Page<AccountTransactionInfoDto> getTransactionsHistory(Pageable pageable, List<AccountTransactionStatusType> statusList, AccountInfoDto accountInfoDto) {
+        if (isNull(pageable)) {
+            log.error("!> requesting getTransactionsHistory for NULL pageable params. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get transaction history by statusList '{}' and accountInfoDto '{}'", statusList, accountInfoDto);
+        Page<AccountTransactionInfoDto> transactionList = restFinancialUnitFacade.findTransactionListByAccountAndStatusList(pageable, statusList, accountInfoDto);
+        log.debug("^ successfully find '{}' transactions history by statusList '{}' and accountInfoDto '{}'", transactionList.stream().count(), statusList, accountInfoDto);
+        return transactionList;
     }
 
     /**
@@ -114,7 +133,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!!> requesting applyPurchaseTransaction for accountTransactionInfoDto with Errors. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to create new transaction and send request to Finance Unit {}", accountTransactionInfoDto);
+        log.debug("^ trying to create new transaction and send request to Finance Unit '{}'", accountTransactionInfoDto);
         return restFinancialUnitFacade.createTransferTransaction(accountTransactionInfoDto);
     }
 
@@ -131,7 +150,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
                     accountTransactionInfoDto.getStatus());
             return null;
         }
-        log.debug("^ trying to create new withdraw transaction and send request to Finance Unit {}", accountTransactionInfoDto);
+        log.debug("^ trying to create new withdraw transaction and send request to Finance Unit '{}'", accountTransactionInfoDto);
         return restFinancialUnitFacade.createTransferTransaction(accountTransactionInfoDto);
     }
 
@@ -144,7 +163,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!!> requesting editWithdrawTransaction for accountTransactionInfoDto with Errors. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to modify withdraw transaction and send request to Finance Unit {}", accountTransactionInfoDto);
+        log.debug("^ trying to modify withdraw transaction and send request to Finance Unit '{}'", accountTransactionInfoDto);
         return restFinancialUnitFacade.editTransferTransaction(accountTransactionInfoDto);
     }
 
@@ -155,17 +174,17 @@ public class FinancialClientServiceImpl implements FinancialClientService {
         }
         Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
         if (!violations.isEmpty()) {
-            log.error("!!> requesting modify transaction for accountTransactionInfoDto:{} with ConstraintViolations {}. Check evoking clients",
+            log.error("!!> requesting modify transaction for accountTransactionInfoDto:'{}' with ConstraintViolations '{}'. Check evoking clients",
                     accountTransactionInfoDto, violations);
             return false;
         }
         if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getSourceAccount())) {
-            log.error("!!> requesting modify transaction for sourceAccount {} with errors. Check evoking clients",
+            log.error("!!> requesting modify transaction for sourceAccount '{}' with errors. Check evoking clients",
                     accountTransactionInfoDto);
             return false;
         }
         if (!this.verifyAccountInfoDto(accountTransactionInfoDto.getTargetAccount())) {
-            log.error("!!> requesting modify transaction for targetAccount {} with errors. Check evoking clients",
+            log.error("!!> requesting modify transaction for targetAccount '{}' with errors. Check evoking clients",
                     accountTransactionInfoDto);
             return false;
         }
@@ -219,14 +238,14 @@ public class FinancialClientServiceImpl implements FinancialClientService {
         }
         Set<ConstraintViolation<AccountInfoDto>> violations = validator.validate(accountInfo);
         if (!violations.isEmpty()) {
-            log.error("!!> requesting verifyAccountInfoDto for accountInfo:{} with ConstraintViolations {}. Check evoking clients",
+            log.error("!!> requesting verifyAccountInfoDto for accountInfo:'{}' with ConstraintViolations '{}'. Check evoking clients",
                     accountInfo, violations);
             return false;
         }
 
         if (!accountInfo.getIsNotTracking()) {
             if (isBlank(accountInfo.getOwnerGUID()) || isNull(accountInfo.getOwnerType())) {
-                log.error("!!> requesting verifyAccountInfoDto for accountInfo:{} with BLANK ownerGUID or NULL ownerType {}. " +
+                log.error("!!> requesting verifyAccountInfoDto for accountInfo:'{}' with BLANK ownerGUID or NULL ownerType '{}'. " +
                         "Check evoking clients", accountInfo.getOwnerGUID(), accountInfo.getOwnerType());
                 return false;
             }

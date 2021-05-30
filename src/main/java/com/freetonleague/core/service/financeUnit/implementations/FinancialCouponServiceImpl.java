@@ -83,7 +83,7 @@ public class FinancialCouponServiceImpl implements FinancialCouponService {
 
     private AccountInfoDto getBonusAccount() {
         if (isNull(bonusAccount)) {
-            log.debug("^ trying to define bonus account info by system holder id: {}", systemBonusUserLogin);
+            log.debug("^ trying to define bonus account info by system holder id: '{}'", systemBonusUserLogin);
             User systemBonusUser = userService.findByUsername(systemUserPrefix.concat(systemBonusUserLogin));
             bonusAccount = restFinancialUnitFacade.findAccountByHolder(systemBonusUser.getLeagueId(),
                     AccountHolderType.USER);

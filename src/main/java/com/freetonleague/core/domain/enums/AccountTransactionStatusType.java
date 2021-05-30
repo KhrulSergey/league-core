@@ -1,5 +1,9 @@
 package com.freetonleague.core.domain.enums;
 
+import com.google.common.collect.Lists;
+
+import java.util.List;
+
 public enum AccountTransactionStatusType {
     INITIATED,
     FROZEN,
@@ -19,4 +23,6 @@ public enum AccountTransactionStatusType {
     public boolean isAborted() {
         return this == ABORTED;
     }
+
+    public static final List<AccountTransactionStatusType> valueList = Lists.newArrayList(AccountTransactionStatusType.values());
 }
