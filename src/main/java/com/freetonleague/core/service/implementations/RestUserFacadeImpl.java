@@ -56,7 +56,7 @@ public class RestUserFacadeImpl implements RestUserFacade {
             user = null;
         }
         if (isNull(user)) {
-            log.debug("^ User was not found for request parameter username {}", username);
+            log.debug("^ User was not found for request parameter username '{}'", username);
             throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
                     String.format("Requested parameter username: '%s'", username));
         }
@@ -79,7 +79,7 @@ public class RestUserFacadeImpl implements RestUserFacade {
             user = null;
         }
         if (isNull(user)) {
-            log.debug("^ User was not found for request parameter leagueId {}", leagueId);
+            log.debug("^ User was not found for request parameter leagueId '{}'", leagueId);
             throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
                     String.format("Requested parameter leagueId: '%s'", leagueId));
         }

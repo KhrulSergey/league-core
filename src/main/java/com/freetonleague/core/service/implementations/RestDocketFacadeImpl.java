@@ -70,7 +70,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
         docket = docketService.addDocket(docket);
 
         if (isNull(docket)) {
-            log.error("!> error while creating docket from dto {}.", docketDto);
+            log.error("!> error while creating docket from dto '{}'.", docketDto);
             throw new DocketManageException(ExceptionMessages.DOCKET_CREATION_ERROR,
                     "Docket was not saved on Portal. Check requested params.");
         }
@@ -99,7 +99,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
 
         modifiedDocket = docketService.editDocket(modifiedDocket);
         if (isNull(modifiedDocket)) {
-            log.error("!> error while modifying Media resource from dto {}.", docketDto);
+            log.error("!> error while modifying Media resource from dto '{}'.", docketDto);
             throw new DocketManageException(ExceptionMessages.DOCKET_MODIFICATION_ERROR,
                     "Media resource was not updated on Portal. Check requested params.");
         }
@@ -116,7 +116,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
         docket = docketService.deleteDocket(docket);
 
         if (isNull(docket)) {
-            log.error("!> error while deleting docket with id {}.", id);
+            log.error("!> error while deleting docket with id '{}'.", id);
             throw new DocketManageException(ExceptionMessages.DOCKET_MODIFICATION_ERROR,
                     "Docket was not deleted on Portal. Check requested params.");
         }
@@ -130,11 +130,11 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
     public Docket getVerifiedDocketById(long id) {
         Docket docket = docketService.getDocket(id);
         if (isNull(docket)) {
-            log.debug("^ Docket with requested id {} was not found. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id);
+            log.debug("^ Docket with requested id '{}' was not found. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id);
             throw new DocketManageException(ExceptionMessages.DOCKET_NOT_FOUND_ERROR, "Media resource with requested id " + id + " was not found");
         }
         if (docket.getStatus().isDeleted()) {
-            log.debug("^ Docket with requested id {} was {}. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id, docket.getStatus());
+            log.debug("^ Docket with requested id '{}' was '{}'. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id, docket.getStatus());
             throw new DocketManageException(ExceptionMessages.DOCKET_VISIBLE_ERROR, "Visible docket with requested id " + id + " was not found");
         }
         return docket;
@@ -147,7 +147,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
         // Verify Docket information
         Set<ConstraintViolation<DocketDto>> violations = validator.validate(docketDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted DocketDto: {} have constraint violations: {}", docketDto, violations);
+            log.debug("^ transmitted DocketDto: '{}' have constraint violations: '{}'", docketDto, violations);
             throw new ConstraintViolationException(violations);
         }
         return docketMapper.fromDto(docketDto);

@@ -48,7 +48,7 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
      */
     @Override
     public TeamParticipant getParticipantById(long id) {
-        log.debug("^ getting participant by id: {}", id);
+        log.debug("^ getting participant by id: '{}'", id);
         return teamParticipantRepository.findById(id).orElse(null);
     }
 
@@ -75,7 +75,7 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
             log.error("!> requesting getInviteRequestByToken for 'Blank' inviteToken. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get team invite request by invite token: {}", inviteToken);
+        log.debug("^ trying to get team invite request by invite token: '{}'", inviteToken);
         return teamInviteRequestRepository.findByInviteToken(inviteToken);
     }
 
@@ -86,8 +86,8 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
     public TeamInviteRequest createInviteRequest(Team team, TeamParticipant teamParticipant, User invitedUser) {
         if (isNull(team) || team.getStatus() != TeamStateType.ACTIVE
                 || isNull(teamParticipant) || !teamParticipant.getTeam().getId().equals(team.getId())) {
-            log.error("!> requesting createInviteRequest for NULL team {} or DISABLED team " +
-                    "or NULL teamParticipant {} or teamParticipant not from this team. Check evoking clients", team, teamParticipant);
+            log.error("!> requesting createInviteRequest for NULL team '{}' or DISABLED team " +
+                    "or NULL teamParticipant '{}' or teamParticipant not from this team. Check evoking clients", team, teamParticipant);
             return null;
         }
         LocalDateTime tokenExpiration = LocalDateTime.now().plusMinutes(invitationTokenDurationInSec);
@@ -211,8 +211,8 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
     private TeamParticipant addUserToTeam(User user, Team team) {
         if (isNull(team) || team.getStatus() != TeamStateType.ACTIVE
                 || isNull(user)) {
-            log.error("!> requesting addToTeam for NULL team {} or DISABLED team " +
-                    "or NULL user {}. Check evoking clients", team, user);
+            log.error("!> requesting addToTeam for NULL team '{}' or DISABLED team " +
+                    "or NULL user '{}'. Check evoking clients", team, user);
             return null;
         }
         TeamParticipant teamParticipant = TeamParticipant.builder()

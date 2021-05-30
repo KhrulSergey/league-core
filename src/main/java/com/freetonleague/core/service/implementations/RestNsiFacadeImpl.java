@@ -27,7 +27,7 @@ public class RestNsiFacadeImpl implements RestNsiFacade {
      */
     @Override
     public List<GameIndicatorTypeDto> getGameIndicatorList() {
-        log.debug("^ trying to get GameIndicatorType entries of size: {}", GameIndicatorType.values().length);
+        log.debug("^ trying to get GameIndicatorType entries of size: '{}'", GameIndicatorType.values().length);
         return mapper.toDto(GameIndicatorType.values());
     }
 
@@ -36,7 +36,7 @@ public class RestNsiFacadeImpl implements RestNsiFacade {
      */
     @Override
     public List<MatchPropertyTypeDto> getMatchPropertyList() {
-        log.debug("^ trying to get GameIndicatorType entries of size: {}", GameIndicatorType.values().length);
+        log.debug("^ trying to get GameIndicatorType entries of size: '{}'", GameIndicatorType.values().length);
         return mapper.toDto(MatchPropertyType.values());
     }
 

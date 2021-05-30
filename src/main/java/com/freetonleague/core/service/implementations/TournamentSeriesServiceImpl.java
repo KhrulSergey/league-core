@@ -55,7 +55,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
      */
     @Override
     public TournamentSeries getSeries(long id) {
-        log.debug("^ trying to get tournament series by id: {}", id);
+        log.debug("^ trying to get tournament series by id: '{}'", id);
         return tournamentSeriesRepository.findById(id).orElse(null);
     }
 
@@ -65,11 +65,11 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     @Override
     public Page<TournamentSeries> getSeriesList(Pageable pageable, TournamentRound tournamentRound) {
         if (isNull(pageable) || isNull(tournamentRound)) {
-            log.error("!> requesting getSeriesList for NULL pageable {} or NULL tournamentRound {}. Check evoking clients",
+            log.error("!> requesting getSeriesList for NULL pageable '{}' or NULL tournamentRound '{}'. Check evoking clients",
                     pageable, tournamentRound);
             return null;
         }
-        log.debug("^ trying to get tournament series list with pageable params: {} and by tournament round id {}", pageable,
+        log.debug("^ trying to get tournament series list with pageable params: '{}' and by tournament round id '{}'", pageable,
                 tournamentRound.getId());
         return tournamentSeriesRepository.findAllByTournamentRound(pageable, tournamentRound);
     }
@@ -82,7 +82,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         if (!this.verifyTournamentSeries(tournamentSeries, true)) {
             return null;
         }
-        log.debug("^ trying to add new tournament series {}", tournamentSeries);
+        log.debug("^ trying to add new tournament series '{}'", tournamentSeries);
         return tournamentSeriesRepository.save(tournamentSeries);
     }
 
@@ -117,7 +117,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         List<TournamentMatch> matchList = tournamentSeries.getMatchList();
         matchList.add(OmtMatch);
         tournamentSeries.setMatchList(matchList);
-        log.debug("^ trying to save updated series with embedded new match {}", tournamentSeries);
+        log.debug("^ trying to save updated series with embedded new match '{}'", tournamentSeries);
         return tournamentSeriesRepository.save(tournamentSeries);
     }
 
@@ -129,16 +129,16 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     public TournamentSeries editSeries(TournamentSeries tournamentSeries) {
         boolean checkEmbeddedMatchList = true;
         if (!this.isExistsTournamentSeriesById(tournamentSeries.getId())) {
-            log.error("!> requesting modify tournament series {} for non-existed tournament series. Check evoking clients",
+            log.error("!> requesting modify tournament series '{}' for non-existed tournament series. Check evoking clients",
                     tournamentSeries.getId());
             return null;
         }
-        log.debug("^ trying to modify tournament series {}", tournamentSeries);
+        log.debug("^ trying to modify tournament series '{}'", tournamentSeries);
         if (tournamentSeries.getStatus().isFinished()) {
             tournamentSeries.setFinishedDate(LocalDateTime.now());
             TournamentSeriesRival seriesWinner = this.getCalculatedSeriesWinner(tournamentSeries);
             if (isNull(seriesWinner)) {
-                log.error("!> requesting modify tournament series id {} was canceled. Series winner was not defined or found. Check stack trace.",
+                log.error("!> requesting modify tournament series id '{}' was canceled. Series winner was not defined or found. Check stack trace.",
                         tournamentSeries.getId());
                 tournamentEventService.processSeriesDeadHead(tournamentSeries);
                 tournamentSeries.setStatus(TournamentStatusType.PAUSE);
@@ -168,7 +168,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             log.error("!> requesting delete tournament series for non-existed tournament series. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to set 'deleted' mark to tournament series {}", tournamentSeries);
+        log.debug("^ trying to set 'deleted' mark to tournament series '{}'", tournamentSeries);
         tournamentSeries.setStatus(TournamentStatusType.DELETED);
         tournamentSeries = tournamentSeriesRepository.save(tournamentSeries);
         this.handleTournamentSeriesStatusChanged(tournamentSeries);
@@ -220,14 +220,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         }
 
         if (isNull(seriesWinnerProposal)) {
-            log.error("!> requesting calculateSeriesWinner tournament series id {} for non-existed rival with advantage score. Check evoking clients",
+            log.error("!> requesting calculateSeriesWinner tournament series id '{}' for non-existed rival with advantage score. Check evoking clients",
                     tournamentSeries.getId());
             return null;
         }
         TournamentSeriesRival seriesWinner = tournamentSeriesRivalRepository.findByTournamentSeriesAndTeamProposal(
                 tournamentSeries, seriesWinnerProposal);
         if (isNull(seriesWinner)) {
-            log.error("!> requesting calculateSeriesWinner tournament series winner with tournamentTeamProposal.id {} " +
+            log.error("!> requesting calculateSeriesWinner tournament series winner with tournamentTeamProposal.id '{}' " +
                             "for non-existed reference to TournamentSeriesRival. Check evoking clients",
                     seriesWinnerProposal.getId());
             return null;
@@ -246,7 +246,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         }
         Set<ConstraintViolation<TournamentSeries>> violations = validator.validate(tournamentSeries);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament series {} with verifyTournamentSeries for tournament series with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify tournament series '{}' with verifyTournamentSeries for tournament series with ConstraintViolations. Check evoking clients",
                     tournamentSeries.getId());
             return false;
         }
@@ -254,7 +254,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         if (nonNull(tournamentMatches) && checkEmbeddedMatchList) {
             for (TournamentMatch match : tournamentMatches) {
                 if (!tournamentMatchService.verifyTournamentMatch(match)) {
-                    log.error("!> requesting modify tournament series {} with verifyTournamentSeries for tournament match with ConstraintViolations. Check evoking clients",
+                    log.error("!> requesting modify tournament series '{}' with verifyTournamentSeries for tournament match with ConstraintViolations. Check evoking clients",
                             tournamentSeries.getId());
                     return false;
                 }
@@ -267,7 +267,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
      * Prototype for handle tournament status
      */
     private void handleTournamentSeriesStatusChanged(TournamentSeries tournamentSeries) {
-        log.warn("~ status for tournament series id {} was changed from {} to {} ",
+        log.warn("~ status for tournament series id '{}' was changed from '{}' to '{}' ",
                 tournamentSeries.getId(), tournamentSeries.getPrevStatus(), tournamentSeries.getStatus());
         tournamentEventService.processSeriesStatusChange(tournamentSeries, tournamentSeries.getStatus());
         tournamentSeries.setPrevStatus(tournamentSeries.getStatus());

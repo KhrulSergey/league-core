@@ -58,7 +58,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
     public List<TeamInviteRequestDto> getInviteList(long teamId, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, true);
         if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for getting invite list for user {} from team {}.", user, team);
+            log.warn("~ forbiddenException for getting invite list for user '{}' from team '{}'.", user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
                     "Only captain can get list of all invitation to a team.");
         }
@@ -102,7 +102,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
         TeamParticipant teamParticipant = teamService.getParticipantOfTeamByUser(team, currentUser);
         //check participation status
         if (isNull(teamParticipant) || !participantStatusAccessibleToInvite.contains(teamParticipant.getStatus())) {
-            log.debug("^ forbiddenException for creating invitation for user {} for team {}.", currentUser, team);
+            log.debug("^ forbiddenException for creating invitation for user '{}' for team '{}'.", currentUser, team);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
                     "Only participant of the team can create invitation.");
         }
@@ -121,7 +121,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
                         String.format("Invitation to user with leagueId '%s' is already existed.", leagueId));
             }
             if (nonNull(teamService.getUserParticipantStatusOfTeam(team, invitedUser))) {
-                log.debug("^ createInvite was denied for user {} that is already participate in a team {}.", invitedUser, team);
+                log.debug("^ createInvite was denied for user '{}' that is already participate in a team '{}'.", invitedUser, team);
                 throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_REJECTED_ERROR,
                         "Double participation to one team is forbidden.");
             }
@@ -146,12 +146,12 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
     public TeamParticipantDto applyInviteRequest(String inviteToken, User currentUser) {
         TeamInviteRequest teamInviteRequest = this.getVerifiedTeamInviteRequestByToken(inviteToken, currentUser);
         if (nonNull(teamService.getUserParticipantStatusOfTeam(teamInviteRequest.getTeam(), currentUser))) {
-            log.debug("^ applyInviteRequest was denied for user {} that is already participate in a team {}.", currentUser, teamInviteRequest.getTeam());
+            log.debug("^ applyInviteRequest was denied for user '{}' that is already participate in a team '{}'.", currentUser, teamInviteRequest.getTeam());
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_REJECTED_ERROR,
                     "Double participation to one team is forbidden.");
         }
         if (nonNull(teamInviteRequest.getInvitedUser()) && !teamInviteRequest.getInvitedUser().equals(currentUser)) {
-            log.debug("^ applyInviteRequest was rejected because invite request assigned for user with ID {}, not for current user {}.",
+            log.debug("^ applyInviteRequest was rejected because invite request assigned for user with ID '{}', not for current user '{}'.",
                     teamInviteRequest.getInvitedUser().getLeagueId(), Objects.requireNonNull(currentUser).getLeagueId());
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_ASSIGNED_ERROR,
                     "Applying invitation to a team was rejected because of wrong assigned");
@@ -171,7 +171,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
         if (isNull(teamParticipant)
                 || (teamParticipant.getStatus() != TeamParticipantStatusType.CAPTAIN)
                 || !teamInviteRequest.getParticipantCreator().getId().equals(teamParticipant.getId())) {
-            log.warn("~ forbiddenException for deleting invitation for user {} from team {}.",
+            log.warn("~ forbiddenException for deleting invitation for user '{}' from team '{}'.",
                     user, teamInviteRequest.getTeam());
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
                     "Only captain or author can delete this invitation to a team.");
@@ -188,7 +188,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
         TeamInviteRequest teamInviteRequest = this.getVerifiedTeamInviteRequestByToken(inviteToken, user);
         //check rights to reject personal invitation to participate team
         if (!teamInviteRequest.getInvitedUser().equals(user)) {
-            log.warn("~ forbiddenException for rejecting invitation for user {} from team {}. Current user {}",
+            log.warn("~ forbiddenException for rejecting invitation for user '{}' from team '{}'. Current user '{}'",
                     teamInviteRequest.getInvitedUser(), teamInviteRequest.getTeam(), user);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_FORBIDDEN_ERROR,
                     "Only invited user can reject this invitation to a team.");
@@ -204,7 +204,7 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
     public TeamParticipant getTeamParticipant(long participantId, Team team) {
         TeamParticipant teamParticipant = participantService.getParticipantById(participantId);
         if (isNull(teamParticipant)) {
-            log.debug("^ Participant with requested id {} was not found. 'getTeamParticipant' request denied", participantId);
+            log.debug("^ Participant with requested id '{}' was not found. 'getTeamParticipant' request denied", participantId);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_NOT_FOUND_ERROR, "Participant with requested id " + participantId + " was not found");
         }
         if (!team.getParticipantList().contains(teamParticipant)) {
@@ -230,19 +230,19 @@ public class RestTeamParticipantFacadeImpl implements RestTeamParticipantFacade 
         }
         TeamInviteRequest teamInviteRequest = participantService.getInviteRequestByToken(inviteToken);
         if (isNull(teamInviteRequest)) {
-            log.debug("^ Invitation to a team with requested token {} was not found. 'getVerifiedTeamInviteRequestByToken' request denied for user {}",
+            log.debug("^ Invitation to a team with requested token '{}' was not found. 'getVerifiedTeamInviteRequestByToken' request denied for user '{}'",
                     inviteToken, user);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_NOT_FOUND_ERROR,
                     "Invitation to a team with requested token " + inviteToken + " was not found");
         }
         if (teamInviteRequest.getStatus() != TeamInviteRequestStatusType.OPENED) {
-            log.debug("^ getVerifiedTeamInviteRequestByToken was rejected by EXPIRED status of teamInviteRequest {} for user {}.",
+            log.debug("^ getVerifiedTeamInviteRequestByToken was rejected by EXPIRED status of teamInviteRequest '{}' for user '{}'.",
                     teamInviteRequest, user);
             throw new TeamParticipantManageException(ExceptionMessages.TEAM_PARTICIPANT_INVITE_EXPIRED_ERROR,
                     "Get invitation link to a team was rejected because of invite status: " + teamInviteRequest.getStatus());
         }
         if (teamInviteRequest.getTeam().getStatus() != TeamStateType.ACTIVE) {
-            log.debug("^ Get info for Invitation to a team with requested token {} was denied. Active team was not found, current status {}",
+            log.debug("^ Get info for Invitation to a team with requested token '{}' was denied. Active team was not found, current status '{}'",
                     inviteToken, teamInviteRequest.getTeam().getStatus());
             throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR,
                     "Active team for requested invite token " + inviteToken + " was not found");

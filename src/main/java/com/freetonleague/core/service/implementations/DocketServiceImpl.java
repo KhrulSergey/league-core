@@ -39,7 +39,7 @@ public class DocketServiceImpl implements DocketService {
      */
     @Override
     public Docket getDocket(long id) {
-        log.debug("^ trying to get docket by id: {}", id);
+        log.debug("^ trying to get docket by id: '{}'", id);
         return docketRepository.findById(id).orElse(null);
     }
 
@@ -52,7 +52,7 @@ public class DocketServiceImpl implements DocketService {
             log.error("!> requesting getDocketList for NULL pageable. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get docket list with pageable params: {} and status list {}", pageable, statusList);
+        log.debug("^ trying to get docket list with pageable params: '{}' and status list '{}'", pageable, statusList);
         boolean filterByStatusEnabled = isNotEmpty(statusList);
         boolean filterByCreatorEnabled = nonNull(creatorUser);
 
@@ -82,7 +82,7 @@ public class DocketServiceImpl implements DocketService {
         if (!this.verifyDocket(docket)) {
             return null;
         }
-        log.debug("^ trying to add new docket {}", docket);
+        log.debug("^ trying to add new docket '{}'", docket);
         docket = docketRepository.save(docket);
         docketEventService.processDocketStatusChange(docket, docket.getStatus());
         return docket;
@@ -97,10 +97,10 @@ public class DocketServiceImpl implements DocketService {
             return null;
         }
         if (!this.isExistsDocketById(docket.getId())) {
-            log.error("!> requesting modify docket.id {} and name {} for non-existed docket. Check evoking clients", docket.getId(), docket.getName());
+            log.error("!> requesting modify docket.id '{}' and name '{}' for non-existed docket. Check evoking clients", docket.getId(), docket.getName());
             return null;
         }
-        log.debug("^ trying to modify docket {}", docket);
+        log.debug("^ trying to modify docket '{}'", docket);
 
         if (docket.getStatus().isFinished()) {
             docket.setFinishedDate(LocalDateTime.now());
@@ -124,7 +124,7 @@ public class DocketServiceImpl implements DocketService {
             log.error("!> requesting delete tournament for non-existed tournament. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to set 'deleted' mark to tournament {}", docket);
+        log.debug("^ trying to set 'deleted' mark to tournament '{}'", docket);
         docket.setStatus(DocketStatusType.DELETED);
         docket = docketRepository.save(docket);
         this.handleDocketStatusChanged(docket);
@@ -150,7 +150,7 @@ public class DocketServiceImpl implements DocketService {
         }
         Set<ConstraintViolation<Docket>> violations = validator.validate(docket);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify docket id {} name {} with verifyDocket for docket with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify docket id '{}' name '{}' with verifyDocket for docket with ConstraintViolations. Check evoking clients",
                     docket.getId(), docket.getName());
             return false;
         }
@@ -161,7 +161,7 @@ public class DocketServiceImpl implements DocketService {
      * Prototype for handle docket status
      */
     private void handleDocketStatusChanged(Docket docket) {
-        log.warn("~ status for docket id {} was changed from {} to {} ",
+        log.warn("~ status for docket id '{}' was changed from '{}' to '{}' ",
                 docket.getId(), docket.getPrevStatus(), docket.getStatus());
         docket.setPrevStatus(docket.getStatus());
     }

@@ -181,7 +181,7 @@ public class GameDisciplineServiceImpl implements GameDisciplineService {
     private GameDisciplineSettings updateGameDisciplineSettings(GameDisciplineSettings disciplineSettings) {
         GameDisciplineSettings primaryDisciplineSettings = getPrimaryGameDisciplineSettings(disciplineSettings.getGameDiscipline());
         if (!disciplineSettings.getIsPrimary() && primaryDisciplineSettings.equals(disciplineSettings)) {
-            log.warn("~ primary flag of discipline settings can't be changed. Settings {}", disciplineSettings);
+            log.warn("~ primary flag of discipline settings can't be changed. Settings '{}'", disciplineSettings);
             throw new GameDisciplineSettingsManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_PRIMARY_MODIFICATION_ERROR,
                     "Primary flag of discipline settings can't be changed");
         }

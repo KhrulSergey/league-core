@@ -39,7 +39,7 @@ public class DocketEventServiceImpl implements DocketEventService {
      */
     @Override
     public void processDocketStatusChange(Docket docket, DocketStatusType newDocketStatusType) {
-        log.debug("^ new status changed for docket {} with new status {}.", docket, newDocketStatusType);
+        log.debug("^ new status changed for docket '{}' with new status '{}'.", docket, newDocketStatusType);
         if (newDocketStatusType.isCreated()) {
             financialClientService.createAccountByHolderInfo(docket.getCoreId(),
                     AccountHolderType.DOCKET, docket.getName());
@@ -52,7 +52,7 @@ public class DocketEventServiceImpl implements DocketEventService {
     @Override
     public List<AccountTransactionInfoDto> processDocketUserProposalStateChange(DocketUserProposal docketUserProposal,
                                                                                 ParticipationStateType newUserProposalState) {
-        log.debug("^ state of user proposal to docket was changed from {} to {}. Process user proposal state change in Docket Event Service.",
+        log.debug("^ state of user proposal to docket was changed from '{}' to '{}'. Process user proposal state change in Docket Event Service.",
                 docketUserProposal.getPrevState(), newUserProposalState);
         List<AccountTransactionInfoDto> paymentList = null;
         if (docketUserProposal.getDocket().getAccessType().isPaid()
@@ -80,7 +80,7 @@ public class DocketEventServiceImpl implements DocketEventService {
     private List<AccountTransactionInfoDto> tryMakeParticipationFeePayment(DocketUserProposal docketUserProposal) {
         User user = docketUserProposal.getUser();
         Docket docket = docketUserProposal.getDocket();
-        log.debug("^ try to make participation fee to docket.id {} from user.leagueId {}",
+        log.debug("^ try to make participation fee to docket.id '{}' from user.leagueId '{}'",
                 docket.getId(), user.getLeagueId());
 
 
@@ -88,7 +88,7 @@ public class DocketEventServiceImpl implements DocketEventService {
         AccountInfoDto userAccountDto = financialClientService.getAccountByHolderInfo(user.getLeagueId(),
                 AccountHolderType.USER);
         if (userAccountDto.getAmount() < userParticipationFeeAmount) {
-            log.warn("~ forbiddenException for create new proposal for user {} to docket id {} and status {}. " +
+            log.warn("~ forbiddenException for create new proposal for user '{}' to docket id '{}' and status '{}'. " +
                             "User doesn't have enough fund to pay participation fee for all team members",
                     user.getLeagueId(), docket.getId(), docket.getStatus());
             throw new TeamParticipantManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
@@ -102,7 +102,7 @@ public class DocketEventServiceImpl implements DocketEventService {
         AccountTransactionInfoDto result = financialClientService.applyPurchaseTransaction(
                 this.composeParticipationFeeTransaction(userAccountDto, docketAccountDto, userParticipationFeeAmount));
         if (isNull(result)) {
-            log.warn("~ forbiddenException for create new proposal for user.id {} to docket id {}. " +
+            log.warn("~ forbiddenException for create new proposal for user.id '{}' to docket id '{}'. " +
                             "Error while transferring fund to pat participation fee. Check requested params.",
                     user.getLeagueId(), docket.getId());
             throw new TeamParticipantManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,

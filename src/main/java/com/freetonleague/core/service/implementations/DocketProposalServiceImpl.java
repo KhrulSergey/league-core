@@ -42,7 +42,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      */
     @Override
     public DocketUserProposal getProposalById(long id) {
-        log.debug("^ trying to get user proposal to docket by id {}", id);
+        log.debug("^ trying to get user proposal to docket by id '{}'", id);
         return docketProposalRepository.findById(id).orElse(null);
     }
 
@@ -52,11 +52,11 @@ public class DocketProposalServiceImpl implements DocketProposalService {
     @Override
     public DocketUserProposal getProposalByUserAndDocket(User user, Docket docket) {
         if (isNull(user) || isNull(docket)) {
-            log.error("!> requesting getProposalByUserAndDocket for NULL user {} or NULL docket {}. Check evoking clients",
+            log.error("!> requesting getProposalByUserAndDocket for NULL user '{}' or NULL docket '{}'. Check evoking clients",
                     user, docket);
             return null;
         }
-        log.debug("^ trying to get uer proposal to docket for user: {} and docket {}",
+        log.debug("^ trying to get uer proposal to docket for user: '{}' and docket '{}'",
                 user.getId(), docket.getId());
         return docketProposalRepository.findByUserAndDocket(user, docket);
     }
@@ -67,12 +67,12 @@ public class DocketProposalServiceImpl implements DocketProposalService {
     @Override
     public Page<DocketUserProposal> getProposalListForDocket(Pageable pageable, Docket docket) {
         if (isNull(pageable) || isNull(docket)) {
-            log.error("!> requesting getProposalListForDocket for NULL pageable {} or NULL docket {}. Check evoking clients",
+            log.error("!> requesting getProposalListForDocket for NULL pageable '{}' or NULL docket '{}'. Check evoking clients",
                     pageable, docket);
             return null;
         }
         List<ParticipationStateType> filteredProposalStateList = List.of(ParticipationStateType.values());
-        log.debug("^ trying to get user proposal to docket list with pageable params: {} and for docket {}",
+        log.debug("^ trying to get user proposal to docket list with pageable params: '{}' and for docket '{}'",
                 pageable, docket.getId());
         return docketProposalRepository.findAllByDocketAndStateIn(pageable, docket, filteredProposalStateList);
     }
@@ -84,7 +84,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public DocketUserProposal addProposal(DocketUserProposal userProposal) {
         if (isNull(userProposal) || isNull(userProposal.getDocket())) {
-            log.error("!> requesting addProposal for NULL userProposal {} or NULL userProposal.docket. Check evoking clients",
+            log.error("!> requesting addProposal for NULL userProposal '{}' or NULL userProposal.docket. Check evoking clients",
                     userProposal);
             return null;
         }
@@ -93,7 +93,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
             log.error("!> requesting addProposal for docket with proposal's limit exceeded. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to add new user proposal to docket {}", userProposal);
+        log.debug("^ trying to add new user proposal to docket '{}'", userProposal);
         List<AccountTransactionInfoDto> paymentList = docketEventService.processDocketUserProposalStateChange(
                 userProposal, userProposal.getState());
         userProposal.setParticipatePaymentList(paymentList);
@@ -110,11 +110,11 @@ public class DocketProposalServiceImpl implements DocketProposalService {
             return null;
         }
         if (!isExistsDocketUserProposalById(userProposal.getId())) {
-            log.error("!> requesting modify user proposal to docket or non-existed proposal.id {}. Check evoking clients",
+            log.error("!> requesting modify user proposal to docket or non-existed proposal.id '{}'. Check evoking clients",
                     userProposal.getId());
             return null;
         }
-        log.debug("^ trying to modify user proposal to docket {}", userProposal);
+        log.debug("^ trying to modify user proposal to docket '{}'", userProposal);
         if (userProposal.isStateChanged()) {
             this.handleDocketUserProposalStateChanged(userProposal);
         }
@@ -139,7 +139,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
             log.error("!> requesting getActiveUserProposalListByDocket for NULL docket. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get Approved user proposal list by docket with id: {}", docket.getId());
+        log.debug("^ trying to get Approved user proposal list by docket with id: '{}'", docket.getId());
 
         return docketProposalRepository.findAllByDocketAndState(docket, ParticipationStateType.APPROVE);
     }
@@ -154,7 +154,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
             log.error("!> requesting countActiveUserProposalListByDocket for NULL docket. Check evoking clients");
             return 0;
         }
-        log.debug("^ trying to count Approved user proposal list by docket with id: {}", docket.getId());
+        log.debug("^ trying to count Approved user proposal list by docket with id: '{}'", docket.getId());
         return docketProposalRepository.countByDocketAndState(docket, ParticipationStateType.APPROVE);
     }
 
@@ -175,7 +175,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      * Prototype for handle tournament team proposal state
      */
     private void handleDocketUserProposalStateChanged(DocketUserProposal userProposal) {
-        log.warn("~ status for user proposal to docket with id {} was changed from {} to {} ",
+        log.warn("~ status for user proposal to docket with id '{}' was changed from '{}' to '{}' ",
                 userProposal.getId(), userProposal.getPrevState(), userProposal.getState());
 //        tournamentEventService.processTournamentTeamProposalStateChange(tournamentTeamProposal, tournamentTeamProposal.getState());
         userProposal.setPrevState(userProposal.getState());
