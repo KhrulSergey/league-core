@@ -151,7 +151,8 @@ public class ExceptionMessages {
     public static final String FINANCE_UNIT_ACCOUNT_CREATION_ERROR = "Financial account creation failed. Please try again";
     public static final String FINANCE_UNIT_TRANSACTION_CREATION_ERROR = "Financial transaction was not created and not saved. Please check request parameters";
     public static final String FINANCE_UNIT_TRANSACTION_MODIFY_ABORTED_ERROR = "Aborted financial transaction can't be modified. Request denied";
-    public static final String FINANCE_UNIT_TRANSACTION_ABORT_ERROR = "Aborted financial transaction can't be modified. Request denied";
+    public static final String FINANCE_UNIT_TRANSACTION_MODIFY_ABORT_ERROR = "Aborted financial transaction can't be modified. Request denied";
+    public static final String FINANCE_UNIT_TRANSACTION_ABORT_ERROR = "Financial transaction can't be aborted. Request denied";
     public static final String FINANCE_UNIT_TRANSACTION_MODIFY_FINISHED_ERROR = "Only aborted operation available for finished transaction. Request denied";
     public static final String FINANCE_UNIT_TOKEN_VALIDATION_ERROR = "Specified token is not valid for operate with deposit transactions. Request denied";
 }

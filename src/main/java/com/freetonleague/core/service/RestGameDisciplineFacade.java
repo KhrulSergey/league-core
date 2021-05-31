@@ -77,12 +77,12 @@ public interface RestGameDisciplineFacade {
     /**
      * Getting game discipline info by id and user with privacy check
      */
-    GameDiscipline getVerifiedDiscipline(long id, User user);
+    GameDiscipline getVerifiedDiscipline(long id);
 
     /**
      * Getting game discipline settings info by id, discipline and user with privacy check
      */
-    GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline, User user);
+    GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline);
 
     /**
      * Getting primary game discipline settings info by game discipline with privacy check

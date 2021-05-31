@@ -31,6 +31,7 @@ public class AccountTransactionInfoDto {
 
     private String name;
 
+    @NotNull
     private AccountTransactionStatusType status;
 
     private UserDto approvedBy;

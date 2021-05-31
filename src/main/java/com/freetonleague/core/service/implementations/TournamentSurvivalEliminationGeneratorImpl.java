@@ -60,7 +60,7 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
         //define vars for algorithm
         GameDisciplineSettings gameDisciplineSettings = tournament.getGameDisciplineSettings();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
-        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament);
+        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getApprovedTeamProposalListByTournament(tournament);
         Integer matchRivalCount = gameDisciplineSettings.getMatchRivalCount();
         Integer matchCountPerSeries = tournamentSettings.getMatchCountPerSeries();
         int teamProposalListSize = teamProposalList.size();

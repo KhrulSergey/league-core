@@ -69,6 +69,11 @@ public interface FinancialClientService {
     AccountTransactionInfoDto editWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 
     /**
+     * Returns updated info for aborted transaction
+     */
+    AccountTransactionInfoDto abortTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+
+    /**
      * Apply coupon by advertisement company hash for user from session
      *
      * @param couponInfo coupon info with ref to bonusAccount

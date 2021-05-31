@@ -147,7 +147,7 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
      * Returns list of approved team proposal list for specified tournament.
      */
     @Override
-    public List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament) {
+    public List<TournamentTeamProposal> getApprovedTeamProposalListByTournament(Tournament tournament) {
         if (isNull(tournament)) {
             log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
             return null;
@@ -155,6 +155,22 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
         log.debug("^ trying to get Approved team proposal list by tournament with id: '{}'", tournament.getId());
 
         return teamProposalRepository.findAllByTournamentAndState(tournament, ParticipationStateType.APPROVE);
+    }
+
+
+    /**
+     * Returns list of active team proposal list for specified tournament.
+     */
+    @Override
+    public List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament) {
+        if (isNull(tournament)) {
+            log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get Approved team proposal list by tournament with id: '{}'", tournament.getId());
+
+        return teamProposalRepository.findAllByTournamentAndStateIn(null,
+                tournament, ParticipationStateType.activeProposalStateList).getContent();
     }
 
     /**
@@ -196,7 +212,7 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
      * Prototype for handle tournament team proposal state
      */
     private void handleTeamProposalStateChanged(TournamentTeamProposal tournamentTeamProposal) {
-        log.warn("~ status for tournament team proposal id '{}' was changed from '{}' to '{}' ",
+        log.debug("~ status for tournament team proposal id '{}' was changed from '{}' to '{}' ",
                 tournamentTeamProposal.getId(), tournamentTeamProposal.getPrevState(), tournamentTeamProposal.getState());
         //TODO unlock auto-payment in processTournamentTeamProposalStateChange when auto-refund will be ready
 //        tournamentEventService.processTournamentTeamProposalStateChange(tournamentTeamProposal, tournamentTeamProposal.getState());

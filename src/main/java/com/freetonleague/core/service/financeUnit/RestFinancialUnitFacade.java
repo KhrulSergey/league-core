@@ -60,7 +60,6 @@ public interface RestFinancialUnitFacade {
      */
     AccountInfoDto createAccountForHolder(UUID holderExternalGUID, AccountHolderType holderType, String holderName);
 
-
     /**
      * Returns transaction info for specified guid
      *
@@ -93,6 +92,14 @@ public interface RestFinancialUnitFacade {
      * @return transaction info
      */
     AccountTransactionInfoDto editTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
+
+    /**
+     * Returns aborted transaction info for specified GUID
+     *
+     * @param transactionGUID specified transaction GUID to abort
+     * @return transaction info
+     */
+    AccountTransactionInfoDto abortTransaction(String transactionGUID);
 
 //    /**
 //     * Returns created withdraw transaction info (with pause status) for specified data
