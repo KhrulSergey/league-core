@@ -38,7 +38,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
     public TournamentSeriesRival getVerifiedSeriesRivalById(long id) {
         TournamentSeriesRival tournamentSeriesRival = tournamentSeriesService.getSeriesRival(id);
         if (isNull(tournamentSeriesRival)) {
-            log.debug("^ Tournament rival with requested id {} was not found. 'getVerifiedSeriesRivalById' in " +
+            log.debug("^ Tournament rival with requested id '{}' was not found. 'getVerifiedSeriesRivalById' in " +
                     "RestTournamentSeriesRivalFacade request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_NOT_FOUND_ERROR, "Tournament series rival with requested id " + id + " was not found");
         }
@@ -57,7 +57,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
         }
         Set<ConstraintViolation<TournamentSeriesRivalDto>> settingsViolations = validator.validate(seriesRivalDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament series rival dto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament series rival dto: '{}' have constraint violations: '{}'",
                     seriesRivalDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }

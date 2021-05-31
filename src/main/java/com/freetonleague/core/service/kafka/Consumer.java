@@ -29,7 +29,7 @@ public class Consumer {
                             final @Header(KafkaHeaders.RECEIVED_TIMESTAMP) long ts,
                             final Acknowledgment acknowledgment
     ) {
-        log.debug("#### -> Consumed message -> TIMESTAMP: {}, Message:{}\noffset: {}, key: {}, partition: {} topic: {}",
+        log.debug("#### -> Consumed message -> TIMESTAMP: '{}', Message:'{}'\noffset: '{}', key: '{}', partition: '{}' topic: '{}'",
                 ts, data, offset, key, partition, topic);
         acknowledgment.acknowledge();
         eventService.processEvent(data);

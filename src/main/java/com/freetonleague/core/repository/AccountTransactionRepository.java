@@ -1,5 +1,6 @@
 package com.freetonleague.core.repository;
 
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.model.Account;
 import com.freetonleague.core.domain.model.AccountTransaction;
 import org.springframework.data.domain.Page;
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface AccountTransactionRepository extends JpaRepository<AccountTransaction, Long>,
@@ -16,8 +18,13 @@ public interface AccountTransactionRepository extends JpaRepository<AccountTrans
 
     AccountTransaction findByGUID(UUID GUID);
 
-    @Query(value = "select t from AccountTransaction t where t.sourceAccount = :account or t.targetAccount = :account")
-    Page<AccountTransaction> findAllByAccount(Pageable pageable, @Param("account") Account account);
+    @Query(value = "select t from AccountTransaction t where (t.status in :statusList) and (t.sourceAccount = :account or t.targetAccount = :account)")
+    Page<AccountTransaction> findAllByAccount(Pageable pageable,
+                                              @Param("account") Account account,
+                                              @Param("statusList") List<AccountTransactionStatusType> statusList);
+
+
+    Page<AccountTransaction> findAllByStatusIn(Pageable pageable, List<AccountTransactionStatusType> statusList);
 
     boolean existsByGUID(UUID GUID);
 

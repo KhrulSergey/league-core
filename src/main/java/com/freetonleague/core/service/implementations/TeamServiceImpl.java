@@ -57,10 +57,10 @@ public class TeamServiceImpl implements TeamService {
     public Team addTeam(Team team) {
         Set<ConstraintViolation<Team>> violations = validator.validate(team);
         if (!violations.isEmpty()) {
-            log.error("!> requesting addTeam for team {} with constraint violations: {}. Check evoking clients", team, violations);
+            log.error("!> requesting addTeam for team '{}' with constraint violations: '{}'. Check evoking clients", team, violations);
             return null;
         }
-        log.debug("^ trying to add team in DB: {}", team);
+        log.debug("^ trying to add team in DB: '{}'", team);
         team.generateGUID();
         if (!isBlank(team.getLogoRawFile())) {
             team.setLogoHashKey(leagueStorageClientService.saveTeamLogo(team));
@@ -81,14 +81,14 @@ public class TeamServiceImpl implements TeamService {
         }
         Set<ConstraintViolation<Team>> violations = validator.validate(team);
         if (!violations.isEmpty()) {
-            log.error("!> requesting editTeam for team {} with constraint violations: {}. Check evoking clients", team, violations);
+            log.error("!> requesting editTeam for team '{}' with constraint violations: '{}'. Check evoking clients", team, violations);
             return null;
         }
         if (!teamRepository.existsById(team.getId())) {
-            log.error("!> requesting editTeam for non-existent team {}. Check evoking clients", team);
+            log.error("!> requesting editTeam for non-existent team '{}'. Check evoking clients", team);
             return null;
         }
-        log.debug("^ trying to modify team in DB: {}", team);
+        log.debug("^ trying to modify team in DB: '{}'", team);
         if (!isBlank(team.getLogoRawFile())) {
             team.setLogoHashKey(leagueStorageClientService.saveTeamLogo(team));
         }
@@ -100,7 +100,7 @@ public class TeamServiceImpl implements TeamService {
      */
     @Override
     public Team getTeamById(long id) {
-        log.debug("^ trying to get team by id: {}", id);
+        log.debug("^ trying to get team by id: '{}'", id);
         return teamRepository.findById(id).orElse(null);
     }
 
@@ -113,7 +113,7 @@ public class TeamServiceImpl implements TeamService {
             log.error("!> requesting getByName for Blank teamName. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get team by name: {}", teamName);
+        log.debug("^ trying to get team by name: '{}'", teamName);
         return teamRepository.findByName(teamName);
     }
 
@@ -146,19 +146,19 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Team expelParticipant(Team team, TeamParticipant teamParticipant, boolean isSelfQuit) {
         if (isNull(team) || isNull(teamParticipant)) {
-            log.error("!> requesting expelParticipant for NULL team {} or NULL participant {}. Check evoking clients", team, teamParticipant);
+            log.error("!> requesting expelParticipant for NULL team '{}' or NULL participant '{}'. Check evoking clients", team, teamParticipant);
             return null;
         }
         if (!teamRepository.existsById(team.getId())) {
-            log.error("!> requesting expelParticipant for non-existent team {}. Check evoking clients", team);
+            log.error("!> requesting expelParticipant for non-existent team '{}'. Check evoking clients", team);
             return null;
         }
         if (!team.getParticipantList().contains(teamParticipant)) {
-            log.error("!> requesting expelParticipant for exclude participant {} who isn't a member of the team {}. " +
+            log.error("!> requesting expelParticipant for exclude participant '{}' who isn't a member of the team '{}'. " +
                     "Check evoking clients", teamParticipant, team);
             return null;
         }
-        log.debug("^ trying to expel participant {} from team {}", teamParticipant, team.getId());
+        log.debug("^ trying to expel participant '{}' from team '{}'", teamParticipant, team.getId());
         teamParticipantService.expelParticipant(teamParticipant, isSelfQuit);
         return teamRepository.findById(team.getId()).orElse(null);
     }
@@ -174,10 +174,10 @@ public class TeamServiceImpl implements TeamService {
             return;
         }
         if (!teamRepository.existsById(team.getId())) {
-            log.error("!> requesting disbandTeam for non-existent team {}. Check evoking clients", team);
+            log.error("!> requesting disbandTeam for non-existent team '{}'. Check evoking clients", team);
             return;
         }
-        log.debug("^ trying to disband the team  {}", team);
+        log.debug("^ trying to disband the team  '{}'", team);
         team.getParticipantList().parallelStream() // expel all participants
                 .forEach(p -> teamParticipantService.expelParticipant(p, false));
         team.setStatus(TeamStateType.DELETED);

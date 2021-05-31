@@ -4,8 +4,12 @@ import com.freetonleague.core.domain.dto.AccountDepositFinUnitDto;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.BankProviderType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -64,6 +68,15 @@ public interface RestFinancialUnitFacade {
      * @return transaction info
      */
     AccountTransactionInfoDto findTransactionByGUID(String transactionGUID);
+
+    /**
+     * Get list of transactions for specified account and filtered by status list. Search in both source and target.
+     *
+     * @param accountDto to search transaction for
+     * @param statusList status list to filter transactions
+     * @return list of transactions with pageable params
+     */
+    Page<AccountTransactionInfoDto> findTransactionListByAccountAndStatusList(Pageable pageable, List<AccountTransactionStatusType> statusList, AccountInfoDto accountDto);
 
     /**
      * Returns created transaction info for specified data

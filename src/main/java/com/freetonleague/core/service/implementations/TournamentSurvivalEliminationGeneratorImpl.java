@@ -48,7 +48,7 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
      */
     @Override
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
-        log.debug("^ trying to generate rounds for tournament.id {} with Survival Elimination algorithm", tournament.getId());
+        log.debug("^ trying to generate rounds for tournament.id '{}' with Survival Elimination algorithm", tournament.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournament.getStatus())) {
             log.error("!> requesting generate survival tournament rounds for non-active tournament. Check evoking clients");
             return null;
@@ -103,7 +103,7 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
      */
     @Override
     public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
-        log.debug("^ trying to compose matches for new round for tournamentRound.id {} with Survival Elimination algorithm",
+        log.debug("^ trying to compose matches for new round for tournamentRound.id '{}' with Survival Elimination algorithm",
                 tournamentRound.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournamentRound.getStatus())) {
             log.error("!> requesting composeNewRoundForTournament for not active survival tournament round status. Check evoking clients");
@@ -160,7 +160,7 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
 
         if (isEmpty(updatedTournamentSeriesList)
                 || updatedTournamentSeriesList.size() != tournamentRound.getSeriesList().size()) {
-            log.error("!> requesting composeNewRoundForTournament for errors in series list for round.id {}. " +
+            log.error("!> requesting composeNewRoundForTournament for errors in series list for round.id '{}'. " +
                     "Check stack trace and evoking clients", tournamentRound.getId());
             throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
         }
@@ -185,8 +185,8 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
                 .collect(Collectors.toList());
         // check if filtered size is match for count of expected matchRivalWinners
         if (seriesRivalWinners.size() != matchRivalWinners) {
-            log.error("!!> requesting composeNewRoundForTournament for errors in series rival winners for series.id {}. " +
-                            "Series rival winner size is {}, but expected {}. Check stack trace and evoking clients",
+            log.error("!!> requesting composeNewRoundForTournament for errors in series rival winners for series.id '{}'. " +
+                            "Series rival winner size is '{}', but expected '{}'. Check stack trace and evoking clients",
                     tournamentSeries.getId(), seriesRivalWinners.size(), matchRivalWinners);
             throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
         }
@@ -213,7 +213,7 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
                                                                             int matchCountPerSeries) {
         if (isNotEmpty(currentSeries.getSeriesRivalList())) {
             log.error("!> requesting composeAndFillRivalsOfTournamentSurvivalSeries in composeNewRoundForTournament for not empty " +
-                    "list of series rival for series {}. Check evoking clients.", currentSeries);
+                    "list of series rival for series '{}'. Check evoking clients.", currentSeries);
             return null;
         }
         List<TournamentSeries> parentSeriesList = currentSeries.getParentSeriesList();
@@ -376,8 +376,8 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
                                                                                          Integer rivalCountPerMatch,
                                                                                          List<TournamentTeamProposal> teamProposalList) {
         if (isNull(rivalCombinationCount) || isNull(rivalCountPerMatch) || isNull(teamProposalList)) {
-            log.error("!> requesting generate rival combination for NULL rivalCombinationCount {} " +
-                            "or NULL matchRivalCount {} or NULL teamProposalList {}. Check evoking clients",
+            log.error("!> requesting generate rival combination for NULL rivalCombinationCount '{}' " +
+                            "or NULL matchRivalCount '{}' or NULL teamProposalList '{}'. Check evoking clients",
                     rivalCombinationCount, rivalCountPerMatch, teamProposalList);
             return null;
         }

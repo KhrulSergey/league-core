@@ -71,7 +71,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                                                                 TournamentTeamProposalDto teamProposalDto, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
         if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for create proposal to tournament for user {} from team {}.", user, team);
+            log.warn("~ forbiddenException for create proposal to tournament for user '{}' from team '{}'.", user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
                     "Only captain can apply and modify proposals to tournaments from team.");
         }
@@ -80,14 +80,14 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         //check if proposal already existed
         TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         if (nonNull(teamProposal)) {
-            log.warn("~ forbiddenException for create duplicate proposal from user {}. Already existed proposal {}.", user, teamProposal);
+            log.warn("~ forbiddenException for create duplicate proposal from user '{}'. Already existed proposal '{}'.", user, teamProposal);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR,
                     "Duplicate proposal from team to the one tournament is prohibited. Request rejected.");
         }
 
         //check status of tournament
         if (tournament.getStatus() != TournamentStatusType.SIGN_UP) {
-            log.warn("~ forbiddenException for create new proposal for team {} by user {} to tournament id {} and status {}. " +
+            log.warn("~ forbiddenException for create new proposal for team '{}' by user '{}' to tournament id '{}' and status '{}'. " +
                             "Tournament is closed for new proposals",
                     team.getId(), user, tournament.getId(), tournament.getStatus());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
@@ -113,7 +113,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         //save proposal
         newTeamProposal = tournamentProposalService.addProposal(newTeamProposal);
         if (isNull(newTeamProposal)) {
-            log.error("!> error while creating tournament team proposal by team {} for tournament {} by user {}.", teamId, tournamentId, user);
+            log.error("!> error while creating tournament team proposal by team '{}' for tournament '{}' by user '{}'.", teamId, tournamentId, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
         }
@@ -134,20 +134,20 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
             Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
             //TODO enable editing proposal by Team Capitan
 //            if (!team.isCaptain(user) || user.isAdmin()) {
-//                log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
+//                log.warn("~ forbiddenException for modify proposal to tournament for user '{}' from team '{}'.", user, team);
 //                throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
 //                        "Only captain can apply and modify proposals to tournaments from team.");
 //            }
             Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
             teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         } else {
-            log.warn("~ forbiddenException for modify proposal to tournament for user {}. " +
+            log.warn("~ forbiddenException for modify proposal to tournament for user '{}'. " +
                     "No valid parameters of team proposal was specified", user);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VALIDATION_ERROR,
                     "No valid parameters of team proposal was specified. Request rejected.");
         }
         if (isNull(teamProposal)) {
-            log.debug("^ Tournament team proposal with requested parameters tournamentId {}, teamId {}, teamProposalId {} was not found. " +
+            log.debug("^ Tournament team proposal with requested parameters tournamentId '{}', teamId '{}', teamProposalId '{}' was not found. " +
                     "'editProposalToTournament' in RestTournamentTeamFacadeImpl request denied", tournamentId, teamId, teamProposalId);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR, "Tournament team proposal with requested id " + teamProposalId + " was not found");
         }
@@ -155,7 +155,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         teamProposal.setState(teamProposalState);
         TournamentTeamProposal savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
         if (isNull(savedTeamProposal)) {
-            log.error("!> error while modifying tournament team proposal {} for user {}.", teamProposal, user);
+            log.error("!> error while modifying tournament team proposal '{}' for user '{}'.", teamProposal, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
         }
@@ -171,7 +171,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
         //TODO enable editing proposal by Team Capitan
 //        if (!team.isCaptain(user)) {
-//            log.warn("~ forbiddenException for modify proposal to tournament for user {} from team {}.", user, team);
+//            log.warn("~ forbiddenException for modify proposal to tournament for user '{}' from team '{}'.", user, team);
 //            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
 //                    "Only captain can apply and modify proposals to tournaments from team.");
 //        }
@@ -179,7 +179,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 
         // check if tournament is already started
         if (TournamentStatusType.startedStatusList.contains(tournament.getStatus())) {
-            log.warn("~ forbiddenException for modify proposal to started tournament.id {} for user {} from team {}.",
+            log.warn("~ forbiddenException for modify proposal to started tournament.id '{}' for user '{}' from team '{}'.",
                     tournament.getId(), user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
                     "Quit from already started or finished tournament is prohibited. Request is rejected.");
@@ -188,7 +188,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 
         // check if proposal is active
         if (!ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
-            log.warn("~ forbiddenException for modify non-active proposal with state {} to tournament.id {} for user {} from team {}.",
+            log.warn("~ forbiddenException for modify non-active proposal with state '{}' to tournament.id '{}' for user '{}' from team '{}'.",
                     teamProposal.getState(), tournament.getId(), user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
                     String.format("Modify non-active proposal with state '%s' is prohibited. Request is rejected.",
@@ -197,7 +197,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 
         teamProposal = tournamentProposalService.quitFromTournament(teamProposal);
         if (isNull(teamProposal)) {
-            log.error("!> error while quiting from tournament id {} for team id {} by user {}.", tournament.getId(), team.getId(), user);
+            log.error("!> error while quiting from tournament id '{}' for team id '{}' by user '{}'.", tournament.getId(), team.getId(), user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
                     "Team proposal was not modified on Portal and rejected by system. Check requested params.");
         }
@@ -215,12 +215,12 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 
         TournamentTeamProposal tournamentTeamProposal = tournamentProposalService.getProposalById(id);
         if (isNull(tournamentTeamProposal)) {
-            log.debug("^ Tournament team proposal with requested id {} was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
+            log.debug("^ Tournament team proposal with requested id '{}' was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR, "Tournament team proposal  with requested id " + id + " was not found");
         }
         //TODO check logic and make decision about need in restrict proposal modification for orgs
 //        if (tournamentTeamProposal.getState().isRejected()) {
-//            log.debug("^ Tournament team proposal with requested id {} was rejected by orgs. " +
+//            log.debug("^ Tournament team proposal with requested id '{}' was rejected by orgs. " +
 //                            "'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
 //            throw new TeamManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VISIBLE_ERROR,
 //                    "Tournament team proposal with requested id " + id + " was rejected by orgs. Modifying request denied");
@@ -245,7 +245,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         }
         TournamentTeamParticipant tournamentTeamParticipant = tournamentProposalService.getTournamentTeamParticipantById(tournamentTeamParticipantId);
         if (isNull(tournamentTeamParticipant)) {
-            log.debug("^ Tournament team participant with requested id {} was not found. 'getVerifiedTournamentTeamParticipant' request denied",
+            log.debug("^ Tournament team participant with requested id '{}' was not found. 'getVerifiedTournamentTeamParticipant' request denied",
                     tournamentTeamParticipantId);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PARTICIPANT_NOT_FOUND_ERROR,
                     "Tournament team participant with requested id " + tournamentTeamParticipantId + " was not found");
@@ -264,8 +264,8 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     private void verifyBusinessLogicOnTeamToParticipateTournament(Tournament tournament, Team team,
                                                                   List<TournamentTeamParticipant> tournamentTeamParticipantList) {
         if (isNull(team) || isNull(tournament) || isNull(tournamentTeamParticipantList) || tournamentTeamParticipantList.isEmpty()) {
-            log.error("!> requesting validateTeamToParticipateTournament for NULL team {} or NULL tournament {} " +
-                            "or BLANK tournamentTeamParticipantList {}. Check evoking clients",
+            log.error("!> requesting validateTeamToParticipateTournament for NULL team '{}' or NULL tournament '{}' " +
+                            "or BLANK tournamentTeamParticipantList '{}'. Check evoking clients",
                     team, tournament, tournamentTeamParticipantList);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     "Team cant participate on tournament. Check requested params.");
@@ -278,7 +278,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                     lastTeamParticipant.set(p);
                     return isBlank(p.getUser().getDiscordId());
                 })) {
-            log.warn("~ requesting validateTeamToParticipateTournament for team {} with participant without Discord reference. At least for {}",
+            log.warn("~ requesting validateTeamToParticipateTournament for team '{}' with participant without Discord reference. At least for '{}'",
                     team, lastTeamParticipant.get());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
@@ -325,7 +325,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 //
 //        Set<ConstraintViolation<TournamentTeamProposalBaseDto>> violations = validator.validate(tournamentTeamProposalDto);
 //        if (!violations.isEmpty()) {
-//            log.debug("^ transmitted tournament team proposal dto: {} have constraint violations: {}",
+//            log.debug("^ transmitted tournament team proposal dto: '{}' have constraint violations: '{}'",
 //                    tournamentTeamProposalDto, violations);
 //            throw new ConstraintViolationException(violations);
 //        }

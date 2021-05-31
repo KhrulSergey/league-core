@@ -43,7 +43,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
      */
     @Override
     public TournamentMatch getMatch(long id) {
-        log.debug("^ trying to get tournament match by id: {}", id);
+        log.debug("^ trying to get tournament match by id: '{}'", id);
         return tournamentMatchRepository.findById(id).orElse(null);
     }
 
@@ -53,11 +53,11 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     @Override
     public Page<TournamentMatch> getMatchList(Pageable pageable, TournamentSeries tournamentSeries) {
         if (isNull(pageable) || isNull(tournamentSeries)) {
-            log.error("!> requesting getMatchList for NULL pageable {} or NULL tournament {}. Check evoking clients",
+            log.error("!> requesting getMatchList for NULL pageable '{}' or NULL tournament '{}'. Check evoking clients",
                     pageable, tournamentSeries);
             return null;
         }
-        log.debug("^ trying to get tournament match list with pageable params: {} and by tournament series id {}",
+        log.debug("^ trying to get tournament match list with pageable params: '{}' and by tournament series id '{}'",
                 pageable, tournamentSeries.getId());
 
         return tournamentMatchRepository.findAllByTournamentSeries(pageable, tournamentSeries);
@@ -74,7 +74,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (isNotEmpty(tournamentMatch.getMatchPropertyList())) {
             tournamentMatch.setMatchPropertyList(MatchPropertyConverter.convertAndValidate(tournamentMatch.getMatchPropertyList()));
         }
-        log.debug("^ trying to add new tournament match {}", tournamentMatch);
+        log.debug("^ trying to add new tournament match '{}'", tournamentMatch);
         return tournamentMatchRepository.save(tournamentMatch);
     }
 
@@ -83,7 +83,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
      */
     @Override
     public List<TournamentMatch> addMatchList(List<TournamentMatch> tournamentMatchList) {
-        log.debug("^ trying to add list of new tournament matches with size {}", tournamentMatchList.size());
+        log.debug("^ trying to add list of new tournament matches with size '{}'", tournamentMatchList.size());
         return tournamentMatchList.stream().map(this::addMatch).collect(Collectors.toList());
     }
 
@@ -96,11 +96,11 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
             return null;
         }
         if (!this.isExistsTournamentMatchById(tournamentMatch.getId())) {
-            log.error("!> requesting modify tournament match {} for non-existed tournament match. Check evoking clients",
+            log.error("!> requesting modify tournament match '{}' for non-existed tournament match. Check evoking clients",
                     tournamentMatch.getId());
             return null;
         }
-        log.debug("^ trying to modify tournament match {}", tournamentMatch);
+        log.debug("^ trying to modify tournament match '{}'", tournamentMatch);
         if (tournamentMatch.getStatus().isFinished()) {
             tournamentMatch.setFinishedDate(LocalDateTime.now());
         }
@@ -127,7 +127,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
             log.error("!> requesting delete tournament match for non-existed tournament tournamentMatch. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to set 'deleted' mark to tournament match {}", tournamentMatch);
+        log.debug("^ trying to set 'deleted' mark to tournament match '{}'", tournamentMatch);
         tournamentMatch.setStatus(TournamentStatusType.DELETED);
         tournamentMatch = tournamentMatchRepository.save(tournamentMatch);
         this.handleTournamentMatchStatusChanged(tournamentMatch);
@@ -166,7 +166,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         }
         Set<ConstraintViolation<TournamentMatch>> violations = validator.validate(tournamentMatch);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament match id:{} name:{} with verifyTournamentMatch for tournament match with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify tournament match id:'{}' name:'{}' with verifyTournamentMatch for tournament match with ConstraintViolations. Check evoking clients",
                     tournamentMatch.getId(), tournamentMatch.getName());
             return false;
         }
@@ -174,7 +174,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (nonNull(tournamentMatchRivals)) {
             for (TournamentMatchRival matchRival : tournamentMatchRivals) {
                 if (!tournamentMatchRivalService.verifyTournamentMatchRival(matchRival)) {
-                    log.error("!> requesting modify tournament match id:{} name:{} with verifyTournamentMatch for tournament match rival with ConstraintViolations. Check evoking clients",
+                    log.error("!> requesting modify tournament match id:'{}' name:'{}' with verifyTournamentMatch for tournament match rival with ConstraintViolations. Check evoking clients",
                             tournamentMatch.getId(), tournamentMatch.getName());
                     return false;
                 }
@@ -187,7 +187,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
      * Prototype for handle tournament match status
      */
     private void handleTournamentMatchStatusChanged(TournamentMatch tournamentMatch) {
-        log.warn("~ status for tournament match id {} was changed from {} to {} ",
+        log.warn("~ status for tournament match id '{}' was changed from '{}' to '{}' ",
                 tournamentMatch.getId(), tournamentMatch.getPrevStatus(), tournamentMatch.getStatus());
         //TODO check all match to be finished
         tournamentEventService.processMatchStatusChange(tournamentMatch, tournamentMatch.getStatus());

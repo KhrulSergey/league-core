@@ -35,7 +35,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
      */
     @Override
     public TournamentMatchRival getMatchRival(long id) {
-        log.debug("^ trying to get match rival by id: {}", id);
+        log.debug("^ trying to get match rival by id: '{}'", id);
         return tournamentMatchRivalRepository.findById(id).orElse(null);
     }
 
@@ -51,7 +51,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
             log.error("!> requesting get tournament rival with getMatchRivalByMatch for NULL match. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get match rival by match.id: {}", match.getId());
+        log.debug("^ trying to get match rival by match.id: '{}'", match.getId());
         return tournamentMatchRivalRepository.findAllByTournamentMatch(match);
     }
 
@@ -63,7 +63,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
         if (!this.verifyTournamentMatchRival(tournamentMatchRival)) {
             return null;
         }
-        log.debug("^ trying to add new tournament match rival {}", tournamentMatchRival);
+        log.debug("^ trying to add new tournament match rival '{}'", tournamentMatchRival);
         return tournamentMatchRivalRepository.save(tournamentMatchRival);
     }
 
@@ -76,11 +76,11 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
             return null;
         }
         if (!this.isExistsTournamentMatchRivalById(tournamentMatchRival.getId())) {
-            log.error("!> requesting modify tournament match rival {} for non-existed tournament match. Check evoking clients",
+            log.error("!> requesting modify tournament match rival '{}' for non-existed tournament match. Check evoking clients",
                     tournamentMatchRival.getId());
             return null;
         }
-        log.debug("^ trying to modify tournament match rival {}", tournamentMatchRival);
+        log.debug("^ trying to modify tournament match rival '{}'", tournamentMatchRival);
         if (tournamentMatchRival.isStatusChanged()) {
             this.handleTournamentMatchRivalStatusChanged(tournamentMatchRival);
         }
@@ -99,7 +99,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
             log.error("!> requesting delete tournament match rival for non-existed tournament tournamentMatchRival. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to set 'deleted' mark to tournament match rival {}", tournamentMatchRival);
+        log.debug("^ trying to set 'deleted' mark to tournament match rival '{}'", tournamentMatchRival);
         tournamentMatchRival.setStatus(TournamentMatchRivalParticipantStatusType.DISABLED);
         tournamentMatchRival = tournamentMatchRivalRepository.save(tournamentMatchRival);
         this.handleTournamentMatchRivalStatusChanged(tournamentMatchRival);
@@ -126,7 +126,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
         }
         Set<ConstraintViolation<TournamentMatchRival>> violations = validator.validate(tournamentMatchRival);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament rival id:{} with verifyTournamentMatch for tournament match with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify tournament rival id:'{}' with verifyTournamentMatch for tournament match with ConstraintViolations. Check evoking clients",
                     tournamentMatchRival.getId());
             return false;
         }
@@ -134,7 +134,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
         if (nonNull(tournamentMatchRivalParticipants)) {
             for (TournamentMatchRivalParticipant matchRivalParticipant : tournamentMatchRivalParticipants) {
                 if (!this.verifyTournamentRivalParticipant(matchRivalParticipant)) {
-                    log.error("!> requesting modify tournament rival {} with verifyTournamentRival for tournament rival participant with ConstraintViolations. Check evoking clients",
+                    log.error("!> requesting modify tournament rival '{}' with verifyTournamentRival for tournament rival participant with ConstraintViolations. Check evoking clients",
                             tournamentMatchRival.getId());
                     return false;
                 }
@@ -148,7 +148,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
      */
     @Override
     public TournamentMatchRivalParticipant getMatchRivalParticipant(long id) {
-        log.debug("^ trying to get match rival participant by id: {}", id);
+        log.debug("^ trying to get match rival participant by id: '{}'", id);
         return tournamentMatchRivalParticipantRepository.findById(id).orElse(null);
     }
 
@@ -162,7 +162,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
         }
         Set<ConstraintViolation<TournamentMatchRivalParticipant>> violations = validator.validate(tournamentMatchRivalParticipant);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament rival participant id:{} with verifyTournamentRivalParticipant for tournament match rival with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify tournament rival participant id:'{}' with verifyTournamentRivalParticipant for tournament match rival with ConstraintViolations. Check evoking clients",
                     tournamentMatchRivalParticipant.getId());
             return false;
         }
@@ -173,7 +173,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
      * Prototype for handle tournament match status
      */
     private void handleTournamentMatchRivalStatusChanged(TournamentMatchRival tournamentMatchRival) {
-        log.warn("~ status for tournament match rival id {} was changed from {} to {} ",
+        log.warn("~ status for tournament match rival id '{}' was changed from '{}' to '{}' ",
                 tournamentMatchRival.getId(), tournamentMatchRival.getPrevStatus(), tournamentMatchRival.getStatus());
         tournamentMatchRival.setPrevStatus(tournamentMatchRival.getStatus());
     }
