@@ -83,7 +83,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         tournamentMatch = tournamentMatchService.addMatch(tournamentMatch);
 
         if (isNull(tournamentMatch)) {
-            log.error("!> error while creating tournament match from dto {} for user {}.", tournamentMatchDto, user);
+            log.error("!> error while creating tournament match from dto '{}' for user '{}'.", tournamentMatchDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_CREATION_ERROR,
                     "Tournament match was not saved on Portal. Check requested params.");
         }
@@ -113,14 +113,14 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         if ((tournamentMatch.getStatus().isFinished() && isNull(tournamentMatch.getMatchWinner()))
                 || (nonNull(tournamentMatch.getMatchWinner()) && !tournamentMatch.getStatus().isFinished())) {
             log.warn("~ tournament match can be finished only with setting the winner of the match. " +
-                    "Request to set status {} and winner {} was rejected.", tournamentMatch.getStatus(), tournamentMatch.getMatchWinner());
+                    "Request to set status '{}' and winner '{}' was rejected.", tournamentMatch.getStatus(), tournamentMatch.getMatchWinner());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_FINISHED_ERROR,
                     "Modifying tournament match was rejected. Check requested params and method.");
         }
 
         tournamentMatch = tournamentMatchService.editMatch(tournamentMatch);
         if (isNull(tournamentMatch)) {
-            log.error("!> error while editing tournament match from dto {} for user {}.", tournamentMatchDto, user);
+            log.error("!> error while editing tournament match from dto '{}' for user '{}'.", tournamentMatchDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_MODIFICATION_ERROR,
                     "Tournament series was not updated on Portal. Check requested params.");
         }
@@ -137,7 +137,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         tournamentMatch = tournamentMatchService.deleteMatch(tournamentMatch);
 
         if (isNull(tournamentMatch)) {
-            log.error("!> error while deleting tournament match with id {} for user {}.", matchId, user);
+            log.error("!> error while deleting tournament match with id '{}' for user '{}'.", matchId, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_MODIFICATION_ERROR,
                     "Tournament match was not deleted on Portal. Check requested params.");
         }
@@ -169,7 +169,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
 
         Set<ConstraintViolation<TournamentMatchDto>> settingsViolations = validator.validate(tournamentMatchDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament match dto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament match dto: '{}' have constraint violations: '{}'",
                     tournamentMatchDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -217,11 +217,11 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
     public TournamentMatch getVerifiedMatchById(long id, User user, boolean checkUser) {
         TournamentMatch tournamentMatch = tournamentMatchService.getMatch(id);
         if (isNull(tournamentMatch)) {
-            log.debug("^ Tournament match with requested id {} was not found. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id);
+            log.debug("^ Tournament match with requested id '{}' was not found. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_NOT_FOUND_ERROR, "Tournament match with requested id " + id + " was not found");
         }
         if (tournamentMatch.getStatus().isDeleted()) {
-            log.debug("^ Tournament match with requested id {} was {}. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id, tournamentMatch.getStatus());
+            log.debug("^ Tournament match with requested id '{}' was '{}'. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id, tournamentMatch.getStatus());
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_DISABLE_ERROR, "Active tournament match with requested id " + id + " was not found");
         }
         return tournamentMatch;

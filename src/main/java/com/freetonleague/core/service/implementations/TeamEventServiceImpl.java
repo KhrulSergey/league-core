@@ -30,7 +30,7 @@ public class TeamEventServiceImpl implements TeamEventService {
      */
     @Override
     public void processTeamStatusChange(Team team, TeamStateType newTeamStateType) {
-        log.debug("^ new status changed for team {} with new status {}.", team, newTeamStateType);
+        log.debug("^ new status changed for team '{}' with new status '{}'.", team, newTeamStateType);
         if (newTeamStateType.isCreated()) {
             financialClientService.createAccountByHolderInfo(team.getCoreId(),
                     AccountHolderType.TEAM, team.getName());

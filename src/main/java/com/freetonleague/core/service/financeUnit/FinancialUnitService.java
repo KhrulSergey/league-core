@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.financeUnit;
 
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.AccountType;
 import com.freetonleague.core.domain.model.Account;
 import com.freetonleague.core.domain.model.AccountHolder;
@@ -8,6 +9,7 @@ import com.freetonleague.core.domain.model.AccountTransaction;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -83,12 +85,13 @@ public interface FinancialUnitService {
     AccountTransaction getTransaction(UUID GUID);
 
     /**
-     * Get list of transactions for specified account. Search in both source and target.
+     * Get list of transactions for specified account and filtered by status list. Search in both source and target.
      *
-     * @param account to search transaction for
+     * @param account    to search transaction for
+     * @param statusList status list to filter transactions
      * @return list of transactions with pageable params
      */
-    Page<AccountTransaction> getTransactionList(Pageable pageable, Account account);
+    Page<AccountTransaction> findTransactionListByAccountAndStatus(Pageable pageable, List<AccountTransactionStatusType> statusList, Account account);
 
     /**
      * Save new transaction and update Accounts: source (if specified) and target

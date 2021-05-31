@@ -26,7 +26,7 @@ public class TournamentOrganizerServiceIml implements TournamentOrganizerService
      */
     @Override
     public TournamentOrganizer get(long id) {
-        log.debug("^ try to get tournament organizer by id: {}", id);
+        log.debug("^ try to get tournament organizer by id: '{}'", id);
         return organizerRepository.findById(id).orElse(null);
     }
 
@@ -41,10 +41,10 @@ public class TournamentOrganizerServiceIml implements TournamentOrganizerService
         }
         Set<ConstraintViolation<TournamentOrganizer>> violations = validator.validate(tournamentOrganizer);
         if (!violations.isEmpty()) {
-            log.error("!> requesting add organizer for tournamentOrganizer {} with constraint violations: {}. Check evoking clients", tournamentOrganizer, violations);
+            log.error("!> requesting add organizer for tournamentOrganizer '{}' with constraint violations: '{}'. Check evoking clients", tournamentOrganizer, violations);
             return null;
         }
-        log.debug("^ trying to add organizer in DB: {}", tournamentOrganizer);
+        log.debug("^ trying to add organizer in DB: '{}'", tournamentOrganizer);
         return organizerRepository.save(tournamentOrganizer);
     }
 
@@ -59,14 +59,14 @@ public class TournamentOrganizerServiceIml implements TournamentOrganizerService
         }
         Set<ConstraintViolation<TournamentOrganizer>> violations = validator.validate(tournamentOrganizer);
         if (!violations.isEmpty()) {
-            log.error("!> requesting edit organizer for tournamentOrganizer {} with constraint violations: {}. Check evoking clients", tournamentOrganizer, violations);
+            log.error("!> requesting edit organizer for tournamentOrganizer '{}' with constraint violations: '{}'. Check evoking clients", tournamentOrganizer, violations);
             return null;
         }
         if (!organizerRepository.existsById(tournamentOrganizer.getId())) {
-            log.error("!> requesting edit organizer for non-existent tournamentOrganizer {}. Check evoking clients", tournamentOrganizer);
+            log.error("!> requesting edit organizer for non-existent tournamentOrganizer '{}'. Check evoking clients", tournamentOrganizer);
             return null;
         }
-        log.debug("^ trying to modify organizer in DB: {}", tournamentOrganizer);
+        log.debug("^ trying to modify organizer in DB: '{}'", tournamentOrganizer);
         return organizerRepository.save(tournamentOrganizer);
     }
 }

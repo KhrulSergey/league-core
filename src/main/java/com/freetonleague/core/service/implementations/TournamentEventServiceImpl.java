@@ -90,7 +90,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentMatchStatus) {
-        log.debug("^ new status changed for tournament {} with new status {}.", tournament, newTournamentMatchStatus);
+        log.debug("^ new status changed for tournament '{}' with new status '{}'.", tournament, newTournamentMatchStatus);
         if (newTournamentMatchStatus.isCreated()) {
             financialClientService.createAccountByHolderInfo(tournament.getCoreId(),
                     AccountHolderType.TOURNAMENT, tournament.getName());
@@ -102,7 +102,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
-        log.debug("^ status of match was changed from {} to {}. Process match status change in Tournament Event Service.",
+        log.debug("^ status of match was changed from '{}' to '{}'. Process match status change in Tournament Event Service.",
                 tournamentMatch.getPrevStatus(), newTournamentMatchStatus);
         // check all match is finished to finish the series
         if (newTournamentMatchStatus.isFinished()
@@ -118,7 +118,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
-        log.debug("^ status of series was changed from {} to {}. Process series status change in Tournament Event Service.",
+        log.debug("^ status of series was changed from '{}' to '{}'. Process series status change in Tournament Event Service.",
                 tournamentSeries.getPrevStatus(), newTournamentSeriesStatus);
         // check all series is finished to finish the round
         if (newTournamentSeriesStatus.isFinished()
@@ -132,7 +132,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
-        log.debug("^ status of round was changed from {} to {}. Process round status change in Tournament Event Service.",
+        log.debug("^ status of round was changed from '{}' to '{}'. Process round status change in Tournament Event Service.",
                 tournamentRound.getPrevStatus(), newTournamentRoundStatus);
         // check all rounds is finished to finish the tournament or to compose new round
         if (newTournamentRoundStatus.isFinished()) {
@@ -149,7 +149,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processSeriesDeadHead(TournamentSeries tournamentSeries) {
-        log.error("!> We have a dead head in series {}. Create new match manually", tournamentSeries);
+        log.error("!> We have a dead head in series '{}'. Create new match manually", tournamentSeries);
     }
 
     /**
@@ -158,7 +158,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     @Override
     public List<AccountTransactionInfoDto> processTournamentTeamProposalStateChange(TournamentTeamProposal tournamentTeamProposal,
                                                                                     ParticipationStateType newTournamentTeamState) {
-        log.debug("^ state of team proposal was changed from {} to {}. Process team proposal state change in Tournament Event Service.",
+        log.debug("^ state of team proposal was changed from '{}' to '{}'. Process team proposal state change in Tournament Event Service.",
                 tournamentTeamProposal.getPrevState(), newTournamentTeamState);
         List<AccountTransactionInfoDto> paymentList = null;
         if (tournamentTeamProposal.getTournament().getAccessType().isPaid()) {
@@ -201,7 +201,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      * Try to make participation fee and commission from team to tournament
      */
     private List<AccountTransactionInfoDto> tryMakeParticipationFeePayment(TournamentTeamProposal teamProposal) {
-        log.debug("^ try to make participation fee and commission to tournament from team.id {} and teamProposal.id {}",
+        log.debug("^ try to make participation fee and commission to tournament from team.id '{}' and teamProposal.id '{}'",
                 teamProposal.getTeam().getId(), teamProposal.getId());
         User teamCapitan = teamProposal.getTeam().getCaptain().getUser();
         Tournament tournament = teamProposal.getTournament();
@@ -210,8 +210,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         AccountInfoDto teamCapitanAccountDto = financialClientService.getAccountByHolderInfo(teamCapitan.getLeagueId(),
                 AccountHolderType.USER);
         if (teamCapitanAccountDto.getAmount() < teamParticipationFee) {
-            log.warn("~ forbiddenException for create new proposal for team {} to tournament id {} and status {}. " +
-                            "Team capitan {} doesn't have enough fund to pay participation fee for all team members",
+            log.warn("~ forbiddenException for create new proposal for team '{}' to tournament id '{}' and status '{}'. " +
+                            "Team capitan '{}' doesn't have enough fund to pay participation fee for all team members",
                     teamProposal.getTeam().getId(), tournament.getId(), tournament.getStatus(), teamCapitan);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     String.format("Team capitan '%s' doesn't have enough fund to pay participation fee for all team members. " +
@@ -232,7 +232,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         AccountTransactionInfoDto result = financialClientService.applyPurchaseTransaction(
                 this.composeParticipationFeeTransaction(teamCapitanAccountDto, tournamentAccountDto, tournamentFundAmount));
         if (isNull(result)) {
-            log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
+            log.warn("~ forbiddenException for create new proposal for team '{}' to tournament id '{}'. " +
                             "Error while transferring fund to pat participation fee. Check requested params.",
                     teamProposal.getTeam().getId(), tournament.getId());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
@@ -243,7 +243,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         result = financialClientService.applyPurchaseTransaction(
                 this.composeParticipationCommissionTransaction(teamCapitanAccountDto, tournamentOwnerAccountDto, commissionAmount));
         if (isNull(result)) {
-            log.warn("~ forbiddenException for create new proposal for team {} to tournament id {}. " +
+            log.warn("~ forbiddenException for create new proposal for team '{}' to tournament id '{}'. " +
                             "Error while transferring fund to pat participation fee. Check requested params.",
                     teamProposal.getTeam().getId(), tournament.getId());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
@@ -286,7 +286,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     private void tryMakeStatusUpdateOperations(Tournament tournament) {
-        log.debug("^ try to define events for tournament: {}", tournament.getId());
+        log.debug("^ try to define events for tournament: '{}'", tournament.getId());
         final TournamentStatusType tournamentStatus = tournament.getStatus();
 
         if (tournamentStatus.isBefore(TournamentStatusType.SIGN_UP)
@@ -299,12 +299,12 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 && tournament.getStartPlannedDate().isBefore(LocalDateTime.now())) {
             this.handleTournamentStatusChange(tournament, TournamentStatusType.STARTED);
         }
-        log.debug("^ tournament {} with status {} were checked, and added to cache", tournament.getName(), tournament.getId());
+        log.debug("^ tournament '{}' with status '{}' were checked, and added to cache", tournament.getName(), tournament.getId());
         cachedTournamentId.add(tournament.getId());
     }
 
     private void handleTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentStatus) {
-        log.debug("^ handle changing status of tournament to {} in Tournament Event Service.", newTournamentStatus);
+        log.debug("^ handle changing status of tournament to '{}' in Tournament Event Service.", newTournamentStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentStatus
         );
@@ -319,10 +319,10 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .createdDate(LocalDateTime.now())
                 .build();
         try {
-            log.debug("Not implement to send kafka event in handleTournamentStatusChange: {}", event);
+            log.debug("Not implement to send kafka event in handleTournamentStatusChange: '{}'", event);
 //            eventService.sendEvent(event);
         } catch (Exception exc) {
-            log.error("Error in handleStatusChange: {}", exc.getMessage());
+            log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
         //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
         tournament.setStatus(newTournamentStatus);
@@ -330,7 +330,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     private void handleRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
-        log.debug("^ handle changing status of round to {} in Tournament Event Service.", newTournamentRoundStatus);
+        log.debug("^ handle changing status of round to '{}' in Tournament Event Service.", newTournamentRoundStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentRoundStatus
         );
@@ -347,7 +347,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         try {
             eventService.sendEvent(event);
         } catch (Exception exc) {
-            log.error("Error in handleStatusChange: {}", exc.getMessage());
+            log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
         //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
         tournamentRound.setStatus(newTournamentRoundStatus);
@@ -355,7 +355,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     private void handleSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
-        log.debug("^ handle changing status of series to {} in Tournament Event Service.", newTournamentSeriesStatus);
+        log.debug("^ handle changing status of series to '{}' in Tournament Event Service.", newTournamentSeriesStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentSeriesStatus
         );
@@ -372,7 +372,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         try {
             eventService.sendEvent(event);
         } catch (Exception exc) {
-            log.error("Error in handleStatusChange: {}", exc.getMessage());
+            log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
         //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
         tournamentSeries.setStatus(newTournamentSeriesStatus);
@@ -380,7 +380,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     private void handleMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
-        log.debug("^ handle changing status of match to {} in Tournament Event Service.", newTournamentMatchStatus);
+        log.debug("^ handle changing status of match to '{}' in Tournament Event Service.", newTournamentMatchStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentMatchStatus
         );
@@ -397,7 +397,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         try {
             eventService.sendEvent(event);
         } catch (Exception exc) {
-            log.error("Error in handleStatusChange: {}", exc.getMessage());
+            log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
     }
 }

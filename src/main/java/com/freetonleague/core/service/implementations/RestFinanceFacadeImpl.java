@@ -21,11 +21,15 @@ import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -43,9 +47,11 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     private final RestTeamFacade restTeamFacade;
     private final RestUserFacade restUserFacade;
     private final UserMapper userMapper;
-    private final Double withdrawFundFractionStep = 0.1;
+
     @Value("${freetonleague.service.league-finance.min-withdraw-value:12.0}")
     private Double minWithdrawFundValue;
+
+    private static final Double withdrawFundFractionStep = 0.1;
 
     @Override
     public AccountInfoDto getBalanceByGUID(String GUID, User user) {
@@ -91,6 +97,39 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     }
 
     /**
+     * Returns found transaction history (list) for current user
+     */
+    @Override
+    public Page<AccountTransactionInfoDto> getMyTransactionsHistory(Pageable pageable, List<AccountTransactionStatusType> statusList, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'getMyTransactionsHistory' in RestFinanceFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getMyTransactionsHistory' request denied");
+        }
+        log.debug("^ requested getMyTransactionsHistory in RestFinanceFacade for statusList '{}' by user.id '{}'",
+                statusList, user.getLeagueId());
+        AccountInfoDto accountInfoDto = this.getVerifiedAccountByHolder(user.getLeagueId(), AccountHolderType.USER, user, false);
+        return financialClientService.getTransactionsHistory(pageable, statusList, accountInfoDto);
+    }
+
+    /**
+     * Returns found transaction history (list) by specified params (only for admin)
+     */
+    @CanManageFinTransaction
+    @Override
+    public Page<AccountTransactionInfoDto> getTransactionsHistory(Pageable pageable, String leagueId, List<AccountTransactionStatusType> statusList, User user) {
+        AccountInfoDto accountInfoDto = null;
+        if (!isBlank(leagueId)) {
+            User filteredUser = restUserFacade.getVerifiedUserByLeagueId(leagueId);
+            accountInfoDto = nonNull(filteredUser)
+                    ? this.getVerifiedAccountByHolder(filteredUser.getLeagueId(), AccountHolderType.USER, user, false)
+                    : null;
+        }
+        log.debug("^ requested getTransactionsHistory in RestFinanceFacade for statusList '{}' for user.id '{}'",
+                statusList, leagueId);
+        return financialClientService.getTransactionsHistory(pageable, statusList, accountInfoDto);
+    }
+
+    /**
      * Returns created withdraw fund transaction info (with pause status) for specified params
      */
     @Override
@@ -116,6 +155,8 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
             throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "sourceAccountGUID",
                     "parameter 'sourceAccountGUID' is not belongs to current user. Create withdraw request was rejected");
         }
+        log.debug("^ requested createWithdrawRequest in RestFinanceFacade with amount '{}', sourceAccountGUID '{}', targetAddress '{}' by user.id '{}'",
+                amount, sourceAccountGUID, targetAddress, user.getLeagueId());
         // get external account by ExternalAddress (or create new one)
         AccountInfoDto targetAccount = this.getVerifiedAccountByExternalAddress(targetAddress);
         //Compose withdraw transaction
@@ -129,7 +170,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
                 .build();
         AccountTransactionInfoDto savedTransactionInfoDto = financialClientService.applyWithdrawTransaction(accountTransactionInfoDto);
         if (isNull(savedTransactionInfoDto)) {
-            log.error("!> error while creating withdraw transaction from data {} for user {}.", accountTransactionInfoDto, user.getLeagueId());
+            log.error("!> error while creating withdraw transaction from data '{}' for user '{}'.", accountTransactionInfoDto, user.getLeagueId());
             throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_WITHDRAW_CREATION_ERROR,
                     "Withdraw transaction was not finished and not saved on Portal. Check requested params.");
         }
@@ -144,7 +185,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     @Override
     public AccountTransactionInfoDto editWithdrawRequest(String transactionGUID, AccountTransactionInfoDto transactionInfoDto, User user) {
         if (isBlank(transactionInfoDto.getGUID()) || !transactionGUID.equals((transactionInfoDto.getGUID()))) {
-            log.debug("^ Transaction with requested GUID parameter {} is not match specified GUID in transactionInfoDto {} for." +
+            log.debug("^ Transaction with requested GUID parameter '{}' is not match specified GUID in transactionInfoDto '{}' for." +
                     " 'editWithdrawRequest' in RestFinanceFacade request denied", transactionGUID, transactionInfoDto.getGUID());
             throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR,
                     String.format("Transaction with requested GUID '%s' is not match specified GUID in transactionInfoDto '%s'", transactionGUID, transactionInfoDto.getGUID()));
@@ -154,6 +195,8 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
             throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "status",
                     "parameter 'status' is is not set for transactionInfoDto. Modifying transaction request was rejected");
         }
+        log.debug("^ requested editWithdrawRequest in RestFinanceFacade for transactionGUID '{}', data '{}', by user.id '{}'",
+                transactionGUID, transactionInfoDto, user.getLeagueId());
         AccountTransactionInfoDto existedTransaction = this.getVerifiedTransactionByGUID(transactionGUID);
         // Change only status of transaction
         existedTransaction.setStatus(transactionInfoDto.getStatus());
@@ -163,7 +206,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
 
         AccountTransactionInfoDto savedTransactionInfoDto = financialClientService.editWithdrawTransaction(existedTransaction);
         if (isNull(savedTransactionInfoDto)) {
-            log.error("!> error while modifying withdraw transaction from data {} for user {}.", transactionInfoDto, user.getLeagueId());
+            log.error("!> error while modifying withdraw transaction from data '{}' for user '{}'.", transactionInfoDto, user.getLeagueId());
             throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_WITHDRAW_CREATION_ERROR,
                     "Withdraw transaction was not finished and not saved on Portal. Check requested params.");
         }
@@ -190,7 +233,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         }
         CouponInfoDto advertisementCompanyAccount = financialClientService.getVerifiedAdvertisementCompany(couponHash);
         if (isNull(advertisementCompanyAccount)) {
-            log.warn("~ Applying coupon with hash {} was unsuccessful for user. " +
+            log.warn("~ Applying coupon with hash '{}' was unsuccessful for user. " +
                     "Active advertisement company was not found. Request denied in RestFinanceFacade", couponHash);
             throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_COUPON_APPLY_ERROR,
                     "Active advertisement company was not found. Applying coupon with hash " + couponHash + " was unsuccessful");
@@ -198,7 +241,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
 
         AccountInfoDto account = financialClientService.applyCouponForUser(advertisementCompanyAccount, user);
         if (isNull(account)) {
-            log.warn("~ Applying coupon with hash {} was unsuccessful for user {}. " +
+            log.warn("~ Applying coupon with hash '{}' was unsuccessful for user '{}'. " +
                     "ApplyCouponForUser in RestFinanceFacade request denied", couponHash, user);
             throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_COUPON_APPLY_ERROR,
                     "Applying coupon with hash " + couponHash + " was unsuccessful");
@@ -216,7 +259,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         }
         AccountInfoDto account = financialClientService.getAccountByGUID(GUID);
         if (isNull(account)) {
-            log.debug("^ Account for requested GUID {} was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
+            log.debug("^ Account for requested GUID '{}' was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
             throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id '" + GUID + "' was not found");
         }
         return account;
@@ -232,7 +275,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         }
         AccountInfoDto account = financialClientService.getAccountByExternalAddress(externalAddress);
         if (isNull(account)) {
-            log.debug("^ Account for requested external address {} was not found. 'getVerifiedAccountByExternalAddress' in RestFinanceFacade request denied", externalAddress);
+            log.debug("^ Account for requested external address '{}' was not found. 'getVerifiedAccountByExternalAddress' in RestFinanceFacade request denied", externalAddress);
             throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested external address '" + externalAddress + "' was not found");
         }
         return account;
@@ -257,7 +300,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     private AccountTransactionInfoDto getVerifiedTransactionByGUID(String transactionGUID) {
         AccountTransactionInfoDto existedTransaction = financialClientService.getTransactionByGUID(transactionGUID);
         if (isNull(existedTransaction)) {
-            log.debug("^ Transaction with requested GUID {} is not found for 'getVerifiedTransactionByGUID' in RestFinanceFacade request denied",
+            log.debug("^ Transaction with requested GUID '{}' is not found for 'getVerifiedTransactionByGUID' in RestFinanceFacade request denied",
                     transactionGUID);
             throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_NOT_FOUND_ERROR,
                     String.format("Transaction with requested GUID '%s' is not found. Request rejected.", transactionGUID));

@@ -68,7 +68,7 @@ public class SessionServiceImpl implements SessionService {
                 User user = userService.loadWithLeagueId(sessionDto.getUserLeagueId(), token);
                 if (nonNull(user)) {
                     // create new session
-                    log.debug("^ trying to save new session with token: '{}' for user: {}", token, user);
+                    log.debug("^ trying to save new session with token: '{}' for user: '{}'", token, user);
                     session = this.saveFromLeagueId(sessionDto, user);
                 }
             }
@@ -82,14 +82,14 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public Session loadServiceByToken(String accessToken) {
         if (isBlank(accessToken) || !accessToken.equals(this.leagueFinanceServiceToken)) {
-            log.error("!!> accessToken: {} for service session was Blank or not correct. Service authorize request rejected.", accessToken);
+            log.error("!!> accessToken: '{}' for service session was Blank or not correct. Service authorize request rejected.", accessToken);
             return null;
         }
         log.debug("^ trying to find service session by accessToken: '{}'", accessToken);
         User user = userService.findByUsername("SERVICE_" + accessToken);
         Session session = this.getByUser(user);
         if (isNull(session)) {
-            log.debug("^ active session for service user wasn't found in DB. trying to create new session for Service user {}", user);
+            log.debug("^ active session for service user wasn't found in DB. trying to create new session for Service user '{}'", user);
             session = this.createSessionForServiceUser(user);
         }
         return session;
@@ -118,7 +118,7 @@ public class SessionServiceImpl implements SessionService {
      */
     private Session saveFromLeagueId(SessionDto sessionDto, User user) {
         if (isNull(sessionDto) || isNull(user)) {
-            log.error("!> error while creating new session for user {} and session data {} ", user, sessionDto);
+            log.error("!> error while creating new session for user '{}' and session data '{}' ", user, sessionDto);
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_SESSION_ERROR,
                     "Some error while creating session in Core-module for " + user + " with data " + sessionDto);
         }

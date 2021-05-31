@@ -54,7 +54,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      */
     @Override
     public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
-        log.debug("^ trying to generate rounds for tournament.id {} with Single Elimination algorithm", tournament.getId());
+        log.debug("^ trying to generate rounds for tournament.id '{}' with Single Elimination algorithm", tournament.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournament.getStatus())) {
             log.error("!> requesting generate tournament round for non-active tournament. Check evoking clients");
             return null;
@@ -109,7 +109,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      */
     @Override
     public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
-        log.debug("^ trying to compose matches for new round for tournamentRound.id {} with Single Elimination algorithm",
+        log.debug("^ trying to compose matches for new round for tournamentRound.id '{}' with Single Elimination algorithm",
                 tournamentRound.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournamentRound.getStatus())) {
             log.error("!> requesting composeNewRoundForTournament for not active tournament round status. Check evoking clients");
@@ -129,7 +129,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                 .map(this::composeAndFillRivalsOfTournamentSeries).filter(Objects::nonNull).collect(Collectors.toList());
         if (isEmpty(updatedTournamentSeriesList)
                 || updatedTournamentSeriesList.size() != tournamentRound.getSeriesList().size()) {
-            log.error("!> requesting composeNewRoundForTournament for errors in series list for round.id {}. " +
+            log.error("!> requesting composeNewRoundForTournament for errors in series list for round.id '{}'. " +
                     "Check stack trace and evoking clients", tournamentRound.getId());
             throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
         }
@@ -154,7 +154,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     private TournamentSeries composeAndFillRivalsOfTournamentSeries(TournamentSeries currentSeries) {
         if (isNotEmpty(currentSeries.getSeriesRivalList())) {
             log.error("!> requesting composeAndFillRivalsOfTournamentSeries in composeNewRoundForTournament for not empty " +
-                    "list of series rival for series {}. Check evoking clients.", currentSeries);
+                    "list of series rival for series '{}'. Check evoking clients.", currentSeries);
             return null;
         }
         // collect and build series rival for current series
@@ -316,8 +316,8 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
                                                                                         Integer rivalCountPerMatch,
                                                                                         List<TournamentTeamProposal> teamProposalList) {
         if (isNull(rivalCombinationCount) || isNull(rivalCountPerMatch) || isNull(teamProposalList)) {
-            log.error("!> requesting generate rival combination for NULL rivalCombinationCount {} " +
-                            "or NULL matchRivalCount {} or NULL teamProposalList {}. Check evoking clients",
+            log.error("!> requesting generate rival combination for NULL rivalCombinationCount '{}' " +
+                            "or NULL matchRivalCount '{}' or NULL teamProposalList '{}'. Check evoking clients",
                     rivalCombinationCount, rivalCountPerMatch, teamProposalList);
             return null;
         }

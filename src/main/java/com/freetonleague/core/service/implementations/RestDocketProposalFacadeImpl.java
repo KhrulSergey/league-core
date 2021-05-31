@@ -84,7 +84,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         DocketUserProposal newUserProposal = this.getVerifiedUserProposalByDto(userProposalDto);
 
         if (!newUserProposal.getUser().equals(currentUser)) {
-            log.warn("~ forbiddenException for create proposal to docket.id {} for user.leagueId {} from user {}.",
+            log.warn("~ forbiddenException for create proposal to docket.id '{}' for user.leagueId '{}' from user '{}'.",
                     userProposalDto.getDocketId(), userProposalDto.getLeagueId(), currentUser);
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_CREATION_ERROR,
                     "User can apply to docket only by himself. Session user not equals specified leagueId.");
@@ -96,7 +96,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         DocketUserProposal existedUserProposal = docketProposalService.getProposalByUserAndDocket(
                 newUserProposal.getUser(), docket);
         if (nonNull(existedUserProposal)) {
-            log.warn("~ forbiddenException for create duplicate proposal from user {}. Already existed proposal.id {}.",
+            log.warn("~ forbiddenException for create duplicate proposal from user '{}'. Already existed proposal.id '{}'.",
                     newUserProposal.getUser(), existedUserProposal.getId());
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_EXIST_ERROR,
                     "Duplicate proposal from user to the one docket is prohibited. Request rejected.");
@@ -104,7 +104,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
 
         //check status of docket
         if (!DocketStatusType.activeStatusList.contains(docket.getStatus())) {
-            log.warn("~ forbiddenException for create new proposal for user {} to docket.id {} with status {}. " +
+            log.warn("~ forbiddenException for create new proposal for user '{}' to docket.id '{}' with status '{}'. " +
                             "Docket is closed for new proposals",
                     userProposalDto.getLeagueId(), docket.getId(), docket.getStatus());
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
@@ -115,12 +115,12 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         //check exceed max proposal count to docket
         if (docket.hasProposalCountLimit()) {
             int docketProposalCount = docketProposalService.countActiveUserProposalListByDocket(docket);
-            log.warn("~ For docket {} with limit {} we have proposalList.size {}, from repo we have proposal count {}, " +
-                            "proposal size is {} equal",
+            log.warn("~ For docket '{}' with limit '{}' we have proposalList.size '{}', from repo we have proposal count '{}', " +
+                            "proposal size is '{}' equal",
                     docket.getId(), docket.getMaxProposalCount(), docket.getUserProposalList().size(),
                     docketProposalCount, docketProposalCount == docket.getUserProposalList().size());
             if (docketProposalCount > docket.getMaxProposalCount()) {
-                log.warn("~ forbiddenException for create new proposal for user {} to docket.id {}. " +
+                log.warn("~ forbiddenException for create new proposal for user '{}' to docket.id '{}'. " +
                                 "User proposal's to Docket can't be created. Docket proposal's limit exceeded",
                         userProposalDto.getLeagueId(), docket.getId());
                 throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_LIMIT_EXCEED_ERROR,
@@ -138,7 +138,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         //save proposal
         newUserProposal = docketProposalService.addProposal(newUserProposal);
         if (isNull(newUserProposal)) {
-            log.error("!> error while creating user proposal to docket by user.id {} to docket.id {}.",
+            log.error("!> error while creating user proposal to docket by user.id '{}' to docket.id '{}'.",
                     userProposalDto.getDocketId(), userProposalDto.getDocketId());
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_CREATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
@@ -162,13 +162,13 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
             Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
             userProposal = docketProposalService.getProposalByUserAndDocket(user, docket);
         } else {
-            log.warn("~ forbiddenException for modify proposal to docket for user {}. " +
+            log.warn("~ forbiddenException for modify proposal to docket for user '{}'. " +
                     "No valid parameters of user proposal to docket was specified", userProposalId);
             throw new TeamParticipantManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
                     "No valid parameters of user proposal to docket was specified. Request rejected.");
         }
         if (isNull(userProposal)) {
-            log.debug("^ User proposal to docket with requested parameters docketId {}, leagueId {}, userProposalId {} was not found. " +
+            log.debug("^ User proposal to docket with requested parameters docketId '{}', leagueId '{}', userProposalId '{}' was not found. " +
                     "'editProposalToDocket' in RestDocketProposalFacade request denied", docketId, leagueId, userProposalId);
             throw new TeamManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR, "User proposal to docket with requested id " + userProposalId + " was not found");
         }
@@ -176,7 +176,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         userProposal.setState(currentUserProposalState);
         DocketUserProposal savedUserProposal = docketProposalService.editProposal(userProposal);
         if (isNull(savedUserProposal)) {
-            log.error("!> error while modifying user proposal to docket {}.", userProposal);
+            log.error("!> error while modifying user proposal to docket '{}'.", userProposal);
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_MODIFICATION_ERROR,
                     "User proposal to docket was not saved on Portal. Check requested params.");
         }
@@ -198,12 +198,12 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
     public DocketUserProposal getVerifiedUserProposalById(long id) {
         DocketUserProposal docketUserProposal = docketProposalService.getProposalById(id);
         if (isNull(docketUserProposal)) {
-            log.debug("^ User proposal to docket with requested id {} was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
+            log.debug("^ User proposal to docket with requested id '{}' was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
             throw new DocketManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR, "Tournament team proposal  with requested id " + id + " was not found");
         }
         //TODO check logic and make decision about need in restrict proposal modification for orgs
 //        if (docketUserProposal.getState().isRejected()) {
-//            log.debug("^ Docket user proposal with requested id {} was rejected by orgs. " +
+//            log.debug("^ Docket user proposal with requested id '{}' was rejected by orgs. " +
 //                            "'getVerifiedUserProposalById' in RestDocketProposalFacade request denied", id);
 //            throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VISIBLE_ERROR,
 //                    "Docket user proposal with requested id " + id + " was rejected by orgs. Modifying request denied");
@@ -218,7 +218,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         // Verify Docket information
         Set<ConstraintViolation<DocketUserProposalDto>> violations = validator.validate(userProposalDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted DocketUserProposalDto: {} have constraint violations: {}", userProposalDto, violations);
+            log.debug("^ transmitted DocketUserProposalDto: '{}' have constraint violations: '{}'", userProposalDto, violations);
             throw new ConstraintViolationException(violations);
         }
         DocketUserProposal docketUserProposal = docketProposalMapper.fromDto(userProposalDto);

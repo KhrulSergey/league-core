@@ -31,7 +31,7 @@ public class LeagueStorageClientService {
         if (isNull(team)) {
             log.error("!> requesting saveTeamLogo for NULL team. Check evoking clients");
         }
-        log.debug("^ try to saveTeamLogo in LeagueStorageClientService for team.id {}", team.getCoreId());
+        log.debug("^ try to saveTeamLogo in LeagueStorageClientService for team.id '{}'", team.getCoreId());
         MediaResourceDto teamLogo = MediaResourceDto.builder()
                 .rawData(team.getLogoRawFile())
                 .name(String.format("Logo-for-team-%s", team.getName()))
@@ -49,7 +49,7 @@ public class LeagueStorageClientService {
         if (isNull(tournament)) {
             log.error("!> requesting saveTournamentLogo for NULL tournament. Check evoking clients");
         }
-        log.debug("^ try to saveTournamentLogo in LeagueStorageClientService for tournament.id {}", tournament.getCoreId());
+        log.debug("^ try to saveTournamentLogo in LeagueStorageClientService for tournament.id '{}'", tournament.getCoreId());
 
         MediaResourceDto tournamentLogo = MediaResourceDto.builder()
                 .rawData(tournament.getLogoRawFile())

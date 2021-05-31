@@ -101,14 +101,14 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     private void tryUpdateInfoFromLeagueIdModule(User user) {
-        log.debug("^ try to define update events for user: {}", user.getLeagueId());
+        log.debug("^ try to define update events for user: '{}'", user.getLeagueId());
         cachedInitiatedUserLeagueId.add(user.getLeagueId());
         try {
             UserDto updatedUser = leagueIdClientService.getUserByLeagueId(user.getLeagueId());
             if (nonNull(updatedUser) && nonNull(updatedUser.getUpdatedAt())
                     && updatedUser.getUpdatedAt().isAfter(user.getUpdatedAt())) {
 
-                log.debug("^ user.id {} were choose to updated info {} in monitorForActiveUsers", user.getLeagueId(), updatedUser);
+                log.debug("^ user.id '{}' were choose to updated info '{}' in monitorForActiveUsers", user.getLeagueId(), updatedUser);
 
                 user.setAvatarHashKey(updatedUser.getAvatarHashKey());
                 user.setEmail(updatedUser.getEmail());
@@ -117,24 +117,24 @@ public class UserEventServiceImpl implements UserEventService {
 
                 User savedUser = userService.edit(user);
                 if (isNull(savedUser)) {
-                    log.debug("^ user.id {} were not saved in DB with data {}. Check stackTrace", user.getLeagueId(), updatedUser);
+                    log.debug("^ user.id '{}' were not saved in DB with data '{}'. Check stackTrace", user.getLeagueId(), updatedUser);
                 }
             }
 
         } finally {
-            log.debug("^ user.id {} were checked in monitorForActiveUsers and added to cache", user.getLeagueId());
+            log.debug("^ user.id '{}' were checked in monitorForActiveUsers and added to cache", user.getLeagueId());
             cachedActiveUserLeagueId.add(user.getLeagueId());
         }
     }
 
     private void tryMakeStatusUpdateOperations(User user) {
-        log.debug("^ try to define events for user: {}", user.getLeagueId());
+        log.debug("^ try to define events for user: '{}'", user.getLeagueId());
         final UserStatusType userStatus = user.getStatus();
 
         if (userStatus.isInitiated()) {
             this.handleUserStatusChange(user, UserStatusType.CREATED);
         }
-        log.debug("^ user {} with status {} were checked, and added to cache", user.getLeagueId(), user.getStatus());
+        log.debug("^ user '{}' with status '{}' were checked, and added to cache", user.getLeagueId(), user.getStatus());
         cachedInitiatedUserLeagueId.add(user.getLeagueId());
     }
 
@@ -158,7 +158,7 @@ public class UserEventServiceImpl implements UserEventService {
      */
     @Override
     public void processUserStatusChange(User user, UserStatusType newUserStatusType) {
-        log.debug("^ new status changed for user {} with new status {}.", user, newUserStatusType);
+        log.debug("^ new status changed for user '{}' with new status '{}'.", user, newUserStatusType);
         if (newUserStatusType.isCreated()) {
             financialClientService.createAccountByHolderInfo(user.getLeagueId(),
                     AccountHolderType.USER, user.getUsername());
@@ -180,10 +180,10 @@ public class UserEventServiceImpl implements UserEventService {
                 .createdDate(LocalDateTime.now())
                 .build();
         try {
-            log.debug("Not implement to send kafka event in handleUserStatusChange: {}", event);
+            log.debug("Not implement to send kafka event in handleUserStatusChange: '{}'", event);
 //            eventService.sendEvent(event);
         } catch (Exception exc) {
-            log.error("Error in handleStatusChange: {}", exc.getMessage());
+            log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
         user.setStatus(newUserStatusType);
         userService.edit(user);
