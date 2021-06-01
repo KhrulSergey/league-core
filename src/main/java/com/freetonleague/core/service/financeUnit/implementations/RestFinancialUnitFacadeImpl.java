@@ -27,6 +27,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -180,6 +181,10 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
     @Override
     public AccountTransactionInfoDto createTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
         log.debug("^ try to create transfer transaction for data '{}'", accountTransactionInfoDto);
+        if (!this.verifyAccountTransactionByDto(accountTransactionInfoDto)) {
+            log.error("!!> Can't create transfer transaction for accountTransactionInfoDto with errors. Request denied");
+            return null;
+        }
         AccountTransaction accountTransaction = this.composeVerifiedTransferTransactionByDto(accountTransactionInfoDto);
         if (isNull(accountTransaction)) {
             log.error("!!> Can't create transfer transaction for accountTransactionInfoDto with errors. Request denied");
@@ -235,9 +240,34 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         } catch (Exception exc) {
             log.error("!!> modifying transferring transaction '{}' from Dto '{}' cause error with message '{}'. Request denied",
                     savedAccountTransaction, accountTransactionInfoDto, exc.getMessage());
-            throw new CustomUnexpectedException("Saved transferring transaction returned NULL from DB");
+            throw new CustomUnexpectedException("Save transferring transaction process returned NULL from DB");
         }
         return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
+    }
+
+    /**
+     * Returns aborted transaction info for specified data
+     */
+    @Override
+    public AccountTransactionInfoDto abortTransaction(String transactionGUID) {
+        log.debug("^ try to abort transfer transaction for transactionGUID '{}'", transactionGUID);
+        if (isBlank(transactionGUID)) {
+            log.error("!!> Can't abort transfer transaction for BLANK transactionGUID. Request denied");
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_ABORT_ERROR,
+                    "can't abort transfer transaction for BLANK transactionGUID. Request denied");
+        }
+        AccountTransaction existedTransaction = this.getVerifiedAccountTransactionByGUID(transactionGUID);
+        if (isNull(Objects.requireNonNull(existedTransaction).getStatus()) || existedTransaction.getStatus().isAborted()) {
+            log.warn("~ Transfer transaction is already aborted. Request denied");
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_ABORT_ERROR,
+                    "Transfer transaction is already aborted. Request denied");
+        }
+        AccountTransaction savedTransaction = financialUnitService.abortTransaction(existedTransaction);
+        if (isNull(savedTransaction)) {
+            log.error("!!> Can't abort transaction. Check stack trace. Request denied");
+            throw new CustomUnexpectedException("Aborted transaction process returned NULL from DB");
+        }
+        return accountTransactionFinUnitMapper.toDto(savedTransaction);
     }
 
 //    /**
@@ -275,7 +305,6 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
 //        }
 //        return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
 //    }
-
 
     /**
      * Returns created account info for specified holder
@@ -356,8 +385,25 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
                 .targetAccount(account)
                 .transactionType(TransactionType.DEPOSIT)
                 .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
+                .status(AccountTransactionStatusType.FINISHED)
                 .build();
         accountTransaction.generateGUID();
+        return accountTransaction;
+    }
+
+    private AccountTransaction getVerifiedAccountTransactionByGUID(String transactionGUID) {
+        if (isBlank(transactionGUID)) {
+            log.error("!> requesting getVerifiedAccountByGUID for Blank transactionGUID. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to get transaction by GUID '{}'", transactionGUID);
+        AccountTransaction accountTransaction = financialUnitService.getTransaction(UUID.fromString(transactionGUID));
+        if (isNull(accountTransaction)) {
+            log.error("!!> Transaction with requested id '{}' was not found. 'getVerifiedAccountTransactionByGUID' in RestFinancialUnitFacadeImpl request denied",
+                    transactionGUID);
+            throw new FinancialUnitManageException(ExceptionMessages.TRANSACTION_NOT_FOUND_ERROR,
+                    "Financial transaction with requested id " + transactionGUID + " was not found");
+        }
         return accountTransaction;
     }
 

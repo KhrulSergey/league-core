@@ -321,7 +321,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         if (transaction.getStatus().isAborted()) {
             log.error("!!> requesting abort transaction with data '{}' in editTransaction. Call specific abortTransaction method to abort. " +
                     "Request denied. Check evoking clients", transaction);
-            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_ABORT_ERROR,
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_MODIFY_ABORT_ERROR,
                     "Specified financial account transaction can't be aborted with modifying method. ");
         }
         log.debug("^ trying to modify transaction '{}'", transaction);

@@ -95,6 +95,13 @@ public class TournamentEventServiceImpl implements TournamentEventService {
             financialClientService.createAccountByHolderInfo(tournament.getCoreId(),
                     AccountHolderType.TOURNAMENT, tournament.getName());
         }
+        if (tournament.getAccessType().isPaid() && TournamentStatusType.canceledStatusList.contains(newTournamentMatchStatus)) {
+            List<TournamentTeamProposal> activeProposalList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament);
+            for (TournamentTeamProposal proposal : activeProposalList) {
+                proposal.setParticipatePaymentList(this.tryMakeParticipationFeeRefund(proposal, false));
+                tournamentProposalService.editProposal(proposal);
+            }
+        }
     }
 
     /**
@@ -253,6 +260,29 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         return participatePaymentList;
     }
 
+    /**
+     * Try to make refund of participation fee and commission to team
+     */
+    private List<AccountTransactionInfoDto> tryMakeParticipationFeeRefund(TournamentTeamProposal teamProposal, Boolean needToPayPenalty) {
+        if (isNull(teamProposal.getState()) || !ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
+            log.warn("~ forbiddenException for refund to proposal for team '{}' with state {} to tournament. " +
+                            "Error while refund transferring of participation fee. Check requested params.",
+                    teamProposal.getTeam().getId(), teamProposal.getState());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    "Error while transferring fund to pay commission participation fee. Check requested params.");
+        }
+        log.debug("^ try to refund tournament participation fee and commission to team.id '{}' and teamProposal.id '{}'",
+                teamProposal.getTeam().getId(), teamProposal.getId());
+        // abort transaction
+        List<AccountTransactionInfoDto> updatedParticipatePaymentList = teamProposal.getParticipatePaymentList().parallelStream()
+                .map(financialClientService::abortTransaction).collect(Collectors.toList());
+        if (needToPayPenalty) {
+            //TODO implement penalty payments
+        }
+        log.debug("^ successfully refund to team.id '{}' and teamProposal.id '{}'", teamProposal.getTeam().getId(), teamProposal.getId());
+        return updatedParticipatePaymentList;
+    }
+
     private AccountTransactionInfoDto composeParticipationFeeTransaction(AccountInfoDto accountSourceDto,
                                                                          AccountInfoDto accountTargetDto,
                                                                          double tournamentFundAmount) {
@@ -262,6 +292,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .targetAccount(accountTargetDto)
                 .transactionType(TransactionType.PAYMENT)
                 .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
+                .status(AccountTransactionStatusType.FINISHED)
                 .build();
 
     }
@@ -275,6 +306,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .targetAccount(accountTargetDto)
                 .transactionType(TransactionType.PAYMENT)
                 .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_COMMISSION)
+                .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }
 

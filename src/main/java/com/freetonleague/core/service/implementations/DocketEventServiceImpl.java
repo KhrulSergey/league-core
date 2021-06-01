@@ -120,6 +120,7 @@ public class DocketEventServiceImpl implements DocketEventService {
                 .targetAccount(accountTargetDto)
                 .transactionType(TransactionType.PAYMENT)
                 .transactionTemplateType(TransactionTemplateType.DOCKET_ENTRANCE_FEE)
+                .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }
 }

@@ -67,6 +67,11 @@ public interface TournamentProposalService {
     /**
      * Returns list of approved team proposal list for specified tournament.
      */
+    List<TournamentTeamProposal> getApprovedTeamProposalListByTournament(Tournament tournament);
+
+    /**
+     * Returns list of active team proposal list for specified tournament.
+     */
     List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament);
 
     /**
