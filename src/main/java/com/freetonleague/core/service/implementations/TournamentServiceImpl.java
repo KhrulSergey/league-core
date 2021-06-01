@@ -99,7 +99,9 @@ public class TournamentServiceImpl implements TournamentService {
             tournament.setLogoHashKey(leagueStorageClientService.saveTournamentLogo(tournament));
         }
         tournament = tournamentRepository.save(tournament);
-        tournamentEventService.processTournamentStatusChange(tournament, tournament.getStatus());
+        if (tournament.isStatusChanged()) {
+            this.handleTournamentStatusChanged(tournament);
+        }
         return tournament;
     }
 
@@ -116,7 +118,6 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         log.debug("^ trying to modify tournament '{}'", tournament);
-
         if (tournament.getStatus().isFinished()) {
             tournament.setFinishedDate(LocalDateTime.now());
             // if tournament was automatically finished by EventService (not manually-forced)
@@ -153,9 +154,8 @@ public class TournamentServiceImpl implements TournamentService {
         }
         log.debug("^ trying to set 'deleted' mark to tournament '{}'", tournament);
         tournament.setStatus(TournamentStatusType.DELETED);
-        tournament = tournamentRepository.save(tournament);
         this.handleTournamentStatusChanged(tournament);
-        return tournament;
+        return tournamentRepository.save(tournament);
     }
 
     /**
@@ -232,6 +232,7 @@ public class TournamentServiceImpl implements TournamentService {
     private void handleTournamentStatusChanged(Tournament tournament) {
         log.warn("~ status for tournament id '{}' was changed from '{}' to '{}' ",
                 tournament.getId(), tournament.getPrevStatus(), tournament.getStatus());
+        tournamentEventService.processTournamentStatusChange(tournament, tournament.getStatus());
         tournament.setPrevStatus(tournament.getStatus());
     }
 }

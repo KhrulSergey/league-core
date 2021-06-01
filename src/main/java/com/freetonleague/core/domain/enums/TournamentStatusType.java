@@ -27,6 +27,22 @@ public enum TournamentStatusType {
         return this.sequencePosition < compare.getSequencePosition();
     }
 
+    /**
+     * Returns "finished" statuses for tournaments
+     */
+    public static final List<TournamentStatusType> finishedStatusList = List.of(
+            TournamentStatusType.FINISHED,
+            TournamentStatusType.DECLINED,
+            TournamentStatusType.DELETED
+    );
+    /**
+     * Returns "canceled" statuses for tournaments
+     */
+    public static final List<TournamentStatusType> canceledStatusList = List.of(
+            TournamentStatusType.DECLINED,
+            TournamentStatusType.DELETED
+    );
+
     public boolean isFinished() {
         return this == FINISHED;
     }
@@ -35,11 +51,13 @@ public enum TournamentStatusType {
         return this == DELETED;
     }
 
-    public static final List<TournamentStatusType> finishedStatusList = List.of(
-            TournamentStatusType.FINISHED,
-            TournamentStatusType.DECLINED,
-            TournamentStatusType.DELETED
-    );
+    public boolean isCreated() {
+        return this == CREATED;
+    }
+
+    public boolean isDeclined() {
+        return this == DECLINED;
+    }
 
     /**
      * Returns "active" statuses for tournaments
@@ -61,7 +79,5 @@ public enum TournamentStatusType {
             TournamentStatusType.FINISHED
     );
 
-    public boolean isCreated() {
-        return this == CREATED;
-    }
+
 }

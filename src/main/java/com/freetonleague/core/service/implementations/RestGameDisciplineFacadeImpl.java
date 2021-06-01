@@ -39,7 +39,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public GameDisciplineDto getDiscipline(long id, User user) {
-        return disciplineMapper.toDto(this.getVerifiedDiscipline(id, user));
+        return disciplineMapper.toDto(this.getVerifiedDiscipline(id));
     }
 
     /**
@@ -47,11 +47,6 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public List<GameDisciplineDto> getAllDisciplines(User user) {
-        //TODO delete until 01/06/21
-//        if (isNull(user)) {
-//            log.debug("^ user is not authenticate. 'getAllDisciplines' in RestGameDisciplineFacade request denied");
-//            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getAllDisciplines' request denied");
-//        }
         return disciplineMapper.toDto(disciplineService.getAllDisciplines());
     }
 
@@ -100,7 +95,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public GameDisciplineSettingsDto getPrimaryDisciplineSettingsByDiscipline(long disciplineId, User user) {
-        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId, user);
+        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId);
 
         return disciplineSettingsMapper.toDto(this.getVerifiedPrimaryDisciplineSettingsByDiscipline(gameDiscipline));
     }
@@ -122,7 +117,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
                     "parameter name is not unique for addDisciplineSettings");
         }
 
-        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineSettingsDto.getGameDisciplineId(), user);
+        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineSettingsDto.getGameDisciplineId());
         GameDisciplineSettings gameDisciplineSettings = disciplineSettingsMapper.fromDto(disciplineSettingsDto);
         gameDisciplineSettings.setGameDiscipline(gameDiscipline);
         gameDisciplineSettings = disciplineService.addDisciplineSettings(gameDisciplineSettings);
@@ -147,11 +142,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      * Getting game discipline info by id and user with privacy check
      */
     @Override
-    public GameDiscipline getVerifiedDiscipline(long id, User user) {
-//        if (isNull(user)) {
-//            log.debug("^ user is not authenticate. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied");
-//            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedDiscipline' request denied");
-//        }
+    public GameDiscipline getVerifiedDiscipline(long id) {
         GameDiscipline gameDiscipline = disciplineService.getDisciplineById(id);
         if (isNull(gameDiscipline)) {
             log.debug("^ Game discipline with requested id '{}' was not found. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied", id);
@@ -170,11 +161,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      * Getting game discipline settings info by id, discipline and user with privacy check
      */
     @Override
-    public GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedDisciplineSettings' request denied");
-        }
+    public GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline) {
         GameDisciplineSettings gameDisciplineSettings = disciplineService.getDisciplineSettings(id);
         if (isNull(gameDisciplineSettings)) {
             log.debug("^ Game discipline settings with requested id '{}' was not found. " +

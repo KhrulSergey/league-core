@@ -5,7 +5,6 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TournamentManageException;
-import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
@@ -95,7 +94,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         tournamentDto.getTournamentSettings().setId(null);
         tournamentDto.getTournamentSettings().setTournamentId(null);
 
-        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
+        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto);
         newTournament = tournamentService.addTournament(newTournament);
 
         if (isNull(newTournament)) {
@@ -112,19 +111,23 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     @CanManageTournament
     @Override
     public TournamentDto editTournament(TournamentDto tournamentDto, User user) {
-        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
-
+        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto);
         if (isNull(tournamentDto.getId())) {
             log.warn("~ parameter 'tournament id' is not set for editTournament");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_VALIDATION_ERROR, "tournament id",
                     "parameter 'tournament id' is not set for editTournament");
         }
-
-        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId());
         if (tournamentDto.getStatus().isDeleted()) {
             log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
                     "Modifying tournament was rejected. Check requested params and method.");
+        }
+        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId());
+
+        if (TournamentStatusType.canceledStatusList.contains(tournament.getStatus())) {
+            log.warn("~ tournament was already canceled, modifying tournament with editTournament is rejected.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
+                    "Modifying canceled tournament was rejected. Check requested params and method.");
         }
 
         if (isNull(tournamentDto.getTournamentSettings().getId())) {
@@ -204,7 +207,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     }
 
     private TournamentDiscordChannelDto composeDiscordChannelInfoForTournament(Tournament tournament) {
-        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament)
+        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentProposalService.getApprovedTeamProposalListByTournament(tournament)
                 .parallelStream()
                 .map(tournamentProposalService::getUserDiscordIdListFromTeamProposal)
                 .flatMap(Collection::stream)
@@ -220,12 +223,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     /**
      * Getting tournament by DTO and user with deep validation and privacy check
      */
-    private Tournament getVerifiedTournamentByDto(TournamentDto tournamentDto, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'addTournament' request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'addTournament' request denied");
-        }
-
+    private Tournament getVerifiedTournamentByDto(TournamentDto tournamentDto) {
         // Verify base Tournament information
         Set<ConstraintViolation<TournamentDto>> violations = validator.validate(tournamentDto);
         if (!violations.isEmpty()) {
@@ -277,9 +275,9 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
 
         //Verify Discipline and its Settings for Tournament
-        GameDiscipline gameDiscipline = gameDisciplineFacade.getVerifiedDiscipline(tournamentDto.getGameDisciplineId(), user);
+        GameDiscipline gameDiscipline = gameDisciplineFacade.getVerifiedDiscipline(tournamentDto.getGameDisciplineId());
         GameDisciplineSettings gameDisciplineSettings = gameDisciplineFacade.getVerifiedDisciplineSettings(
-                tournamentDto.getGameDisciplineSettingsId(), gameDiscipline, user);
+                tournamentDto.getGameDisciplineSettingsId(), gameDiscipline);
 
 
         // Collect all data for Tournament and save it

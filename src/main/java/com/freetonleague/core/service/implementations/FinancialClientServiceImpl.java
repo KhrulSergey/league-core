@@ -145,7 +145,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             log.error("!!> requesting applyWithdrawTransaction for accountTransactionInfoDto with Errors. Check evoking clients");
             return null;
         }
-        if (!accountTransactionInfoDto.getStatus().isFrozen()) {
+        if (isNull(accountTransactionInfoDto.getStatus()) || !accountTransactionInfoDto.getStatus().isFrozen()) {
             log.error("!!> requesting applyWithdrawTransaction for error in transaction status '{}'. Check evoking clients",
                     accountTransactionInfoDto.getStatus());
             return null;
@@ -165,6 +165,20 @@ public class FinancialClientServiceImpl implements FinancialClientService {
         }
         log.debug("^ trying to modify withdraw transaction and send request to Finance Unit '{}'", accountTransactionInfoDto);
         return restFinancialUnitFacade.editTransferTransaction(accountTransactionInfoDto);
+    }
+
+    /**
+     * Returns updated info for aborted transaction
+     */
+    @Override
+    public AccountTransactionInfoDto abortTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
+        if (isNull(accountTransactionInfoDto) || isNull(accountTransactionInfoDto.getGUID())) {
+            log.error("!!> requesting abortTransaction for accountTransactionInfoDto '{}' with Errors. Check evoking clients",
+                    accountTransactionInfoDto);
+            return null;
+        }
+        log.debug("^ trying to abort transaction.GUID and send request to Finance Unit '{}'", accountTransactionInfoDto.getGUID());
+        return restFinancialUnitFacade.abortTransaction(accountTransactionInfoDto.getGUID());
     }
 
     private boolean verifyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
@@ -226,6 +240,7 @@ public class FinancialClientServiceImpl implements FinancialClientService {
                 .amount(tournamentFundAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
+                .status(AccountTransactionStatusType.FINISHED)
                 .transactionType(TransactionType.PAYMENT)
                 .transactionTemplateType(TransactionTemplateType.DOCKET_ENTRANCE_FEE)
                 .build();
