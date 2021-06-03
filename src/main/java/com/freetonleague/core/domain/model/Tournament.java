@@ -117,6 +117,9 @@ public class Tournament extends ExtendedBaseEntity {
     @Column(name = "logo_file_name")
     private String logoHashKey;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "sign_up_start_at")
     private LocalDateTime signUpStartDate;
 
