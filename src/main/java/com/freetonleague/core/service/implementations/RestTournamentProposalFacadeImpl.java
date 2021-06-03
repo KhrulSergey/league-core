@@ -10,10 +10,7 @@ import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
-import com.freetonleague.core.service.RestTeamFacade;
-import com.freetonleague.core.service.RestTournamentFacade;
-import com.freetonleague.core.service.RestTournamentProposalFacade;
-import com.freetonleague.core.service.TournamentProposalService;
+import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,12 +18,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
-import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 
 /**
  * Service-facade for managing tournament team proposal and team composition
@@ -40,6 +36,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     private final RestTournamentFacade restTournamentFacade;
     private final TournamentProposalService tournamentProposalService;
     private final TournamentProposalMapper tournamentProposalMapper;
+    private final TeamParticipantService teamParticipantService;
 
     /**
      * Get team proposal for tournament
@@ -102,8 +99,17 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                 .tournament(tournament)
                 .build();
 
+        //Add all active participant from team to proposal
+        List<TeamParticipant> activeTeamParticipant = teamParticipantService.getActiveParticipantByTeam(team);
+        if (isEmpty(activeTeamParticipant)) {
+            log.warn("~ forbiddenException for create new proposal for team.id '{}' by user '{}' to tournament id '{}'. " +
+                            "Team have no active participant",
+                    team.getId(), user, tournament.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    "Team have no active participant. Request rejected.");
+        }
         TournamentTeamProposal finalNewTeamProposal = newTeamProposal; // created final var just for parallelStream work
-        List<TournamentTeamParticipant> tournamentTeamParticipantList = team.getParticipantList().parallelStream()
+        List<TournamentTeamParticipant> tournamentTeamParticipantList = activeTeamParticipant.parallelStream()
                 .map(p -> this.createTournamentTeamParticipant(p, finalNewTeamProposal))
                 .collect(Collectors.toList());
         newTeamProposal.setTournamentTeamParticipantList(tournamentTeamParticipantList);
@@ -271,19 +277,21 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                     "Team cant participate on tournament. Check requested params.");
         }
 
-        AtomicReference<TournamentTeamParticipant> lastTeamParticipant = new AtomicReference<>();
-
-        if (tournamentTeamParticipantList.parallelStream()
-                .anyMatch(p -> {
-                    lastTeamParticipant.set(p);
-                    return isBlank(p.getUser().getDiscordId());
-                })) {
-            log.warn("~ requesting validateTeamToParticipateTournament for team '{}' with participant without Discord reference. At least for '{}'",
-                    team, lastTeamParticipant.get());
-            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
-                    String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
-                            lastTeamParticipant.get().getUser().getUsername()));
-        }
+        //TODO delete until 01/09/21
+        //disable check has DISCORD account of team participant
+//        AtomicReference<TournamentTeamParticipant> lastTeamParticipant = new AtomicReference<>();
+//
+//        if (tournamentTeamParticipantList.parallelStream()
+//                .anyMatch(p -> {
+//                    lastTeamParticipant.set(p);
+//                    return isBlank(p.getUser().getDiscordId());
+//                })) {
+//            log.warn("~ requesting validateTeamToParticipateTournament for team '{}' with participant without Discord reference. At least for '{}'",
+//                    team, lastTeamParticipant.get());
+//            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+//                    String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
+//                            lastTeamParticipant.get().getUser().getUsername()));
+//        }
     }
 
     /**

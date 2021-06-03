@@ -97,6 +97,11 @@ public interface TeamParticipantService {
     boolean isExistsActiveInviteRequestByInvitedUser(User user);
 
     /**
+     * Returns list of active TeamParticipant for specified Team
+     */
+    List<TeamParticipant> getActiveParticipantByTeam(Team team);
+
+    /**
      * Returns list of filtered TeamParticipant list to view in public
      */
     List<TeamParticipant> filterTeamParticipantFoPublic(List<TeamParticipant> teamParticipantList);
