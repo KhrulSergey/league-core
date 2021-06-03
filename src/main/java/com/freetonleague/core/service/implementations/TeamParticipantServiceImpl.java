@@ -194,6 +194,18 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
     }
 
     /**
+     * Returns list of active TeamParticipant for specified Team
+     */
+    @Override
+    public List<TeamParticipant> getActiveParticipantByTeam(Team team) {
+        if (isNull(team)) {
+            log.error("!> requesting getActiveParticipantByTeam for NULL team. Check evoking clients");
+            return null;
+        }
+        return teamParticipantRepository.findAllActiveParticipantByTeam(team);
+    }
+
+    /**
      * Returns list of filtered TeamParticipant list to view in public
      */
     @Override

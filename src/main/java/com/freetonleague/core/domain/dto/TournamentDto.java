@@ -57,6 +57,8 @@ public class TournamentDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String logoRawFile;
 
+    private String description;
+
     private LocalDateTime signUpStartDate;
 
     private LocalDateTime signUpEndDate;
