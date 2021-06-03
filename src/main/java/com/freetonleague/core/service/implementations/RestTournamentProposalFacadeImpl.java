@@ -277,19 +277,21 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                     "Team cant participate on tournament. Check requested params.");
         }
 
-        AtomicReference<TournamentTeamParticipant> lastTeamParticipant = new AtomicReference<>();
-
-        if (tournamentTeamParticipantList.parallelStream()
-                .anyMatch(p -> {
-                    lastTeamParticipant.set(p);
-                    return isBlank(p.getUser().getDiscordId());
-                })) {
-            log.warn("~ requesting validateTeamToParticipateTournament for team '{}' with participant without Discord reference. At least for '{}'",
-                    team, lastTeamParticipant.get());
-            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
-                    String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
-                            lastTeamParticipant.get().getUser().getUsername()));
-        }
+        //TODO delete until 01/09/21
+        //disable check has DISCORD account of team participant
+//        AtomicReference<TournamentTeamParticipant> lastTeamParticipant = new AtomicReference<>();
+//
+//        if (tournamentTeamParticipantList.parallelStream()
+//                .anyMatch(p -> {
+//                    lastTeamParticipant.set(p);
+//                    return isBlank(p.getUser().getDiscordId());
+//                })) {
+//            log.warn("~ requesting validateTeamToParticipateTournament for team '{}' with participant without Discord reference. At least for '{}'",
+//                    team, lastTeamParticipant.get());
+//            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+//                    String.format("Team cant participate on tournament. There are team participant without Discord reference. At least for user with login '%s'",
+//                            lastTeamParticipant.get().getUser().getUsername()));
+//        }
     }
 
     /**
