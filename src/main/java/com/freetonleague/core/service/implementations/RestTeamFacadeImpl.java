@@ -136,7 +136,6 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             throw new ValidationException(ExceptionMessages.TEAM_DUPLICATE_BY_NAME_ERROR, "name", "parameter name is not unique for editTeam");
         }
 
-        team.setName(teamDto.getName());
         team.setLogoRawFile(teamDto.getLogoRawFile());
         team = teamService.editTeam(team);
         if (isNull(team)) {
