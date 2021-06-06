@@ -143,6 +143,12 @@ public class ExceptionMessages {
     public static final String ACCOUNT_COUPON_APPLY_ERROR = "Applying coupon by advertisement company hash was unsuccessful." +
             "Please check request parameters or contact organizers";
 
+    public static final String NEWS_NOT_FOUND_ERROR = "News was not found. Please check request parameters";
+    public static final String NEWS_VISIBLE_ERROR = "Docket is not visible and modification forbidden. Please contact to organizers.";
+    public static final String NEWS_STATUS_DELETE_ERROR = "News delete should be done with specific request. Please try again with other method.";
+    public static final String NEWS_CREATION_ERROR = "News creation failed. Please try again";
+    public static final String NEWS_VALIDATION_ERROR = "News was specified with errors. Please check request parameters";
+    public static final String NEWS_MODIFICATION_ERROR = "News modifying failed. Please try again";
 
     public static final String FEIGN_UNEXPECTED_ERROR = "Some error with service connections. Try again";
 

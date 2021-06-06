@@ -3,6 +3,7 @@ package com.freetonleague.core.domain.model;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.envers.Audited;
 import org.springframework.data.annotation.CreatedBy;
@@ -20,6 +21,7 @@ import static org.hibernate.envers.RelationTargetAuditMode.NOT_AUDITED;
  * Extended base model for highly responsible (in business meaning) entities
  */
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @Data
 @SuperBuilder
 @NoArgsConstructor
