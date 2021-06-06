@@ -104,7 +104,7 @@ public class DocketServiceImpl implements DocketService {
 
         if (docket.getStatus().isFinished()) {
             docket.setFinishedDate(LocalDateTime.now());
-            // if tournament was automatically finished by EventService (not manually-forced)
+            // if docket was automatically finished by EventService (not manually-forced)
         }
         if (docket.isStatusChanged()) {
             this.handleDocketStatusChanged(docket);
@@ -121,10 +121,10 @@ public class DocketServiceImpl implements DocketService {
             return null;
         }
         if (!this.isExistsDocketById(docket.getId())) {
-            log.error("!> requesting delete tournament for non-existed tournament. Check evoking clients");
+            log.error("!> requesting delete docket for non-existed docket. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to set 'deleted' mark to tournament '{}'", docket);
+        log.debug("^ trying to set 'deleted' mark to docket '{}'", docket);
         docket.setStatus(DocketStatusType.DELETED);
         docket = docketRepository.save(docket);
         this.handleDocketStatusChanged(docket);
@@ -141,7 +141,7 @@ public class DocketServiceImpl implements DocketService {
     }
 
     /**
-     * Validate tournament parameters and settings to modify
+     * Validate docket parameters and settings to modify
      */
     private boolean verifyDocket(Docket docket) {
         if (isNull(docket)) {

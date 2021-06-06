@@ -163,10 +163,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler({AuthProviderConfigException.class, UserManageException.class,
-            TeamManageException.class, TeamParticipantManageException.class, GameDisciplineManageException.class,
-            GameDisciplineSettingsManageException.class, TournamentManageException.class, FinancialUnitManageException.class,
-            AccountFinanceManageException.class, DocketManageException.class})
+    //    @ExceptionHandler({AuthProviderConfigException.class, UserManageException.class,
+//            TeamManageException.class, TeamParticipantManageException.class, GameDisciplineManageException.class,
+//            GameDisciplineSettingsManageException.class, TournamentManageException.class, FinancialUnitManageException.class,
+//            AccountFinanceManageException.class, DocketManageException.class, NewsManageException.class})
+    @ExceptionHandler({BaseDetailedException.class})
     public ResponseEntity<Object> handleBaseDetailedException(BaseDetailedException ex, WebRequest request) {
         String debugMessage = enableDebugMessage() ? ex.getDetailedMessage() : null;
         List<String> errors = enableStackTrace && nonNull(ex.getCause()) ? Collections.singletonList(ex.getCause().toString()) : null;
