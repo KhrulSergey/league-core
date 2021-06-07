@@ -11,7 +11,7 @@ public enum TransactionType {
 
     ;
 
-    public static List<TransactionType> withdrawTransactionTypeList = List.of(
+    public static final List<TransactionType> withdrawTransactionTypeList = List.of(
             TransactionType.WITHDRAW,
             TransactionType.PAYMENT,
             TransactionType.TRANSFER
@@ -22,6 +22,10 @@ public enum TransactionType {
     }
 
     public boolean isPayment() {
-        return this == TRANSFER;
+        return this == PAYMENT;
+    }
+
+    public boolean isWithdraw() {
+        return this == WITHDRAW;
     }
 }

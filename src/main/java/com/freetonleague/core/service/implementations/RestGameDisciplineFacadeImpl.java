@@ -39,7 +39,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public GameDisciplineDto getDiscipline(long id, User user) {
-        return disciplineMapper.toDto(this.getVerifiedDiscipline(id, user));
+        return disciplineMapper.toDto(this.getVerifiedDiscipline(id));
     }
 
     /**
@@ -47,11 +47,6 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public List<GameDisciplineDto> getAllDisciplines(User user) {
-        //TODO delete until 01/06/21
-//        if (isNull(user)) {
-//            log.debug("^ user is not authenticate. 'getAllDisciplines' in RestGameDisciplineFacade request denied");
-//            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getAllDisciplines' request denied");
-//        }
         return disciplineMapper.toDto(disciplineService.getAllDisciplines());
     }
 
@@ -67,7 +62,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
         }
         Set<ConstraintViolation<GameDisciplineDto>> violations = validator.validate(disciplineDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted GameDisciplineDto: {} have constraint violations: {}", disciplineDto, violations);
+            log.debug("^ transmitted GameDisciplineDto: '{}' have constraint violations: '{}'", disciplineDto, violations);
             throw new ConstraintViolationException(violations);
         }
         if (disciplineService.isDisciplineExistByName(disciplineDto.getName())) {
@@ -79,7 +74,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
         gameDiscipline.setActive(true);
         gameDiscipline = disciplineService.addDiscipline(gameDiscipline);
         if (isNull(gameDiscipline)) {
-            log.error("!> error while creating game discipline from dto {} for user {}.", disciplineDto, user);
+            log.error("!> error while creating game discipline from dto '{}' for user '{}'.", disciplineDto, user);
             throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_CREATION_ERROR,
                     "Game discipline was not saved on Portal. Check requested params.");
         }
@@ -100,7 +95,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      */
     @Override
     public GameDisciplineSettingsDto getPrimaryDisciplineSettingsByDiscipline(long disciplineId, User user) {
-        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId, user);
+        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineId);
 
         return disciplineSettingsMapper.toDto(this.getVerifiedPrimaryDisciplineSettingsByDiscipline(gameDiscipline));
     }
@@ -113,7 +108,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     public GameDisciplineSettingsDto addDisciplineSettings(GameDisciplineSettingsDto disciplineSettingsDto, User user) {
         Set<ConstraintViolation<GameDisciplineSettingsDto>> violations = validator.validate(disciplineSettingsDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted GameDisciplineSettingsDto: {} have constraint violations: {}", disciplineSettingsDto, violations);
+            log.debug("^ transmitted GameDisciplineSettingsDto: '{}' have constraint violations: '{}'", disciplineSettingsDto, violations);
             throw new ConstraintViolationException(violations);
         }
         if (disciplineService.isDisciplineSettingsExistByName(disciplineSettingsDto.getName())) {
@@ -122,12 +117,12 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
                     "parameter name is not unique for addDisciplineSettings");
         }
 
-        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineSettingsDto.getGameDisciplineId(), user);
+        GameDiscipline gameDiscipline = this.getVerifiedDiscipline(disciplineSettingsDto.getGameDisciplineId());
         GameDisciplineSettings gameDisciplineSettings = disciplineSettingsMapper.fromDto(disciplineSettingsDto);
         gameDisciplineSettings.setGameDiscipline(gameDiscipline);
         gameDisciplineSettings = disciplineService.addDisciplineSettings(gameDisciplineSettings);
         if (isNull(gameDisciplineSettings)) {
-            log.error("!> error while creating game discipline settings from dto {} for user {}.", disciplineSettingsDto, user);
+            log.error("!> error while creating game discipline settings from dto '{}' for user '{}'.", disciplineSettingsDto, user);
             throw new GameDisciplineSettingsManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_CREATION_ERROR,
                     "Game discipline settings was not saved on Portal. Check requested params.");
         }
@@ -147,19 +142,15 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      * Getting game discipline info by id and user with privacy check
      */
     @Override
-    public GameDiscipline getVerifiedDiscipline(long id, User user) {
-//        if (isNull(user)) {
-//            log.debug("^ user is not authenticate. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied");
-//            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedDiscipline' request denied");
-//        }
+    public GameDiscipline getVerifiedDiscipline(long id) {
         GameDiscipline gameDiscipline = disciplineService.getDisciplineById(id);
         if (isNull(gameDiscipline)) {
-            log.debug("^ Game discipline with requested id {} was not found. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied", id);
+            log.debug("^ Game discipline with requested id '{}' was not found. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied", id);
             throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_NOT_FOUND_ERROR,
                     "Game discipline with requested id " + id + " was not found");
         }
         if (!gameDiscipline.isActive()) {
-            log.debug("^ Game discipline with requested id {} is not active. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied", id);
+            log.debug("^ Game discipline with requested id '{}' is not active. 'getVerifiedDiscipline' in RestGameDisciplineFacade request denied", id);
             throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_NOT_ACTIVE_ERROR,
                     "Game discipline with requested id " + id + " is not active");
         }
@@ -170,20 +161,16 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
      * Getting game discipline settings info by id, discipline and user with privacy check
      */
     @Override
-    public GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedDisciplineSettings' request denied");
-        }
+    public GameDisciplineSettings getVerifiedDisciplineSettings(long id, GameDiscipline discipline) {
         GameDisciplineSettings gameDisciplineSettings = disciplineService.getDisciplineSettings(id);
         if (isNull(gameDisciplineSettings)) {
-            log.debug("^ Game discipline settings with requested id {} was not found. " +
+            log.debug("^ Game discipline settings with requested id '{}' was not found. " +
                     "'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied", id);
             throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR,
                     "Game discipline settings with requested id " + id + " was not found");
         }
         if (!gameDisciplineSettings.getGameDiscipline().equals(discipline)) {
-            log.debug("^ Game discipline settings with requested id {} is not match Game discipline." +
+            log.debug("^ Game discipline settings with requested id '{}' is not match Game discipline." +
                     " 'getVerifiedDisciplineSettings' in RestGameDisciplineFacade request denied", id);
             throw new GameDisciplineManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_MATCH_DISCIPLINE_ERROR,
                     "Game discipline with requested id " + id + " is not match requested discipline id " + discipline.getId());
@@ -197,7 +184,7 @@ public class RestGameDisciplineFacadeImpl implements RestGameDisciplineFacade {
     public GameDisciplineSettings getVerifiedPrimaryDisciplineSettingsByDiscipline(GameDiscipline gameDiscipline) {
         GameDisciplineSettings gameDisciplineSettings = disciplineService.getPrimaryDisciplineSettingsByDiscipline(gameDiscipline);
         if (isNull(gameDisciplineSettings)) {
-            log.debug("^ Game discipline settings for requested discipline id {} was not found. " +
+            log.debug("^ Game discipline settings for requested discipline id '{}' was not found. " +
                     "'getPrimaryDisciplineSettingsByDiscipline' in RestGameDisciplineFacade request denied", gameDiscipline.getId());
             throw new GameDisciplineSettingsManageException(ExceptionMessages.GAME_DISCIPLINE_SETTINGS_NOT_FOUND_ERROR,
                     "Game discipline settings for requested discipline id " + gameDiscipline.getId() + " was not found");

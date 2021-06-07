@@ -27,6 +27,22 @@ public enum TournamentStatusType {
         return this.sequencePosition < compare.getSequencePosition();
     }
 
+    /**
+     * Returns "finished" statuses for tournaments
+     */
+    public static final List<TournamentStatusType> finishedStatusList = List.of(
+            TournamentStatusType.FINISHED,
+            TournamentStatusType.DECLINED,
+            TournamentStatusType.DELETED
+    );
+    /**
+     * Returns "canceled" statuses for tournaments
+     */
+    public static final List<TournamentStatusType> canceledStatusList = List.of(
+            TournamentStatusType.DECLINED,
+            TournamentStatusType.DELETED
+    );
+
     public boolean isFinished() {
         return this == FINISHED;
     }
@@ -35,16 +51,18 @@ public enum TournamentStatusType {
         return this == DELETED;
     }
 
-    public static List<TournamentStatusType> finishedStatusList = List.of(
-            TournamentStatusType.FINISHED,
-            TournamentStatusType.DECLINED,
-            TournamentStatusType.DELETED
-    );
+    public boolean isCreated() {
+        return this == CREATED;
+    }
+
+    public boolean isDeclined() {
+        return this == DECLINED;
+    }
 
     /**
      * Returns "active" statuses for tournaments
      */
-    public static List<TournamentStatusType> activeStatusList = List.of(
+    public static final List<TournamentStatusType> activeStatusList = List.of(
             TournamentStatusType.CREATED,
             TournamentStatusType.SIGN_UP,
             TournamentStatusType.ADJUSTMENT,
@@ -55,13 +73,11 @@ public enum TournamentStatusType {
     /**
      * Returns "started" statuses for tournaments
      */
-    public static List<TournamentStatusType> startedStatusList = List.of(
+    public static final List<TournamentStatusType> startedStatusList = List.of(
             TournamentStatusType.STARTED,
             TournamentStatusType.PAUSE,
             TournamentStatusType.FINISHED
     );
 
-    public boolean isCreated() {
-        return this == CREATED;
-    }
+
 }

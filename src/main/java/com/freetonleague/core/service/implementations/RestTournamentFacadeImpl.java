@@ -5,7 +5,6 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TournamentManageException;
-import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
@@ -95,11 +94,11 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         tournamentDto.getTournamentSettings().setId(null);
         tournamentDto.getTournamentSettings().setTournamentId(null);
 
-        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
+        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto);
         newTournament = tournamentService.addTournament(newTournament);
 
         if (isNull(newTournament)) {
-            log.error("!> error while creating tournament from dto {} for user {}.", tournamentDto, user);
+            log.error("!> error while creating tournament from dto '{}' for user '{}'.", tournamentDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_CREATION_ERROR,
                     "Tournament was not saved on Portal. Check requested params.");
         }
@@ -112,19 +111,23 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     @CanManageTournament
     @Override
     public TournamentDto editTournament(TournamentDto tournamentDto, User user) {
-        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto, user);
-
+        Tournament newTournament = this.getVerifiedTournamentByDto(tournamentDto);
         if (isNull(tournamentDto.getId())) {
             log.warn("~ parameter 'tournament id' is not set for editTournament");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_VALIDATION_ERROR, "tournament id",
                     "parameter 'tournament id' is not set for editTournament");
         }
-
-        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId());
         if (tournamentDto.getStatus().isDeleted()) {
             log.warn("~ tournament deleting was declined in editTournament. This operation should be done with specific method.");
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
                     "Modifying tournament was rejected. Check requested params and method.");
+        }
+        Tournament tournament = this.getVerifiedTournamentById(tournamentDto.getId());
+
+        if (TournamentStatusType.canceledStatusList.contains(tournament.getStatus())) {
+            log.warn("~ tournament was already canceled, modifying tournament with editTournament is rejected.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_DELETE_ERROR,
+                    "Modifying canceled tournament was rejected. Check requested params and method.");
         }
 
         if (isNull(tournamentDto.getTournamentSettings().getId())) {
@@ -142,13 +145,13 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         if (this.verifyTournamentStatusBadlyFinished(tournamentDto.getStatus(), tournamentDto.getTournamentWinnerList(),
                 tournamentDto.getIsForcedFinished())) {
             log.warn("~ tournament can be finished only with setting the winners of the tournament and flag isForcedFinished. " +
-                    "Request to set status {} and winners {} was rejected.", tournamentDto.getStatus(), tournamentDto.getTournamentWinnerList());
+                    "Request to set status '{}' and winners '{}' was rejected.", tournamentDto.getStatus(), tournamentDto.getTournamentWinnerList());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_STATUS_FINISHED_ERROR,
                     "Modifying tournament was rejected. Check requested params and method.");
         }
         newTournament = tournamentService.editTournament(newTournament);
         if (isNull(newTournament)) {
-            log.error("!> error while modifying tournament from dto {} for user {}.", tournamentDto, user);
+            log.error("!> error while modifying tournament from dto '{}' for user '{}'.", tournamentDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MODIFICATION_ERROR,
                     "Tournament was not updated on Portal. Check requested params.");
         }
@@ -167,7 +170,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         tournament = tournamentService.deleteTournament(tournament);
 
         if (isNull(tournament)) {
-            log.error("!> error while deleting tournament with id {} for user {}.", id, user);
+            log.error("!> error while deleting tournament with id '{}' for user '{}'.", id, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MODIFICATION_ERROR,
                     "Tournament was not deleted on Portal. Check requested params.");
         }
@@ -193,18 +196,18 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     public Tournament getVerifiedTournamentById(long id) {
         Tournament tournament = tournamentService.getTournament(id);
         if (isNull(tournament)) {
-            log.debug("^ Tournament with requested id {} was not found. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id);
+            log.debug("^ Tournament with requested id '{}' was not found. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_NOT_FOUND_ERROR, "Tournament with requested id " + id + " was not found");
         }
         if (tournament.getStatus().isDeleted()) {
-            log.debug("^ Tournament with requested id {} was {}. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id, tournament.getStatus());
+            log.debug("^ Tournament with requested id '{}' was '{}'. 'getVerifiedTournamentById' in RestTournamentFacadeImpl request denied", id, tournament.getStatus());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_VISIBLE_ERROR, "Visible tournament with requested id " + id + " was not found");
         }
         return tournament;
     }
 
     private TournamentDiscordChannelDto composeDiscordChannelInfoForTournament(Tournament tournament) {
-        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament)
+        Set<String> tournamentInvolvedUsersDiscordIdList = tournamentProposalService.getApprovedTeamProposalListByTournament(tournament)
                 .parallelStream()
                 .map(tournamentProposalService::getUserDiscordIdListFromTeamProposal)
                 .flatMap(Collection::stream)
@@ -220,16 +223,11 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
     /**
      * Getting tournament by DTO and user with deep validation and privacy check
      */
-    private Tournament getVerifiedTournamentByDto(TournamentDto tournamentDto, User user) {
-        if (isNull(user)) {
-            log.debug("^ user is not authenticate. 'addTournament' request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'addTournament' request denied");
-        }
-
+    private Tournament getVerifiedTournamentByDto(TournamentDto tournamentDto) {
         // Verify base Tournament information
         Set<ConstraintViolation<TournamentDto>> violations = validator.validate(tournamentDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted TournamentDto: {} have constraint violations: {}", tournamentDto, violations);
+            log.debug("^ transmitted TournamentDto: '{}' have constraint violations: '{}'", tournamentDto, violations);
             throw new ConstraintViolationException(violations);
         }
         //Verify Tournament settings
@@ -277,9 +275,9 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
 
         //Verify Discipline and its Settings for Tournament
-        GameDiscipline gameDiscipline = gameDisciplineFacade.getVerifiedDiscipline(tournamentDto.getGameDisciplineId(), user);
+        GameDiscipline gameDiscipline = gameDisciplineFacade.getVerifiedDiscipline(tournamentDto.getGameDisciplineId());
         GameDisciplineSettings gameDisciplineSettings = gameDisciplineFacade.getVerifiedDisciplineSettings(
-                tournamentDto.getGameDisciplineSettingsId(), gameDiscipline, user);
+                tournamentDto.getGameDisciplineSettingsId(), gameDiscipline);
 
 
         // Collect all data for Tournament and save it
@@ -313,7 +311,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         Set<ConstraintViolation<TournamentSettingsDto>> settingsViolations = validator.validate(tournamentSettingsDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament with embedded TournamentSettingsDto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament with embedded TournamentSettingsDto: '{}' have constraint violations: '{}'",
                     tournamentSettingsDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -336,7 +334,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         Set<ConstraintViolation<TournamentPrizePoolDistributionDto>> settingsViolations = validator.validate(prizePoolDistribution);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament with embedded TournamentPrizePoolDistributionDto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament with embedded TournamentPrizePoolDistributionDto: '{}' have constraint violations: '{}'",
                     prizePoolDistribution, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -353,7 +351,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         Set<ConstraintViolation<TournamentQuitPenaltyDistributionDto>> settingsViolations = validator.validate(quitPenaltyDistributionDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament with embedded TournamentQuitPenaltyDistributionDto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament with embedded TournamentQuitPenaltyDistributionDto: '{}' have constraint violations: '{}'",
                     quitPenaltyDistributionDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -369,7 +367,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         Set<ConstraintViolation<TournamentWinnerDto>> settingsViolations = validator.validate(winnerDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament with embedded TournamentWinnerDto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament with embedded TournamentWinnerDto: '{}' have constraint violations: '{}'",
                     winnerDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -378,8 +376,8 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                 .getVerifiedTeamProposalById(winnerDto.getTeamProposalId(), null, false);
 
         if (!tournamentTeamProposal.getTournament().getId().equals(tournamentId)) {
-            log.warn("~ parameter 'tournamentTeamProposal' {} is not correctly set to verify tournament winner for tournament {}" +
-                            "  in getVerifiedTournamentByDto. Can't set winner with teamProposal to other tournament {}",
+            log.warn("~ parameter 'tournamentTeamProposal' '{}' is not correctly set to verify tournament winner for tournament '{}'" +
+                            "  in getVerifiedTournamentByDto. Can't set winner with teamProposal to other tournament '{}'",
                     tournamentTeamProposal.getId(), tournamentId, tournamentTeamProposal.getTournament().getId());
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SETTINGS_VALIDATION_ERROR, "tournamentTeamProposal",
                     "parameter 'tournamentTeamProposal' is not correctly set to verify tournament winner for tournament." +
@@ -404,7 +402,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
         Set<ConstraintViolation<TournamentOrganizerDto>> settingsViolations = validator.validate(organizerDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament with embedded TournamentOrganizerDto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament with embedded TournamentOrganizerDto: '{}' have constraint violations: '{}'",
                     organizerDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -415,7 +413,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         if (nonNull(organizerDto.getId())) {
             tournamentOrganizer = tournamentOrganizerService.get(organizerDto.getId());
             if (isNull(tournamentOrganizer)) {
-                log.debug("^ Tournament organizer with requested id {} was not found. 'getVerifiedTournamentOrganizerByDto' in RestTournamentFacade request denied", organizerDto.getId());
+                log.debug("^ Tournament organizer with requested id '{}' was not found. 'getVerifiedTournamentOrganizerByDto' in RestTournamentFacade request denied", organizerDto.getId());
                 throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ORGANIZER_NOT_FOUND_ERROR, "Tournament organizer with requested id " + organizerDto.getId() + " was not found");
             }
             if (!tournamentOrganizer.getTournament().getId().equals(organizerDto.getTournamentId())) {

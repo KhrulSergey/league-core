@@ -92,7 +92,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
 
         // Check if specified MatchRival corresponds to specified Match
         if (!tournamentMatchRival.getTournamentMatch().equals(tournamentMatch)) {
-            log.warn("~ parameter 'rivalId' {} is not match by id to Tournament Match with 'matchId' {} for editMatchRivalParticipant",
+            log.warn("~ parameter 'rivalId' '{}' is not match by id to Tournament Match with 'matchId' '{}' for editMatchRivalParticipant",
                     rivalId, matchId);
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "rivalId",
                     "parameter 'rivalId' is not match by id to Tournament Match with 'matchId' for editMatchRivalParticipant");
@@ -100,7 +100,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         // Check if current user is not Captain of specified MatchRival or is not Organizer of specified Match
         if (!tournamentService.isUserTournamentOrganizer(tournamentMatch.getTournamentSeries().getTournamentRound().getTournament(), user)
                 || !tournamentTeamProposal.getTeam().isCaptain(user)) {
-            log.warn("~ forbiddenException for manage active match participants from rivalId {} for user {}.",
+            log.warn("~ forbiddenException for manage active match participants from rivalId '{}' for user '{}'.",
                     rivalId, user);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_FORBIDDEN_ERROR,
                     "Only captain or organizers can manage active tournament match participants from team.");
@@ -131,7 +131,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         tournamentMatchRival.setRivalParticipantList(newTournamentMatchRivalParticipants);
         tournamentMatchRival = tournamentMatchRivalService.editMatchRival(tournamentMatchRival);
         if (isNull(tournamentMatchRival)) {
-            log.error("!> error while editing ActiveMatchRivalParticipants for matchId {}, rivalId {}, size of new rival participant {}, for user {}.",
+            log.error("!> error while editing ActiveMatchRivalParticipants for matchId '{}', rivalId '{}', size of new rival participant '{}', for user '{}'.",
                     matchId, rivalId, rivalParticipantList.size(), user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_PARTICIPANT_MODIFY_ERROR,
                     "Tournament match rival participant list was not saved on Portal. Check requested params.");
@@ -155,7 +155,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     public TournamentMatchRival getVerifiedMatchRivalById(long id) {
         TournamentMatchRival tournamentMatchRival = tournamentMatchRivalService.getMatchRival(id);
         if (isNull(tournamentMatchRival)) {
-            log.debug("^ Tournament rival with requested id {} was not found. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied", id);
+            log.debug("^ Tournament rival with requested id '{}' was not found. 'getVerifiedMatchRivalById' in RestTournamentMatchRivalService request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_NOT_FOUND_ERROR, "Tournament rival with requested id " + id + " was not found");
         }
 
@@ -175,7 +175,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         }
         Set<ConstraintViolation<TournamentMatchRivalDto>> settingsViolations = validator.validate(matchRivalDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament match rival dto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament match rival dto: '{}' have constraint violations: '{}'",
                     matchRivalDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -206,7 +206,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         // check if rivalParticipant already existed and was banned
         if (nonNull(existedRivalParticipant)
                 && existedRivalParticipant.getStatus() == TournamentMatchRivalParticipantStatusType.BANNED) {
-            log.warn("~ parameter 'rivalParticipantList' {} is not match by id to Tournament Match with 'matchId' {} for editMatchRivalParticipant",
+            log.warn("~ parameter 'rivalParticipantList' '{}' is not match by id to Tournament Match with 'matchId' '{}' for editMatchRivalParticipant",
                     tournamentMatchRival.getId(), tournamentMatchRival.getTournamentMatch().getId());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_PARTICIPANT_BANNED_ERROR,
                     "Tournament rival participant id" + existedRivalParticipant.getId() + " was banned. Including participant in match was rejected");
@@ -231,7 +231,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     private TournamentMatchRivalParticipant getVerifiedTournamentMatchRivalParticipantByDtoForEditing(
             TournamentMatchRivalParticipantDto rivalParticipantDto, TournamentMatchRival tournamentMatchRival) {
         if (isNull(rivalParticipantDto.getId())) {
-            log.debug("^ Tournament rival participant with unset id, rivalParticipantDto: {}. " +
+            log.debug("^ Tournament rival participant with unset id, rivalParticipantDto: '{}'. " +
                             "'getVerifiedTournamentMatchRivalParticipantByDto' in RestTournamentMatchRivalService request denied",
                     rivalParticipantDto);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_PARTICIPANT_NOT_FOUND_ERROR,
@@ -252,7 +252,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         }
         Set<ConstraintViolation<TournamentMatchRivalParticipantDto>> settingsViolations = validator.validate(rivalParticipantDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted rival participant dto: {} have constraint violations: {}",
+            log.debug("^ transmitted rival participant dto: '{}' have constraint violations: '{}'",
                     rivalParticipantDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
@@ -283,7 +283,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     private TournamentMatchRivalParticipant getVerifiedMatchRivalParticipantById(long id) {
         TournamentMatchRivalParticipant matchRivalParticipant = tournamentMatchRivalService.getMatchRivalParticipant(id);
         if (isNull(matchRivalParticipant)) {
-            log.debug("^ Tournament rival participant with requested id {} was not found. 'getVerifiedMatchRivalParticipantById' in RestTournamentMatchRivalService request denied", id);
+            log.debug("^ Tournament rival participant with requested id '{}' was not found. 'getVerifiedMatchRivalParticipantById' in RestTournamentMatchRivalService request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_PARTICIPANT_NOT_FOUND_ERROR, "Tournament rival participant with requested id " + id + " was not found");
         }
         return matchRivalParticipant;

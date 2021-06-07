@@ -1,13 +1,15 @@
 package com.freetonleague.core.service.financeUnit;
 
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.AccountType;
 import com.freetonleague.core.domain.model.Account;
 import com.freetonleague.core.domain.model.AccountHolder;
 import com.freetonleague.core.domain.model.AccountTransaction;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
-import java.awt.print.Pageable;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -41,6 +43,14 @@ public interface FinancialUnitService {
     Account getAccountByHolderGUIDAndType(UUID externalHolderGUID, AccountHolderType holderType);
 
     /**
+     * Get account by external address.
+     *
+     * @param externalAddress to search account for
+     * @return found account or null
+     */
+    Account getAccountByExternalAddress(String externalAddress);
+
+    /**
      * Get account holder by external GUID and Holder type.
      *
      * @param externalHolderGUID to search account for
@@ -59,6 +69,14 @@ public interface FinancialUnitService {
     Account createAccountHolderWithAccount(AccountHolder accountHolder, AccountType accountType);
 
     /**
+     * Save new notTracking account
+     *
+     * @param account data to save ind DB
+     * @return saved transaction
+     */
+    Account createNotTrackingAccount(Account account);
+
+    /**
      * Get transaction by GUID.
      *
      * @param GUID to search transaction for
@@ -67,12 +85,13 @@ public interface FinancialUnitService {
     AccountTransaction getTransaction(UUID GUID);
 
     /**
-     * Get list of transactions for specified account. Search in both source and target.
+     * Get list of transactions for specified account and filtered by status list. Search in both source and target.
      *
-     * @param account to search transaction for
+     * @param account    to search transaction for
+     * @param statusList status list to filter transactions
      * @return list of transactions with pageable params
      */
-    Page<AccountTransaction> getTransactionList(Pageable pageable, Account account);
+    Page<AccountTransaction> findTransactionListByAccountAndStatus(Pageable pageable, List<AccountTransactionStatusType> statusList, Account account);
 
     /**
      * Save new transaction and update Accounts: source (if specified) and target
@@ -80,10 +99,33 @@ public interface FinancialUnitService {
      * @param accountTransaction data to save ind DB
      * @return saved transaction
      */
-    AccountTransaction saveTransaction(AccountTransaction accountTransaction);
+    AccountTransaction createTransaction(AccountTransaction accountTransaction);
+
+    /**
+     * Edit transaction and update Accounts: source (if specified) and target
+     *
+     * @param accountTransaction data to save ind DB
+     * @return saved transaction
+     */
+    AccountTransaction editTransaction(AccountTransaction accountTransaction);
+
+    /**
+     * Abort transaction and update Accounts: source (if specified) and target
+     */
+    AccountTransaction abortTransaction(AccountTransaction transaction);
 
     /**
      * Validate token for operate with finance unit
      */
     boolean validateFinanceTokenForDeposit(String token);
+
+    /**
+     * Returns sign of transaction existence for specified GUID.
+     */
+    boolean isExistsTransactionByGUID(UUID GUID);
+
+    /**
+     * Returns sign of transaction aborted for specified GUID.
+     */
+    boolean isAbortedTransactionByGUID(UUID GUID);
 }

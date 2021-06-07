@@ -9,6 +9,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -31,9 +34,9 @@ public class LeagueIdClientService {
                 sessionFromLeagueId = leagueIdClientCloud.getSession(token);
             } catch (FeignClientException exc) {
                 //TODO habdle exception
-                log.error("New FeignClientException exc {}", exc, exc);
+                log.error("New FeignClientException exc '{}'", exc, exc);
             } catch (FeignException exc) {
-                log.error("New FeignException exc {}", exc, exc);
+                log.error("New FeignException exc '{}'", exc, exc);
             }
         }
         return sessionFromLeagueId;
@@ -46,25 +49,25 @@ public class LeagueIdClientService {
                 userInfo = leagueIdClientCloud.account(token);
             } catch (FeignClientException exc) {
                 //TODO habdle exception
-                log.error("New FeignClientException exc {}", exc, exc);
+                log.error("New FeignClientException exc '{}'", exc, exc);
             } catch (FeignException exc) {
-                log.error("New FeignException exc {}", exc, exc);
+                log.error("New FeignException exc '{}'", exc, exc);
             }
         }
         return userInfo;
     }
 
-    public UserDto getUserByLeagueId(String leagueId) {
-        log.debug("^ try to getUserByLeagueId in LeagueIdClientService by serviceToken {} and leagueId {}", leagueIdServiceToken, leagueId);
+    public UserDto getUserByLeagueId(UUID leagueId) {
+        log.debug("^ try to getUserByLeagueId in LeagueIdClientService by serviceToken '{}' and leagueId '{}'", leagueIdServiceToken, leagueId);
         UserDto userInfo = null;
-        if (!isBlank(leagueId)) {
+        if (nonNull(leagueId)) {
             try {
-                userInfo = leagueIdClientCloud.getUserByLeagueId(leagueIdServiceToken, leagueId);
+                userInfo = leagueIdClientCloud.getUserByLeagueId(leagueIdServiceToken, leagueId.toString());
             } catch (FeignClientException exc) {
                 //TODO habdle exception
-                log.error("New FeignClientException exc {}", exc, exc);
+                log.error("New FeignClientException exc '{}'", exc, exc);
             } catch (FeignException exc) {
-                log.error("New FeignException exc {}", exc, exc);
+                log.error("New FeignException exc '{}'", exc, exc);
             }
         }
         return userInfo;
@@ -77,9 +80,9 @@ public class LeagueIdClientService {
                 userInfo = leagueIdClientCloud.getUserByUsername(leagueIdServiceToken, username);
             } catch (FeignClientException exc) {
                 //TODO habdle exception
-                log.error("New FeignClientException exc {}", exc, exc);
+                log.error("New FeignClientException exc '{}'", exc, exc);
             } catch (FeignException exc) {
-                log.error("New FeignException exc {}", exc, exc);
+                log.error("New FeignException exc '{}'", exc, exc);
             }
         }
         return userInfo;

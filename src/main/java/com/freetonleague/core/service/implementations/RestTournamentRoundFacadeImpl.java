@@ -81,7 +81,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
 
         tournamentRound = tournamentRoundService.addRound(tournamentRound);
         if (isNull(tournamentRound)) {
-            log.error("!> error while creating tournament round from dto {} for user {}.", tournamentRoundDto, user);
+            log.error("!> error while creating tournament round from dto '{}' for user '{}'.", tournamentRoundDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_CREATION_ERROR,
                     "Tournament round was not saved on Portal. Check requested params.");
         }
@@ -97,7 +97,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
         boolean result = tournamentRoundService.generateRoundListForTournament(tournament);
         if (!result) {
-            log.error("!> error while generated tournament round list for tournament id {} with user {}.", tournamentId, user);
+            log.error("!> error while generated tournament round list for tournament id '{}' with user '{}'.", tournamentId, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_GENERATION_ERROR,
                     "Tournament round was not generated and saved on Portal. Check requested params.");
         }
@@ -123,7 +123,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
         }
         tournamentRound = tournamentRoundService.editRound(tournamentRound);
         if (isNull(tournamentRound)) {
-            log.error("!> error while editing tournament round from dto {} for user {}.", tournamentRoundDto, user);
+            log.error("!> error while editing tournament round from dto '{}' for user '{}'.", tournamentRoundDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_MODIFICATION_ERROR,
                     "Tournament round was not updated on Portal. Check requested params.");
         }
@@ -140,7 +140,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
         tournamentRound = tournamentRoundService.deleteRound(tournamentRound);
 
         if (isNull(tournamentRound)) {
-            log.error("!> error while deleting tournament round with id {} for user {}.", id, user);
+            log.error("!> error while deleting tournament round with id '{}' for user '{}'.", id, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_MODIFICATION_ERROR,
                     "Tournament round was not deleted on Portal. Check requested params.");
         }
@@ -154,11 +154,11 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     public TournamentRound getVerifiedRoundById(long id) {
         TournamentRound tournamentRound = tournamentRoundService.getRound(id);
         if (isNull(tournamentRound)) {
-            log.debug("^ Tournament round with requested id {} was not found. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id);
+            log.debug("^ Tournament round with requested id '{}' was not found. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_NOT_FOUND_ERROR, "Tournament series  with requested id " + id + " was not found");
         }
         if (tournamentRound.getStatus().isDeleted()) {
-            log.debug("^ Tournament round with requested id {} was {}. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id, tournamentRound.getStatus());
+            log.debug("^ Tournament round with requested id '{}' was '{}'. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id, tournamentRound.getStatus());
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_DISABLE_ERROR, "Active tournament round with requested id " + id + " was not found");
         }
         return tournamentRound;
@@ -183,7 +183,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
 
         Set<ConstraintViolation<TournamentRoundDto>> violations = validator.validate(tournamentRoundDto);
         if (!violations.isEmpty()) {
-            log.debug("^ transmitted tournament round dto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament round dto: '{}' have constraint violations: '{}'",
                     tournamentRoundDto, violations);
             throw new ConstraintViolationException(violations);
         }

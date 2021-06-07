@@ -83,7 +83,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
 
         newTournamentSeries = tournamentSeriesService.addSeries(newTournamentSeries);
         if (isNull(newTournamentSeries)) {
-            log.error("!> error while creating tournament series from dto {} for user {}.", tournamentSeriesDto, user);
+            log.error("!> error while creating tournament series from dto '{}' for user '{}'.", tournamentSeriesDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_CREATION_ERROR,
                     "Tournament series was not saved on Portal. Check requested params.");
         }
@@ -99,7 +99,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         TournamentSeries tournamentSeries = this.getVerifiedSeriesById(id);
         tournamentSeries = tournamentSeriesService.generateOmtForSeries(tournamentSeries);
         if (isNull(tournamentSeries)) {
-            log.error("!> error while generate Omt match for tournament series.id {}.", id);
+            log.error("!> error while generate Omt match for tournament series.id '{}'.", id);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR,
                     "OMT match was not generated and saved for tournament series " + id + ". Check requested params.");
         }
@@ -128,7 +128,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         if (tournamentSeries.getStatus().isFinished() &&
                 !(nonNull(tournamentSeries.getSeriesWinner()) || nonNull(tournamentSeries.getSeriesRivalList()))) {
             log.warn("~ tournament series can be finished only with setting the winner of the series " +
-                            "or set winner places in series rivals. Request to set status {}, winner {} and rivals {} was rejected.",
+                            "or set winner places in series rivals. Request to set status '{}', winner '{}' and rivals '{}' was rejected.",
                     tournamentSeries.getStatus(), tournamentSeries.getSeriesWinner(), tournamentSeries.getSeriesRivalList());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_STATUS_FINISHED_ERROR,
                     "Modifying tournament series was rejected. Check requested params and method.");
@@ -136,7 +136,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
 
         tournamentSeries = tournamentSeriesService.editSeries(tournamentSeries);
         if (isNull(tournamentSeries)) {
-            log.error("!> error while editing tournament series from dto {} for user {}.", tournamentSeriesDto, user);
+            log.error("!> error while editing tournament series from dto '{}' for user '{}'.", tournamentSeriesDto, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
                     "Tournament series was not updated on Portal. Check requested params.");
         }
@@ -153,7 +153,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         tournamentSeries = tournamentSeriesService.deleteSeries(tournamentSeries);
 
         if (isNull(tournamentSeries)) {
-            log.error("!> error while deleting tournament series with id {} for user {}.", id, user);
+            log.error("!> error while deleting tournament series with id '{}' for user '{}'.", id, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
                     "Tournament series was not deleted on Portal. Check requested params.");
         }
@@ -167,11 +167,11 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     public TournamentSeries getVerifiedSeriesById(long id) {
         TournamentSeries tournamentSeries = tournamentSeriesService.getSeries(id);
         if (isNull(tournamentSeries)) {
-            log.debug("^ Tournament series with requested id {} was not found. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied", id);
+            log.debug("^ Tournament series with requested id '{}' was not found. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied", id);
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_SERIES_NOT_FOUND_ERROR, "Tournament series  with requested id " + id + " was not found");
         }
         if (tournamentSeries.getStatus().isDeleted()) {
-            log.debug("^ Tournament series with requested id {} was {}. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied", id, tournamentSeries.getStatus());
+            log.debug("^ Tournament series with requested id '{}' was '{}'. 'getVerifiedSeriesById' in RestTournamentSeriesService request denied", id, tournamentSeries.getStatus());
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_SERIES_DISABLE_ERROR, "Active tournament series with requested id " + id + " was not found");
         }
         return tournamentSeries;
@@ -196,7 +196,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
 
         Set<ConstraintViolation<TournamentSeriesDto>> settingsViolations = validator.validate(tournamentSeriesDto);
         if (!settingsViolations.isEmpty()) {
-            log.debug("^ transmitted tournament series dto: {} have constraint violations: {}",
+            log.debug("^ transmitted tournament series dto: '{}' have constraint violations: '{}'",
                     tournamentSeriesDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }

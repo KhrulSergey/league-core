@@ -18,8 +18,9 @@ public class TournamentSeriesParentDto {
 
     private Long tournamentRoundId;
 
+    @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private TournamentTeamProposalBaseDto teamProposalWinner;
+    private TournamentTeamProposalDto teamProposalWinner;
 
     @ApiModelProperty(required = true)
     @NotNull
@@ -33,7 +34,7 @@ public class TournamentSeriesParentDto {
 
     private LocalDateTime startDate;
 
-    @ApiModelProperty(required = false, readOnly = true)
+    @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime finishedDate;
 }

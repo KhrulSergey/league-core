@@ -50,7 +50,7 @@ public class TournamentServiceImpl implements TournamentService {
      */
     @Override
     public Tournament getTournament(long id) {
-        log.debug("^ trying to get tournament by id: {}", id);
+        log.debug("^ trying to get tournament by id: '{}'", id);
         return tournamentRepository.findById(id).orElse(null);
     }
 
@@ -63,7 +63,7 @@ public class TournamentServiceImpl implements TournamentService {
             log.error("!> requesting getTournamentList for NULL pageable. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get tournament list with pageable params: {} and status list {}", pageable, statusList);
+        log.debug("^ trying to get tournament list with pageable params: '{}' and status list '{}'", pageable, statusList);
         boolean filterByStatusEnabled = isNotEmpty(statusList);
         boolean filterByCreatorEnabled = nonNull(creatorUser);
 
@@ -94,12 +94,14 @@ public class TournamentServiceImpl implements TournamentService {
         if (!this.verifyTournament(tournament)) {
             return null;
         }
-        log.debug("^ trying to add new tournament {}", tournament);
+        log.debug("^ trying to add new tournament '{}'", tournament);
         if (!isBlank(tournament.getLogoRawFile())) {
             tournament.setLogoHashKey(leagueStorageClientService.saveTournamentLogo(tournament));
         }
         tournament = tournamentRepository.save(tournament);
-        tournamentEventService.processTournamentStatusChange(tournament, tournament.getStatus());
+        if (tournament.isStatusChanged()) {
+            this.handleTournamentStatusChanged(tournament);
+        }
         return tournament;
     }
 
@@ -112,18 +114,17 @@ public class TournamentServiceImpl implements TournamentService {
             return null;
         }
         if (!this.isExistsTournamentById(tournament.getId())) {
-            log.error("!> requesting modify tournament {} for non-existed tournament. Check evoking clients", tournament.getId());
+            log.error("!> requesting modify tournament '{}' for non-existed tournament. Check evoking clients", tournament.getId());
             return null;
         }
-        log.debug("^ trying to modify tournament {}", tournament);
-
+        log.debug("^ trying to modify tournament '{}'", tournament);
         if (tournament.getStatus().isFinished()) {
             tournament.setFinishedDate(LocalDateTime.now());
             // if tournament was automatically finished by EventService (not manually-forced)
             if (isFalse(tournament.getIsForcedFinished())) {
                 List<TournamentWinner> tournamentWinnerList = this.getCalculatedTeamProposalWinnerList(tournament);
                 if (isEmpty(tournamentWinnerList)) {
-                    log.error("!> requesting modify tournament id {} was canceled. Tournament winner was not defined or found. Check stack trace.",
+                    log.error("!> requesting modify tournament id '{}' was canceled. Tournament winner was not defined or found. Check stack trace.",
                             tournament.getId());
                     tournament.setStatus(TournamentStatusType.PAUSE);
                 }
@@ -139,28 +140,6 @@ public class TournamentServiceImpl implements TournamentService {
         return tournamentRepository.save(tournament);
     }
 
-    private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {
-
-        List<TournamentWinner> winnerTeamProposal = new ArrayList<>();
-        TournamentRound tournamentRound = tournament.getTournamentRoundList().stream()
-                .max(Comparator.comparingInt(TournamentRound::getRoundNumber))
-                .orElse(null);
-
-        if (isNull(tournamentRound) || isEmpty(tournamentRound.getSeriesList()) || tournamentRound.getSeriesList().size() > 1) {
-            log.error("!> requesting getCalculatedTeamProposalWinnerList for tournament {} " +
-                            "for non-existed rival with advantage score. Check evoking clients",
-                    tournament.getId());
-            return null;
-        }
-        TournamentSeriesRival winnerOfLastSeries = tournamentRound.getSeriesList().get(0).getSeriesWinner();
-        winnerTeamProposal.add(TournamentWinner.builder()
-                .winnerPlaceType(TournamentWinnerPlaceType.FIRST)
-                .tournament(tournament)
-                .teamProposal(winnerOfLastSeries.getTeamProposal())
-                .build());
-        return winnerTeamProposal;
-    }
-
     /**
      * Mark 'deleted' tournament in DB.
      */
@@ -173,11 +152,10 @@ public class TournamentServiceImpl implements TournamentService {
             log.error("!> requesting delete tournament for non-existed tournament. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to set 'deleted' mark to tournament {}", tournament);
+        log.debug("^ trying to set 'deleted' mark to tournament '{}'", tournament);
         tournament.setStatus(TournamentStatusType.DELETED);
-        tournament = tournamentRepository.save(tournament);
         this.handleTournamentStatusChanged(tournament);
-        return tournament;
+        return tournamentRepository.save(tournament);
     }
 
     /**
@@ -193,11 +171,33 @@ public class TournamentServiceImpl implements TournamentService {
      */
     public boolean isUserTournamentOrganizer(Tournament tournament, User user) {
         if (isNull(tournament) || isNull(user)) {
-            log.error("!> requesting isUserTournamentOrganizer for NULL tournament {} or NULL user {}. Check evoking clients",
+            log.error("!> requesting isUserTournamentOrganizer for NULL tournament '{}' or NULL user '{}'. Check evoking clients",
                     tournament, user);
             return false;
         }
         return tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
+    }
+
+    private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {
+
+        List<TournamentWinner> winnerTeamProposal = new ArrayList<>();
+        TournamentRound tournamentRound = tournament.getTournamentRoundList().stream()
+                .max(Comparator.comparingInt(TournamentRound::getRoundNumber))
+                .orElse(null);
+
+        if (isNull(tournamentRound) || isEmpty(tournamentRound.getSeriesList()) || tournamentRound.getSeriesList().size() > 1) {
+            log.error("!> requesting getCalculatedTeamProposalWinnerList for tournament '{}' " +
+                            "for non-existed rival with advantage score. Check evoking clients",
+                    tournament.getId());
+            return null;
+        }
+        TournamentSeriesRival winnerOfLastSeries = tournamentRound.getSeriesList().get(0).getSeriesWinner();
+        winnerTeamProposal.add(TournamentWinner.builder()
+                .winnerPlaceType(TournamentWinnerPlaceType.FIRST)
+                .tournament(tournament)
+                .teamProposal(winnerOfLastSeries.getTeamProposal())
+                .build());
+        return winnerTeamProposal;
     }
 
     /**
@@ -210,14 +210,16 @@ public class TournamentServiceImpl implements TournamentService {
         }
         Set<ConstraintViolation<Tournament>> violations = validator.validate(tournament);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament {} with verifyTournament for tournament with ConstraintViolations. Check evoking clients", tournament.getId());
+            log.error("!> requesting modify tournament '{}' with verifyTournament for tournament with ConstraintViolations '{}'. Check evoking clients",
+                    tournament.getId(), violations);
             return false;
         }
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
         if (nonNull(tournamentSettings)) {
             Set<ConstraintViolation<TournamentSettings>> settingsViolations = validator.validate(tournamentSettings);
             if (!settingsViolations.isEmpty()) {
-                log.error("!> requesting modify tournament {} with verifyTournament for tournament settings with ConstraintViolations. Check evoking clients", tournament.getId());
+                log.error("!> requesting modify tournament '{}' with verifyTournament for tournament settings with ConstraintViolations '{}'. Check evoking clients",
+                        tournament.getId(), settingsViolations);
                 return false;
             }
         }
@@ -228,8 +230,9 @@ public class TournamentServiceImpl implements TournamentService {
      * Prototype for handle tournament status
      */
     private void handleTournamentStatusChanged(Tournament tournament) {
-        log.warn("~ status for tournament id {} was changed from {} to {} ",
+        log.warn("~ status for tournament id '{}' was changed from '{}' to '{}' ",
                 tournament.getId(), tournament.getPrevStatus(), tournament.getStatus());
+        tournamentEventService.processTournamentStatusChange(tournament, tournament.getStatus());
         tournament.setPrevStatus(tournament.getStatus());
     }
 }

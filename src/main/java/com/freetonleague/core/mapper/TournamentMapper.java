@@ -1,6 +1,9 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.*;
+import com.freetonleague.core.domain.dto.TournamentDto;
+import com.freetonleague.core.domain.dto.TournamentOrganizerDto;
+import com.freetonleague.core.domain.dto.TournamentSettingsDto;
+import com.freetonleague.core.domain.dto.TournamentWinnerDto;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentOrganizer;
 import com.freetonleague.core.domain.model.TournamentSettings;
@@ -25,17 +28,8 @@ public interface TournamentMapper {
     @Named(value = "toDto")
     TournamentDto toDto(Tournament entity);
 
-    @Mapping(target = "gameDisciplineId", source = "entity.gameDiscipline.id")
-    @Mapping(target = "gameDisciplineSettingsId", source = "entity.gameDisciplineSettings.id")
-    @Mapping(target = "tournamentCreator", source = "entity.createdBy", qualifiedByName = "toDto")
-    @Named(value = "toBaseDto")
-    TournamentBaseDto toBaseDto(Tournament entity);
-
     @IterableMapping(qualifiedByName = "toDto")
     List<TournamentDto> toDto(List<Tournament> entities);
-
-    @IterableMapping(qualifiedByName = "toBaseDto")
-    List<TournamentBaseDto> toBaseDto(List<Tournament> entities);
     //endregion
 
 
@@ -67,7 +61,7 @@ public interface TournamentMapper {
     TournamentWinner fromDto(TournamentWinnerDto dto);
 
     @Named(value = "toWinnerDto")
-    @Mapping(target = "team", source = "teamProposal.team", qualifiedByName = "toBaseDto")
+    @Mapping(target = "team", source = "teamProposal.team", qualifiedByName = "toDto")
     @Mapping(target = "tournamentId", source = "tournament.id")
     @Mapping(target = "teamProposalId", source = "teamProposal.id")
     TournamentWinnerDto toDto(TournamentWinner entity);

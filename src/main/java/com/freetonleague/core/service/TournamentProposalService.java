@@ -1,6 +1,7 @@
 package com.freetonleague.core.service;
 
 
+import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -37,7 +38,7 @@ public interface TournamentProposalService {
      * @param tournament params to search tournament team proposal
      * @return list of tournament team proposal entities
      */
-    Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament);
+    Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament, List<ParticipationStateType> stateList);
 
     /**
      * Returns tournament team proposal (request to participate on tournament).
@@ -65,6 +66,11 @@ public interface TournamentProposalService {
 
     /**
      * Returns list of approved team proposal list for specified tournament.
+     */
+    List<TournamentTeamProposal> getApprovedTeamProposalListByTournament(Tournament tournament);
+
+    /**
+     * Returns list of active team proposal list for specified tournament.
      */
     List<TournamentTeamProposal> getActiveTeamProposalListByTournament(Tournament tournament);
 

@@ -3,7 +3,6 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.TransactionTemplateType;
 import com.freetonleague.core.domain.enums.TransactionType;
-import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -12,6 +11,11 @@ import lombok.experimental.SuperBuilder;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.util.UUID;
+
+import static java.util.Objects.nonNull;
 
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
@@ -51,10 +55,12 @@ public class AccountTransaction extends FinancialBaseEntity implements Serializa
     @Column(name = "name")
     private String name;
 
-    @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
-    private AccountTransactionStatusType status = AccountTransactionStatusType.FINISHED;
+    private AccountTransactionStatusType status;
+
+    @Transient
+    private AccountTransactionStatusType prevStatus;
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
@@ -63,4 +69,35 @@ public class AccountTransaction extends FinancialBaseEntity implements Serializa
     @Column(name = "template_type")
     @Enumerated(EnumType.STRING)
     private TransactionTemplateType transactionTemplateType;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne
+    @JoinColumn(name = "approved_by_league_id", referencedColumnName = "league_id", nullable = false)
+    private User approvedBy;
+
+    @Column(name = "finished_at")
+    private LocalDateTime finishedAt;
+
+    @Column(name = "aborted_at")
+    private LocalDateTime abortedAt;
+
+    private String signature;
+
+    public void setStatus(AccountTransactionStatusType status) {
+        prevStatus = this.status;
+        this.status = status;
+    }
+
+    public boolean isStatusChanged() {
+        return !this.status.equals(this.prevStatus);
+    }
+
+    @PrePersist
+    @PreUpdate
+    public void calculateSignature() {
+        String sourceAccount = nonNull(getSourceAccount()) ? getSourceAccount().getGUID().toString() : "";
+        String targetAccount = nonNull(getTargetAccount()) ? getTargetAccount().getGUID().toString() : "";
+        String stringToHash = getGUID().toString() + getAmount().toString() + sourceAccount + targetAccount;
+        this.signature = UUID.nameUUIDFromBytes(stringToHash.getBytes(StandardCharsets.UTF_8)).toString();
+    }
 }

@@ -59,10 +59,10 @@ public class UserServiceImpl implements UserService {
     public User add(User user) {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
         if (!violations.isEmpty()) {
-            log.warn("~ User [ {} ] have constraint violations: {}", user, violations);
+            log.warn("~ User [ '{}' ] have constraint violations: '{}'", user, violations);
             throw new ConstraintViolationException(violations);
         }
-        log.debug("^ User [ {} ] binding is successful", user);
+        log.debug("^ User [ '{}' ] binding is successful", user);
         user.setRoles(Collections.singleton(this.getRegularRole()));
         user.setStatus(UserStatusType.ACTIVE);
         user = userRepository.saveAndFlush(user);
@@ -75,7 +75,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User findByLeagueId(UUID leagueId) {
-        log.debug("^ trying to find user in BD with leagueId {}", leagueId);
+        log.debug("^ trying to find user in BD with leagueId '{}'", leagueId);
         if (isNull(leagueId)) {
             log.error("!> requesting findByLeagueId for Blank leagueId. Check evoking clients");
             return null;
@@ -83,12 +83,12 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByLeagueId(leagueId);
         if (isNull(user)) {
             log.debug("^ trying to load user from LeagueId-module with id '{}'", leagueId);
-            UserDto userDto = leagueIdClientService.getUserByLeagueId(leagueId.toString());
+            UserDto userDto = leagueIdClientService.getUserByLeagueId(leagueId);
             if (nonNull(userDto)) {
                 //create new user
                 return this.add(userDto);
             } else {
-                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+                log.warn("~ No user with leagueId '{}' found in LeagueId-module", leagueId);
             }
         }
         return user;
@@ -99,7 +99,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User findByUsername(String username) {
-        log.debug("^ trying to find user in BD with username {}", username);
+        log.debug("^ trying to find user in BD with username '{}'", username);
         if (isBlank(username)) {
             log.error("!> requesting findByUsername for Blank username. Check evoking clients");
             return null;
@@ -112,7 +112,7 @@ public class UserServiceImpl implements UserService {
                 //create new user
                 user = this.add(userDto);
             } else {
-                log.warn("~ No user with username {} found in LeagueId-module", username);
+                log.warn("~ No user with username '{}' found in LeagueId-module", username);
             }
         }
         return user;
@@ -123,16 +123,16 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User loadWithLeagueId(String leagueId, String sessionToken) {
-        log.debug("^ trying to find user on BD with leagueId {}", leagueId);
+        log.debug("^ trying to find user on BD with leagueId '{}'", leagueId);
         User user = this.findByLeagueId(UUID.fromString(leagueId));
         if (isNull(user)) {
-            log.debug("^ trying to load user from LeagueId {}", leagueId);
+            log.debug("^ trying to load user from LeagueId '{}'", leagueId);
             UserDto userDto = leagueIdClientService.getUser(sessionToken);
             if (nonNull(userDto)) {
                 //create new user
                 user = this.add(userDto);
             } else {
-                log.warn("~ No user with leagueId {} found in LeagueId-module", leagueId);
+                log.warn("~ No user with leagueId '{}' found in LeagueId-module", leagueId);
             }
         }
         return user;
@@ -147,15 +147,15 @@ public class UserServiceImpl implements UserService {
         Set<ConstraintViolation<User>> violations = validator.validate(user);
 
         if (!userRepository.existsByLeagueId(user.getLeagueId())) {
-            log.warn("user: {} is not exist", user);
+            log.warn("user: '{}' is not exist", user);
             throw new UserManageException(ExceptionMessages.USER_NOT_FOUND_ERROR,
                     "user with leagueId " + user.getLeagueId() + " is not exist");
         }
         if (!violations.isEmpty()) {
-            log.warn("edited user: {} have constraint violations: {}", user, violations);
+            log.warn("edited user: '{}' have constraint violations: '{}'", user, violations);
             throw new ConstraintViolationException(violations);
         }
-        log.debug("user: {} is edited", user);
+        log.debug("user: '{}' is edited", user);
         updatedUser = userRepository.saveAndFlush(user);
         userEventService.processUserStatusChange(user, user.getStatus());
         return updatedUser;
@@ -165,8 +165,16 @@ public class UserServiceImpl implements UserService {
      * Returns list of all initiated users on portal
      */
     @Override
-    public List<User> getInitiatedUserList() {
+    public List<User> findInitiatedUserList() {
         return userRepository.findAllInitiatedUsers();
+    }
+
+    /**
+     * Returns list of all active users on portal
+     */
+    @Override
+    public List<User> findActiveUserList() {
+        return userRepository.findAllActiveUsers();
     }
 
     /**
@@ -179,7 +187,7 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        log.debug("!> try to find user by login: {} for Spring Auth", username);
+        log.debug("!> try to find user by login: '{}' for Spring Auth", username);
         User user = this.findByUsername(username);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
@@ -201,11 +209,11 @@ public class UserServiceImpl implements UserService {
     private User add(UserDto userDto) {
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         if (!violations.isEmpty()) {
-            log.warn("~ user: {} have constraint violations: {}", userDto, violations);
+            log.warn("~ user: '{}' have constraint violations: '{}'", userDto, violations);
             throw new ConstraintViolationException(violations);
         }
         if (!isBlank(userDto.getUsername()) && this.isUserExistedByUserName(userDto.getUsername())) {
-            log.error("^ user with username already exists on core module: {} but with DIFFERENT GUID. Check data!", userDto.getUsername());
+            log.error("^ user with username already exists on core module: '{}' but with DIFFERENT GUID. Check data!", userDto.getUsername());
             throw new UserManageException(ExceptionMessages.USER_DUPLICATE_FOUND_ERROR,
                     String.format("Found duplicates by username '%s' on auth and data modules", userDto.getUsername()));
         }

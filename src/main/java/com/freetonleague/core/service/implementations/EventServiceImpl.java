@@ -30,7 +30,7 @@ public class EventServiceImpl implements EventService {
         ListenableFuture<SendResult<String, EventDto>> listenableFuture = this.producer.sendMessage(eventDto.getTopic(), "IN_KEY", eventDto);
 
         SendResult<String, EventDto> result = listenableFuture.get();
-        log.info("Produced: event id {} message: {} \ntopic: {}, offset: {}, partition: {}, value size: {}",
+        log.info("Produced: event id '{}' message: '{}' \ntopic: '{}', offset: '{}', partition: '{}', value size: '{}'",
                 eventDto.getId(),
                 eventDto.getMessage(),
                 eventDto.getTopic(), result.getRecordMetadata().offset(),

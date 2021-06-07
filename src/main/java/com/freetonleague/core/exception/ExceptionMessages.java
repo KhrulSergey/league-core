@@ -137,14 +137,28 @@ public class ExceptionMessages {
     public static final String DOCKET_USER_PROPOSAL_MODIFICATION_ERROR = "User proposal to Docket modifying failed. Please try again";
 
     public static final String ACCOUNT_INFO_NOT_FOUND_ERROR = "Financial account info was not found. Please check request parameters";
+    public static final String TRANSACTION_WITHDRAW_CREATION_ERROR = "Request for financial withdraw transaction was rejected by provider. Please check request parameters or try again later";
+    public static final String TRANSACTION_VALIDATION_ERROR = "Request for financial transaction was specified with errors. Please check request parameters";
+    public static final String TRANSACTION_NOT_FOUND_ERROR = "Financial transaction info was not found. Please check request parameters";
     public static final String ACCOUNT_COUPON_APPLY_ERROR = "Applying coupon by advertisement company hash was unsuccessful." +
             "Please check request parameters or contact organizers";
+
+    public static final String NEWS_NOT_FOUND_ERROR = "News was not found. Please check request parameters";
+    public static final String NEWS_VISIBLE_ERROR = "Docket is not visible and modification forbidden. Please contact to organizers.";
+    public static final String NEWS_STATUS_DELETE_ERROR = "News delete should be done with specific request. Please try again with other method.";
+    public static final String NEWS_CREATION_ERROR = "News creation failed. Please try again";
+    public static final String NEWS_VALIDATION_ERROR = "News was specified with errors. Please check request parameters";
+    public static final String NEWS_MODIFICATION_ERROR = "News modifying failed. Please try again";
 
     public static final String FEIGN_UNEXPECTED_ERROR = "Some error with service connections. Try again";
 
     //---//
     public static final String FINANCE_UNIT_ACCOUNT_NOT_FOUND_ERROR = "Financial account was not found. Please check request parameters";
     public static final String FINANCE_UNIT_ACCOUNT_CREATION_ERROR = "Financial account creation failed. Please try again";
-    public static final String FINANCE_UNIT_TRANSACTION_CREATION_ERROR = "Financial transation was not saved. Please check request parameters";
+    public static final String FINANCE_UNIT_TRANSACTION_CREATION_ERROR = "Financial transaction was not created and not saved. Please check request parameters";
+    public static final String FINANCE_UNIT_TRANSACTION_MODIFY_ABORTED_ERROR = "Aborted financial transaction can't be modified. Request denied";
+    public static final String FINANCE_UNIT_TRANSACTION_MODIFY_ABORT_ERROR = "Aborted financial transaction can't be modified. Request denied";
+    public static final String FINANCE_UNIT_TRANSACTION_ABORT_ERROR = "Financial transaction can't be aborted. Request denied";
+    public static final String FINANCE_UNIT_TRANSACTION_MODIFY_FINISHED_ERROR = "Only aborted operation available for finished transaction. Request denied";
     public static final String FINANCE_UNIT_TOKEN_VALIDATION_ERROR = "Specified token is not valid for operate with deposit transactions. Request denied";
 }

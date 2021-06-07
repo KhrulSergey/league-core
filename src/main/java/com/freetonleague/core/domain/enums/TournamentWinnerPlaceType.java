@@ -14,7 +14,15 @@ public enum TournamentWinnerPlaceType {
     FIFTH(5),
     SIXTH(6),
     SEVENTH(7),
-    EIGHTH(8);
+    EIGHTH(8),
+    NINTH(9),
+    TENTH(10),
+    ELEVENTH(11),
+    TWELFTH(12),
+    THIRTEENTH(13),
+    FOURTEENTH(14),
+    FIFTEENTH(15),
+    SIXTEENTH(16);
 
     public static Comparator<TournamentWinnerPlaceType> winnerPlaceTypeComparator =
             Comparator.comparingInt(TournamentWinnerPlaceType::getPlaceNumber);

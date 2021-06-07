@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface UserService extends UserDetailsService {
+
     /**
      * Adding a new user to DB.
      *
@@ -50,5 +51,12 @@ public interface UserService extends UserDetailsService {
      *
      * @return list of user entities
      */
-    List<User> getInitiatedUserList();
+    List<User> findInitiatedUserList();
+
+    /**
+     * Returns list of all active users on portal
+     *
+     * @return list of user entities
+     */
+    List<User> findActiveUserList();
 }

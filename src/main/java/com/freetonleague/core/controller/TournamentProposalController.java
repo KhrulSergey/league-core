@@ -1,7 +1,6 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.User;
@@ -17,6 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
+
+import java.util.List;
+
+import static java.util.Objects.nonNull;
 
 @RestController
 @RequestMapping(path = TournamentProposalController.BASE_PATH)
@@ -36,8 +39,8 @@ public class TournamentProposalController {
 
     @ApiOperation("Apply to participate in tournament by id")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_APPLY_TO_TOURNAMENT)
-    public ResponseEntity<TournamentTeamProposalDto> applyToTournamentById(@RequestParam(value = "tournament_id", required = true) long tournamentId,
-                                                                           @RequestParam(value = "team_id", required = true) long teamId,
+    public ResponseEntity<TournamentTeamProposalDto> applyToTournamentById(@RequestParam(value = "tournament_id") long tournamentId,
+                                                                           @RequestParam(value = "team_id") long teamId,
                                                                            @ApiIgnore @RequestBody(required = false) TournamentTeamProposalDto teamProposalDto,
                                                                            @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.createProposalToTournament(tournamentId, teamId, teamProposalDto, user), HttpStatus.OK);
@@ -48,15 +51,15 @@ public class TournamentProposalController {
     public ResponseEntity<TournamentTeamProposalDto> editTeamProposal(@RequestParam(value = "tournament_id", required = false) Long tournamentId,
                                                                       @RequestParam(value = "team_id", required = false) Long teamId,
                                                                       @RequestParam(value = "team_poposal_id", required = false) Long teamProposalId,
-                                                                      @RequestParam(value = "team_poposal_state", required = true) ParticipationStateType teamProposalState,
+                                                                      @RequestParam(value = "team_poposal_state") ParticipationStateType teamProposalState,
                                                                       @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.editProposalToTournament(tournamentId, teamId, teamProposalId, teamProposalState, user), HttpStatus.OK);
     }
 
     @ApiOperation("Quit team from tournament by tournament and team id")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_QUIT_FROM_TOURNAMENT)
-    public ResponseEntity<Void> quitFromTournamentById(@RequestParam(value = "tournament_id", required = true) long tournamentId,
-                                                       @RequestParam(value = "team_id", required = true) long teamId,
+    public ResponseEntity<Void> quitFromTournamentById(@RequestParam(value = "tournament_id") long tournamentId,
+                                                       @RequestParam(value = "team_id") long teamId,
                                                        @ApiIgnore @AuthenticationPrincipal User user) {
         restTournamentProposalFacade.quitFromTournament(tournamentId, teamId, user);
         return new ResponseEntity<>(HttpStatus.OK);
@@ -64,8 +67,8 @@ public class TournamentProposalController {
 
     @ApiOperation("Get team proposal for tournament by Team (for orgs and team - extended view)")
     @GetMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_GET_FOR_TOURNAMENT)
-    public ResponseEntity<TournamentTeamProposalDto> getTournamentProposalByTeamId(@RequestParam(value = "tournament_id", required = true) long tournamentId,
-                                                                                   @RequestParam(value = "team_id", required = true) long teamId,
+    public ResponseEntity<TournamentTeamProposalDto> getTournamentProposalByTeamId(@RequestParam(value = "tournament_id") long tournamentId,
+                                                                                   @RequestParam(value = "team_id") long teamId,
                                                                                    @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.getProposalFromTeamForTournament(tournamentId, teamId, user), HttpStatus.OK);
     }
@@ -73,10 +76,11 @@ public class TournamentProposalController {
     @ApiPageable
     @ApiOperation("Get team proposal list for tournament (for orgs and team - extended view)")
     @GetMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_GET_LIST_FOR_TOURNAMENT)
-    public ResponseEntity<Page<TournamentTeamProposalBaseDto>> getTournamentProposalList(@PageableDefault Pageable pageable,
-                                                                                         @RequestParam(value = "tournament_id", required = true) long tournamentId,
-                                                                                         @ApiIgnore @AuthenticationPrincipal User user) {
-
-        return new ResponseEntity<>(restTournamentProposalFacade.getProposalListForTournament(pageable, tournamentId, user), HttpStatus.OK);
+    public ResponseEntity<Page<TournamentTeamProposalDto>> getTournamentProposalList(
+            @PageableDefault Pageable pageable,
+            @RequestParam(value = "tournament_id") long tournamentId,
+            @RequestParam(value = "states", required = false) ParticipationStateType... states) {
+        List<ParticipationStateType> stateList = nonNull(states) ? List.of(states) : null;
+        return new ResponseEntity<>(restTournamentProposalFacade.getProposalListForTournament(pageable, tournamentId, stateList), HttpStatus.OK);
     }
 }

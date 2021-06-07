@@ -22,8 +22,8 @@ public class FeignErrorDecoder implements ErrorDecoder {
     @Override
     public Exception decode(String methodKey, Response response) {
         String body = response.body().toString();
-        log.error("!> Got error while feign http request. Method key '{}'. Response body from resource: {}, reason {}. " +
-                "Full response from resource: {}", methodKey, body, response.reason(), response);
+        log.error("!> Got error while feign http request. Method key '{}'. Response body from resource: '{}', reason '{}'. " +
+                "Full response from resource: '{}'", methodKey, body, response.reason(), response);
         ApiError apiError;
         try {
             apiError = gson.fromJson(body, ApiError.class);

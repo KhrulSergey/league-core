@@ -1,7 +1,6 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
-import com.freetonleague.core.domain.dto.TournamentTeamProposalBaseDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.TournamentTeamParticipant;
@@ -9,6 +8,8 @@ import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
+import java.util.List;
 
 /**
  * Service-facade for managing tournament team proposal and team composition
@@ -28,10 +29,11 @@ public interface RestTournamentProposalFacade {
     /**
      * Get team proposal list for tournament
      *
+     * @param pageable     filtered params to search tournament
      * @param tournamentId identify of tournament
-     * @param user         current user from Session
+     * @param stateList    filter params
      */
-    Page<TournamentTeamProposalBaseDto> getProposalListForTournament(Pageable pageable, long tournamentId, User user);
+    Page<TournamentTeamProposalDto> getProposalListForTournament(Pageable pageable, long tournamentId, List<ParticipationStateType> stateList);
 
     /**
      * Registry new team to tournament

@@ -13,6 +13,8 @@ public interface BroxusAccountingClientCloud {
 
     String AUTH_TOKEN = "token";
     String ACCOUNT_IDENTIFIER = "userId";
+    String TARGET_ACCOUNT_ADDRESS = "address";
+    String WITHDRAW_AMOUNT = "amount";
 
     @GetMapping("/get-user-balance")
     AccountBroxusResponseDto getAccountBalance(@RequestParam(AUTH_TOKEN) String token,
@@ -21,4 +23,10 @@ public interface BroxusAccountingClientCloud {
     @GetMapping("/get-deposit-address")
     AccountBroxusResponseDto createBroxusAccount(@RequestParam(AUTH_TOKEN) String token,
                                                  @RequestParam(ACCOUNT_IDENTIFIER) String accountGUID);
+
+    @GetMapping("/withdraw")
+    AccountBroxusResponseDto registerWithdrawTransaction(@RequestParam(AUTH_TOKEN) String token,
+                                                         @RequestParam(ACCOUNT_IDENTIFIER) String accountGUID,
+                                                         @RequestParam(TARGET_ACCOUNT_ADDRESS) String targetAccountExternalAddress,
+                                                         @RequestParam(WITHDRAW_AMOUNT) Double amount);
 }

@@ -38,4 +38,12 @@ public class BroxusAccountingClientCloudMockImpl implements BroxusAccountingClie
                 .data(data)
                 .build();
     }
+
+    @Override
+    public AccountBroxusResponseDto registerWithdrawTransaction(String token, String accountGUID, String targetAccountExternalAddress, Double amount) {
+        return AccountBroxusResponseDto.builder()
+                .success(true)
+                .data(null)
+                .build();
+    }
 }

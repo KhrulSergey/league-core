@@ -1,7 +1,6 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.TeamBaseDto;
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.dto.TeamExtendedDto;
 import com.freetonleague.core.domain.model.User;
@@ -61,14 +60,14 @@ public class TeamController {
 
     @ApiOperation("Register new team on platform")
     @PostMapping(path = PATH_REGISTER)
-    public ResponseEntity<TeamDto> registerTeam(@RequestBody TeamBaseDto teamDto,
+    public ResponseEntity<TeamDto> registerTeam(@RequestBody TeamDto teamDto,
                                                 @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.addTeam(teamDto, user), HttpStatus.CREATED);
     }
 
     @ApiOperation("Edit team info (only for captain)")
     @PutMapping(path = PATH_EDIT)
-    public ResponseEntity<TeamExtendedDto> editTeam(@PathVariable("id") long id, @RequestBody TeamBaseDto teamDto,
+    public ResponseEntity<TeamExtendedDto> editTeam(@PathVariable("id") long id, @RequestBody TeamDto teamDto,
                                                     @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTeamFacade.editTeam(id, teamDto, user), HttpStatus.OK);
     }

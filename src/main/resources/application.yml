@@ -74,6 +74,8 @@ freetonleague:
       balance-update-timeout-in-sec: 300
       system-bonus-user-login: KdnIgwRY0qzedOZ6R2X6T9GtNDz # name of similar service-user from V025__fin_service_user_and_role.sql
       first-ton-bonus-name: first_ton_2021 # name bonus advertisement company (equals utm_source)
+      auto-abort-transaction: false
+      min-withdraw-value: 10
     league-storage:
       url: league-storage:7702/api
       service-token: EqUEcXc3#iZCu5hQS!l33O6I3
@@ -98,11 +100,11 @@ logging:
           wire: INFO
       springframework: WARN #for detailed debug set DEBUG
       hibernate:
-        SQL: DEBUG
+        SQL: INFO
         type:
           descriptor:
             sql:
-              BasicBinder: TRACE
+              BasicBinder: INFO
     com:
       freetonleague: DEBUG
   file:

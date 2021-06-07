@@ -84,8 +84,8 @@ public class DocketProposalController {
 
 //    @ApiOperation("Quit user from docket by docket and user id")
 //    @PostMapping(path = PATH_QUIT_FROM_DOCKET)
-//    public ResponseEntity<Void> quitFromDocketById(@RequestParam(value = "docket_id", required = true) long docketId,
-//                                                       @RequestParam(value = "leagueId", required = true) long leagueId,
+//    public ResponseEntity<Void> quitFromDocketById(@RequestParam(value = "docket_id" ) long docketId,
+//                                                       @RequestParam(value = "leagueId" ) long leagueId,
 //                                                       @ApiIgnore @AuthenticationPrincipal User user) {
 //        restDocketProposalFacade.quitFromDocket(docketId, leagueId, user);
 //        return new ResponseEntity<>(HttpStatus.OK);
