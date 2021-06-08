@@ -150,6 +150,8 @@ public class ExceptionMessages {
     public static final String NEWS_VALIDATION_ERROR = "News was specified with errors. Please check request parameters";
     public static final String NEWS_MODIFICATION_ERROR = "News modifying failed. Please try again";
 
+    public static final String NOTIFICATION_VALIDATION_ERROR = "Notification was specified with errors. Please check request parameters";
+
     public static final String FEIGN_UNEXPECTED_ERROR = "Some error with service connections. Try again";
 
     //---//

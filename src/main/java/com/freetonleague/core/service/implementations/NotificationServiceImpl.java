@@ -13,6 +13,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static java.util.Objects.isNull;
 
@@ -20,6 +22,8 @@ import static java.util.Objects.isNull;
 @RequiredArgsConstructor
 @Service
 public class NotificationServiceImpl implements NotificationService {
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final MessageProducer producer;
     private final Validator validator;
 
@@ -30,6 +34,10 @@ public class NotificationServiceImpl implements NotificationService {
                     notificationDto);
             return;
         }
+        executor.submit(() -> sendNotificationToKafka(notificationDto));
+    }
+
+    private void sendNotificationToKafka(NotificationDto notificationDto) {
         ListenableFuture<SendResult<String, NotificationDto>> listenableFuture = this.producer.sendNotificationMessage(notificationDto);
         try {
             SendResult<String, NotificationDto> result = listenableFuture.get();
@@ -43,6 +51,7 @@ public class NotificationServiceImpl implements NotificationService {
                     notificationDto, exc);
         }
     }
+
 
     private boolean verifyNotification(NotificationDto notificationDto) {
         if (isNull(notificationDto)) {
