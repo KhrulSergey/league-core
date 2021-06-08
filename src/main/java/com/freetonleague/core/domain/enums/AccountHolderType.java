@@ -6,5 +6,9 @@ public enum AccountHolderType {
     TEAM,
     TOURNAMENT,
     DOCKET,
-    COMMISSION_FEES
+    COMMISSION_FEES;
+
+    public boolean isUser() {
+        return this == USER;
+    }
 }
