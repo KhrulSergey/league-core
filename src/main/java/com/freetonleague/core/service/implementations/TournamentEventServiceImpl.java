@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -320,7 +321,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private void tryMakeStatusUpdateOperations(Tournament tournament) {
         log.debug("^ try to define events for tournament: '{}'", tournament.getId());
         final TournamentStatusType tournamentStatus = tournament.getStatus();
-
+        boolean result = true;
         if (tournamentStatus.isBefore(TournamentStatusType.SIGN_UP)
                 && tournament.getSignUpStartDate().isBefore(LocalDateTime.now())) {
             this.handleTournamentStatusChange(tournament, TournamentStatusType.SIGN_UP);
@@ -348,11 +349,10 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .eventTopic(EventProducerModelType.TOURNAMENT)
                 .modelId(tournament.getId().toString())
                 .modelData(updateFields)
-                .createdDate(LocalDateTime.now())
+                .createdDate(LocalDate.now())
                 .build();
         try {
-            log.debug("Not implement to send kafka event in handleTournamentStatusChange: '{}'", event);
-//            eventService.sendEvent(event);
+            eventService.sendEvent(event);
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
@@ -374,7 +374,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .eventTopic(EventProducerModelType.TOURNAMENT_ROUND)
                 .modelId(tournamentRound.getId().toString())
                 .modelData(updateFields)
-                .createdDate(LocalDateTime.now())
+                .createdDate(LocalDate.now())
                 .build();
         try {
             eventService.sendEvent(event);
@@ -399,7 +399,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .eventTopic(EventProducerModelType.TOURNAMENT_MATCH)
                 .modelId(tournamentSeries.getId().toString())
                 .modelData(updateFields)
-                .createdDate(LocalDateTime.now())
+                .createdDate(LocalDate.now())
                 .build();
         try {
             eventService.sendEvent(event);
@@ -411,7 +411,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         tournamentSeriesService.editSeries(tournamentSeries);
     }
 
-    private void handleMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
+    public void handleMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
         log.debug("^ handle changing status of match to '{}' in Tournament Event Service.", newTournamentMatchStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentMatchStatus
@@ -424,7 +424,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .eventTopic(EventProducerModelType.TOURNAMENT_MATCH)
                 .modelId(tournamentMatch.getId().toString())
                 .modelData(updateFields)
-                .createdDate(LocalDateTime.now())
+                .createdDate(LocalDate.now())
                 .build();
         try {
             eventService.sendEvent(event);

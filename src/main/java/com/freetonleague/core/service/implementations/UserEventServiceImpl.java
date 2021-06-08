@@ -17,7 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -177,7 +177,7 @@ public class UserEventServiceImpl implements UserEventService {
                 .eventTopic(EventProducerModelType.USER)
                 .modelId(user.getLeagueId().toString())
                 .modelData(updateFields)
-                .createdDate(LocalDateTime.now())
+                .createdDate(LocalDate.now())
                 .build();
         try {
             log.debug("Not implement to send kafka event in handleUserStatusChange: '{}'", event);

@@ -1,6 +1,5 @@
 package com.freetonleague.core.domain.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.DocketStatusType;
 import io.swagger.annotations.ApiModelProperty;
@@ -12,7 +11,6 @@ import lombok.experimental.SuperBuilder;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.List;
 
 /**
  * View of universal docket (lists) for different purpose
@@ -53,7 +51,4 @@ public class DocketDto {
 
     @ApiModelProperty(notes = "optional")
     private Integer maxProposalCount;
-
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private List<DocketUserProposalDto> userProposalList;
 }
