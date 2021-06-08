@@ -8,56 +8,23 @@ server:
 spring:
   application:
   name: Freeton League Core - the system for manage FreeTon League Game Tournaments
-  datasource: #JPA / HIBERNATE
+  # ==== JPA / HIBERNATE ====
+  datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/league_core
     password: postgres
     username: postgres
-  # ===============================
-  # Kafka configuration
-  # ===============================
-  kafka:
-    bootstrap-servers: ${kafka_bootstrap_servers:localhost:9092}
-    properties:
-      sasl:
-        jaas:
-          config: org.apache.kafka.common.security.plain.PlainLoginModule required username=${kafka_username:'admin'} password=${kafka_password:'admin-secret'};
-        mechanism: PLAIN
-      security:
-        protocol: SASL_PLAINTEXT
-    consumer:
-      auto-offset-reset: earliest
-      group-id: example
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      max-poll-records: 5
-      fetch-max-wait: 360000
-      enable-auto-commit: false
-      client-id: example
-      properties:
-        spring.json.trusted.packages: "*"
-        #        fetch.min.bytes: 1000
-        fetch.min.bytes: 1
-        fetch.max.wait.ms: 200000
-    producer:
-      client-id: example
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
-      retries: 2
-    jaas:
-      enabled: true
-    listener:
-      poll-timeout: 180000
-      concurrency: 2
-      ack-mode: manual_immediate
-      idle-event-interval: 200000
-
 
 config:
   broxus-client:
     debug: false # change to true for mock Client use
     url: http://49.12.10.52:3383
     token: XXXXXXXXXXXXXXXXXXXXXXXXX
+  kafka:
+    bootstrapAddress: kafka:9093
+    notifications:
+      start-debug: false
+      topic-name: NOTIFICATION
 
 freetonleague:
   service-user-prefix: SERVICE_

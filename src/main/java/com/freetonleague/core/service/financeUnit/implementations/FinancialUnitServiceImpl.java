@@ -14,11 +14,14 @@ import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.repository.AccountHolderRepository;
 import com.freetonleague.core.repository.AccountRepository;
 import com.freetonleague.core.repository.AccountTransactionRepository;
-import com.freetonleague.core.service.UserService;
+import com.freetonleague.core.service.NotificationService;
+import com.freetonleague.core.service.financeUnit.FinanceEventService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -50,9 +53,13 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private final AccountRepository accountsRepository;
     private final AccountHolderRepository accountHolderRepository;
     private final AccountTransactionRepository accountTransactionRepository;
+    private final NotificationService notificationService;
     private final Validator validator;
 
-    private final UserService userService;
+    @Lazy
+    @Autowired
+    private FinanceEventService financeEventService;
+
 
     @Value("${freetonleague.service.league-finance.service-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
     private String leagueFinanceServiceToken;
@@ -290,6 +297,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         }
         AccountTransaction savedTransaction = accountTransactionRepository.save(transaction);
         log.debug("^ transaction is saved?:'{}' in DB with data: '{}'", true, savedTransaction);
+        // send event about saved transaction
+        financeEventService.processTransactionStatusChange(savedTransaction, savedTransaction.getStatus());
         return savedTransaction;
     }
 
