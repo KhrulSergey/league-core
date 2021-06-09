@@ -181,6 +181,19 @@ public class FinancialClientServiceImpl implements FinancialClientService {
         return restFinancialUnitFacade.abortTransaction(accountTransactionInfoDto.getGUID());
     }
 
+    /**
+     * Returns sign if specified user made deposit transaction at least once to his account
+     */
+    @Override
+    public boolean isUserMadeDepositToHisAccount(User user) {
+        if (isNull(user)) {
+            log.error("!!> requesting isUserMadeDepositToHisAccount for NULL user. Check evoking clients");
+            return false;
+        }
+        log.debug("^ trying to check is user.id '{}' made deposit to his account", user.getLeagueId());
+        return restFinancialUnitFacade.isHolderMadeDeposit(user.getLeagueId(), AccountHolderType.USER);
+    }
+
     private boolean verifyWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
         if (isNull(accountTransactionInfoDto)) {
             log.error("!!> requesting modify transaction for NULL accountTransactionInfoDto. Check evoking clients");

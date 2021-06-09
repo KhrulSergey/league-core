@@ -31,4 +31,11 @@ public interface AccountTransactionRepository extends JpaRepository<AccountTrans
     @Query(value = "select case when count(a)> 0 then true else false end from " +
             "AccountTransaction a where a.GUID = :GUID and a.status = com.freetonleague.core.domain.enums.AccountTransactionStatusType.ABORTED")
     boolean isAbortedByGUID(@Param("GUID") UUID GUID);
+
+    @Query(value = "select case when count(t)> 0 then true else false end from " +
+            "AccountTransaction t where t.targetAccount = :account " +
+            "and t.status = com.freetonleague.core.domain.enums.AccountTransactionStatusType.FINISHED " +
+            "and t.transactionTemplateType = com.freetonleague.core.domain.enums.TransactionTemplateType.EXTERNAL_PROVIDER " +
+            "and t.transactionType = com.freetonleague.core.domain.enums.TransactionType.DEPOSIT")
+    boolean isExistFinishedDepositTransaction(@Param("account") Account account);
 }

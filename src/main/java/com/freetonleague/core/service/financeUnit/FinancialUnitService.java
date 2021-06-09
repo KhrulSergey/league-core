@@ -40,7 +40,7 @@ public interface FinancialUnitService {
      * @param holderType         to search account for
      * @return found account or null
      */
-    Account getAccountByHolderGUIDAndType(UUID externalHolderGUID, AccountHolderType holderType);
+    Account getAccountByHolderExternalGUIDAndType(UUID externalHolderGUID, AccountHolderType holderType);
 
     /**
      * Get account by external address.
@@ -128,4 +128,12 @@ public interface FinancialUnitService {
      * Returns sign of transaction aborted for specified GUID.
      */
     boolean isAbortedTransactionByGUID(UUID GUID);
+
+    /**
+     * Returns sign if with specified account was made deposit transaction at least once
+     *
+     * @param account specified account to search deposit transaction
+     * @return sign if with account was made deposit transaction at least once
+     */
+    boolean isHolderMadeDeposit(Account account);
 }
