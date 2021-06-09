@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = NsiController.BASE_PATH)
 @RequiredArgsConstructor
-@Api(value = "Game Discipline Management Controller")
+@Api(value = "Nsi (dictionary) Controller")
 public class NsiController {
 
     public static final String BASE_PATH = "/api/nsi";
