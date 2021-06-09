@@ -74,6 +74,14 @@ public interface FinancialClientService {
     AccountTransactionInfoDto abortTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 
     /**
+     * Returns sign if specified user made deposit transaction at least once to his account
+     *
+     * @param user specified user to search account and deposit transaction
+     * @return sign if user made deposit transaction at least once
+     */
+    boolean isUserMadeDepositToHisAccount(User user);
+
+    /**
      * Apply coupon by advertisement company hash for user from session
      *
      * @param couponInfo coupon info with ref to bonusAccount

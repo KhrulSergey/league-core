@@ -7,10 +7,9 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {DocketProposalMapper.class})
+        unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface DocketMapper {
 
-    @Mapping(target = "userProposalList", source = "entity.userProposalList", qualifiedByName = "toDtoList")
     @Named(value = "toDto")
     DocketDto toDto(Docket entity);
 
