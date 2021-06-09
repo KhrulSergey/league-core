@@ -59,6 +59,9 @@ public class User extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
 
+    @Transient
+    private UserStatusType prevStatus;
+
     @Builder.Default
     @Column(name = "is_hidden")
     private boolean isHidden = false;

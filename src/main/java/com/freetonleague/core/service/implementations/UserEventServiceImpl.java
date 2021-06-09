@@ -67,9 +67,12 @@ public class UserEventServiceImpl implements UserEventService {
         int countSelected = (int) Math.ceil(keys.size() * 0.15); //15%
 
         List<UUID> selectedKeys = keys.stream().limit(countSelected).collect(Collectors.toList());
-
         for (UUID selectedKey : selectedKeys) {
             User user = activeUserIdToUserMap.get(selectedKey);
+            if (isNull(user)) {
+                log.debug("^ User with leagueId '{}' was not found in Core DB. Continue to monitor users", selectedKey);
+                continue;
+            }
             this.tryUpdateInfoFromLeagueIdModule(user);
         }
     }
@@ -102,7 +105,6 @@ public class UserEventServiceImpl implements UserEventService {
 
     private void tryUpdateInfoFromLeagueIdModule(User user) {
         log.debug("^ try to define update events for user: '{}'", user.getLeagueId());
-        cachedInitiatedUserLeagueId.add(user.getLeagueId());
         try {
             UserDto updatedUser = leagueIdClientService.getUserByLeagueId(user.getLeagueId());
             if (nonNull(updatedUser) && nonNull(updatedUser.getUpdatedAt())
