@@ -68,7 +68,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
     @CanManageDepositFinUnit
     public List<DocketUserProposalBonusDto> getProposalListByDocketForBonus(String accessToken, long docketId) {
         Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
-        List<DocketUserProposal> docketUserProposals = docketProposalService.getActiveUserProposalListByDocket(docket);
+        List<DocketUserProposal> docketUserProposals = docketProposalService.getProposalListByDocketForBonusService(docket);
         return docketProposalMapper.toBonusDto(docketUserProposals);
     }
 
