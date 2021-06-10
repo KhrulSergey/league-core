@@ -24,7 +24,6 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
-import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -66,10 +65,10 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
      */
     @Override
     @CanManageDepositFinUnit
-    public List<DocketUserProposalBonusDto> getProposalListByDocketForBonus(String accessToken, long docketId) {
+    public Page<DocketUserProposalBonusDto> getProposalListByDocketForBonus(Pageable pageable, String accessToken, long docketId) {
         Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
-        List<DocketUserProposal> docketUserProposals = docketProposalService.getProposalListByDocketForBonusService(docket);
-        return docketProposalMapper.toBonusDto(docketUserProposals);
+        Page<DocketUserProposal> docketUserProposals = docketProposalService.getProposalListByDocketForBonusService(pageable, docket);
+        return docketUserProposals.map(docketProposalMapper::toBonusDto);
     }
 
     /**
