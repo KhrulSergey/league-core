@@ -7,8 +7,6 @@ import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 public interface DocketProposalService {
 
     /**
@@ -62,9 +60,9 @@ public interface DocketProposalService {
     DocketUserProposal quitFromDocket(DocketUserProposal userProposal);
 
     /**
-     * Returns list of approved user proposal for specified docket.
+     * Returns list of approved user proposal list for specified docket with bonus-logic filtering.
      */
-    List<DocketUserProposal> getActiveUserProposalListByDocket(Docket docket);
+    Page<DocketUserProposal> getProposalListByDocketForBonusService(Pageable pageable, Docket docket);
 
     /**
      * Returns count of approved user proposal's list for specified docket.

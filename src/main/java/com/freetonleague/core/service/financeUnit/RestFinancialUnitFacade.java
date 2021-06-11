@@ -101,6 +101,15 @@ public interface RestFinancialUnitFacade {
      */
     AccountTransactionInfoDto abortTransaction(String transactionGUID);
 
+    /**
+     * Returns sign if specified holder made deposit transaction at least once
+     *
+     * @param holderExternalGUID unique external identifier of holder
+     * @param holderType         type of holder
+     * @return sign if holder made deposit transaction at least once
+     */
+    boolean isHolderMadeDeposit(UUID holderExternalGUID, AccountHolderType holderType);
+
 //    /**
 //     * Returns created withdraw transaction info (with pause status) for specified data
 //     *

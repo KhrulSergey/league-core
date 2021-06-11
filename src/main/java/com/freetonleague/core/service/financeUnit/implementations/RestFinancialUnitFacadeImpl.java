@@ -270,6 +270,22 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         return accountTransactionFinUnitMapper.toDto(savedTransaction);
     }
 
+    /**
+     * Returns sign if specified holder made deposit transaction at least once
+     */
+    @Override
+    public boolean isHolderMadeDeposit(UUID holderExternalGUID, AccountHolderType holderType) {
+        log.debug("^ requested isHolderMadeDeposit with holderGUID:'{}' and holder type: '{}'",
+                holderExternalGUID, holderType);
+        Account account = this.getVerifiedAccountByHolder(holderExternalGUID, holderType);
+        if (isNull(account)) {
+            log.warn("~ returning isHolderMadeDeposit as FALSE: account for holderGUID:'{}' and holder type: '{}' was not found.",
+                    holderExternalGUID, holderType);
+            return false;
+        }
+        return financialUnitService.isHolderMadeDeposit(account);
+    }
+
 //    /**
 //     * Returns created transaction info for specified data
 //     */
@@ -421,13 +437,13 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         return true;
     }
 
-    private Account getVerifiedAccountByHolder(UUID holderGUID, AccountHolderType holderType) {
-        if (isNull(holderGUID) || isNull(holderType)) {
+    private Account getVerifiedAccountByHolder(UUID holderExternalGUID, AccountHolderType holderType) {
+        if (isNull(holderExternalGUID) || isNull(holderType)) {
             log.error("!!>  requesting getVerifiedAccountByHolder for Blank holderGUID '{}' or for NULL holderType '{}' in RestFinancialUnitFacadeImpl. Request denied",
-                    holderGUID, holderType);
+                    holderExternalGUID, holderType);
             return null;
         }
-        Account account = financialUnitService.getAccountByHolderGUIDAndType(holderGUID, holderType);
+        Account account = financialUnitService.getAccountByHolderExternalGUIDAndType(holderExternalGUID, holderType);
         //TODO check if it's needed
 //        if (isNull(account)) {
 //            log.error("!!> Account with requested holderGUID '{}' was not found. 'getVerifiedAccountByHolder' in RestFinancialUnitFacadeImpl request denied",
@@ -437,7 +453,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
 //        }
         if (nonNull(account) && !account.getStatus().isActive()) {
             log.error("!!> Specified account with GUID '{}' for holder GUID '{}' and Type '{}' is not active. Request passed, but be aware",
-                    account.getGUID(), holderGUID, holderType);
+                    account.getGUID(), holderExternalGUID, holderType);
             //TODO process deposit to non-active account
         }
         return account;

@@ -14,14 +14,14 @@ public interface RestNsiFacade {
     /**
      * Returns all entries of Game Indicator Type
      *
-     * @return team entity
+     * @return game indicator entity list
      */
     List<GameIndicatorTypeDto> getGameIndicatorList();
 
     /**
      * Returns all entries of Match Property Type
      *
-     * @return team entity
+     * @return match property list
      */
     List<MatchPropertyTypeDto> getMatchPropertyList();
 
