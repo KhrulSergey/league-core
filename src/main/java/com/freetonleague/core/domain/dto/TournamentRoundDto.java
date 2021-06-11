@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.TournamentRoundType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import io.swagger.annotations.ApiModelProperty;
@@ -9,6 +10,7 @@ import lombok.Data;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class TournamentRoundDto {
@@ -42,4 +44,7 @@ public class TournamentRoundDto {
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime finishedDate;
+
+    private Map<GameIndicatorType, Double> gameIndicatorMultipliersMap;
+
 }
