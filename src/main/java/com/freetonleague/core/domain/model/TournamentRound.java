@@ -1,18 +1,23 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.TournamentRoundType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
@@ -20,6 +25,7 @@ import java.util.List;
 @Getter
 @Setter
 @Entity
+@TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 @Table(schema = "public", name = "tournament_rounds")
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_rounds_id_seq", schema = "public", allocationSize = 1)
 public class TournamentRound extends ExtendedBaseEntity {
@@ -65,6 +71,11 @@ public class TournamentRound extends ExtendedBaseEntity {
 
     @Column(name = "finished_at")
     private LocalDateTime finishedDate;
+
+    @Getter
+    @Type(type = "jsonb")
+    @Column(name = "game_indicator_multipliers", columnDefinition = "jsonb")
+    private Map<GameIndicatorType, Double> gameIndicatorMultipliersMap;
 
     public void setStatus(TournamentStatusType status) {
         prevStatus = this.status;
