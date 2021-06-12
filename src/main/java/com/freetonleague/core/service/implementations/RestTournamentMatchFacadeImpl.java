@@ -249,6 +249,10 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
     }
 
     private TournamentMatchRival setGameIndicatorMultipliers(TournamentMatchRival rival, TournamentSeries tournamentSeries) {
+        if (rival.getMatchIndicator() == null) {
+            return rival;
+        }
+
         TournamentRound tournamentRound = tournamentSeries.getTournamentRound();
         Map<GameIndicatorType, Double> multiplierMap = tournamentRound.getGameIndicatorMultipliersMap();
 
