@@ -15,4 +15,7 @@ public class GameDisciplineIndicatorDto implements Serializable {
     private GameIndicatorType gameIndicatorType;
 
     private Object gameIndicatorValue;
+
+    private Double multipliedValue;
+
 }
