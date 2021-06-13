@@ -263,20 +263,10 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         for (GameDisciplineIndicatorDto indicator : rival.getMatchIndicator()) {
             double multiplier = multiplierMap.getOrDefault(indicator.getGameIndicatorType(), 1D);
 
-            if (Objects.isNull(indicator.getGameIndicatorValue())) {
-                indicator.setGameIndicatorValue(0);
-            }
+            if (indicator.getGameIndicatorValue() != null && indicator.getGameIndicatorValue() instanceof Number) {
+                double doubleValue = Double.parseDouble(indicator.getGameIndicatorValue().toString());
 
-            switch (indicator.getGameIndicatorType().getValueClassType()) {
-                case DOUBLE:
-                    indicator.setGameIndicatorValue((Double) indicator.getGameIndicatorValue() * multiplier);
-                    break;
-                case INTEGER:
-                    indicator.setGameIndicatorValue((Integer) indicator.getGameIndicatorValue() * multiplier);
-                    break;
-                case LONG:
-                    indicator.setGameIndicatorValue((Long) indicator.getGameIndicatorValue() * multiplier);
-                    break;
+                indicator.setMultipliedValue(doubleValue * multiplier);
             }
 
         }
