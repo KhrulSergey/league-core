@@ -267,6 +267,8 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
                 double doubleValue = Double.parseDouble(indicator.getGameIndicatorValue().toString());
 
                 indicator.setMultipliedValue(doubleValue * multiplier);
+            } else {
+                indicator.setMultipliedValue(null);
             }
 
         }
