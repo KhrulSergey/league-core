@@ -36,14 +36,26 @@ public interface RestTournamentProposalFacade {
     Page<TournamentTeamProposalDto> getProposalListForTournament(Pageable pageable, long tournamentId, List<ParticipationStateType> stateList);
 
     /**
-     * Registry new team to tournament
+     * Registry team proposal to tournament
      *
      * @param tournamentId    identify of tournament
      * @param teamId          identify of team
      * @param teamProposalDto Team proposal data to be added
+     * @param user            current user from Session
      * @return Added team proposal
      */
     TournamentTeamProposalDto createProposalToTournament(long tournamentId, long teamId, TournamentTeamProposalDto teamProposalDto, User user);
+
+
+    /**
+     * Registry new "single" team for user and create tournament proposal
+     *
+     * @param tournamentId identify of tournament
+     * @param leagueId     identify of user
+     * @param user         current user from Session
+     * @return Added team proposal
+     */
+    TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user);
 
     /**
      * Edit team proposal to tournament (only state)
@@ -52,6 +64,7 @@ public interface RestTournamentProposalFacade {
      * @param teamId            identify of team
      * @param teamProposalId    identify of team proposal
      * @param teamProposalState new status of team proposal
+     * @param user              current user from Session
      * @return Modified team proposal
      */
     TournamentTeamProposalDto editProposalToTournament(Long tournamentId, Long teamId, Long teamProposalId,

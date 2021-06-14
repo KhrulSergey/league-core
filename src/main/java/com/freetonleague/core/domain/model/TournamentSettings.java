@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.TournamentPrizePoolDistributionDto;
 import com.freetonleague.core.domain.dto.TournamentQuitPenaltyDistributionDto;
+import com.freetonleague.core.domain.dto.TournamentRoundSettingDto;
 import com.freetonleague.core.domain.enums.FundGatheringType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
@@ -12,11 +13,13 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true)
 @Getter
 @Setter
 @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
@@ -25,6 +28,7 @@ import java.util.List;
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_settings_id_seq", schema = "public", allocationSize = 1)
 public class TournamentSettings extends ExtendedBaseEntity {
 
+    @ToString.Exclude
     @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     @JoinColumn(name = "tournament_id")
     private Tournament tournament;
@@ -56,6 +60,10 @@ public class TournamentSettings extends ExtendedBaseEntity {
     @NotNull
     @Column(name = "match_count_per_series")
     private Integer matchCountPerSeries = 3;
+
+    @Type(type = "jsonb")
+    @Column(name = "tournament_round_settings_list", columnDefinition = "jsonb")
+    private Map<Integer, TournamentRoundSettingDto> tournamentRoundSettingsList;
 
     /**
      * Goal prize fund value. (info purpose only)

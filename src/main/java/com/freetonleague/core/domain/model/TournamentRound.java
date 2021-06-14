@@ -2,10 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TournamentRoundType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -17,6 +14,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true, of = {"name", "roundNumber", "status", "isLast"})
 @Getter
 @Setter
 @Entity
@@ -43,6 +41,13 @@ public class TournamentRound extends ExtendedBaseEntity {
     @Min(1)
     @Column(name = "round_number")
     private Integer roundNumber;
+
+    /**
+     * Sign if round is last for tournament
+     */
+    @Builder.Default
+    @Column(name = "is_last")
+    private Boolean isLast = false;
 
     @NotNull
     @Column(name = "status")

@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
@@ -24,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -105,7 +107,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
      * Generate tournament round list for specified tournament and save to DB.
      */
     @Override
-    public boolean generateRoundListForTournament(Tournament tournament) {
+    public boolean initiateTournamentBracketsWithRounds(Tournament tournament) {
         if (isNull(tournament)) {
             log.error("!> requesting generateRoundForTournament for NULL tournament. Check evoking clients");
             return false;
@@ -114,13 +116,13 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         log.debug("^ trying to define component for generation algorithm '{}'", tournament.getSystemType());
         switch (tournament.getSystemType()) {
             case SINGLE_ELIMINATION:
-                tournamentRoundList = singleEliminationGenerator.generateRoundsForTournament(tournament);
+                tournamentRoundList = singleEliminationGenerator.initiateTournamentBracketsWithRounds(tournament);
                 break;
             case DOUBLE_ELIMINATION:
-                tournamentRoundList = doubleEliminationGenerator.generateRoundsForTournament(tournament);
+                tournamentRoundList = doubleEliminationGenerator.initiateTournamentBracketsWithRounds(tournament);
                 break;
             case SURVIVAL_ELIMINATION:
-                tournamentRoundList = survivalEliminationGenerator.generateRoundsForTournament(tournament);
+                tournamentRoundList = survivalEliminationGenerator.initiateTournamentBracketsWithRounds(tournament);
                 break;
             default:
                 break;
@@ -130,7 +132,13 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             return false;
         }
         log.debug("^ trying to save round and matches from generator with round list size '{}'", tournamentRoundList.size());
-        return tournamentRoundList.stream().map(this::addRound).allMatch(Objects::nonNull);
+
+        List<TournamentRound> savedTournamentRoundList = tournamentRoundList.stream()
+                .map(this::addRound).collect(Collectors.toList());
+
+        tournament.setTournamentRoundList(savedTournamentRoundList);
+        tournamentEventService.processTournamentBracketsChanged(tournament);
+        return savedTournamentRoundList.parallelStream().allMatch(Objects::nonNull);
     }
 
     /**
@@ -143,20 +151,16 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             return false;
         }
 
-        TournamentRound tournamentRound = this.getNextOpenRoundForTournament(tournament);
-        if (isNull(tournamentRound)) {
-            log.error("!> requesting composeNewRoundForTournament for tournament with no existed open round for compose series. Check evoking clients");
-            return false;
-        }
+        TournamentRound tournamentRound = null;
         switch (tournament.getSystemType()) {
             case SINGLE_ELIMINATION:
-                tournamentRound = singleEliminationGenerator.composeNextRoundForTournament(tournamentRound);
+                tournamentRound = singleEliminationGenerator.composeNextRoundForTournament(tournament);
                 break;
             case DOUBLE_ELIMINATION:
-                tournamentRound = doubleEliminationGenerator.composeNextRoundForTournament(tournamentRound);
+                tournamentRound = doubleEliminationGenerator.composeNextRoundForTournament(tournament);
                 break;
             case SURVIVAL_ELIMINATION:
-                tournamentRound = survivalEliminationGenerator.composeNextRoundForTournament(tournamentRound);
+                tournamentRound = survivalEliminationGenerator.composeNextRoundForTournament(tournament);
                 break;
             default:
                 break;
@@ -165,13 +169,24 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             log.error("!> error while composeNewRoundForTournament. Check stack trace");
             return false;
         }
-        log.debug("^ trying to save updated round with series, matches and rivals '{}'", tournamentRound);
-        return nonNull(this.editRound(tournamentRound));
+        log.debug("^ trying to generate and save next round for tournament.id {} with series, matches and rivals with data '{}'",
+                tournament.getId(), tournamentRound);
+        TournamentRound savedTournamentRound = nonNull(tournamentRound.getId()) ?
+                this.editRound(tournamentRound) :
+                this.addRound(tournamentRound);
+
+        List<TournamentRound> tournamentRoundList = tournament.getTournamentRoundList();
+        tournamentRoundList.add(savedTournamentRound);
+        tournament.setTournamentRoundList(tournamentRoundList);
+
+        tournamentEventService.processTournamentBracketsChanged(tournament);
+        return nonNull(savedTournamentRound);
     }
 
     /**
      * Edit tournament round in DB.
      */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
     public TournamentRound editRound(TournamentRound tournamentRound) {
         if (!this.verifyTournamentRound(tournamentRound)) {
@@ -186,10 +201,14 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         if (tournamentRound.getStatus().isFinished()) {
             tournamentRound.setFinishedDate(LocalDateTime.now());
         }
+
+        // save round
+        tournamentRoundRepository.save(tournamentRound);
+        // check if status was updated
         if (tournamentRound.isStatusChanged()) {
             this.handleTournamentRoundStatusChanged(tournamentRound);
         }
-        return tournamentRoundRepository.save(tournamentRound);
+        return tournamentRound;
     }
 
     /**
@@ -236,7 +255,11 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         return this.getActiveRoundForTournament(tournament).getRoundNumber();
     }
 
-    private TournamentRound getNextOpenRoundForTournament(Tournament tournament) {
+    /**
+     * Returns next opened round for specified tournament
+     */
+    @Override
+    public TournamentRound getNextOpenRoundForTournament(Tournament tournament) {
         if (isNull(tournament)) {
             log.error("!> requesting getNextOpenRound for NULL tournament. Check evoking clients");
             return null;
