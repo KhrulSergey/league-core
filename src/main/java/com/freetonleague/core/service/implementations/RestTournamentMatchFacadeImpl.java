@@ -1,12 +1,15 @@
 package com.freetonleague.core.service.implementations;
 
 
+import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.dto.TournamentMatchDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
+import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
+import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.*;
@@ -28,6 +31,8 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -193,7 +198,10 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         TournamentMatchRival matchRivalWinner = null;
         if (nonNull(matchRivalWinnerDto)) {
             matchRivalWinnerDto.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
-            matchRivalWinner = this.getVerifiedMatchRivalWinnerByDto(matchRivalWinnerDto);
+            matchRivalWinner = setGameIndicatorMultipliers(
+                    this.getVerifiedMatchRivalWinnerByDto(matchRivalWinnerDto),
+                    tournamentSeries
+            );
         }
         tournamentMatch.setMatchWinner(matchRivalWinner);
 
@@ -203,6 +211,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         if (isNotEmpty(tournamentMatchRivalDtoList)) {
             tournamentMatchRivalList = tournamentMatchRivalDtoList.parallelStream()
                     .map(this::getVerifiedMatchRivalWinnerByDto)
+                    .map(m -> setGameIndicatorMultipliers(m, tournamentSeries))
                     .collect(Collectors.toList());
         }
         tournamentMatch.setMatchRivalList(tournamentMatchRivalList);
@@ -238,4 +247,31 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         }
         return restTournamentMatchRivalFacade.getVerifiedMatchRivalByDto(rivalWinnerDto);
     }
+
+    private TournamentMatchRival setGameIndicatorMultipliers(TournamentMatchRival rival, TournamentSeries tournamentSeries) {
+        if (rival.getMatchIndicator() == null) {
+            return rival;
+        }
+
+        TournamentRound tournamentRound = tournamentSeries.getTournamentRound();
+        Map<GameIndicatorType, Double> multiplierMap = tournamentRound.getGameIndicatorMultipliersMap();
+
+        if (multiplierMap == null) {
+            return rival;
+        }
+
+        for (GameDisciplineIndicatorDto indicator : rival.getMatchIndicator()) {
+            double multiplier = multiplierMap.getOrDefault(indicator.getGameIndicatorType(), 1D);
+
+            if (indicator.getGameIndicatorValue() != null && indicator.getGameIndicatorValue() instanceof Number) {
+                double doubleValue = Double.parseDouble(indicator.getGameIndicatorValue().toString());
+
+                indicator.setMultipliedValue(doubleValue * multiplier);
+            }
+
+        }
+
+        return rival;
+    }
+
 }
