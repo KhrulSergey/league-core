@@ -17,6 +17,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
@@ -125,6 +127,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     /**
      * Edit tournament series in DB.
      */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
     public TournamentSeries editSeries(TournamentSeries tournamentSeries) {
         boolean checkEmbeddedMatchList = true;
@@ -136,15 +139,17 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         log.debug("^ trying to modify tournament series '{}'", tournamentSeries);
         if (tournamentSeries.getStatus().isFinished()) {
             tournamentSeries.setFinishedDate(LocalDateTime.now());
-            TournamentSeriesRival seriesWinner = this.getCalculatedSeriesWinner(tournamentSeries);
-            if (isNull(seriesWinner)) {
-                log.error("!> requesting modify tournament series id '{}' was canceled. Series winner was not defined or found. Check stack trace.",
-                        tournamentSeries.getId());
-                tournamentEventService.processSeriesDeadHead(tournamentSeries);
-                tournamentSeries.setStatus(TournamentStatusType.PAUSE);
+            if (isNull(tournamentSeries.getSeriesWinner())) {
+                TournamentSeriesRival seriesWinner = this.getCalculatedSeriesWinner(tournamentSeries);
+                if (isNull(seriesWinner)) {
+                    log.error("!> requesting modify tournament series id '{}' was canceled. Series winner was not defined or found. Check stack trace.",
+                            tournamentSeries.getId());
+                    tournamentEventService.processSeriesDeadHead(tournamentSeries);
+                    tournamentSeries.setStatus(TournamentStatusType.PAUSE);
+                }
+                tournamentSeries.setSeriesWinner(seriesWinner);
             }
             checkEmbeddedMatchList = false;
-            tournamentSeries.setSeriesWinner(seriesWinner);
         }
         if (!this.verifyTournamentSeries(tournamentSeries, checkEmbeddedMatchList)) {
             return null;

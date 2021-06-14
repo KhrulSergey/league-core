@@ -18,6 +18,7 @@ import static java.util.Objects.isNull;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@ToString(callSuper = true, of = {"name", "status"})
 @SuperBuilder
 @Getter
 @Setter
@@ -110,7 +111,6 @@ public class Tournament extends ExtendedBaseEntity {
     private String discordChannelId;
 
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @Transient
     private String logoRawFile;
 

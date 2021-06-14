@@ -51,7 +51,7 @@ public interface RestTournamentRoundFacade {
      * @param tournamentId specified tournament to generate tournament round list
      * @param user         current user from Session
      */
-    void generateRoundForTournament(long tournamentId, User user);
+    void generateRoundsForTournament(long tournamentId, User user);
 
     /**
      * Edit tournament round.
