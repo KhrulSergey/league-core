@@ -1,10 +1,9 @@
 package com.freetonleague.core;
 
+import com.freetonleague.core.common.IntegrationTest;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class LeagueCoreApplicationTests {
+class LeagueCoreApplicationTests extends IntegrationTest {
 
     @Test
     void contextLoads() {

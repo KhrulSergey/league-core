@@ -53,7 +53,6 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private final AccountRepository accountsRepository;
     private final AccountHolderRepository accountHolderRepository;
     private final AccountTransactionRepository accountTransactionRepository;
-    private final NotificationService notificationService;
     private final Validator validator;
 
     @Lazy
