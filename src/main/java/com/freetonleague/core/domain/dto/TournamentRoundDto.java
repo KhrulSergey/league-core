@@ -37,6 +37,10 @@ public class TournamentRoundDto {
     @NotNull
     private TournamentRoundType type;
 
+    @ApiModelProperty(required = true)
+    @NotNull
+    private Boolean isLast = false;
+
     private LocalDateTime startPlannedDate;
 
     private LocalDateTime startDate;

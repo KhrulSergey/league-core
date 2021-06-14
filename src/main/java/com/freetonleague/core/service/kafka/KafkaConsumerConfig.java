@@ -1,10 +1,11 @@
 package com.freetonleague.core.service.kafka;
 
+import com.freetonleague.core.config.properties.KafkaProperties;
 import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.dto.NotificationDto;
+import lombok.RequiredArgsConstructor;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -18,14 +19,14 @@ import java.util.Map;
 
 @EnableKafka
 @Configuration
+@RequiredArgsConstructor
 public class KafkaConsumerConfig {
 
-    @Value(value = "${config.kafka.bootstrapAddress}")
-    private String bootstrapAddress;
+    private final KafkaProperties kafkaProperties;
 
     public ConsumerFactory<String, EventDto> eventConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapAddress());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "core");
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(EventDto.class));
     }
@@ -39,7 +40,7 @@ public class KafkaConsumerConfig {
 
     public ConsumerFactory<String, NotificationDto> notificationConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapAddress);
+        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapAddress());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "notification");
         return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(), new JsonDeserializer<>(NotificationDto.class));
     }

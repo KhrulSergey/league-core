@@ -227,7 +227,9 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
 
             //try to find series winner (first place)
             TournamentSeriesRival seriesWinner = tournamentSeriesRivalList.parallelStream()
-                    .filter(s -> s.getWonPlaceInSeries().isWinner()).findFirst().orElse(null);
+                    .filter(s -> nonNull(s.getWonPlaceInSeries())
+                            && s.getWonPlaceInSeries().isWinner())
+                    .findFirst().orElse(null);
             tournamentSeries.setSeriesWinner(seriesWinner);
         }
         tournamentSeries.setTournamentRound(tournamentRound);

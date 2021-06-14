@@ -10,6 +10,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
+import java.util.Map;
 
 @Builder
 @Data
@@ -46,6 +47,8 @@ public class TournamentSettingsDto {
     @NotNull
     @Min(1)
     private Integer matchCountPerSeries;
+
+    private Map<Integer, TournamentRoundSettingDto> tournamentRoundSettingsList;
 
     @Min(0)
     private Double prizeFund;

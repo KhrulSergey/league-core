@@ -1,0 +1,76 @@
+variables:
+  DOCKER_HOST: tcp://docker:2375/
+  DOCKER_DRIVER: overlay2
+  DOCKER_REPOSITORY: ${CI_REGISTRY}/${CI_PROJECT_PATH}
+  DOCKER_PUSH_USERNAME: gitlab-ci-token
+  DOCKER_PUSH_PASSWORD: ${CI_JOB_TOKEN}
+  DOCKER_TLS_CERTDIR: ""
+
+before_script:
+  - CURRENT_BRANCH=$(echo "${CI_COMMIT_REF_NAME}" | sed -e 's|[- \/]|\.|g')
+  - BUILD_NUMBER=$([[ ! -z ${CI_PIPELINE_ID} ]] && echo ${CI_PIPELINE_ID} || echo 0)
+  - DOCKER_TAG=$([[ ! -z ${CI_COMMIT_TAG} ]] && echo ${CI_COMMIT_TAG} || echo ${CURRENT_BRANCH}.${BUILD_NUMBER})
+  - export DOCKER_IMAGE=${DOCKER_REPOSITORY}:${DOCKER_TAG}
+
+stages:
+  - build
+  - test
+
+workflow:
+  rules:
+    - if: $CI_COMMIT_TAG
+    - if: $CI_COMMIT_BRANCH
+    - if: $CI_MERGE_REQUEST_IID
+
+build:
+  stage: build
+  image: gradle:6.8.3-jdk11-openj9
+  tags:
+    - docker
+  artifacts:
+    when: always
+    paths:
+      - ./build/libs/*.jar
+      - ./build/result/jar/*.jar
+      - ./build/reports/tests/test/**
+    reports:
+      junit: build/test-results/test/TEST-*.xml
+  variables:
+    JAVA_OPTS: -Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+    GRADLE_OPTS: -Dorg.gradle.daemon=false
+    GRADLE_USER_HOME: ${CI_PROJECT_DIR}/.gradle
+  script:
+    - gradle build -x test -Dskip.tests -Dtest.exclude=docker --stacktrace
+
+#test:
+#  stage: test
+#  dependencies: []
+#  image: mayakplay/dind-gradle:6.8.3-1
+#  services:
+#    - name: docker:19.03.12
+#      alias: thedockerhost
+#  tags:
+#    - docker
+#  artifacts:
+#    when: always
+#    paths:
+#      - ./build/reports/**
+#    reports:
+#      junit: build/test-results/test/TEST-*.xml
+#  variables:
+#    DOCKER_HOST: tcp://thedockerhost:2375/
+#    DOCKER_DRIVER: overlay2
+#    JAVA_OPTS: -Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+#    GRADLE_OPTS: -Dorg.gradle.daemon=false
+#    GRADLE_USER_HOME: ${CI_PROJECT_DIR}/.gradle
+#  script:
+#    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Getting docker info at $(date +"%Y-%m-%d %H:%M:%S")"
+#    - docker info
+#    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Starting Gradle at $(date +"%Y-%m-%d %H:%M:%S")"
+#    - ./gradlew test --profile --stacktrace
+#    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Gradle finished at $(date +"%Y-%m-%d %H:%M:%S")"
+#  timeout: 1h
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#    - when: manual
+#      allow_failure: true

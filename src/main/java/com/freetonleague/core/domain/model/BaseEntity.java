@@ -1,9 +1,6 @@
 package com.freetonleague.core.domain.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -15,6 +12,7 @@ import java.time.LocalDateTime;
  * Base model for all project entities
  */
 @EqualsAndHashCode
+@ToString
 @Setter
 @Getter
 @SuperBuilder

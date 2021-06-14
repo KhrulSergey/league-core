@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -106,6 +107,16 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
+     * Process tournament brackets was generated
+     */
+    @Override
+    public void processTournamentBracketsChanged(Tournament tournament) {
+        log.debug("^ brackets for tournament.id '{}' was changed.", tournament.getId());
+        //compose and update tournaments setting according to tournament template
+        tournamentService.composeAdditionalSettings(tournament);
+    }
+
+    /**
      * Process match status changing
      */
     @Override
@@ -116,7 +127,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         if (newTournamentMatchStatus.isFinished()
                 && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())
                 //TODO switch on auto closing series for all type of Tournament System Template
-                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isAutoFinishSeriesEnabled()) {
+                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isAutoFinishSeriesEnabled()
+                && !tournamentMatch.getTournamentSeries().getStatus().isFinished()) {
             this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
         }
     }
@@ -130,7 +142,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 tournamentSeries.getPrevStatus(), newTournamentSeriesStatus);
         // check all series is finished to finish the round
         if (newTournamentSeriesStatus.isFinished()
-                && tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())) {
+                && tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())
+                && !tournamentSeries.getTournamentRound().getStatus().isFinished()) {
             this.handleRoundStatusChange(tournamentSeries.getTournamentRound(), TournamentStatusType.FINISHED);
         }
     }
@@ -142,12 +155,15 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
         log.debug("^ status of round was changed from '{}' to '{}'. Process round status change in Tournament Event Service.",
                 tournamentRound.getPrevStatus(), newTournamentRoundStatus);
-        // check all rounds is finished to finish the tournament or to compose new round
+        // check if round is finished then we automatically generate new round or finish tournament
         if (newTournamentRoundStatus.isFinished()) {
-            if (tournamentRoundService.isAllRoundsFinishedByTournament(tournamentRound.getTournament())) {
-                this.handleTournamentStatusChange(tournamentRound.getTournament(), TournamentStatusType.FINISHED);
-            } else {
+            // check if round is not last or not all rounds is already finished
+            if (isFalse(tournamentRound.getIsLast())
+                    || !tournamentRoundService.isAllRoundsFinishedByTournament(tournamentRound.getTournament())) {
                 tournamentRoundService.composeNextRoundForTournament(tournamentRound.getTournament());
+            } else if (!tournamentRound.getTournament().getStatus().isFinished()) {
+                // last (all rounds) is finished, so finishing the tournament
+                this.handleTournamentStatusChange(tournamentRound.getTournament(), TournamentStatusType.FINISHED);
             }
         }
     }

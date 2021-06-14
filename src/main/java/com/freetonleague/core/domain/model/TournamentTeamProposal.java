@@ -5,10 +5,7 @@ import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -28,6 +25,7 @@ import static java.util.Objects.isNull;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true, of = {"team", "state"})
 @Getter
 @Setter
 @Entity

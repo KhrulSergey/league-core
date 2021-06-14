@@ -3,6 +3,7 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.TournamentSettings;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,6 +59,11 @@ public interface TournamentService {
      * @return tournament with updated fields and deleted status
      */
     Tournament deleteTournament(Tournament tournament);
+
+    /**
+     * Generate tournament round list for specified tournament and save to DB.
+     */
+    TournamentSettings composeAdditionalSettings(Tournament tournament);
 
     /**
      * Returns sign of tournament existence for specified id.

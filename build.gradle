@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.hibernate:hibernate-envers:5.4.30.Final'
 
 
+
     compile 'io.springfox:springfox-swagger2:2.7.0'
     compile 'io.springfox:springfox-swagger-ui:2.7.0'
     compile 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.9.4'
@@ -56,6 +57,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     testImplementation 'org.springframework.security:spring-security-test'
+
+    testImplementation 'org.testcontainers:postgresql:1.15.2'
+    testImplementation "org.testcontainers:kafka:1.15.2"
 }
 
 test {
