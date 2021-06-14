@@ -42,35 +42,35 @@ build:
   script:
     - gradle build -x test -Dskip.tests -Dtest.exclude=docker --stacktrace
 
-test:
-  stage: test
-  dependencies: []
-  image: mayakplay/dind-gradle:6.8.3
-  services:
-    - docker:18.09.7-dind
-    alias: thedockerhost
-  tags:
-    - docker
-  artifacts:
-    when: always
-    paths:
-      - ./build/reports/**
-    reports:
-      junit: build/test-results/test/TEST-*.xml
-  variables:
-    DOCKER_HOST: tcp://thedockerhost:2375/
-    DOCKER_DRIVER: overlay2
-    JAVA_OPTS: -Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
-    GRADLE_OPTS: -Dorg.gradle.daemon=false
-    GRADLE_USER_HOME: ${CI_PROJECT_DIR}/.gradle
-  script:
-    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Getting docker info at $(date +"%Y-%m-%d %H:%M:%S")"
-    - docker info
-    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Starting Gradle at $(date +"%Y-%m-%d %H:%M:%S")"
-    - ./gradlew test --profile --stacktrace
-    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Gradle finished at $(date +"%Y-%m-%d %H:%M:%S")"
-  timeout: 1h
-  rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-    - when: manual
-      allow_failure: true
+#test:
+#  stage: test
+#  dependencies: []
+#  image: mayakplay/dind-gradle:6.8.3-1
+#  services:
+#    - name: docker:19.03.12
+#      alias: thedockerhost
+#  tags:
+#    - docker
+#  artifacts:
+#    when: always
+#    paths:
+#      - ./build/reports/**
+#    reports:
+#      junit: build/test-results/test/TEST-*.xml
+#  variables:
+#    DOCKER_HOST: tcp://thedockerhost:2375/
+#    DOCKER_DRIVER: overlay2
+#    JAVA_OPTS: -Xmx2g -XX:MaxMetaspaceSize=512m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8
+#    GRADLE_OPTS: -Dorg.gradle.daemon=false
+#    GRADLE_USER_HOME: ${CI_PROJECT_DIR}/.gradle
+#  script:
+#    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Getting docker info at $(date +"%Y-%m-%d %H:%M:%S")"
+#    - docker info
+#    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Starting Gradle at $(date +"%Y-%m-%d %H:%M:%S")"
+#    - ./gradlew test --profile --stacktrace
+#    - echo ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Gradle finished at $(date +"%Y-%m-%d %H:%M:%S")"
+#  timeout: 1h
+#  rules:
+#    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+#    - when: manual
+#      allow_failure: true
