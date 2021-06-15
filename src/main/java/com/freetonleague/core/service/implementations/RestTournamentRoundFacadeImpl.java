@@ -95,6 +95,12 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     @Override
     public void generateRoundsForTournament(long tournamentId, User user) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
+        if (!tournament.getSystemType().isGenerationRoundEnabled()) {
+            log.warn("~ generation tournament round list for tournament id '{}' with systemType '{}' is prohibited.", tournamentId, tournament.getSystemType());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_GENERATION_ERROR,
+                    String.format("Generation tournament round list for tournament id '%s' with systemType '%s' " +
+                            "is prohibited. Check requested params.", tournamentId, tournament.getSystemType()));
+        }
         boolean result = tournamentRoundService.initiateTournamentBracketsWithRounds(tournament);
         if (!result) {
             log.error("!> error while generated tournament round list for tournament id '{}' with user '{}'.", tournamentId, user);
