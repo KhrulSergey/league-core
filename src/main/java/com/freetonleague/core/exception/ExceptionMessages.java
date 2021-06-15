@@ -112,6 +112,7 @@ public class ExceptionMessages {
     public static final String TOURNAMENT_TEAM_PROPOSAL_VISIBLE_ERROR = "Tournament team proposal is not visible and modification forbidden. Please contact to organizers.";
     public static final String TOURNAMENT_TEAM_PROPOSAL_VALIDATION_ERROR = "Tournament team proposal was specified with errors. Please check request parameters";
     public static final String TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR = "Tournament proposal can't be created to specified tournament. Please check participation parameters, account balance or contact to organizers";
+    public static final String TOURNAMENT_TEAM_PROPOSAL_PARAMETERS_VERIFICATION_ERROR = "Team can't participate in specified tournament. Each participant should fill in the parameters in the profile";
     public static final String TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR = "Tournament team proposal creation failed. Please try again";
     public static final String TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR = "Tournament team proposal modifying failed. Please try again";
 
