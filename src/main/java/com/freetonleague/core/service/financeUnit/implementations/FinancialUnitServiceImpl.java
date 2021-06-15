@@ -14,7 +14,6 @@ import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.repository.AccountHolderRepository;
 import com.freetonleague.core.repository.AccountRepository;
 import com.freetonleague.core.repository.AccountTransactionRepository;
-import com.freetonleague.core.service.NotificationService;
 import com.freetonleague.core.service.financeUnit.FinanceEventService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
