@@ -13,6 +13,7 @@ import com.freetonleague.core.security.permissions.FreeAccess;
 import com.freetonleague.core.service.RestTeamFacade;
 import com.freetonleague.core.service.RestTeamParticipantFacade;
 import com.freetonleague.core.service.TeamService;
+import com.freetonleague.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -91,28 +92,10 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             log.warn("~ parameter 'name' is not unique for addTeam");
             throw new ValidationException(ExceptionMessages.TEAM_DUPLICATE_BY_NAME_ERROR, "name", "parameter name is not unique for addTeam");
         }
-
         teamDto.setId(null);
-        Team newTeam = teamMapper.fromDto(teamDto);
-        TeamParticipant captain = TeamParticipant.builder() // save current user as captain
-                .user(user)
-                .team(newTeam)
-                .status(TeamParticipantStatusType.CAPTAIN)
-                .joinAt(LocalDateTime.now())
-                .build();
-        //set captain to team and  1st participant
-        newTeam.setCaptain(captain);
-        newTeam.setParticipantList(Collections.singleton(captain));
-        newTeam.setStatus(TeamStateType.ACTIVE);
-        //save team and captain by Cascade persistence
-        newTeam = teamService.addTeam(newTeam);
-
-        if (isNull(newTeam)) {
-            log.error("!> error while creating team from dto '{}' for user '{}'.", teamDto, user);
-            throw new TeamManageException(ExceptionMessages.TEAM_CREATION_ERROR, "Team was not saved on Portal. Check requested params.");
-        }
-        return teamMapper.toDto(newTeam);
+        return teamMapper.toDto(this.createTeamForUserCaptain(teamMapper.fromDto(teamDto), user));
     }
+
 
     /**
      * Edit team on Portal.
@@ -205,6 +188,18 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
     }
 
     /**
+     * Create virtual team for user as capitan
+     */
+    @Override
+    public Team createVirtualTeam(User user) {
+        Team virtualTeam = Team.builder()
+                .name(String.format("Virtual team - %s", StringUtil.generateRandomTeamName()))
+                .isVirtual(true)
+                .build();
+        return this.createTeamForUserCaptain(virtualTeam, user);
+    }
+
+    /**
      * Getting team by id and user with privacy check
      */
     @Override
@@ -223,5 +218,25 @@ public class RestTeamFacadeImpl implements RestTeamFacade {
             throw new TeamManageException(ExceptionMessages.TEAM_DISABLE_ERROR, "Active team with requested id " + id + " was not found");
         }
         return team;
+    }
+
+    private Team createTeamForUserCaptain(Team newTeam, User captainUser) {
+        TeamParticipant captain = TeamParticipant.builder() // save current user as captain
+                .user(captainUser)
+                .team(newTeam)
+                .status(TeamParticipantStatusType.CAPTAIN)
+                .joinAt(LocalDateTime.now())
+                .build();
+        //set captain to team and  1st participant
+        newTeam.setCaptain(captain);
+        newTeam.setParticipantList(Collections.singleton(captain));
+        newTeam.setStatus(TeamStateType.ACTIVE);
+        //save team and captain by Cascade persistence
+        newTeam = teamService.addTeam(newTeam);
+        if (isNull(newTeam)) {
+            log.error("!> error while creating team from dto '{}' for user '{}'.", newTeam, captainUser);
+            throw new TeamManageException(ExceptionMessages.TEAM_CREATION_ERROR, "Team was not saved on Portal. Check requested params.");
+        }
+        return newTeam;
     }
 }

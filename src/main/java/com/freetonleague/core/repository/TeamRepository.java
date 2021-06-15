@@ -12,10 +12,14 @@ import org.springframework.data.repository.query.Param;
 public interface TeamRepository extends JpaRepository<Team, Long>,
         JpaSpecificationExecutor<Team> {
 
+
+    @Query(value = "select t from Team t where t.isVirtual = false ")
+    Page<Team> findAllExceptVirtual(Pageable pageable);
+
     /**
      * Find all teams with participation of specified user
      */
-    @Query(value = "select t from Team t where t in (select p.team from TeamParticipant p where p.user = :user) " +
+    @Query(value = "select t from Team t where t.isVirtual = false and t in (select p.team from TeamParticipant p where p.user = :user) " +
             "and t.status <> com.freetonleague.core.domain.enums.TeamStateType.DELETED")
     Page<Team> findAllByUserParticipation(Pageable pageable, @Param("user") User user);
 

@@ -123,7 +123,7 @@ public class TeamServiceImpl implements TeamService {
     @Override
     public Page<Team> getTeamList(Pageable pageable) {
         log.debug("^ trying to get list of all teams");
-        return teamRepository.findAll(pageable);
+        return teamRepository.findAllExceptVirtual(pageable);
     }
 
     /**
