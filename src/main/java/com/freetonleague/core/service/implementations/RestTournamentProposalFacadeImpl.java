@@ -2,10 +2,7 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
-import com.freetonleague.core.domain.enums.ParticipationStateType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
-import com.freetonleague.core.domain.enums.TournamentTeamType;
+import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentProposalMapper;
@@ -17,12 +14,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 /**
  * Service-facade for managing tournament team proposal and team composition
@@ -66,7 +65,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     @Override
     public TournamentTeamProposalDto createProposalToTournament(long tournamentId, long teamId,
                                                                 TournamentTeamProposalDto teamProposalDto, User user) {
-        Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
+        Team team = restTeamFacade.getVerifiedTeamById(teamId, user, true);
         if (!team.isCaptain(user)) {
             log.warn("~ forbiddenException for create proposal to tournament for user '{}' from team '{}'.", user, team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
@@ -120,6 +119,80 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         newTeamProposal = tournamentProposalService.addProposal(newTeamProposal);
         if (isNull(newTeamProposal)) {
             log.error("!> error while creating tournament team proposal by team '{}' for tournament '{}' by user '{}'.", teamId, tournamentId, user);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
+                    "Team proposal was not saved on Portal. Check requested params.");
+        }
+        return tournamentProposalMapper.toDto(newTeamProposal);
+    }
+
+    /**
+     * Registry new "single" team for user and create tournament proposal
+     */
+    @Override
+    public TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'createProposalToTournamentFromUser' in RestTournamentProposalFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'createProposalToTournamentFromUser' request denied");
+        }
+        if (!leagueId.equals(user.getLeagueId().toString())) {
+            log.warn("~ parameter 'leagueId' = '{}' is not match to current user.id {}. Create proposal request to " +
+                    "tournament was rejected", leagueId, user.getLeagueId());
+            throw new ValidationException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR, "leagueId",
+                    "parameter 'leagueId' is not match to current user. Create proposal request to tournament was rejected");
+        }
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
+
+        //check if proposal already existed
+        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getProposalByCapitanUserAndTournament(user, tournament);
+        if (isNotEmpty(teamProposalList)) {
+            log.warn("~ forbiddenException for create duplicate proposal from user-captain '{}' and team.id {}. " +
+                    "Already existed at least one proposal '{}'.", user, teamProposalList.get(0).getTeam().getId(), teamProposalList.get(0));
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR,
+                    "Duplicate proposal from user (virtual team) to the one tournament is prohibited. Request rejected.");
+        }
+
+        //check status of tournament
+        if (tournament.getStatus() != TournamentStatusType.SIGN_UP) {
+            log.warn("~ forbiddenException for create new proposal for user '{}' to tournament id '{}' and status '{}'. " +
+                            "Tournament is closed for new proposals",
+                    user, tournament.getId(), tournament.getStatus());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    String.format("Tournament '%s' is closed for new proposals and have status '%s'. Request rejected.",
+                            tournament.getId(), tournament.getStatus()));
+        }
+
+        if (tournament.getSystemType() != TournamentSystemType.LOBBY_ELIMINATION) {
+            log.warn("~ forbiddenException for create new proposal directly from user '{}' to tournament id '{}' and system type '{}'. " +
+                            "Tournament is closed for new proposals",
+                    user, tournament.getId(), tournament.getSystemType());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    String.format("Tournament '%s' is not intended to create proposals directly from user and have system type '%s'. Request rejected.",
+                            tournament.getId(), tournament.getSystemType()));
+        }
+
+        //create new virtual team for user
+        Team virtualTeamForUser = restTeamFacade.createVirtualTeam(user);
+
+        TournamentTeamProposal newTeamProposal = TournamentTeamProposal.builder()
+                .state(ParticipationStateType.CREATED)
+                .type(TournamentTeamType.SOLID)
+                .team(virtualTeamForUser)
+                .tournament(tournament)
+                .build();
+
+        //Add the only participant - captain from team to proposal
+        List<TournamentTeamParticipant> tournamentTeamParticipantList =
+                Collections.singletonList(this.createTournamentTeamParticipant(virtualTeamForUser.getCaptain(), newTeamProposal));
+
+        newTeamProposal.setTournamentTeamParticipantList(tournamentTeamParticipantList);
+
+        // Verify team participants, team bank account balance and other business staff
+        this.verifyBusinessLogicOnTeamToParticipateTournament(tournament, virtualTeamForUser, tournamentTeamParticipantList);
+        //save proposal
+        newTeamProposal = tournamentProposalService.addProposal(newTeamProposal);
+        if (isNull(newTeamProposal)) {
+            log.error("!> error while creating tournament team proposal by user.id '{}', " +
+                    "virtual team '{}' for tournament '{}'.", user.getLeagueId(), virtualTeamForUser, tournamentId);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
         }

@@ -3,10 +3,7 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.Team;
-import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.domain.model.TournamentTeamParticipant;
-import com.freetonleague.core.domain.model.TournamentTeamProposal;
+import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentTeamParticipantRepository;
 import com.freetonleague.core.repository.TournamentTeamProposalRepository;
 import com.freetonleague.core.service.TournamentEventService;
@@ -59,6 +56,21 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
         log.debug("^ trying to get tournament team proposal for team: '{}' and tournament '{}'",
                 team.getId(), tournament.getId());
         return teamProposalRepository.findByTeamAndTournament(team, tournament);
+    }
+
+    /**
+     * Returns tournament team proposal (request to participate on tournament) by capitan of team and tournament.
+     */
+    @Override
+    public List<TournamentTeamProposal> getProposalByCapitanUserAndTournament(User userCapitan, Tournament tournament) {
+        if (isNull(userCapitan) || isNull(tournament)) {
+            log.error("!> requesting getProposalByTeamAndTournament for NULL userCapitan '{}' or NULL tournament '{}'. Check evoking clients",
+                    userCapitan, tournament);
+            return null;
+        }
+        log.debug("^ trying to get tournament proposal for userCapitan.id: '{}' and tournament '{}'",
+                userCapitan.getLeagueId(), tournament.getId());
+        return teamProposalRepository.findProposalByUserCapitanAndTournament(userCapitan, tournament);
     }
 
     /**

@@ -116,6 +116,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         log.debug("^ trying to define component for generation algorithm '{}'", tournament.getSystemType());
         switch (tournament.getSystemType()) {
             case SINGLE_ELIMINATION:
+            case LOBBY_ELIMINATION:
                 tournamentRoundList = singleEliminationGenerator.initiateTournamentBracketsWithRounds(tournament);
                 break;
             case DOUBLE_ELIMINATION:
