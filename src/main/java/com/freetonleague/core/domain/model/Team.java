@@ -58,8 +58,9 @@ public class Team extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private TeamStateType status;
 
-    @Transient
-    private String accountId;
+    @Builder.Default
+    @Column(name = "is_virtual")
+    private Boolean isVirtual = false;
 
     @PrePersist
     public void prePersist() {
