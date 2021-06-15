@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
+import com.freetonleague.core.domain.enums.UserParameterType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -98,4 +99,6 @@ public class TournamentDto {
 
     @ApiModelProperty(notes = "need to set true with 'force' finishing tournament")
     private Boolean isForcedFinished = false;
+
+    private List<UserParameterType> mandatoryUserParameters;
 }

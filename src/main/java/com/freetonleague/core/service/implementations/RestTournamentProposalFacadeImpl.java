@@ -6,6 +6,7 @@ import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
+import com.freetonleague.core.domain.enums.UserParameterType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentProposalMapper;
@@ -17,7 +18,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -90,6 +94,25 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     String.format("Tournament '%s' is closed for new proposals and have status '%s'. Request rejected.",
                             tournament.getId(), tournament.getStatus()));
+        }
+
+        List<UserParameterType> mandatoryUserParameters = tournament.getMandatoryUserParameters();
+
+        if (mandatoryUserParameters != null && !mandatoryUserParameters.isEmpty()) {
+            List<Map<UserParameterType, String>> teamUsersParameters = team.getParticipantList().stream()
+                    .map(TeamParticipant::getUser)
+                    .map(u -> u.getParameters() == null ? new HashMap<UserParameterType, String>() : u.getParameters())
+                    .collect(Collectors.toList());
+
+            for (Map<UserParameterType, String> usersParameters : teamUsersParameters) {
+                for (UserParameterType mandatoryUserParameter : mandatoryUserParameters) {
+                    if (usersParameters.get(mandatoryUserParameter) == null) {
+                        throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_PARAMETERS_VERIFICATION_ERROR,
+                                "Team can't participate in specified tournament. Each participant should fill in the parameters in the profile:" +
+                                        mandatoryUserParameters.stream().map(Objects::toString).collect(Collectors.toList()));
+                    }
+                }
+            }
         }
 
         TournamentTeamProposal newTeamProposal = TournamentTeamProposal.builder()

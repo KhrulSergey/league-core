@@ -3,8 +3,15 @@ package com.freetonleague.core.mapper;
 import com.freetonleague.core.domain.dto.UserBonusDto;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserPublicDto;
+import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
-import org.mapstruct.*;
+import org.mapstruct.InjectionStrategy;
+import org.mapstruct.IterableMapping;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
+import org.mapstruct.ReportingPolicy;
 
 import java.util.List;
 
@@ -34,5 +41,8 @@ public interface UserMapper {
 
     @IterableMapping(qualifiedByName = "toDto")
     List<UserDto> toDto(List<User> entities);
+
+    void applyChanges(@MappingTarget User user, UserInfoFilter filter);
+
 }
 
