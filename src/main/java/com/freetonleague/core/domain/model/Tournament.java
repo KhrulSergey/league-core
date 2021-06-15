@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.AccessType;
+import com.freetonleague.core.domain.enums.TournamentParticipantType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentSystemType;
 import lombok.*;
@@ -84,6 +85,14 @@ public class Tournament extends ExtendedBaseEntity {
     @Column(name = "system_type")
     @Enumerated(EnumType.STRING)
     private TournamentSystemType systemType;
+
+    /**
+     * Type of participant that accessible to participate in tournament
+     */
+    @NotNull
+    @Column(name = "participant_type")
+    @Enumerated(EnumType.STRING)
+    private TournamentParticipantType participantType;
 
     /**
      * Prototype for ref to Bank-Account entity for current tournament
