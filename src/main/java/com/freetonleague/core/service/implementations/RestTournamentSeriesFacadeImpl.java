@@ -61,16 +61,6 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         return tournamentSeriesMapper.toDto(tournamentSeries);
     }
 
-    //TODO delete until 01/07/21 if not needed
-//    /**
-//     * Returns list of all tournament series filtered by requested params
-//     */
-//    @Override
-//    public Page<TournamentSeriesDto> getSeriesList(Pageable pageable, long tournamentId, User user) {
-//        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId, user, true);
-//        return tournamentSeriesService.getSeriesList(pageable, tournament).map(tournamentSeriesMapper::toDto);
-//    }
-
     /**
      * Add new tournament series
      */

@@ -288,5 +288,4 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         }
         return matchRivalParticipant;
     }
-
 }

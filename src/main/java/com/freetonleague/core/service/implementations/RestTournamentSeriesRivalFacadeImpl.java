@@ -72,6 +72,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
             }
             tournamentSeriesRival.setWonPlaceInSeries(seriesRivalDto.getWonPlaceInSeries());
         }
+
         return tournamentSeriesRival;
     }
 }
