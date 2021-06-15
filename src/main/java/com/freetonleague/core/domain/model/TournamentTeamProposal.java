@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.TournamentParticipantType;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -65,6 +66,14 @@ public class TournamentTeamProposal extends BaseEntity {
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
     private TournamentTeamType type;
+
+    /**
+     * Type of participant that apply to tournament
+     */
+    @NotNull
+    @Column(name = "participant_type")
+    @Enumerated(EnumType.STRING)
+    private TournamentParticipantType participantType;
 
     /**
      * Team participant list with their role (status) in tournament

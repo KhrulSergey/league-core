@@ -14,8 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -67,7 +66,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                                                                 TournamentTeamProposalDto teamProposalDto, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, true);
         if (!team.isCaptain(user)) {
-            log.warn("~ forbiddenException for create proposal to tournament for user '{}' from team '{}'.", user, team);
+            log.warn("~ forbiddenException for create proposal to tournament for user '{}' from team '{}'.", user.getLeagueId(), team.getId());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
                     "Only captain can apply and modify proposals to tournaments from team.");
         }
@@ -85,16 +84,46 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         if (tournament.getStatus() != TournamentStatusType.SIGN_UP) {
             log.warn("~ forbiddenException for create new proposal for team '{}' by user '{}' to tournament id '{}' and status '{}'. " +
                             "Tournament is closed for new proposals",
-                    team.getId(), user, tournament.getId(), tournament.getStatus());
+                    team.getId(), user.getLeagueId(), tournament.getId(), tournament.getStatus());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     String.format("Tournament '%s' is closed for new proposals and have status '%s'. Request rejected.",
                             tournament.getId(), tournament.getStatus()));
+        }
+
+        //check accessible type of tournament
+        if (!tournament.getParticipantType().isAccessibleToTeam()) {
+            log.warn("~ forbiddenException for create new proposal for team '{}' by user '{}' to tournament id '{}' and participantType '{}'. " +
+                            "Tournament is closed for proposals from team",
+                    team.getId(), user.getLeagueId(), tournament.getId(), tournament.getParticipantType());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    String.format("Tournament '%s' is not accessible to proposals from team and have participantType '%s'. Request rejected.",
+                            tournament.getId(), tournament.getParticipantType()));
+        }
+
+        List<UserParameterType> mandatoryUserParameters = tournament.getMandatoryUserParameters();
+
+        if (mandatoryUserParameters != null && !mandatoryUserParameters.isEmpty()) {
+            List<Map<UserParameterType, String>> teamUsersParameters = team.getParticipantList().stream()
+                    .map(TeamParticipant::getUser)
+                    .map(u -> u.getParameters() == null ? new HashMap<UserParameterType, String>() : u.getParameters())
+                    .collect(Collectors.toList());
+
+            for (Map<UserParameterType, String> usersParameters : teamUsersParameters) {
+                for (UserParameterType mandatoryUserParameter : mandatoryUserParameters) {
+                    if (usersParameters.get(mandatoryUserParameter) == null) {
+                        throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_PARAMETERS_VERIFICATION_ERROR,
+                                "Team can't participate in specified tournament. Each participant should fill in the parameters in the profile:" +
+                                        mandatoryUserParameters.stream().map(Objects::toString).collect(Collectors.toList()));
+                    }
+                }
+            }
         }
 
         TournamentTeamProposal newTeamProposal = TournamentTeamProposal.builder()
                 .state(ParticipationStateType.CREATED)
                 .type(TournamentTeamType.SOLID)
                 .team(team)
+                .participantType(tournament.getParticipantType())
                 .tournament(tournament)
                 .build();
 
@@ -103,7 +132,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         if (isEmpty(activeTeamParticipant)) {
             log.warn("~ forbiddenException for create new proposal for team.id '{}' by user '{}' to tournament id '{}'. " +
                             "Team have no active participant",
-                    team.getId(), user, tournament.getId());
+                    team.getId(), user.getLeagueId(), tournament.getId());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     "Team have no active participant. Request rejected.");
         }
@@ -146,7 +175,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getProposalByCapitanUserAndTournament(user, tournament);
         if (isNotEmpty(teamProposalList)) {
             log.warn("~ forbiddenException for create duplicate proposal from user-captain '{}' and team.id {}. " +
-                    "Already existed at least one proposal '{}'.", user, teamProposalList.get(0).getTeam().getId(), teamProposalList.get(0));
+                    "Already existed at least one proposal '{}'.", user.getLeagueId(), teamProposalList.get(0).getTeam().getId(), teamProposalList.get(0));
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR,
                     "Duplicate proposal from user (virtual team) to the one tournament is prohibited. Request rejected.");
         }
@@ -155,19 +184,21 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         if (tournament.getStatus() != TournamentStatusType.SIGN_UP) {
             log.warn("~ forbiddenException for create new proposal for user '{}' to tournament id '{}' and status '{}'. " +
                             "Tournament is closed for new proposals",
-                    user, tournament.getId(), tournament.getStatus());
+                    user.getLeagueId(), tournament.getId(), tournament.getStatus());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
                     String.format("Tournament '%s' is closed for new proposals and have status '%s'. Request rejected.",
                             tournament.getId(), tournament.getStatus()));
         }
 
-        if (tournament.getSystemType() != TournamentSystemType.LOBBY_ELIMINATION) {
-            log.warn("~ forbiddenException for create new proposal directly from user '{}' to tournament id '{}' and system type '{}'. " +
-                            "Tournament is closed for new proposals",
-                    user, tournament.getId(), tournament.getSystemType());
+
+        //check accessible type of tournament
+        if (!tournament.getParticipantType().isAccessibleToUser()) {
+            log.warn("~ forbiddenException for create new proposal for user '{}' to tournament id '{}' and participantType '{}'. " +
+                            "Tournament is closed for proposals from user",
+                    user.getLeagueId(), tournament.getId(), tournament.getParticipantType());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
-                    String.format("Tournament '%s' is not intended to create proposals directly from user and have system type '%s'. Request rejected.",
-                            tournament.getId(), tournament.getSystemType()));
+                    String.format("Tournament '%s' is not accessible to proposals from user and have participantType '%s'. Request rejected.",
+                            tournament.getId(), tournament.getParticipantType()));
         }
 
         //create new virtual team for user
@@ -177,6 +208,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                 .state(ParticipationStateType.CREATED)
                 .type(TournamentTeamType.SOLID)
                 .team(virtualTeamForUser)
+                .participantType(tournament.getParticipantType())
                 .tournament(tournament)
                 .build();
 
@@ -211,7 +243,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
             teamProposal = this.getVerifiedTeamProposalById(teamProposalId, user, false);
         } else if (nonNull(teamId) && nonNull(tournamentId)) {
             Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-            //TODO enable editing proposal by Team Capitan
+            //TODO enable editing proposal by Team Capitan or delete until 01/12/2021
 //            if (!team.isCaptain(user) || user.isAdmin()) {
 //                log.warn("~ forbiddenException for modify proposal to tournament for user '{}' from team '{}'.", user, team);
 //                throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
@@ -221,7 +253,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
             teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
         } else {
             log.warn("~ forbiddenException for modify proposal to tournament for user '{}'. " +
-                    "No valid parameters of team proposal was specified", user);
+                    "No valid parameters of team proposal was specified", user.getLeagueId());
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VALIDATION_ERROR,
                     "No valid parameters of team proposal was specified. Request rejected.");
         }
@@ -234,7 +266,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         teamProposal.setState(teamProposalState);
         TournamentTeamProposal savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
         if (isNull(savedTeamProposal)) {
-            log.error("!> error while modifying tournament team proposal '{}' for user '{}'.", teamProposal, user);
+            log.error("!> error while modifying tournament team proposal '{}' for user '{}'.", teamProposal, user.getLeagueId());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
                     "Team proposal was not saved on Portal. Check requested params.");
         }
@@ -248,7 +280,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     @Override
     public void quitFromTournament(long tournamentId, long teamId, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-        //TODO enable editing proposal by Team Capitan
+        //TODO enable editing proposal by Team Capitan or delete until 01/12/2021
 //        if (!team.isCaptain(user)) {
 //            log.warn("~ forbiddenException for modify proposal to tournament for user '{}' from team '{}'.", user, team);
 //            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
@@ -259,7 +291,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         // check if tournament is already started
         if (TournamentStatusType.startedStatusList.contains(tournament.getStatus())) {
             log.warn("~ forbiddenException for modify proposal to started tournament.id '{}' for user '{}' from team '{}'.",
-                    tournament.getId(), user, team);
+                    tournament.getId(), user.getLeagueId(), team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
                     "Quit from already started or finished tournament is prohibited. Request is rejected.");
         }
@@ -268,7 +300,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         // check if proposal is active
         if (!ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
             log.warn("~ forbiddenException for modify non-active proposal with state '{}' to tournament.id '{}' for user '{}' from team '{}'.",
-                    teamProposal.getState(), tournament.getId(), user, team);
+                    teamProposal.getState(), tournament.getId(), user.getLeagueId(), team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
                     String.format("Modify non-active proposal with state '%s' is prohibited. Request is rejected.",
                             teamProposal.getState()));
@@ -379,7 +411,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                 .build();
     }
 
-    // TODO make creation proposal from DTO and process it with getVerifiedTeamProposalByDto
+    // TODO make creation proposal from DTO and process it with getVerifiedTeamProposalByDto or delete until 01/12/2021
 //    /**
 //     * Getting tournament settings by DTO with privacy check
 //     */
