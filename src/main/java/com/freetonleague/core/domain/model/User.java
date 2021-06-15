@@ -1,7 +1,6 @@
 package com.freetonleague.core.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.UserParameterType;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
@@ -15,11 +14,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;

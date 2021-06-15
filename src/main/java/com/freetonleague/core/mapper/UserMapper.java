@@ -5,13 +5,7 @@ import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.IterableMapping;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
-import org.mapstruct.Named;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.*;
 
 import java.util.List;
 
