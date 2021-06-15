@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.UserPublicDto;
+import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.UserManageException;
@@ -11,6 +12,7 @@ import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -85,4 +87,12 @@ public class RestUserFacadeImpl implements RestUserFacade {
         }
         return user;
     }
+
+    @Override
+    @Transactional
+    public UserPublicDto updateUserInfoByFilter(UserInfoFilter filter, User user) {
+        userMapper.applyChanges(user, filter);
+        return userMapper.toPubicDto(user);
+    }
+
 }

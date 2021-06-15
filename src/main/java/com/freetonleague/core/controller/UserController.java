@@ -1,6 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.domain.dto.UserPublicDto;
+import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestUserFacade;
 import io.swagger.annotations.Api;
@@ -11,9 +12,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import springfox.documentation.annotations.ApiIgnore;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping(path = UserController.BASE_PATH)
@@ -23,6 +28,7 @@ public class UserController {
 
     public static final String BASE_PATH = "/api/user";
     public static final String PATH_GET = "/{league_id}";
+    public static final String PATH_PUT = "/";
 
     private final RestUserFacade restFacade;
 
@@ -32,4 +38,14 @@ public class UserController {
                                                            @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.getUserByLeagueId(leagueId, user), HttpStatus.OK);
     }
+
+    @ApiOperation("Update user data")
+    @PutMapping(path = PATH_PUT)
+    public ResponseEntity<UserPublicDto> updateSelfInfo(
+            @Valid @RequestBody UserInfoFilter filter,
+            @ApiIgnore @AuthenticationPrincipal User user
+    ) {
+        return new ResponseEntity<>(restFacade.updateUserInfoByFilter(filter, user), HttpStatus.OK);
+    }
+
 }
