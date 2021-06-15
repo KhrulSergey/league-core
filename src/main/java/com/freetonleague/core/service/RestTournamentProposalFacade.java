@@ -57,6 +57,17 @@ public interface RestTournamentProposalFacade {
 //     */
 //    TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user);
 
+
+    /**
+     * Registry new "single" team for user and create tournament proposal
+     *
+     * @param tournamentId identify of tournament
+     * @param leagueId     identify of user
+     * @param user         current user from Session
+     * @return Added team proposal
+     */
+    TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user);
+
     /**
      * Edit team proposal to tournament (only state)
      *

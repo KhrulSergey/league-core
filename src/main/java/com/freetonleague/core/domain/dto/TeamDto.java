@@ -37,6 +37,8 @@ public class TeamDto {
 
     private TeamParticipantDto captain;
 
+    private Boolean isVirtual = false;
+
     public Long getCaptainId() {
         return nonNull(captain) ? captain.getId() : null;
     }

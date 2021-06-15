@@ -2,10 +2,7 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.enums.ParticipationStateType;
-import com.freetonleague.core.domain.model.Team;
-import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.domain.model.TournamentTeamParticipant;
-import com.freetonleague.core.domain.model.TournamentTeamProposal;
+import com.freetonleague.core.domain.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,6 +27,15 @@ public interface TournamentProposalService {
      * @return tournament team proposal entity
      */
     TournamentTeamProposal getProposalByTeamAndTournament(Team team, Tournament tournament);
+
+    /**
+     * Returns tournament team proposal list (request to participate on tournament) by capitan of team and tournament.
+     *
+     * @param userCapitan capitan of team for proposal to search
+     * @param tournament  to search connected proposal
+     * @return tournament team proposal entity
+     */
+    List<TournamentTeamProposal> getProposalByCapitanUserAndTournament(User userCapitan, Tournament tournament);
 
     /**
      * Returns list of all tournament team proposal filtered by requested params

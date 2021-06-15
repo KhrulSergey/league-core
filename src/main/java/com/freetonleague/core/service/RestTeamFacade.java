@@ -84,6 +84,11 @@ public interface RestTeamFacade {
     void quitUserFromTeam(long id, User user);
 
     /**
+     * Create virtual team for user as capitan
+     */
+    Team createVirtualTeam(User user);
+
+    /**
      * Getting team by id and user with privacy check
      */
     Team getVerifiedTeamById(long id, User user, boolean checkUser);

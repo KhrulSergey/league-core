@@ -30,6 +30,7 @@ public class TournamentProposalController {
     public static final String BASE_PATH = "/api/tournament";
     public static final String BASE_PROPOSALS_POSTFIX_PATH = "/proposal";
     public static final String PATH_APPLY_TO_TOURNAMENT = "/apply";
+    public static final String PATH_APPLY_TO_TOURNAMENT_BY_USER = "/apply-by-user";
     public static final String PATH_QUIT_FROM_TOURNAMENT = "/quit";
     public static final String PATH_GET_FOR_TOURNAMENT = "/";
     public static final String PATH_EDIT_TEAM_PROPOSAL = "/";
@@ -37,14 +38,24 @@ public class TournamentProposalController {
 
     private final RestTournamentProposalFacade restTournamentProposalFacade;
 
-    @ApiOperation("Apply to participate in tournament by id")
+    @ApiOperation("Apply to participate in tournament from team")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_APPLY_TO_TOURNAMENT)
-    public ResponseEntity<TournamentTeamProposalDto> applyToTournamentById(@RequestParam(value = "tournament_id") long tournamentId,
-                                                                           @RequestParam(value = "team_id") long teamId,
-                                                                           @ApiIgnore @RequestBody(required = false) TournamentTeamProposalDto teamProposalDto,
-                                                                           @ApiIgnore @AuthenticationPrincipal User user) {
+    public ResponseEntity<TournamentTeamProposalDto> applyToTournamentFromTeam(@RequestParam(value = "tournament_id") long tournamentId,
+                                                                               @RequestParam(value = "team_id") long teamId,
+                                                                               @ApiIgnore @RequestBody(required = false) TournamentTeamProposalDto teamProposalDto,
+                                                                               @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.createProposalToTournament(tournamentId, teamId, teamProposalDto, user), HttpStatus.OK);
     }
+
+    @ApiOperation("Apply to participate in tournament from user (only for lobby tournament)")
+    @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_APPLY_TO_TOURNAMENT_BY_USER)
+    public ResponseEntity<TournamentTeamProposalDto> applyToTournamentFromUser(@RequestParam(value = "tournament_id") long tournamentId,
+                                                                               @RequestParam(value = "league_id") String leagueId,
+                                                                               @ApiIgnore @RequestBody(required = false) TournamentTeamProposalDto teamProposalDto,
+                                                                               @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentProposalFacade.createProposalToTournamentFromUser(tournamentId, leagueId, user), HttpStatus.OK);
+    }
+
 
     @ApiOperation("Change team proposal to tournament by teamProposalId or by tournamentId + teamId (available edit only state, for orgs)")
     @PutMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_EDIT_TEAM_PROPOSAL)
