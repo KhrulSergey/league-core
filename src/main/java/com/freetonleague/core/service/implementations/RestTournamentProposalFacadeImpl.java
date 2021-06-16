@@ -240,7 +240,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                                                               ParticipationStateType teamProposalState, User user) {
         TournamentTeamProposal teamProposal;
         if (nonNull(teamProposalId)) {
-            teamProposal = this.getVerifiedTeamProposalById(teamProposalId, user, false);
+            teamProposal = this.getVerifiedTeamProposalById(teamProposalId);
         } else if (nonNull(teamId) && nonNull(tournamentId)) {
             Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
             //TODO enable editing proposal by Team Capitan or delete until 01/12/2021
@@ -318,12 +318,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
      * Returns tournament team proposal by id and user with privacy check
      */
     @Override
-    public TournamentTeamProposal getVerifiedTeamProposalById(long id, User user, boolean checkUser) {
-        if (checkUser && isNull(user)) {
-            log.debug("^ user is not authenticate. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'getVerifiedTeamProposalById' request denied");
-        }
-
+    public TournamentTeamProposal getVerifiedTeamProposalById(long id) {
         TournamentTeamProposal tournamentTeamProposal = tournamentProposalService.getProposalById(id);
         if (isNull(tournamentTeamProposal)) {
             log.debug("^ Tournament team proposal with requested id '{}' was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);

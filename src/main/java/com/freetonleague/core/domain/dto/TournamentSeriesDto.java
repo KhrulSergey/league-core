@@ -17,6 +17,8 @@ public class TournamentSeriesDto {
 
     private String name;
 
+    @ApiModelProperty(required = true)
+    @NotNull
     private Long tournamentRoundId;
 
     @ApiModelProperty(required = true)
@@ -48,6 +50,8 @@ public class TournamentSeriesDto {
 
     @ApiModelProperty(notes = "Required for set winners of series and finish series")
     private List<TournamentSeriesRivalDto> seriesRivalList;
+
+    private TournamentSeriesRivalDto seriesWinner;
 
     @ApiModelProperty(readOnly = true, notes = "The field is set automatically")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

@@ -22,7 +22,6 @@ public class TournamentSeriesController {
     public static final String BASE_PATH = "/api/tournament/series";
     public static final String PATH_GENERATE_OMT = "/generate-omt-for-series/{series_id}";
     public static final String PATH_GET = "/{series_id}";
-    //    public static final String PATH_GET_LIST_BY_TOURNAMENT_ROUND = "/list-by-tournament-round/{tournament_id}";
     public static final String PATH_ADD = "/";
     public static final String PATH_EDIT = "/{series_id}";
     public static final String PATH_DELETE = "/{series_id}";
@@ -35,14 +34,6 @@ public class TournamentSeriesController {
                                                              @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentSeriesFacade.getSeries(id, user), HttpStatus.OK);
     }
-
-//    @ApiOperation("Get series list info by tournament")
-//    @GetMapping(path = PATH_GET_LIST_BY_TOURNAMENT_ROUND)
-//    public ResponseEntity<Page<TournamentSeriesDto>> getSeriesList(@PageableDefault Pageable pageable,
-//                                                                   @PathVariable("tournament_id") long tournamentId,
-//                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
-//        return new ResponseEntity<>(restTournamentSeriesService.getSeriesList(pageable, tournamentId, user), HttpStatus.OK);
-//    }
 
     @ApiOperation("Generate one more match (OMT) for series (only for orgs)")
     @PostMapping(path = PATH_GENERATE_OMT)

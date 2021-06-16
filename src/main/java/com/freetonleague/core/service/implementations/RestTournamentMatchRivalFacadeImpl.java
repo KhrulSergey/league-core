@@ -1,15 +1,14 @@
 package com.freetonleague.core.service.implementations;
 
 
+import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalParticipantDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
+import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.model.*;
-import com.freetonleague.core.exception.ExceptionMessages;
-import com.freetonleague.core.exception.TeamManageException;
-import com.freetonleague.core.exception.TournamentManageException;
-import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.*;
 import com.freetonleague.core.mapper.TournamentMatchRivalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.*;
@@ -24,12 +23,14 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 /**
  * Service-facade for managing tournament match rival and rival participant
@@ -42,12 +43,15 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentService tournamentService;
     private final TournamentMatchRivalMapper tournamentMatchRivalMapper;
-    private final RestTournamentProposalFacade restTournamentProposalFacade;
     private final Validator validator;
 
     @Lazy
     @Autowired
     private RestTournamentMatchFacade restTournamentMatchFacade;
+
+    @Lazy
+    @Autowired
+    private RestTournamentProposalFacade restTournamentProposalFacade;
 
     /**
      * Returns founded tournament match by id
@@ -85,8 +89,13 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "rivalParticipantList",
                     "parameter 'rivalParticipantList' set empty in request for editMatchRivalParticipant");
         }
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'addTournament' request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'addTournament' request denied");
+        }
+
         // find Match and Rival entities
-        TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId, user, true);
+        TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchId);
         TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(rivalId);
         TournamentTeamProposal tournamentTeamProposal = tournamentMatchRival.getTeamProposal();
 
@@ -165,7 +174,6 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     /**
      * Returns tournament rival by dto and user with privacy check
      */
-    //TODO verify fileds for check embedded entities rivalParticipantList, tournamentMatchId, teamProposalId
     @Override
     public TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto) {
         if (isNull(matchRivalDto)) {
@@ -180,6 +188,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
             throw new ConstraintViolationException(settingsViolations);
         }
         TournamentMatchRival tournamentMatchRival = null;
+        //check if match rival already existed
         if (nonNull(matchRivalDto.getId())) {
             tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId());
             if (!matchRivalDto.getTournamentMatchId().equals(tournamentMatchRival.getTournamentMatch().getId())) {
@@ -188,10 +197,76 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                 throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "matchRivalDto.tournamentMatchId",
                         "parameter 'tournament organizer' is not match by id to tournament for getVerifiedMatchRivalByDto");
             }
+            tournamentMatchRival.setStatus(matchRivalDto.getStatus());
             tournamentMatchRival.setWonPlaceInMatch(matchRivalDto.getWonPlaceInMatch());
             tournamentMatchRival.setMatchIndicator(GameIndicatorConverter.convertAndValidate(matchRivalDto.getMatchIndicator()));
+            // check if matchRivalParticipants is set and verify them
+            if (isNotEmpty(matchRivalDto.getRivalParticipantList())) {
+                TournamentMatchRival finalTournamentMatchRival = tournamentMatchRival;
+                Set<TournamentMatchRivalParticipant> matchRivalParticipantList = matchRivalDto
+                        .getRivalParticipantList().parallelStream()
+                        .map(p -> this.getVerifiedTournamentMatchRivalParticipantByDto(p, finalTournamentMatchRival))
+                        .collect(Collectors.toSet());
+                tournamentMatchRival.setRivalParticipantList(matchRivalParticipantList);
+            }
+        } else {
+            //compose new match rival
+            tournamentMatchRival = tournamentMatchRivalMapper.fromDto(matchRivalDto);
+            TournamentTeamProposal teamProposal = restTournamentProposalFacade.getVerifiedTeamProposalById(matchRivalDto.getTeamProposalId());
+            tournamentMatchRival.setTeamProposal(teamProposal);
+            //set match indicators
+            tournamentMatchRival.setMatchIndicator(GameIndicatorConverter.convertAndValidate(matchRivalDto.getMatchIndicator()));
+
+            // check and set match to matchRival
+            if (nonNull(matchRivalDto.getTournamentMatchId())) {
+                TournamentMatch tournamentMatch = restTournamentMatchFacade.getVerifiedMatchById(matchRivalDto.getTournamentMatchId());
+                tournamentMatchRival.setTournamentMatch(tournamentMatch);
+            }
+            // define, check and set matchRivalParticipants
+            if (isNotEmpty(matchRivalDto.getRivalParticipantList())) {
+                TournamentMatchRival finalTournamentMatchRival = tournamentMatchRival;
+                Set<TournamentMatchRivalParticipant> matchRivalParticipantList = matchRivalDto
+                        .getRivalParticipantList().parallelStream()
+                        .map(p -> this.getVerifiedTournamentMatchRivalParticipantByDto(p, finalTournamentMatchRival))
+                        .collect(Collectors.toSet());
+                tournamentMatchRival.setRivalParticipantList(matchRivalParticipantList);
+            } else {
+                //set default matchRivalParticipants for new matchRival
+                tournamentMatchRival.setRivalParticipantsFromTournamentTeamParticipant(
+                        teamProposal.getMainTournamentTeamParticipantList());
+            }
         }
         return tournamentMatchRival;
+    }
+
+
+    @Override
+    public TournamentMatchRival setGameIndicatorMultipliersToMatchRival(TournamentMatchRival rival, TournamentSeries tournamentSeries) {
+        if (rival.getMatchIndicator() == null) {
+            return rival;
+        }
+
+        TournamentRound tournamentRound = tournamentSeries.getTournamentRound();
+        Map<GameIndicatorType, Double> multiplierMap = tournamentRound.getGameIndicatorMultipliersMap();
+
+        if (multiplierMap == null) {
+            return rival;
+        }
+
+        for (GameDisciplineIndicatorDto indicator : rival.getMatchIndicator()) {
+            double multiplier = multiplierMap.getOrDefault(indicator.getGameIndicatorType(), 1D);
+
+            if (indicator.getGameIndicatorValue() != null && indicator.getGameIndicatorValue() instanceof Number) {
+                double doubleValue = Double.parseDouble(indicator.getGameIndicatorValue().toString());
+
+                indicator.setMultipliedValue(doubleValue * multiplier);
+            } else {
+                indicator.setMultipliedValue(null);
+            }
+
+        }
+
+        return rival;
     }
 
     /**

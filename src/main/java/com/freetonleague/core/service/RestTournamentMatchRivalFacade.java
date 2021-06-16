@@ -4,6 +4,7 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.dto.TournamentMatchRivalDto;
 import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
+import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
 
 import java.util.Set;
@@ -63,4 +64,6 @@ public interface RestTournamentMatchRivalFacade {
      * Returns tournament rival by dto and user with privacy check
      */
     TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto);
+
+    TournamentMatchRival setGameIndicatorMultipliersToMatchRival(TournamentMatchRival rival, TournamentSeries tournamentSeries);
 }

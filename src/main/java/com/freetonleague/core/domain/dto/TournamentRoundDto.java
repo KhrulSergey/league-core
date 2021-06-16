@@ -19,6 +19,8 @@ public class TournamentRoundDto {
 
     private String name;
 
+    @ApiModelProperty(required = true)
+    @NotNull
     private Long tournamentId;
 
     @ApiModelProperty(readOnly = true, notes = "allowed to add only next round to tournament. No need to specify number")
@@ -50,5 +52,4 @@ public class TournamentRoundDto {
     private LocalDateTime finishedDate;
 
     private Map<GameIndicatorType, Double> gameIndicatorMultipliersMap;
-
 }

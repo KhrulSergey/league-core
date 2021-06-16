@@ -30,14 +30,15 @@ import java.util.List;
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_series_rivals_id_seq", schema = "public", allocationSize = 1)
 public class TournamentSeriesRival extends ExtendedBaseEntity {
 
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
     /**
      * Reference to team on tournament
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_proposal_id")
     private TournamentTeamProposal teamProposal;
 

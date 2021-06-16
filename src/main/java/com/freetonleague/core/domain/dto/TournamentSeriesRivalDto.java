@@ -15,6 +15,8 @@ public class TournamentSeriesRivalDto {
 
     private Long tournamentSeriesId;
 
+    @ApiModelProperty(required = true)
+    @NotNull
     private Long teamProposalId;
 
     private Long parentTournamentSeriesId;

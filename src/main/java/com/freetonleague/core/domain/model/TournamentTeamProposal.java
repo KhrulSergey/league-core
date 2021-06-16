@@ -6,7 +6,10 @@ import com.freetonleague.core.domain.enums.TournamentParticipantType;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -18,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 
 /**
@@ -26,7 +30,6 @@ import static java.util.Objects.isNull;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
-@ToString(callSuper = true, of = {"team", "state"})
 @Getter
 @Setter
 @Entity
@@ -79,7 +82,7 @@ public class TournamentTeamProposal extends BaseEntity {
      * Team participant list with their role (status) in tournament
      */
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tournamentTeamProposal", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 
     @Transient
@@ -101,5 +104,18 @@ public class TournamentTeamProposal extends BaseEntity {
 
     public boolean isStateChanged() {
         return !this.state.equals(this.prevState);
+    }
+
+    @Override
+    public String toString() {
+        String teamId = nonNull(team) ? "team.id=" + team.getId() : "";
+
+        return "TournamentTeamProposal{" +
+                teamId +
+                ", state=" + state +
+                ", prevState=" + prevState +
+                ", type=" + type +
+                ", participantType=" + participantType +
+                '}';
     }
 }
