@@ -91,7 +91,7 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
      * Mark 'deleted' tournament series in DB.
      */
     @Override
-    public TournamentMatchRival deleteMatchRival(TournamentMatchRival tournamentMatchRival) {
+    public TournamentMatchRival archiveMatchRival(TournamentMatchRival tournamentMatchRival) {
         if (!this.verifyTournamentMatchRival(tournamentMatchRival)) {
             return null;
         }
@@ -107,11 +107,55 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
     }
 
     /**
+     * Delete tournament match rival by id
+     */
+    @Override
+    public boolean deleteMatchRival(TournamentMatchRival tournamentMatchRival) {
+        if (isNull(tournamentMatchRival) || isNull(tournamentMatchRival.getId())) {
+            log.error("!> requesting delete match rival for NULL data (id). Check evoking clients");
+            return false;
+        }
+        if (!this.isExistsTournamentMatchRivalById(tournamentMatchRival.getId())) {
+            log.error("!> requesting delete match rival for non-existed entry. Check evoking clients");
+            return false;
+        }
+        log.debug("^ trying to delete tournament match rival '{}'", tournamentMatchRival);
+        tournamentMatchRivalRepository.delete(tournamentMatchRival);
+        return true;
+    }
+
+    /**
+     * Delete tournament match rival participant by id
+     */
+    @Override
+    public boolean deleteMatchRivalParticipant(TournamentMatchRivalParticipant tournamentMatchRivalParticipant) {
+        if (isNull(tournamentMatchRivalParticipant) || isNull(tournamentMatchRivalParticipant.getId())) {
+            log.error("!> requesting delete match rival participant for NULL data (id). Check evoking clients");
+            return false;
+        }
+        if (!this.isExistsTournamentMatchRivalParticipantById(tournamentMatchRivalParticipant.getId())) {
+            log.error("!> requesting delete match rival participant for non-existed entry. Check evoking clients");
+            return false;
+        }
+        log.debug("^ trying to delete tournament match rival participant '{}'", tournamentMatchRivalParticipant);
+        tournamentMatchRivalParticipantRepository.delete(tournamentMatchRivalParticipant);
+        return true;
+    }
+
+    /**
      * Returns sign of tournament series existence for specified id.
      */
     @Override
     public boolean isExistsTournamentMatchRivalById(long id) {
         return tournamentMatchRivalRepository.existsById(id);
+    }
+
+    /**
+     * Returns sign of tournament match rival participant existence for specified id.
+     */
+    @Override
+    public boolean isExistsTournamentMatchRivalParticipantById(long id) {
+        return tournamentMatchRivalParticipantRepository.existsById(id);
     }
 
     /**

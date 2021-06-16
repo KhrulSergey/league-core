@@ -48,12 +48,18 @@ public interface RestTournamentMatchRivalFacade {
     TournamentMatchRivalDto changeActiveMatchRivalParticipants(long matchId, long rivalId, Set<TournamentTeamParticipantDto> rivalParticipantList, User user);
 
     /**
-     * Mark 'deleted' tournament series in DB.
+     * Delete tournament match rival in DB.
      *
-     * @param tournamentMatchRivalDto to be deleted
-     * @return tournament series with updated fields and deleted status
+     * @param id identify of match rival to be deleted
      */
-    TournamentMatchRivalDto deleteMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto);
+    void deleteMatchRival(long id, User user);
+
+    /**
+     * Delete tournament match participant rival in DB.
+     *
+     * @param id identify of match rival participant to be deleted
+     */
+    void deleteMatchRivalParticipant(long id, User user);
 
     /**
      * Returns tournament rival by id and user with privacy check
@@ -66,4 +72,5 @@ public interface RestTournamentMatchRivalFacade {
     TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto);
 
     TournamentMatchRival setGameIndicatorMultipliersToMatchRival(TournamentMatchRival rival, TournamentSeries tournamentSeries);
+
 }

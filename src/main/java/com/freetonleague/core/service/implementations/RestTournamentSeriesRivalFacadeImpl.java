@@ -4,10 +4,12 @@ import com.freetonleague.core.domain.dto.TournamentSeriesRivalDto;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import com.freetonleague.core.domain.model.TournamentTeamProposal;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentSeriesRivalMapper;
+import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.RestTournamentProposalFacade;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.RestTournamentSeriesRivalFacade;
@@ -47,6 +49,22 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
     private RestTournamentProposalFacade restTournamentProposalFacade;
 
     /**
+     * Delete tournament series rival.
+     */
+    @CanManageTournament
+    @Override
+    public void deleteSeriesRival(long id, User user) {
+        TournamentSeriesRival tournamentSeriesRival = this.getVerifiedSeriesRivalById(id);
+        boolean result = tournamentSeriesService.deleteSeriesRival(tournamentSeriesRival);
+        if (!result) {
+            log.debug("^ Tournament rival with requested id '{}' was not deleted. 'deleteSeriesRival' in " +
+                    "RestTournamentSeriesRivalFacade request denied", id);
+            throw new TeamManageException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_MODIFICATION_ERROR,
+                    "Tournament series rival with requested id " + id + " was not deleted");
+        }
+    }
+
+    /**
      * Returns tournament series rival by id with privacy check
      */
     @Override
@@ -76,7 +94,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
                     seriesRivalDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
-        TournamentSeriesRival tournamentSeriesRival = null;
+        TournamentSeriesRival tournamentSeriesRival;
         if (nonNull(seriesRivalDto.getId())) {
             tournamentSeriesRival = this.getVerifiedSeriesRivalById(seriesRivalDto.getId());
             if (!seriesRivalDto.getTournamentSeriesId().equals(tournamentSeriesRival.getTournamentSeries().getId())) {
