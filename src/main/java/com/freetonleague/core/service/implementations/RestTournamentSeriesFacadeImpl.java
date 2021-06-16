@@ -4,6 +4,7 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
 import com.freetonleague.core.domain.dto.TournamentSeriesRivalDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.TournamentSeriesRival;
@@ -28,6 +29,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -177,34 +179,21 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournamentSeriesDto",
                     "parameter 'tournamentSeriesDto' is not set for get or modify tournament series");
         }
-        if (isNull(tournamentSeriesDto.getTournamentRoundId())) {
-            log.warn("~ parameter 'tournament round id' is not set in tournamentSeriesDto for getVerifiedSeriesByDto");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournament round id",
-                    "parameter 'tournament round id' is not set in tournamentSeriesDto for get or modify tournament series");
-        }
-        TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId());
-
         Set<ConstraintViolation<TournamentSeriesDto>> settingsViolations = validator.validate(tournamentSeriesDto);
         if (!settingsViolations.isEmpty()) {
             log.debug("^ transmitted tournament series dto: '{}' have constraint violations: '{}'",
                     tournamentSeriesDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
-        //TODO delete until 01/09/21 if no needed
-//        if (tournamentSeriesDto.getStatus().isFinished()) {
-//            log.warn("~ tournament series can be finished only automatically when all match is finished." +
-//                    "Request to set status was rejected.");
-//            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_FINISHED_ERROR,
-//                    "Modifying tournament match was rejected. Check requested params and method.");
-//        }
 
         TournamentSeries tournamentSeries = tournamentSeriesMapper.fromDto(tournamentSeriesDto);
 
-        //Check existence of tournament series and it's status
+        //Check existence of tournament series and fill main properties
         if (nonNull(tournamentSeriesDto.getId())) {
             TournamentSeries existedSeries = getVerifiedSeriesById(tournamentSeriesDto.getId());
             tournamentSeries.setParentSeriesList(existedSeries.getParentSeriesList());
             tournamentSeries.setMatchList(existedSeries.getMatchList());
+            tournamentSeries.setSeriesRivalList(existedSeries.getSeriesRivalList());
         }
 
         // check and compose match rival list (modify only WonPlaceInMatch for rival)
@@ -213,19 +202,34 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         if (isNotEmpty(tournamentSeriesRivalDtoList)) {
             tournamentSeriesRivalList = tournamentSeriesRivalDtoList.parallelStream()
                     .map(restTournamentSeriesRivalFacade::getVerifiedSeriesRivalByDto)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
+        }
+        if (nonNull(tournamentSeriesRivalList)) {
+            tournamentSeriesRivalList = tournamentSeriesRivalList.parallelStream()
+                    .peek(s -> s.setTournamentSeries(tournamentSeries)).collect(Collectors.toList());
+            tournamentSeries.setSeriesRivalList(tournamentSeriesRivalList);
+        }
 
+        // try to define series winner from SeriesWinner field or rival from SeriesRivalList with First place
+        TournamentSeriesRivalDto seriesRivalWinnerDto = tournamentSeriesDto.getSeriesWinner();
+        TournamentSeriesRival seriesWinner = null;
+        if (nonNull(seriesRivalWinnerDto)) {
+            seriesRivalWinnerDto.setWonPlaceInSeries(TournamentWinnerPlaceType.FIRST);
+            seriesWinner = restTournamentSeriesRivalFacade.getVerifiedSeriesRivalByDto(seriesRivalWinnerDto);
+        } else if (isNotEmpty(tournamentSeriesRivalList)) {
             //try to find series winner (first place)
-            TournamentSeriesRival seriesWinner = tournamentSeriesRivalList.parallelStream()
+            seriesWinner = tournamentSeriesRivalList.parallelStream()
                     .filter(s -> nonNull(s.getWonPlaceInSeries())
                             && s.getWonPlaceInSeries().isWinner())
                     .findFirst().orElse(null);
+        }
+        if (nonNull(seriesWinner)) {
             tournamentSeries.setSeriesWinner(seriesWinner);
         }
+
+        TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId());
         tournamentSeries.setTournamentRound(tournamentRound);
-        if (nonNull(tournamentSeriesRivalList)) {
-            tournamentSeries.setSeriesRivalList(tournamentSeriesRivalList);
-        }
         return tournamentSeries;
     }
 }

@@ -19,12 +19,20 @@ public class TournamentMatchDto {
 
     @ApiModelProperty(required = true)
     @NotNull
+    private Long tournamentSeriesId;
+
+    @ApiModelProperty(required = true)
+    @NotNull
     private TournamentStatusType status;
 
     @ApiModelProperty(required = true)
     @NotNull
     @Min(1)
     private Integer matchNumberInSeries;
+
+    private List<TournamentMatchRivalDto> matchRivalList;
+
+    private TournamentMatchRivalDto matchWinner;
 
     @ApiModelProperty(required = true)
     @NotNull
@@ -39,14 +47,5 @@ public class TournamentMatchDto {
     private LocalDateTime finishedDate;
 
     private List<MatchPropertyDto> matchPropertyList;
-
-    @ApiModelProperty(required = true)
-    @NotNull
-    private Long tournamentSeriesId;
-
-    @ApiModelProperty(readOnly = true)
-    private List<TournamentMatchRivalDto> matchRivalList;
-
-    private TournamentMatchRivalDto matchWinner;
 }
 

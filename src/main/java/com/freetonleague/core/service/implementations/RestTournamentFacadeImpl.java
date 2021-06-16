@@ -373,7 +373,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
         }
 
         TournamentTeamProposal tournamentTeamProposal = restTournamentProposalFacade
-                .getVerifiedTeamProposalById(winnerDto.getTeamProposalId(), null, false);
+                .getVerifiedTeamProposalById(winnerDto.getTeamProposalId());
 
         if (!tournamentTeamProposal.getTournament().getId().equals(tournamentId)) {
             log.warn("~ parameter 'tournamentTeamProposal' '{}' is not correctly set to verify tournament winner for tournament '{}'" +

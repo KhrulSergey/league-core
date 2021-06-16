@@ -57,13 +57,13 @@ public interface RestTournamentMatchFacade {
     TournamentMatchDto deleteMatch(long matchId, User user);
 
     /**
-     * Returns tournament match by DTO, with validation, business logic and user with privacy check
+     * Returns tournament match by DTO, with validation, business logic with privacy check
      */
-    TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto, User user, boolean checkUser);
+    TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto);
 
     /**
-     * Returns tournament match by id and user with privacy check
+     * Returns tournament match by id with privacy check
      */
-    TournamentMatch getVerifiedMatchById(long id, User user, boolean checkUser);
+    TournamentMatch getVerifiedMatchById(long id);
 
 }
