@@ -92,7 +92,6 @@ public class TournamentDto {
 
     //Detailed settings
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-//    @JsonIgnoreProperties("seriesList")
     private List<TournamentRoundDto> tournamentRoundList;
 
     @ApiModelProperty(notes = "need to set at least one element with 'force' finishing tournament")

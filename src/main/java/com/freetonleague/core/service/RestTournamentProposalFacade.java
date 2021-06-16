@@ -91,9 +91,9 @@ public interface RestTournamentProposalFacade {
     void quitFromTournament(long tournamentId, long teamId, User user);
 
     /**
-     * Returns tournament team proposal by id and user with privacy check
+     * Returns tournament team proposal by id with privacy check
      */
-    TournamentTeamProposal getVerifiedTeamProposalById(long id, User user, boolean checkUser);
+    TournamentTeamProposal getVerifiedTeamProposalById(long id);
 
     /**
      * Getting participant by TournamentTeamParticipantDto, verify team membership

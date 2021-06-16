@@ -252,7 +252,8 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
      */
     @Override
     public int getLastActiveRoundNumberForTournament(Tournament tournament) {
-        return this.getActiveRoundForTournament(tournament).getRoundNumber();
+        TournamentRound tournamentRound = this.getActiveRoundForTournament(tournament);
+        return nonNull(tournamentRound) ? tournamentRound.getRoundNumber() : 0;
     }
 
     /**

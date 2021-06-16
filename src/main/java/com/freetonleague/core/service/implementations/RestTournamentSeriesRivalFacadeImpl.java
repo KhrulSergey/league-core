@@ -1,14 +1,21 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.TournamentSeriesRivalDto;
+import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.TournamentSeriesRival;
+import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.mapper.TournamentSeriesRivalMapper;
+import com.freetonleague.core.service.RestTournamentProposalFacade;
+import com.freetonleague.core.service.RestTournamentSeriesFacade;
 import com.freetonleague.core.service.RestTournamentSeriesRivalFacade;
 import com.freetonleague.core.service.TournamentSeriesService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import javax.validation.ConstraintViolation;
@@ -28,8 +35,16 @@ import static java.util.Objects.nonNull;
 public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeriesRivalFacade {
 
     private final TournamentSeriesService tournamentSeriesService;
+    private final TournamentSeriesRivalMapper seriesRivalMapper;
     private final Validator validator;
 
+    @Lazy
+    @Autowired
+    private RestTournamentSeriesFacade restTournamentSeriesFacade;
+
+    @Lazy
+    @Autowired
+    private RestTournamentProposalFacade restTournamentProposalFacade;
 
     /**
      * Returns tournament series rival by id with privacy check
@@ -70,7 +85,23 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
                 throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_VALIDATION_ERROR, "SeriesRivalDto.tournamentSeriesId",
                         "parameter 'tournament organizer' is not Series by id to tournament for getVerifiedSeriesRivalByDto");
             }
+            tournamentSeriesRival.setStatus(seriesRivalDto.getStatus());
             tournamentSeriesRival.setWonPlaceInSeries(seriesRivalDto.getWonPlaceInSeries());
+            tournamentSeriesRival.setSeriesIndicatorList(seriesRivalDto.getSeriesIndicatorList());
+        } else {
+            tournamentSeriesRival = seriesRivalMapper.fromDto(seriesRivalDto);
+            TournamentTeamProposal teamProposal = restTournamentProposalFacade.getVerifiedTeamProposalById(seriesRivalDto.getTeamProposalId());
+            tournamentSeriesRival.setTeamProposal(teamProposal);
+
+            if (nonNull(seriesRivalDto.getTournamentSeriesId())) {
+                TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(seriesRivalDto.getTournamentSeriesId());
+                tournamentSeriesRival.setTournamentSeries(tournamentSeries);
+            }
+
+            if (nonNull(seriesRivalDto.getParentTournamentSeriesId())) {
+                TournamentSeries parentTournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(seriesRivalDto.getParentTournamentSeriesId());
+                tournamentSeriesRival.setParentTournamentSeries(parentTournamentSeries);
+            }
         }
 
         return tournamentSeriesRival;
