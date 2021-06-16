@@ -4,6 +4,7 @@ package com.freetonleague.core.controller;
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
+import com.freetonleague.core.service.RestTournamentSeriesRivalFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -25,8 +26,10 @@ public class TournamentSeriesController {
     public static final String PATH_ADD = "/";
     public static final String PATH_EDIT = "/{series_id}";
     public static final String PATH_DELETE = "/{series_id}";
+    public static final String PATH_DELETE_SERIES_RIVAL = "/rival/{rival_id}";
 
     private final RestTournamentSeriesFacade restTournamentSeriesFacade;
+    private final RestTournamentSeriesRivalFacade restTournamentSeriesRivalFacade;
 
     @ApiOperation("Get Series by id")
     @GetMapping(path = PATH_GET)
@@ -62,6 +65,14 @@ public class TournamentSeriesController {
     public ResponseEntity<Void> deleteSeries(@PathVariable("series_id") long id,
                                              @ApiIgnore @AuthenticationPrincipal User user) {
         restTournamentSeriesFacade.deleteSeries(id, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiOperation("Delete series rivals (only for orgs)")
+    @DeleteMapping(path = PATH_DELETE_SERIES_RIVAL)
+    public ResponseEntity<Void> deleteSeriesRival(@PathVariable("rival_id") long seriesRivalId,
+                                                  @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentSeriesRivalFacade.deleteSeriesRival(seriesRivalId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

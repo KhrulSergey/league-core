@@ -47,7 +47,23 @@ public interface TournamentMatchRivalService {
      * @param tournamentMatchRival to be deleted
      * @return tournament match rival with updated fields and deleted status
      */
-    TournamentMatchRival deleteMatchRival(TournamentMatchRival tournamentMatchRival);
+    TournamentMatchRival archiveMatchRival(TournamentMatchRival tournamentMatchRival);
+
+    /**
+     * Delete tournament match rival by id
+     *
+     * @param tournamentMatchRival data to delete
+     * @return true if delete successfully or false - if some error occurred
+     */
+    boolean deleteMatchRival(TournamentMatchRival tournamentMatchRival);
+
+    /**
+     * Delete tournament match rival participant by id
+     *
+     * @param tournamentMatchRivalParticipant data to delete
+     * @return true if delete successfully or false - if some error occurred
+     */
+    boolean deleteMatchRivalParticipant(TournamentMatchRivalParticipant tournamentMatchRivalParticipant);
 
     /**
      * Returns sign of tournament match rival existence for specified id.
@@ -56,6 +72,14 @@ public interface TournamentMatchRivalService {
      * @return true is tournament match rival exists, false - if not
      */
     boolean isExistsTournamentMatchRivalById(long id);
+
+    /**
+     * Returns sign of tournament match rival participant existence for specified id.
+     *
+     * @param id for which tournament match rival participant will be find
+     * @return true is tournament match rival participant exists, false - if not
+     */
+    boolean isExistsTournamentMatchRivalParticipantById(long id);
 
     /**
      * Verify tournament match rival info with validation and business check
