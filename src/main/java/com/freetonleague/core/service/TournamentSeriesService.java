@@ -85,4 +85,12 @@ public interface TournamentSeriesService {
      * @return tournament series rival entity or NULL of not found
      */
     TournamentSeriesRival getSeriesRival(long id);
+
+    /**
+     * Delete tournament series rival by id
+     *
+     * @param tournamentSeriesRival data to delete
+     * @return true if delete successfully or false - if some error occurred
+     */
+    boolean deleteSeriesRival(TournamentSeriesRival tournamentSeriesRival);
 }

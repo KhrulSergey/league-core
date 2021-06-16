@@ -224,7 +224,10 @@ public class TournamentServiceImpl implements TournamentService {
                     tournament, user);
             return false;
         }
-        return tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
+        boolean isOrganizer = tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
+        boolean isCreator = tournament.getCreatedBy().equals(user);
+        boolean isAdmin = user.isAdmin();
+        return isOrganizer || isCreator || isAdmin;
     }
 
     private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {

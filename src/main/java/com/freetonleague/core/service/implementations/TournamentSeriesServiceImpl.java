@@ -205,6 +205,24 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         return tournamentSeriesRivalRepository.findById(id).orElse(null);
     }
 
+    /**
+     * Delete tournament series rival by id
+     */
+    @Override
+    public boolean deleteSeriesRival(TournamentSeriesRival tournamentSeriesRival) {
+        if (isNull(tournamentSeriesRival) || isNull(tournamentSeriesRival.getId())) {
+            log.error("!> requesting delete series rival for NULL data (id). Check evoking clients");
+            return false;
+        }
+        if (!this.isExistsSeriesRivalById(tournamentSeriesRival.getId())) {
+            log.error("!> requesting delete series rival for non-existed entry. Check evoking clients");
+            return false;
+        }
+        log.debug("^ trying to delete tournament series rival '{}'", tournamentSeriesRival);
+        tournamentSeriesRivalRepository.delete(tournamentSeriesRival);
+        return true;
+    }
+
     //TODO calculate all winners of series (from 1 to 8 place)
     private TournamentSeriesRival getCalculatedSeriesWinner(TournamentSeries tournamentSeries) {
         Map<TournamentTeamProposal, Long> matchRivalWinnerMap = tournamentSeries.getMatchList().parallelStream()
@@ -266,6 +284,14 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             }
         }
         return true;
+    }
+
+    /**
+     * Returns sign of series rival existence for specified id.
+     */
+    private boolean isExistsSeriesRivalById(long id) {
+        return tournamentSeriesRivalRepository.existsById(id);
+
     }
 
     /**

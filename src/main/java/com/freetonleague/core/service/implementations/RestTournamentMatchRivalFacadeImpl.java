@@ -149,12 +149,35 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
     }
 
     /**
-     * Mark 'deleted' tournament series in DB.
+     * Delete tournament match rival in DB.
      */
     @CanManageTournament
     @Override
-    public TournamentMatchRivalDto deleteMatchRival(TournamentMatchRivalDto tournamentMatchRivalDto) {
-        return null;
+    public void deleteMatchRival(long id, User user) {
+        TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(id);
+        boolean result = tournamentMatchRivalService.deleteMatchRival(tournamentMatchRival);
+        if (!result) {
+            log.debug("^ Tournament match rival with requested id '{}' was not deleted. 'deleteMatchRival' in " +
+                    "RestTournamentMatchRivalFacade request denied", id);
+            throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_MODIFY_ERROR,
+                    "Tournament match rival with requested id " + id + " was not deleted");
+        }
+    }
+
+    /**
+     * Delete tournament match rival participant in DB.
+     */
+    @CanManageTournament
+    @Override
+    public void deleteMatchRivalParticipant(long id, User user) {
+        TournamentMatchRivalParticipant matchRivalParticipant = this.getVerifiedMatchRivalParticipantById(id);
+        boolean result = tournamentMatchRivalService.deleteMatchRivalParticipant(matchRivalParticipant);
+        if (!result) {
+            log.debug("^ Tournament match rival participant with requested id '{}' was not deleted. 'deleteMatchRivalParticipant' in " +
+                    "RestTournamentMatchRivalFacade request denied", id);
+            throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_PARTICIPANT_MODIFY_ERROR,
+                    "Tournament match rival participant with requested id " + id + " was not deleted");
+        }
     }
 
     /**
@@ -187,7 +210,7 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                     matchRivalDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
-        TournamentMatchRival tournamentMatchRival = null;
+        TournamentMatchRival tournamentMatchRival;
         //check if match rival already existed
         if (nonNull(matchRivalDto.getId())) {
             tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId());
