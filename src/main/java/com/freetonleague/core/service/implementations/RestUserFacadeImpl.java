@@ -1,5 +1,6 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
@@ -90,9 +91,12 @@ public class RestUserFacadeImpl implements RestUserFacade {
 
     @Override
     @Transactional
-    public UserPublicDto updateUserInfoByFilter(UserInfoFilter filter, User user) {
-        userMapper.applyChanges(user, filter);
-        return userMapper.toPubicDto(user);
+    public UserDto updateUserInfoByFilter(UserInfoFilter filter, User user) {
+        User selectedUser = userService.findByUsername(user.getUsername());
+
+        userMapper.applyChanges(selectedUser, filter);
+
+        return userMapper.toDto(selectedUser);
     }
 
 }

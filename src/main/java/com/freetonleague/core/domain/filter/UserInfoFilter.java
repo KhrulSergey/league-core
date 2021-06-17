@@ -1,12 +1,12 @@
 package com.freetonleague.core.domain.filter;
 
 import com.freetonleague.core.domain.enums.UserParameterType;
-import lombok.Getter;
+import lombok.Data;
 
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
-@Getter
+@Data
 public class UserInfoFilter {
 
     @NotNull
