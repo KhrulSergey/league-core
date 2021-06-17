@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * View of user proposals to Universal docket (lists)
+ * View of user proposals to docket (Universal lists)
  */
 @SuperBuilder
 @NoArgsConstructor
@@ -36,6 +36,8 @@ public class DocketUserProposalDto {
     private Long docketId;
 
     private String textLabelAnswer;
+
+    private Double participationFee;
 
     @Builder.Default
     @NotNull

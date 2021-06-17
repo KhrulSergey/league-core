@@ -49,14 +49,12 @@ public interface RestDocketProposalFacade {
     /**
      * Edit user proposal to docket (only state)
      *
-     * @param docketId          identify of docket
-     * @param leagueId          identify of user
-     * @param userProposalId    identify of user proposal
-     * @param userProposalState new status of user proposal
+     * @param userProposalId           identify of user proposal
+     * @param currentUserProposalState new status of user proposal
      * @return Modified user proposal
      */
-    DocketUserProposalDto editProposalToDocket(Long docketId, String leagueId, Long userProposalId,
-                                               ParticipationStateType userProposalState, User user);
+    DocketUserProposalDto editProposalToDocket(Long userProposalId,
+                                               ParticipationStateType currentUserProposalState, User currentUser);
 
     /**
      * Quit user from docket

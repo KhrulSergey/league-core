@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.DocketStatusType;
+import com.freetonleague.core.domain.enums.DocketSystemType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -22,6 +23,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true, of = {"name", "status"})
 @Getter
 @Setter
 @Entity
@@ -63,11 +65,26 @@ public class Docket extends ExtendedBaseEntity {
     @Column(name = "access_type")
     private AccessType accessType = AccessType.FREE_ACCESS;
 
+    @Builder.Default
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(name = "system_type")
+    private DocketSystemType systemType = DocketSystemType.DEFAULT;
+
     @Column(name = "image_url")
     private String imageUrl;
 
+    /**
+     * Default or minimum participation fee
+     */
     @Column(name = "participation_fee")
     private Double participationFee;
+
+    /**
+     * Maximum participation fee
+     */
+    @Column(name = "max_participation_fee")
+    private Double maxParticipationFee;
 
     @Column(name = "max_proposal_count")
     private Integer maxProposalCount;

@@ -7,7 +7,10 @@ import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.Docket;
 import com.freetonleague.core.domain.model.DocketUserProposal;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.DocketManageException;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.DocketProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageDepositFinUnit;
 import com.freetonleague.core.security.permissions.CanManageDocket;
@@ -24,6 +27,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
@@ -47,7 +51,8 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
     public DocketUserProposalDto getProposalByUserAndDocket(long docketId, String leagueId) {
         User user = restUserFacade.getVerifiedUserByLeagueId(leagueId);
         Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
-        DocketUserProposal docketUserProposal = docketProposalService.getProposalByUserAndDocket(user, docket);
+        List<DocketUserProposal> docketUserProposalList = docketProposalService.getProposalByUserAndDocket(user, docket);
+        DocketUserProposal docketUserProposal = nonNull(docketUserProposalList) ? docketUserProposalList.get(0) : null;
         return docketProposalMapper.toDto(docketUserProposal);
     }
 
@@ -91,14 +96,16 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
 
         Docket docket = newUserProposal.getDocket();
 
-        //check if proposal already existed
-        DocketUserProposal existedUserProposal = docketProposalService.getProposalByUserAndDocket(
-                newUserProposal.getUser(), docket);
-        if (nonNull(existedUserProposal)) {
-            log.warn("~ forbiddenException for create duplicate proposal from user '{}'. Already existed proposal.id '{}'.",
-                    newUserProposal.getUser(), existedUserProposal.getId());
-            throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_EXIST_ERROR,
-                    "Duplicate proposal from user to the one docket is prohibited. Request rejected.");
+        //check for proposal duplicates
+        if (docket.getSystemType().isProposalDuplicatesProhibited()) {
+            List<DocketUserProposal> existedUserProposal = docketProposalService.getProposalByUserAndDocket(
+                    newUserProposal.getUser(), docket);
+            if (nonNull(existedUserProposal)) {
+                log.warn("~ forbiddenException for create duplicate proposal from user '{}'. Already existed proposal.id '{}'.",
+                        newUserProposal.getUser(), existedUserProposal.get(0).getId());
+                throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_EXIST_ERROR,
+                        "Duplicate proposal from user to the one docket is prohibited. Request rejected.");
+            }
         }
 
         //check status of docket
@@ -128,6 +135,22 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
             }
         }
 
+        //validate and define participant fee amount
+        Double defaultParticipantFee = docket.getParticipationFee();
+        if (docket.getSystemType().isCustomParticipantFeeEnabled()) {
+            Double customParticipantFee = newUserProposal.getParticipationFee();
+            if (customParticipantFee < defaultParticipantFee || customParticipantFee > docket.getMaxParticipationFee()) {
+                log.debug("^ forbiddenException for create new proposal for user '{}' to docket.id '{}'. " +
+                                "Specified participant fee '{}' in user's proposal to Docket exceed limits from {} to {}",
+                        userProposalDto.getLeagueId(), docket.getId(), customParticipantFee, defaultParticipantFee,
+                        docket.getMaxParticipationFee());
+                throw new ValidationException(ExceptionMessages.DOCKET_USER_PROPOSAL_VALIDATION_ERROR, "participationFee",
+                        "parameter 'participationFee' is exceed Docket participation fee limits ");
+            }
+        } else {
+            newUserProposal.setParticipationFee(defaultParticipantFee);
+        }
+
         if (docket.hasTextLabel() && !newUserProposal.hasTextLabelAnswer()) {
             log.warn("~ parameter 'textLabelAnswer' is not set for proposal to createProposalToDocket");
             throw new ValidationException(ExceptionMessages.DOCKET_USER_PROPOSAL_VALIDATION_ERROR, "textLabelAnswer",
@@ -150,25 +173,13 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
      */
     @CanManageDocket
     @Override
-    public DocketUserProposalDto editProposalToDocket(Long docketId, String leagueId, Long userProposalId, ParticipationStateType currentUserProposalState, User currentUser) {
+    public DocketUserProposalDto editProposalToDocket(Long userProposalId, ParticipationStateType currentUserProposalState, User currentUser) {
         //check if user is org
-        DocketUserProposal userProposal;
+        DocketUserProposal userProposal = this.getVerifiedUserProposalById(userProposalId);
 
-        if (nonNull(userProposalId)) {
-            userProposal = this.getVerifiedUserProposalById(userProposalId);
-        } else if (nonNull(leagueId) && nonNull(docketId)) {
-            User user = restUserFacade.getVerifiedUserByLeagueId(leagueId);
-            Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
-            userProposal = docketProposalService.getProposalByUserAndDocket(user, docket);
-        } else {
-            log.warn("~ forbiddenException for modify proposal to docket for user '{}'. " +
-                    "No valid parameters of user proposal to docket was specified", userProposalId);
-            throw new TeamParticipantManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
-                    "No valid parameters of user proposal to docket was specified. Request rejected.");
-        }
         if (isNull(userProposal)) {
-            log.debug("^ User proposal to docket with requested parameters docketId '{}', leagueId '{}', userProposalId '{}' was not found. " +
-                    "'editProposalToDocket' in RestDocketProposalFacade request denied", docketId, leagueId, userProposalId);
+            log.debug("^ User proposal to docket with requested parameters userProposalId '{}' was not found. " +
+                    "'editProposalToDocket' in RestDocketProposalFacade request denied", userProposalId);
             throw new TeamManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR, "User proposal to docket with requested id " + userProposalId + " was not found");
         }
 
