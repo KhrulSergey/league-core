@@ -92,8 +92,11 @@ public class RestUserFacadeImpl implements RestUserFacade {
     @Override
     @Transactional
     public UserDto updateUserInfoByFilter(UserInfoFilter filter, User user) {
-        userMapper.applyChanges(user, filter);
-        return userMapper.toDto(user);
+        User selectedUser = userService.findByUsername(user.getUsername());
+
+        userMapper.applyChanges(selectedUser, filter);
+
+        return userMapper.toDto(selectedUser);
     }
 
 }

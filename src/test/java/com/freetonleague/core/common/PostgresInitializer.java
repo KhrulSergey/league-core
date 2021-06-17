@@ -11,6 +11,7 @@ public class PostgresInitializer implements ApplicationContextInitializer<Config
     private final JdbcDatabaseContainer<?> POSTGRESQL_CONTAINER = new PostgreSQLContainerProvider().newInstance("11.5-alpine");
 
     public PostgresInitializer() {
+        POSTGRESQL_CONTAINER.withDatabaseName("league_core");
         POSTGRESQL_CONTAINER.start();
     }
 
