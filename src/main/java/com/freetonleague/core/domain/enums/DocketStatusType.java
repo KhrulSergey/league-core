@@ -21,7 +21,7 @@ public enum DocketStatusType {
     }
 
     /**
-     * Returns "active" statuses for tournaments
+     * Returns "active" statuses for dockets
      */
     public static final List<DocketStatusType> activeStatusList = List.of(
             DocketStatusType.CREATED,

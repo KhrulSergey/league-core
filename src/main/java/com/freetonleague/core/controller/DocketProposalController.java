@@ -72,14 +72,12 @@ public class DocketProposalController {
         return new ResponseEntity<>(restDocketProposalFacade.createProposalToDocket(userProposalDto, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Change user proposal to docket by userProposalId or by docketId + leagueId (available edit only state, for orgs)")
+    @ApiOperation("Change user proposal to docket by userProposalId (available edit only state, for orgs)")
     @PutMapping(path = PATH_EDIT_USER_PROPOSAL)
-    public ResponseEntity<DocketUserProposalDto> editUserProposal(@RequestParam(value = "docket_id", required = false) Long docketId,
-                                                                  @RequestParam(value = "league_id", required = false) String leagueId,
-                                                                  @RequestParam(value = "user_poposal_id", required = false) Long userProposalId,
+    public ResponseEntity<DocketUserProposalDto> editUserProposal(@RequestParam(value = "user_poposal_id", required = false) Long userProposalId,
                                                                   @RequestParam(value = "user_poposal_state") ParticipationStateType userProposalState,
                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restDocketProposalFacade.editProposalToDocket(docketId, leagueId, userProposalId, userProposalState, user), HttpStatus.OK);
+        return new ResponseEntity<>(restDocketProposalFacade.editProposalToDocket(userProposalId, userProposalState, user), HttpStatus.OK);
     }
 
 //    @ApiOperation("Quit user from docket by docket and user id")

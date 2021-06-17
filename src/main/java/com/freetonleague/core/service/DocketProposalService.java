@@ -7,6 +7,8 @@ import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface DocketProposalService {
 
     /**
@@ -24,7 +26,7 @@ public interface DocketProposalService {
      * @param docket info to search proposal
      * @return docket proposal from user
      */
-    DocketUserProposal getProposalByUserAndDocket(User user, Docket docket);
+    List<DocketUserProposal> getProposalByUserAndDocket(User user, Docket docket);
 
     /**
      * Returns list of all user proposal to docket filtered by requested params

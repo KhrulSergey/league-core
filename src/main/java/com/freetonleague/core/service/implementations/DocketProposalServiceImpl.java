@@ -50,7 +50,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      * Returns user proposal to docket by user and docket.
      */
     @Override
-    public DocketUserProposal getProposalByUserAndDocket(User user, Docket docket) {
+    public List<DocketUserProposal> getProposalByUserAndDocket(User user, Docket docket) {
         if (isNull(user) || isNull(docket)) {
             log.error("!> requesting getProposalByUserAndDocket for NULL user '{}' or NULL docket '{}'. Check evoking clients",
                     user, docket);
@@ -58,7 +58,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
         }
         log.debug("^ trying to get uer proposal to docket for user: '{}' and docket '{}'",
                 user.getId(), docket.getId());
-        return docketProposalRepository.findByUserAndDocket(user, docket);
+        return docketProposalRepository.findAllByUserAndDocket(user, docket);
     }
 
     /**
@@ -172,8 +172,11 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      */
     @Override
     public double calculateUserParticipationFee(DocketUserProposal userProposal) {
-        Docket docket = userProposal.getDocket();
-        return nonNull(docket.getParticipationFee()) ? docket.getParticipationFee() : 0.0;
+        Double participationFee = userProposal.getParticipationFee();
+        if (isNull(participationFee)) {
+            participationFee = userProposal.getDocket().getParticipationFee();
+        }
+        return nonNull(participationFee) ? participationFee : 0.0;
     }
 
     private boolean isExistsDocketUserProposalById(long id) {
