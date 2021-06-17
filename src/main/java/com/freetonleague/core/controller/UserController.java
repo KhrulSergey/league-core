@@ -1,5 +1,6 @@
 package com.freetonleague.core.controller;
 
+import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
@@ -23,7 +24,6 @@ public class UserController {
 
     public static final String BASE_PATH = "/api/user";
     public static final String PATH_GET = "/{league_id}";
-    public static final String PATH_PUT = "/";
 
     private final RestUserFacade restFacade;
 
@@ -34,9 +34,9 @@ public class UserController {
         return new ResponseEntity<>(restFacade.getUserByLeagueId(leagueId, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Update user data")
-    @PutMapping(path = PATH_PUT)
-    public ResponseEntity<UserPublicDto> updateSelfInfo(
+    @ApiOperation("Update user self info")
+    @PutMapping
+    public ResponseEntity<UserDto> updateSelfInfo(
             @Valid @RequestBody UserInfoFilter filter,
             @ApiIgnore @AuthenticationPrincipal User user
     ) {
