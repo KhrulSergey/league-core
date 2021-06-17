@@ -225,10 +225,9 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
             tournamentMatchRival.setMatchIndicator(GameIndicatorConverter.convertAndValidate(matchRivalDto.getMatchIndicator()));
             // check if matchRivalParticipants is set and verify them
             if (isNotEmpty(matchRivalDto.getRivalParticipantList())) {
-                TournamentMatchRival finalTournamentMatchRival = tournamentMatchRival;
                 Set<TournamentMatchRivalParticipant> matchRivalParticipantList = matchRivalDto
                         .getRivalParticipantList().parallelStream()
-                        .map(p -> this.getVerifiedTournamentMatchRivalParticipantByDto(p, finalTournamentMatchRival))
+                        .map(p -> this.getVerifiedTournamentMatchRivalParticipantByDto(p, tournamentMatchRival))
                         .collect(Collectors.toSet());
                 tournamentMatchRival.setRivalParticipantList(matchRivalParticipantList);
             }

@@ -47,6 +47,12 @@ public class DocketUserProposal extends BaseEntity {
     private String textLabelAnswer;
 
     /**
+     * Specified by user or system-set participation fee
+     */
+    @Column(name = "participation_fee")
+    private Double participationFee;
+
+    /**
      * State of user participation in docket
      */
     @NotNull

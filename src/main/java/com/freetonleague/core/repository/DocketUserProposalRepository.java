@@ -15,7 +15,7 @@ import java.util.List;
 public interface DocketUserProposalRepository extends JpaRepository<DocketUserProposal, Long>,
         JpaSpecificationExecutor<DocketUserProposal> {
 
-    DocketUserProposal findByUserAndDocket(User user, Docket docket);
+    List<DocketUserProposal> findAllByUserAndDocket(User user, Docket docket);
 
     Page<DocketUserProposal> findAllByDocketAndStateIn(@PageableDefault Pageable pageable,
                                                        Docket docket, List<ParticipationStateType> state);
