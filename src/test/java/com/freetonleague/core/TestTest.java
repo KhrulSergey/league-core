@@ -5,6 +5,7 @@ import com.freetonleague.core.controller.UserController;
 import com.freetonleague.core.domain.enums.UserParameterType;
 import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.Session;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.SessionRepository;
 import com.freetonleague.core.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
@@ -38,8 +39,10 @@ public class TestTest extends IntegrationTest {
 
     @Test
     public void test() {
+        User user = userRepository.findAll().stream().findFirst().get();
+
         sessionRepository.save(Session.builder()
-                .user(userRepository.findAll().stream().findFirst().get())
+                .user(user)
                 .authProvider("CORE")
                 .token(UUID.randomUUID().toString())
                 .expiration(LocalDateTime.now().plusHours(1))
@@ -60,6 +63,10 @@ public class TestTest extends IntegrationTest {
         );
 
         Assertions.assertTrue(responseEntity.getStatusCode().is2xxSuccessful());
+
+        User userAfterParametersUpdate = userRepository.findByUsername(user.getUsername());
+
+        Assertions.assertEquals(userAfterParametersUpdate.getParameters().size(), 1);
     }
 
 }
