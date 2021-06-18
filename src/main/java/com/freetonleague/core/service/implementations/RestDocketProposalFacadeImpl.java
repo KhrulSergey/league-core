@@ -31,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,7 +52,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         User user = restUserFacade.getVerifiedUserByLeagueId(leagueId);
         Docket docket = restDocketFacade.getVerifiedDocketById(docketId);
         List<DocketUserProposal> docketUserProposalList = docketProposalService.getProposalByUserAndDocket(user, docket);
-        DocketUserProposal docketUserProposal = nonNull(docketUserProposalList) ? docketUserProposalList.get(0) : null;
+        DocketUserProposal docketUserProposal = isNotEmpty(docketUserProposalList) ? docketUserProposalList.get(0) : null;
         return docketProposalMapper.toDto(docketUserProposal);
     }
 
@@ -100,7 +100,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
         if (docket.getSystemType().isProposalDuplicatesProhibited()) {
             List<DocketUserProposal> existedUserProposal = docketProposalService.getProposalByUserAndDocket(
                     newUserProposal.getUser(), docket);
-            if (nonNull(existedUserProposal)) {
+            if (isNotEmpty(existedUserProposal)) {
                 log.warn("~ forbiddenException for create duplicate proposal from user '{}'. Already existed proposal.id '{}'.",
                         newUserProposal.getUser(), existedUserProposal.get(0).getId());
                 throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_EXIST_ERROR,
