@@ -1,17 +1,24 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
+import com.freetonleague.core.config.properties.AppUserProperties;
+import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.EventOperationType;
 import com.freetonleague.core.domain.enums.EventProducerModelType;
+import com.freetonleague.core.domain.enums.TransactionTemplateType;
+import com.freetonleague.core.domain.enums.TransactionType;
 import com.freetonleague.core.domain.enums.UserStatusType;
+import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.EventService;
 import com.freetonleague.core.service.FinancialClientService;
 import com.freetonleague.core.service.UserEventService;
 import com.freetonleague.core.service.UserService;
+import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -33,6 +40,8 @@ public class UserEventServiceImpl implements UserEventService {
     private final UserService userService;
     private final LeagueIdClientService leagueIdClientService;
     private final FinancialClientService financialClientService;
+    private final FinancialUnitService financialUnitService;
+    private final AppUserProperties appUserProperties;
 
     private final Set<UUID> cachedInitiatedUserLeagueId = Collections.synchronizedSet(new HashSet<>());
 
@@ -162,8 +171,20 @@ public class UserEventServiceImpl implements UserEventService {
     public void processUserStatusChange(User user, UserStatusType newUserStatusType) {
         log.debug("^ new status changed for user '{}' with new status '{}'.", user, newUserStatusType);
         if (newUserStatusType.isCreated()) {
-            financialClientService.createAccountByHolderInfo(user.getLeagueId(),
+            AccountInfoDto accountInfoDto = financialClientService.createAccountByHolderInfo(user.getLeagueId(),
                     AccountHolderType.USER, user.getUsername());
+
+            if (appUserProperties.getRegisterBonus().getUtmSource().equals(user.getUtmSource())) {
+                AccountTransaction accountTransaction = AccountTransaction.builder()
+                        .amount(appUserProperties.getRegisterBonus().getAmount())
+                        .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(accountInfoDto.getGUID())))
+                        .transactionType(TransactionType.DEPOSIT)
+                        .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
+                        .status(AccountTransactionStatusType.FINISHED)
+                        .build();
+
+                financialUnitService.createTransaction(accountTransaction);
+            }
         }
     }
 
