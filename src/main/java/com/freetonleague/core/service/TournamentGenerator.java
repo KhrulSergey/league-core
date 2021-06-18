@@ -1,10 +1,7 @@
 package com.freetonleague.core.service;
 
 
-import com.freetonleague.core.domain.model.Tournament;
-import com.freetonleague.core.domain.model.TournamentMatch;
-import com.freetonleague.core.domain.model.TournamentRound;
-import com.freetonleague.core.domain.model.TournamentSeries;
+import com.freetonleague.core.domain.model.*;
 
 import java.util.List;
 
@@ -17,16 +14,26 @@ public interface TournamentGenerator {
      * @param tournament to generate series for
      * @return tournament series list with embedded list of match prototypes
      */
-    List<TournamentRound> generateRoundsForTournament(Tournament tournament);
+    List<TournamentRound> initiateTournamentBracketsWithRounds(Tournament tournament);
 
     /**
-     * Compose series, matches and rivals for tournament round. Look to parents for series in specified tournamentRound and compose rivals.
-     * Tournament Round should open.
+     * Compose additional tournament settings based upon tournament template.
+     * e.g. Generate default round settings from embedded tournament settings
      *
-     * @param tournamentRound to compose series for
+     * @param tournament to compose settings
+     * @return supplemented settings for specified tournament
+     */
+    TournamentSettings composeAdditionalTournamentSettings(Tournament tournament);
+
+    /**
+     * Compose series, matches and rivals for next opened tournament round for specified tournament.
+     * Look to parents for series in opened tournamentRound and compose rivals.
+     * Tournament should have opened Round or available to create new open one.
+     *
+     * @param tournament to compose new opened round with series
      * @return tournament round with embedded list of series and matches
      */
-    TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound);
+    TournamentRound composeNextRoundForTournament(Tournament tournament);
 
     /**
      * Generate new match (OMT) for series.

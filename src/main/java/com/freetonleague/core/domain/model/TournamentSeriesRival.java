@@ -4,10 +4,7 @@ import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -24,6 +21,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true, of = {"status"})
 @Getter
 @Setter
 @Entity
@@ -32,14 +30,15 @@ import java.util.List;
 @SequenceGenerator(name = "base_entity_seq", sequenceName = "tournament_series_rivals_id_seq", schema = "public", allocationSize = 1)
 public class TournamentSeriesRival extends ExtendedBaseEntity {
 
-
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "series_id")
     private TournamentSeries tournamentSeries;
     /**
      * Reference to team on tournament
      */
-    @ManyToOne(fetch = FetchType.EAGER)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "team_proposal_id")
     private TournamentTeamProposal teamProposal;
 

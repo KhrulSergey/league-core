@@ -1,6 +1,8 @@
 package com.freetonleague.core.service;
 
+import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserPublicDto;
+import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
 
 /**
@@ -26,4 +28,7 @@ public interface RestUserFacade {
      * Getting user by leagueId with privacy check
      */
     User getVerifiedUserByLeagueId(String leagueId);
+
+    UserDto updateUserInfoByFilter(UserInfoFilter filter, User user);
+
 }

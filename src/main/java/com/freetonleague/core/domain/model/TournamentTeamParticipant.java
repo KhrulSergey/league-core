@@ -12,7 +12,7 @@ import javax.persistence.*;
 /**
  * Team participants used in proposal to tournament
  */
-@EqualsAndHashCode(callSuper = true, exclude = "tournamentTeamProposal")
+@EqualsAndHashCode(callSuper = true)
 @Getter
 @Setter
 @NoArgsConstructor
@@ -26,6 +26,7 @@ public class TournamentTeamParticipant extends BaseEntity {
     /**
      * Reference to Team Proposal to participate in tournament
      */
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "tournament_team_proposal_id", unique = true)
     private TournamentTeamProposal tournamentTeamProposal;

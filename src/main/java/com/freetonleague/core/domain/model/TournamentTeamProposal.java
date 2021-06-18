@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.TournamentParticipantType;
 import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -20,6 +21,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 
 /**
@@ -69,10 +71,18 @@ public class TournamentTeamProposal extends BaseEntity {
     private TournamentTeamType type;
 
     /**
+     * Type of participant that apply to tournament
+     */
+    @NotNull
+    @Column(name = "participant_type")
+    @Enumerated(EnumType.STRING)
+    private TournamentParticipantType participantType;
+
+    /**
      * Team participant list with their role (status) in tournament
      */
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentTeamProposal", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "tournamentTeamProposal", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 
     @Transient
@@ -94,5 +104,18 @@ public class TournamentTeamProposal extends BaseEntity {
 
     public boolean isStateChanged() {
         return !this.state.equals(this.prevState);
+    }
+
+    @Override
+    public String toString() {
+        String teamId = nonNull(team) ? "team.id=" + team.getId() : "";
+
+        return "TournamentTeamProposal{" +
+                teamId +
+                ", state=" + state +
+                ", prevState=" + prevState +
+                ", type=" + type +
+                ", participantType=" + participantType +
+                '}';
     }
 }

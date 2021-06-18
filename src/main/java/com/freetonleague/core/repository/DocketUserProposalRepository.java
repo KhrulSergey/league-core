@@ -15,12 +15,12 @@ import java.util.List;
 public interface DocketUserProposalRepository extends JpaRepository<DocketUserProposal, Long>,
         JpaSpecificationExecutor<DocketUserProposal> {
 
-    DocketUserProposal findByUserAndDocket(User user, Docket docket);
+    List<DocketUserProposal> findAllByUserAndDocket(User user, Docket docket);
 
     Page<DocketUserProposal> findAllByDocketAndStateIn(@PageableDefault Pageable pageable,
                                                        Docket docket, List<ParticipationStateType> state);
 
-    List<DocketUserProposal> findAllByDocketAndState(Docket docket, ParticipationStateType state);
+    Page<DocketUserProposal> findAllByDocketAndState(@PageableDefault Pageable pageable, Docket docket, ParticipationStateType state);
 
     Integer countByDocketAndState(Docket docket, ParticipationStateType state);
 }

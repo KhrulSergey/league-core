@@ -19,6 +19,11 @@ public interface TournamentEventService {
     void processTournamentStatusChange(Tournament tournament, TournamentStatusType newTournamentMatchStatus);
 
     /**
+     * Process tournament brackets was generated
+     */
+    void processTournamentBracketsChanged(Tournament tournament);
+
+    /**
      * Process match status changing
      */
     void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus);

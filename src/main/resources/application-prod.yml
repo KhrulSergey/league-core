@@ -21,7 +21,7 @@ config:
     url: https://broxusapi.beta.freetonleague.com
     token: 1c7u81TIf7ubap02orukukaL4Oz4akofun
   kafka:
-    bootstrapAddress: kafka:9093
+    bootstrap-address: kafka:9093
     notifications:
       start-debug: false
       topic-name: NOTIFICATION

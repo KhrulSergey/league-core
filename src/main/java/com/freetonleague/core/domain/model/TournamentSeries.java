@@ -2,10 +2,7 @@ package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -22,6 +19,7 @@ import static java.util.Objects.nonNull;
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
+@ToString(callSuper = true, of = {"name", "status"})
 @Getter
 @Setter
 @Entity
@@ -67,10 +65,10 @@ public class TournamentSeries extends ExtendedBaseEntity {
     private TournamentStatusType prevStatus;
 
     @EqualsAndHashCode.Exclude
-    @ManyToMany(targetEntity = TournamentSeries.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "tournament_series_parents",
-            joinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"),
-            inverseJoinColumns = @JoinColumn(name = "series_id", referencedColumnName = "id"))
+            joinColumns = @JoinColumn(name = "child_series_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"))
     private List<TournamentSeries> parentSeriesList;
 
     @Column(name = "start_planned_at")

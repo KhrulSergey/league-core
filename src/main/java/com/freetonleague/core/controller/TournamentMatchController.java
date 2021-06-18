@@ -35,6 +35,8 @@ public class TournamentMatchController {
     public static final String PATH_GET_LIST_BY_SERIES = "/list-by-series/{series_id}";
 
     public static final String PATH_RIVAL_PARTICIPANT_EDIT = "{match_id}/rival/{rival_id}/participants";
+    public static final String PATH_RIVAL_DELETE = "/rival/{rival_id}";
+    public static final String PATH_RIVAL_PARTICIPANT_DELETE = "/rival/participant/{rival_participant_id}";
 
     private final RestTournamentMatchRivalFacade restTournamentMatchRivalFacade;
     private final RestTournamentMatchFacade restTournamentMatchFacade;
@@ -85,5 +87,21 @@ public class TournamentMatchController {
                                                                              @RequestBody Set<TournamentTeamParticipantDto> rivalParticipantList,
                                                                              @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentMatchRivalFacade.changeActiveMatchRivalParticipants(matchId, rivalId, rivalParticipantList, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Delete match rival (only for orgs)")
+    @DeleteMapping(path = PATH_RIVAL_DELETE)
+    public ResponseEntity<Void> deleteMatchRival(@PathVariable("rival_id") long matchRivalId,
+                                                 @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentMatchRivalFacade.deleteMatchRival(matchRivalId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiOperation("Delete match rival participant (only for orgs)")
+    @DeleteMapping(path = PATH_RIVAL_PARTICIPANT_DELETE)
+    public ResponseEntity<Void> deleteMatchRivalParticipant(@PathVariable("rival_participant_id") long matchRivalParticipantId,
+                                                            @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentMatchRivalFacade.deleteMatchRivalParticipant(matchRivalParticipantId, user);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

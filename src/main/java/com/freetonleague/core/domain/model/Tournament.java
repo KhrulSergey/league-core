@@ -1,10 +1,10 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.enums.AccessType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.enums.TournamentSystemType;
+import com.freetonleague.core.domain.enums.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -18,6 +18,7 @@ import static java.util.Objects.isNull;
 
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
+@ToString(callSuper = true, of = {"name", "status"})
 @SuperBuilder
 @Getter
 @Setter
@@ -85,6 +86,14 @@ public class Tournament extends ExtendedBaseEntity {
     private TournamentSystemType systemType;
 
     /**
+     * Type of participant that accessible to participate in tournament
+     */
+    @NotNull
+    @Column(name = "participant_type")
+    @Enumerated(EnumType.STRING)
+    private TournamentParticipantType participantType;
+
+    /**
      * Prototype for ref to Bank-Account entity for current tournament
      */
     @Transient
@@ -110,7 +119,6 @@ public class Tournament extends ExtendedBaseEntity {
     private String discordChannelId;
 
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @Transient
     private String logoRawFile;
 
@@ -131,6 +139,11 @@ public class Tournament extends ExtendedBaseEntity {
 
     @Column(name = "finished_at")
     private LocalDateTime finishedDate;
+
+    @Getter
+    @Type(type = "jsonb")
+    @Column(name = "mandatory_user_parameters", columnDefinition = "jsonb")
+    private List<UserParameterType> mandatoryUserParameters;
 
     //Detailed settings
     @EqualsAndHashCode.Exclude

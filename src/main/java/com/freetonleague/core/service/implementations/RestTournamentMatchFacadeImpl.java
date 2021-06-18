@@ -9,7 +9,10 @@ import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.mapper.TournamentMatchMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.RestTournamentMatchFacade;
@@ -57,7 +60,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
      */
     @Override
     public TournamentMatchDto getMatch(long id, User user) {
-        return tournamentMatchMapper.toDto(this.getVerifiedMatchById(id, user, false));
+        return tournamentMatchMapper.toDto(this.getVerifiedMatchById(id));
     }
 
     /**
@@ -79,7 +82,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
         tournamentMatchDto.setId(null);
         tournamentMatchDto.setStatus(TournamentStatusType.CREATED);
 
-        TournamentMatch tournamentMatch = this.getVerifiedTournamentMatchByDto(tournamentMatchDto, user, true);
+        TournamentMatch tournamentMatch = this.getVerifiedTournamentMatchByDto(tournamentMatchDto);
         tournamentMatch = tournamentMatchService.addMatch(tournamentMatch);
 
         if (isNull(tournamentMatch)) {
@@ -101,7 +104,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "tournamentMatchDto.id",
                     "parameter 'tournamentMatchDto.id' is not match specified id in parameters for editMatch");
         }
-        TournamentMatch tournamentMatch = this.getVerifiedTournamentMatchByDto(tournamentMatchDto, user, true);
+        TournamentMatch tournamentMatch = this.getVerifiedTournamentMatchByDto(tournamentMatchDto);
 
         if (tournamentMatch.getStatus().isDeleted()) {
             log.warn("~ tournament match deleting was declined in editMatch. This operation should be done with specific method.");
@@ -133,7 +136,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
     @CanManageTournament
     @Override
     public TournamentMatchDto deleteMatch(long matchId, User user) {
-        TournamentMatch tournamentMatch = this.getVerifiedMatchById(matchId, user, true);
+        TournamentMatch tournamentMatch = this.getVerifiedMatchById(matchId);
         tournamentMatch = tournamentMatchService.deleteMatch(tournamentMatch);
 
         if (isNull(tournamentMatch)) {
@@ -148,35 +151,28 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
      * Returns tournament match by DTO, with validation, business logic and user with privacy check
      */
     @Override
-    public TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto, User user, boolean checkUser) {
-        if (checkUser && isNull(user)) {
-            log.debug("^ user is not authenticate. 'addTournament' request denied");
-            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'addTournament' request denied");
-        }
+    public TournamentMatch getVerifiedTournamentMatchByDto(TournamentMatchDto tournamentMatchDto) {
 
         if (isNull(tournamentMatchDto)) {
             log.warn("~ parameter 'tournamentMatchDto' is NULL for getVerifiedTournamentMatchByDto");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "tournamentSeriesDto",
                     "parameter 'tournamentMatchDto' is not set for get or modify tournament match");
         }
-        if (isNull(tournamentMatchDto.getTournamentSeriesId())) {
-            log.warn("~ parameter 'tournament series id' is not set in tournamentMatchDto for getVerifiedTournamentMatchByDto");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "tournament series id",
-                    "parameter 'tournament series id' is not set in tournamentMatchDto for get or modify tournament series");
-        }
-        TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(
-                tournamentMatchDto.getTournamentSeriesId());
-
         Set<ConstraintViolation<TournamentMatchDto>> settingsViolations = validator.validate(tournamentMatchDto);
         if (!settingsViolations.isEmpty()) {
             log.debug("^ transmitted tournament match dto: '{}' have constraint violations: '{}'",
                     tournamentMatchDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
+        TournamentMatch tournamentMatch = tournamentMatchMapper.fromDto(tournamentMatchDto);
+
+        //check and set series to match with verification
+        TournamentSeries tournamentSeries = restTournamentSeriesFacade.getVerifiedSeriesById(
+                tournamentMatchDto.getTournamentSeriesId());
         //Check existence of specified by id of tournament match and it's status
         if (nonNull(tournamentMatchDto.getId())) {
             TournamentMatch existedTournamentMatch =
-                    this.getVerifiedMatchById(tournamentMatchDto.getId(), user, false);
+                    this.getVerifiedMatchById(tournamentMatchDto.getId());
             if (!existedTournamentMatch.getTournamentSeries().equals(tournamentSeries)) {
                 log.warn("~ parameter 'tournamentMatchDto.tournamentSeriesId' is not equals TournamentSeries that was saved previously in DB. " +
                         "Request denied in getVerifiedTournamentMatchByDto");
@@ -185,27 +181,44 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
                                 "Request denied in getVerifiedTournamentMatchByDto");
             }
         }
-        TournamentMatch tournamentMatch = tournamentMatchMapper.fromDto(tournamentMatchDto);
         tournamentMatch.setTournamentSeries(tournamentSeries);
 
-        // check and compose match rival winner (modify only WonPlaceInMatch for rival)
-        TournamentMatchRivalDto matchRivalWinnerDto = tournamentMatchDto.getMatchWinner();
-        TournamentMatchRival matchRivalWinner = null;
-        if (nonNull(matchRivalWinnerDto)) {
-            matchRivalWinnerDto.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
-            matchRivalWinner = this.getVerifiedMatchRivalWinnerByDto(matchRivalWinnerDto);
-        }
-        tournamentMatch.setMatchWinner(matchRivalWinner);
-
-        // check and compose match rival list (modify only WonPlaceInMatch for rival)
+        // check and compose match rival list
         List<TournamentMatchRivalDto> tournamentMatchRivalDtoList = tournamentMatchDto.getMatchRivalList();
         List<TournamentMatchRival> tournamentMatchRivalList = null;
         if (isNotEmpty(tournamentMatchRivalDtoList)) {
             tournamentMatchRivalList = tournamentMatchRivalDtoList.parallelStream()
-                    .map(this::getVerifiedMatchRivalWinnerByDto)
+                    .map(restTournamentMatchRivalFacade::getVerifiedMatchRivalByDto)
+                    .map(rival -> restTournamentMatchRivalFacade.setGameIndicatorMultipliersToMatchRival(rival, tournamentSeries))
+                    .peek(rival -> rival.setTournamentMatch(tournamentMatch))
                     .collect(Collectors.toList());
         }
         tournamentMatch.setMatchRivalList(tournamentMatchRivalList);
+
+        // check and compose match rival winner
+        TournamentMatchRivalDto matchWinnerDto = tournamentMatchDto.getMatchWinner();
+        TournamentMatchRival matchWinner = null;
+        if (nonNull(matchWinnerDto)) {
+            matchWinnerDto.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
+            if (isNull(matchWinnerDto.getId())) {
+                log.warn("~ parameter 'matchWinnerDto.id' is NULL for getVerifiedTournamentMatchByDto");
+                throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchWinnerDto.id",
+                        "parameter 'matchWinnerDto.id' is not set for get or modify tournament match");
+            }
+            matchWinner = restTournamentMatchRivalFacade.setGameIndicatorMultipliersToMatchRival(
+                    restTournamentMatchRivalFacade.getVerifiedMatchRivalByDto(matchWinnerDto),
+                    tournamentSeries
+            );
+        } else if (isNotEmpty(tournamentMatchRivalList)) {
+            //try to find series winner (first place)
+            matchWinner = tournamentMatchRivalList.parallelStream()
+                    .filter(s -> nonNull(s.getWonPlaceInMatch())
+                            && s.getWonPlaceInMatch().isWinner())
+                    .findFirst().orElse(null);
+        }
+        if (nonNull(matchWinner)) {
+            tournamentMatch.setMatchWinner(matchWinner);
+        }
 
         return tournamentMatch;
     }
@@ -214,7 +227,7 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
      * Returns tournament match by id and user with privacy check
      */
     @Override
-    public TournamentMatch getVerifiedMatchById(long id, User user, boolean checkUser) {
+    public TournamentMatch getVerifiedMatchById(long id) {
         TournamentMatch tournamentMatch = tournamentMatchService.getMatch(id);
         if (isNull(tournamentMatch)) {
             log.debug("^ Tournament match with requested id '{}' was not found. 'getVerifiedMatchById' in RestTournamentMatchService request denied", id);
@@ -225,17 +238,5 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
             throw new TeamManageException(ExceptionMessages.TOURNAMENT_MATCH_DISABLE_ERROR, "Active tournament match with requested id " + id + " was not found");
         }
         return tournamentMatch;
-    }
-
-    /**
-     * Returns match rival winner by dto with privacy check and modify only WonPlaceInMatch for rival
-     */
-    private TournamentMatchRival getVerifiedMatchRivalWinnerByDto(TournamentMatchRivalDto rivalWinnerDto) {
-        if (isNull(rivalWinnerDto.getId())) {
-            log.warn("~ parameter 'rivalWinnerDto.id' is NULL for getVerifiedMatchRivalWinnerByDto");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "rivalWinnerDto.id",
-                    "parameter 'rivalWinnerDto.id' is not set for get or modify tournament match rival winner");
-        }
-        return restTournamentMatchRivalFacade.getVerifiedMatchRivalByDto(rivalWinnerDto);
     }
 }

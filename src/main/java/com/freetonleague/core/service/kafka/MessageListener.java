@@ -12,9 +12,9 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
-@Component
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class MessageListener {
 
     private final EventService eventService;
@@ -29,9 +29,9 @@ public class MessageListener {
                 ts, eventDto, offset, topic);
     }
 
-    @KafkaListener(topics = "${config.kafka.notifications.topic-name}",
+    @KafkaListener(topics = "!(#kafkaProperties.notifications.topicName)",
             containerFactory = "notificationKafkaListenerContainerFactory",
-            autoStartup = "${config.kafka.notifications.start-debug:false}")
+            autoStartup = "!(#kafkaProperties.notifications.startDebug)")
     public void notificationListener(final @Payload NotificationDto notificationDto,
                                      final @Header(KafkaHeaders.OFFSET) Integer offset,
                                      final @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,

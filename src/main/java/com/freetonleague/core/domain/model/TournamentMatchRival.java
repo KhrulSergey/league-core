@@ -45,6 +45,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
     /**
      * Reference to team on tournament
      */
+    @EqualsAndHashCode.Exclude
     @ManyToOne
     @JoinColumn(name = "team_proposal_id")
     private TournamentTeamProposal teamProposal;

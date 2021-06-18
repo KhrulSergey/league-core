@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -106,17 +107,29 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
+     * Process tournament brackets was generated
+     */
+    @Override
+    public void processTournamentBracketsChanged(Tournament tournament) {
+        log.debug("^ brackets for tournament.id '{}' was changed.", tournament.getId());
+        //compose and update tournaments setting according to tournament template
+        tournamentService.composeAdditionalSettings(tournament);
+    }
+
+    /**
      * Process match status changing
      */
     @Override
     public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
         log.debug("^ status of match was changed from '{}' to '{}'. Process match status change in Tournament Event Service.",
                 tournamentMatch.getPrevStatus(), newTournamentMatchStatus);
-        // check all match is finished to finish the series
+        // check all match is finished, and tournament system type assume automation
+        // then we finish the series
         if (newTournamentMatchStatus.isFinished()
                 && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())
-                //TODO switch on auto closing series for all type of Tournament System Template
-                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isAutoFinishSeriesEnabled()) {
+                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isAutoFinishSeriesEnabled()
+                && !tournamentMatch.getTournamentSeries().getStatus().isFinished()
+                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isGenerationRoundEnabled()) {
             this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
         }
     }
@@ -128,9 +141,12 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     public void processSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
         log.debug("^ status of series was changed from '{}' to '{}'. Process series status change in Tournament Event Service.",
                 tournamentSeries.getPrevStatus(), newTournamentSeriesStatus);
-        // check all series is finished to finish the round
+        // check all series is finished, round of the series is not already finished and tournament system type assume automation
+        // then we finish the round
         if (newTournamentSeriesStatus.isFinished()
-                && tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())) {
+                && tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())
+                && !tournamentSeries.getTournamentRound().getStatus().isFinished()
+                && tournamentSeries.getTournamentRound().getTournament().getSystemType().isGenerationRoundEnabled()) {
             this.handleRoundStatusChange(tournamentSeries.getTournamentRound(), TournamentStatusType.FINISHED);
         }
     }
@@ -142,12 +158,15 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
         log.debug("^ status of round was changed from '{}' to '{}'. Process round status change in Tournament Event Service.",
                 tournamentRound.getPrevStatus(), newTournamentRoundStatus);
-        // check all rounds is finished to finish the tournament or to compose new round
-        if (newTournamentRoundStatus.isFinished()) {
-            if (tournamentRoundService.isAllRoundsFinishedByTournament(tournamentRound.getTournament())) {
-                this.handleTournamentStatusChange(tournamentRound.getTournament(), TournamentStatusType.FINISHED);
-            } else {
+        // check if round is finished then we automatically generate new round or finish tournament
+        if (newTournamentRoundStatus.isFinished() && tournamentRound.getTournament().getSystemType().isGenerationRoundEnabled()) {
+            // check if round is not last or not all rounds is already finished
+            if (isFalse(tournamentRound.getIsLast())
+                    || !tournamentRoundService.isAllRoundsFinishedByTournament(tournamentRound.getTournament())) {
                 tournamentRoundService.composeNextRoundForTournament(tournamentRound.getTournament());
+            } else if (!tournamentRound.getTournament().getStatus().isFinished()) {
+                // last (all rounds) is finished, so finishing the tournament
+                this.handleTournamentStatusChange(tournamentRound.getTournament(), TournamentStatusType.FINISHED);
             }
         }
     }
@@ -295,7 +314,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
-
     }
 
     private AccountTransactionInfoDto composeParticipationCommissionTransaction(AccountInfoDto accountSourceDto,
@@ -356,7 +374,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
+        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
+        // или удалить коммент
         tournament.setStatus(newTournamentStatus);
         tournamentService.editTournament(tournament);
     }
@@ -381,7 +400,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
+        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
+        // или удалить коммент
         tournamentRound.setStatus(newTournamentRoundStatus);
         tournamentRoundService.editRound(tournamentRound);
     }
@@ -406,7 +426,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka
+        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
+        // или удалить коммент
         tournamentSeries.setStatus(newTournamentSeriesStatus);
         tournamentSeriesService.editSeries(tournamentSeries);
     }

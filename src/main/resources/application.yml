@@ -21,7 +21,7 @@ config:
     url: http://49.12.10.52:3383
     token: XXXXXXXXXXXXXXXXXXXXXXXXX
   kafka:
-    bootstrapAddress: kafka:9093
+    bootstrap-address: kafka:9093
     notifications:
       start-debug: false
       topic-name: NOTIFICATION

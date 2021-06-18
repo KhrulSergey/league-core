@@ -6,11 +6,14 @@ import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentRepository;
+import com.freetonleague.core.repository.TournamentSettingsRepository;
 import com.freetonleague.core.service.TournamentEventService;
+import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -38,11 +41,22 @@ public class TournamentServiceImpl implements TournamentService {
 
     private final LeagueStorageClientService leagueStorageClientService;
     private final TournamentRepository tournamentRepository;
+    private final TournamentSettingsRepository tournamentSettingsRepository;
     private final Validator validator;
 
     @Lazy
     @Autowired
     private TournamentEventService tournamentEventService;
+
+    @Autowired
+    @Qualifier("singleEliminationGenerator")
+    private TournamentGenerator singleEliminationGenerator;
+    @Autowired
+    @Qualifier("doubleEliminationGenerator")
+    private TournamentGenerator doubleEliminationGenerator;
+    @Autowired
+    @Qualifier("survivalEliminationGenerator")
+    private TournamentGenerator survivalEliminationGenerator;
 
 
     /**
@@ -158,6 +172,41 @@ public class TournamentServiceImpl implements TournamentService {
         return tournamentRepository.save(tournament);
     }
 
+
+    /**
+     * Generate tournament round list for specified tournament and save to DB.
+     */
+    @Override
+    public TournamentSettings composeAdditionalSettings(Tournament tournament) {
+        if (isNull(tournament)) {
+            log.error("!> requesting composeAdditionalSettings for NULL tournament. Check evoking clients");
+            return null;
+        }
+        log.debug("^ trying to define additional settings for tournament.id '{}' with generation algorithm '{}'",
+                tournament.getId(), tournament.getSystemType());
+        TournamentSettings tournamentSettings;
+        switch (tournament.getSystemType()) {
+            case SINGLE_ELIMINATION:
+                tournamentSettings = singleEliminationGenerator.composeAdditionalTournamentSettings(tournament);
+                break;
+            case DOUBLE_ELIMINATION:
+                tournamentSettings = doubleEliminationGenerator.composeAdditionalTournamentSettings(tournament);
+                break;
+            case SURVIVAL_ELIMINATION:
+                tournamentSettings = survivalEliminationGenerator.composeAdditionalTournamentSettings(tournament);
+                break;
+            default:
+                tournamentSettings = tournament.getTournamentSettings();
+                break;
+        }
+        if (isNull(tournamentSettings)) {
+            log.error("!> error while composeAdditionalSettings. TournamentSettings was composed as NULL. Check stack trace");
+            return null;
+        }
+        log.debug("^ trying to save updated settings for tournament.id '{}' as data '{}'", tournament.getId(), tournamentSettings);
+        return tournamentSettingsRepository.save(tournamentSettings);
+    }
+
     /**
      * Returns sign of tournament existence for specified id.
      */
@@ -175,7 +224,10 @@ public class TournamentServiceImpl implements TournamentService {
                     tournament, user);
             return false;
         }
-        return tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
+        boolean isOrganizer = tournament.getTournamentOrganizerList().parallelStream().anyMatch(org -> org.getUser().equals(user));
+        boolean isCreator = tournament.getCreatedBy().equals(user);
+        boolean isAdmin = user.isAdmin();
+        return isOrganizer || isCreator || isAdmin;
     }
 
     private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {

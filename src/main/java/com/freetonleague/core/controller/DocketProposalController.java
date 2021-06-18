@@ -18,8 +18,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
-import java.util.List;
-
 @RestController
 @RequestMapping(path = DocketProposalController.BASE_PATH)
 @RequiredArgsConstructor
@@ -57,12 +55,14 @@ public class DocketProposalController {
         return new ResponseEntity<>(restDocketProposalFacade.getProposalListByDocket(pageable, docketId), HttpStatus.OK);
     }
 
+    @ApiPageable
     @ApiOperation("Get active user proposal list by docket for bonus payments")
     @GetMapping(path = PATH_GET_LIST_BY_DOCKET_FOR_BONUS)
-    public ResponseEntity<List<DocketUserProposalBonusDto>> getDocketProposalBonusList(
+    public ResponseEntity<Page<DocketUserProposalBonusDto>> getDocketProposalBonusList(
+            @PageableDefault Pageable pageable,
             @RequestParam(value = staticServiceTokenName, required = false) String token,
             @RequestParam(value = "docket_id") long docketId) {
-        return new ResponseEntity<>(restDocketProposalFacade.getProposalListByDocketForBonus(token, docketId), HttpStatus.OK);
+        return new ResponseEntity<>(restDocketProposalFacade.getProposalListByDocketForBonus(pageable, token, docketId), HttpStatus.OK);
     }
 
     @ApiOperation("Apply to participate in docket by id")
@@ -72,14 +72,12 @@ public class DocketProposalController {
         return new ResponseEntity<>(restDocketProposalFacade.createProposalToDocket(userProposalDto, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Change user proposal to docket by userProposalId or by docketId + leagueId (available edit only state, for orgs)")
+    @ApiOperation("Change user proposal to docket by userProposalId (available edit only state, for orgs)")
     @PutMapping(path = PATH_EDIT_USER_PROPOSAL)
-    public ResponseEntity<DocketUserProposalDto> editUserProposal(@RequestParam(value = "docket_id", required = false) Long docketId,
-                                                                  @RequestParam(value = "league_id", required = false) String leagueId,
-                                                                  @RequestParam(value = "user_poposal_id", required = false) Long userProposalId,
+    public ResponseEntity<DocketUserProposalDto> editUserProposal(@RequestParam(value = "user_poposal_id", required = false) Long userProposalId,
                                                                   @RequestParam(value = "user_poposal_state") ParticipationStateType userProposalState,
                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(restDocketProposalFacade.editProposalToDocket(docketId, leagueId, userProposalId, userProposalState, user), HttpStatus.OK);
+        return new ResponseEntity<>(restDocketProposalFacade.editProposalToDocket(userProposalId, userProposalState, user), HttpStatus.OK);
     }
 
 //    @ApiOperation("Quit user from docket by docket and user id")

@@ -1,10 +1,12 @@
 package com.freetonleague.core.domain.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.freetonleague.core.domain.enums.UserParameterType;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -12,10 +14,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
@@ -59,12 +58,20 @@ public class User extends BaseEntity implements UserDetails {
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
 
+    @Transient
+    private UserStatusType prevStatus;
+
     @Builder.Default
     @Column(name = "is_hidden")
     private boolean isHidden = false;
 
     @Column(name = "utm_source")
     private String utmSource;
+
+    @Getter
+    @Type(type = "jsonb")
+    @Column(name = "parameters", columnDefinition = "jsonb")
+    private Map<UserParameterType, String> parameters;
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude

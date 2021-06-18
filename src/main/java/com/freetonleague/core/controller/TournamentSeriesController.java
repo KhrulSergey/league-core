@@ -4,6 +4,7 @@ package com.freetonleague.core.controller;
 import com.freetonleague.core.domain.dto.TournamentSeriesDto;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestTournamentSeriesFacade;
+import com.freetonleague.core.service.RestTournamentSeriesRivalFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
@@ -22,12 +23,13 @@ public class TournamentSeriesController {
     public static final String BASE_PATH = "/api/tournament/series";
     public static final String PATH_GENERATE_OMT = "/generate-omt-for-series/{series_id}";
     public static final String PATH_GET = "/{series_id}";
-    //    public static final String PATH_GET_LIST_BY_TOURNAMENT_ROUND = "/list-by-tournament-round/{tournament_id}";
     public static final String PATH_ADD = "/";
     public static final String PATH_EDIT = "/{series_id}";
     public static final String PATH_DELETE = "/{series_id}";
+    public static final String PATH_DELETE_SERIES_RIVAL = "/rival/{rival_id}";
 
     private final RestTournamentSeriesFacade restTournamentSeriesFacade;
+    private final RestTournamentSeriesRivalFacade restTournamentSeriesRivalFacade;
 
     @ApiOperation("Get Series by id")
     @GetMapping(path = PATH_GET)
@@ -35,14 +37,6 @@ public class TournamentSeriesController {
                                                              @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentSeriesFacade.getSeries(id, user), HttpStatus.OK);
     }
-
-//    @ApiOperation("Get series list info by tournament")
-//    @GetMapping(path = PATH_GET_LIST_BY_TOURNAMENT_ROUND)
-//    public ResponseEntity<Page<TournamentSeriesDto>> getSeriesList(@PageableDefault Pageable pageable,
-//                                                                   @PathVariable("tournament_id") long tournamentId,
-//                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
-//        return new ResponseEntity<>(restTournamentSeriesService.getSeriesList(pageable, tournamentId, user), HttpStatus.OK);
-//    }
 
     @ApiOperation("Generate one more match (OMT) for series (only for orgs)")
     @PostMapping(path = PATH_GENERATE_OMT)
@@ -71,6 +65,14 @@ public class TournamentSeriesController {
     public ResponseEntity<Void> deleteSeries(@PathVariable("series_id") long id,
                                              @ApiIgnore @AuthenticationPrincipal User user) {
         restTournamentSeriesFacade.deleteSeries(id, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiOperation("Delete series rivals (only for orgs)")
+    @DeleteMapping(path = PATH_DELETE_SERIES_RIVAL)
+    public ResponseEntity<Void> deleteSeriesRival(@PathVariable("rival_id") long seriesRivalId,
+                                                  @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentSeriesRivalFacade.deleteSeriesRival(seriesRivalId, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }

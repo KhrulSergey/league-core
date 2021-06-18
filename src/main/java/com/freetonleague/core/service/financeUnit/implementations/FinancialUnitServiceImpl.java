@@ -14,7 +14,6 @@ import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.repository.AccountHolderRepository;
 import com.freetonleague.core.repository.AccountRepository;
 import com.freetonleague.core.repository.AccountTransactionRepository;
-import com.freetonleague.core.service.NotificationService;
 import com.freetonleague.core.service.financeUnit.FinanceEventService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +52,6 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private final AccountRepository accountsRepository;
     private final AccountHolderRepository accountHolderRepository;
     private final AccountTransactionRepository accountTransactionRepository;
-    private final NotificationService notificationService;
     private final Validator validator;
 
     @Lazy
@@ -115,7 +113,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
      * Get account by external GUID and Holder type.
      */
     @Override
-    public Account getAccountByHolderGUIDAndType(UUID externalHolderGUID, AccountHolderType holderType) {
+    public Account getAccountByHolderExternalGUIDAndType(UUID externalHolderGUID, AccountHolderType holderType) {
         if (isNull(externalHolderGUID) || isNull(holderType)) {
             log.error("!!>  requesting getAccountByHolderGUIDAndType for NULL holderGUID '{}' or for NULL holderType '{}'. Check evoking clients",
                     externalHolderGUID, holderType);
@@ -435,6 +433,18 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     @Override
     public boolean isAbortedTransactionByGUID(UUID GUID) {
         return accountTransactionRepository.isAbortedByGUID(GUID);
+    }
+
+    /**
+     * Returns sign if with specified account was made deposit transaction at least once
+     */
+    @Override
+    public boolean isHolderMadeDeposit(Account account) {
+        if (isNull(account)) {
+            log.error("!> requesting isHolderMadeDeposit for NULL account. Check evoking clients");
+            return false;
+        }
+        return accountTransactionRepository.isExistFinishedDepositTransaction(account);
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)

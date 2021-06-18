@@ -20,6 +20,7 @@ public abstract class DocketProposalMapper {
 
     @Named(value = "toDto")
     @Mapping(target = "docketId", source = "entity.docket.id")
+    @Mapping(target = "leagueId", expression = "java(entity.getUser().getLeagueId().toString())")
     public abstract DocketUserProposalDto toDto(DocketUserProposal entity);
 
     @Named(value = "toBonusDto")

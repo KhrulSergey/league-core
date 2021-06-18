@@ -26,7 +26,7 @@ public interface DocketProposalService {
      * @param docket info to search proposal
      * @return docket proposal from user
      */
-    DocketUserProposal getProposalByUserAndDocket(User user, Docket docket);
+    List<DocketUserProposal> getProposalByUserAndDocket(User user, Docket docket);
 
     /**
      * Returns list of all user proposal to docket filtered by requested params
@@ -62,9 +62,9 @@ public interface DocketProposalService {
     DocketUserProposal quitFromDocket(DocketUserProposal userProposal);
 
     /**
-     * Returns list of approved user proposal for specified docket.
+     * Returns list of approved user proposal list for specified docket with bonus-logic filtering.
      */
-    List<DocketUserProposal> getActiveUserProposalListByDocket(Docket docket);
+    Page<DocketUserProposal> getProposalListByDocketForBonusService(Pageable pageable, Docket docket);
 
     /**
      * Returns count of approved user proposal's list for specified docket.

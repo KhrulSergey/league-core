@@ -8,8 +8,6 @@ import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.List;
-
 /**
  * Service-facade for managing docket user proposal
  */
@@ -37,7 +35,7 @@ public interface RestDocketProposalFacade {
      * @param accessToken access token to method
      * @param docketId    identify of docket
      */
-    List<DocketUserProposalBonusDto> getProposalListByDocketForBonus(String accessToken, long docketId);
+    Page<DocketUserProposalBonusDto> getProposalListByDocketForBonus(Pageable pageable, String accessToken, long docketId);
 
     /**
      * Registry new user to docket
@@ -51,14 +49,12 @@ public interface RestDocketProposalFacade {
     /**
      * Edit user proposal to docket (only state)
      *
-     * @param docketId          identify of docket
-     * @param leagueId          identify of user
-     * @param userProposalId    identify of user proposal
-     * @param userProposalState new status of user proposal
+     * @param userProposalId           identify of user proposal
+     * @param currentUserProposalState new status of user proposal
      * @return Modified user proposal
      */
-    DocketUserProposalDto editProposalToDocket(Long docketId, String leagueId, Long userProposalId,
-                                               ParticipationStateType userProposalState, User user);
+    DocketUserProposalDto editProposalToDocket(Long userProposalId,
+                                               ParticipationStateType currentUserProposalState, User currentUser);
 
     /**
      * Quit user from docket

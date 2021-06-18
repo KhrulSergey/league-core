@@ -8,7 +8,7 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.DocketUserProposalRepository;
 import com.freetonleague.core.service.DocketEventService;
 import com.freetonleague.core.service.DocketProposalService;
-import com.freetonleague.core.service.UserService;
+import com.freetonleague.core.service.FinancialClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ import static java.util.Objects.nonNull;
 public class DocketProposalServiceImpl implements DocketProposalService {
 
     private final DocketUserProposalRepository docketProposalRepository;
-    private final UserService userService;
+    private final FinancialClientService financialClientService;
 
     @Lazy
     @Autowired
@@ -50,7 +50,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      * Returns user proposal to docket by user and docket.
      */
     @Override
-    public DocketUserProposal getProposalByUserAndDocket(User user, Docket docket) {
+    public List<DocketUserProposal> getProposalByUserAndDocket(User user, Docket docket) {
         if (isNull(user) || isNull(docket)) {
             log.error("!> requesting getProposalByUserAndDocket for NULL user '{}' or NULL docket '{}'. Check evoking clients",
                     user, docket);
@@ -58,7 +58,7 @@ public class DocketProposalServiceImpl implements DocketProposalService {
         }
         log.debug("^ trying to get uer proposal to docket for user: '{}' and docket '{}'",
                 user.getId(), docket.getId());
-        return docketProposalRepository.findByUserAndDocket(user, docket);
+        return docketProposalRepository.findAllByUserAndDocket(user, docket);
     }
 
     /**
@@ -131,17 +131,26 @@ public class DocketProposalServiceImpl implements DocketProposalService {
     }
 
     /**
-     * Returns list of approved user proposal list for specified docket.
+     * Returns list of approved user proposal list for specified docket with bonus-logic filtering.
      */
     @Override
-    public List<DocketUserProposal> getActiveUserProposalListByDocket(Docket docket) {
+    public Page<DocketUserProposal> getProposalListByDocketForBonusService(Pageable pageable, Docket docket) {
         if (isNull(docket)) {
             log.error("!> requesting getActiveUserProposalListByDocket for NULL docket. Check evoking clients");
             return null;
         }
         log.debug("^ trying to get Approved user proposal list by docket with id: '{}'", docket.getId());
-
-        return docketProposalRepository.findAllByDocketAndState(docket, ParticipationStateType.APPROVE);
+// TODO delete until 01/10/21
+//        Page<DocketUserProposal> docketUserProposalsPageable =
+//                docketProposalRepository.findAllByDocketAndState(pageable, docket, ParticipationStateType.APPROVE);
+//        List<DocketUserProposal> docketUserProposals = docketUserProposalsPageable.getContent();
+//        // "возвращались те пользователи только, которые не вносили ни разу депозит"
+//        // delete proposals, whose user made deposit transaction to his account at least once
+//        docketUserProposals.removeIf(p -> financialClientService.isUserMadeDepositToHisAccount(p.getUser()));
+//        return new PageImpl<>(docketUserProposals,
+//                PageRequest.of(pageable.getPageNumber(), pageable.getPageSize()),
+//                docketUserProposals.size());
+        return docketProposalRepository.findAllByDocketAndState(pageable, docket, ParticipationStateType.APPROVE);
     }
 
     /**
@@ -163,8 +172,11 @@ public class DocketProposalServiceImpl implements DocketProposalService {
      */
     @Override
     public double calculateUserParticipationFee(DocketUserProposal userProposal) {
-        Docket docket = userProposal.getDocket();
-        return nonNull(docket.getParticipationFee()) ? docket.getParticipationFee() : 0.0;
+        Double participationFee = userProposal.getParticipationFee();
+        if (isNull(participationFee)) {
+            participationFee = userProposal.getDocket().getParticipationFee();
+        }
+        return nonNull(participationFee) ? participationFee : 0.0;
     }
 
     private boolean isExistsDocketUserProposalById(long id) {

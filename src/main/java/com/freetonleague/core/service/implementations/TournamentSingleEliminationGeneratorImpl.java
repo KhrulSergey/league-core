@@ -9,7 +9,7 @@ import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentProposalService;
-import com.freetonleague.core.service.TournamentService;
+import com.freetonleague.core.service.TournamentRoundService;
 import com.freetonleague.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,7 +38,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
 
     @Lazy
     @Autowired
-    private TournamentService tournamentService;
+    private TournamentRoundService tournamentRoundService;
 
     /**
      * Returns random number for specified total size
@@ -53,7 +53,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
      * Tournament should be with empty round list.
      */
     @Override
-    public List<TournamentRound> generateRoundsForTournament(Tournament tournament) {
+    public List<TournamentRound> initiateTournamentBracketsWithRounds(Tournament tournament) {
         log.debug("^ trying to generate rounds for tournament.id '{}' with Single Elimination algorithm", tournament.getId());
         if (!TournamentStatusType.activeStatusList.contains(tournament.getStatus())) {
             log.error("!> requesting generate tournament round for non-active tournament. Check evoking clients");
@@ -104,13 +104,30 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
     }
 
     /**
+     * Compose additional tournament settings based upon tournament template.
+     * e.g. Generate default round settings from embedded tournament settings
+     */
+    @Override
+    public TournamentSettings composeAdditionalTournamentSettings(Tournament tournament) {
+        //no need to compose additional settings
+        return tournament.getTournamentSettings();
+    }
+
+    /**
      * Compose series, matches and rivals for tournament round. Look to parents for series in specified tournamentRound and compose rivals.
      * Tournament Round should open.
      */
     @Override
-    public TournamentRound composeNextRoundForTournament(TournamentRound tournamentRound) {
-        log.debug("^ trying to compose matches for new round for tournamentRound.id '{}' with Single Elimination algorithm",
-                tournamentRound.getId());
+    public TournamentRound composeNextRoundForTournament(Tournament tournament) {
+        log.debug("^ trying to compose matches for new opened round for tournament.id '{}' with Single Elimination algorithm",
+                tournament.getId());
+
+        TournamentRound tournamentRound = tournamentRoundService.getNextOpenRoundForTournament(tournament);
+        if (isNull(tournamentRound)) {
+            log.error("!> requesting composeNewRoundForTournament for tournament with no existed open round for compose series. Check evoking clients");
+            return null;
+        }
+
         if (!TournamentStatusType.activeStatusList.contains(tournamentRound.getStatus())) {
             log.error("!> requesting composeNewRoundForTournament for not active tournament round status. Check evoking clients");
             return null;
@@ -120,7 +137,8 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
             return null;
         }
         if (tournamentRound.getSeriesList().isEmpty()) {
-            log.error("!> requesting composeNewRoundForTournament for round with non-empty Series list. Check evoking clients");
+            log.error("!> requesting composeNewRoundForTournament for round with empty Series list - " +
+                    "means some error was with generateRoundsForTournament or data in DB. Check evoking clients");
             return null;
         }
 
@@ -183,11 +201,14 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
             log.error("!> round generation with TournamentSingleEliminationGeneratorImpl caused error. RivalCombinations is NULL. Check evoking params");
             throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
         }
+        //define if current round consist of only 1 series, then it should be the last round in tournament
+        boolean isLastRound = rivalCombinations.size() == 1;
         TournamentRound tournamentRound = TournamentRound.builder()
                 .name("Round #" + roundNumber)
                 .roundNumber(roundNumber)
                 .status(TournamentStatusType.CREATED)
                 .type(TournamentRoundType.DEFAULT)
+                .isLast(isLastRound)
                 .build();
 
         List<TournamentSeries> tournamentSeriesList = IntStream.range(0, rivalCombinations.size()).parallel()

@@ -157,6 +157,7 @@ public class UserServiceImpl implements UserService {
         }
         log.debug("user: '{}' is edited", user);
         updatedUser = userRepository.saveAndFlush(user);
+        //todo check changed status
         userEventService.processUserStatusChange(user, user.getStatus());
         return updatedUser;
     }

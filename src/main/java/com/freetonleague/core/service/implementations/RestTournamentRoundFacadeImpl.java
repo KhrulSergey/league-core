@@ -93,9 +93,15 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @CanManageTournament
     @Override
-    public void generateRoundForTournament(long tournamentId, User user) {
+    public void generateRoundsForTournament(long tournamentId, User user) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-        boolean result = tournamentRoundService.generateRoundListForTournament(tournament);
+        if (!tournament.getSystemType().isGenerationRoundEnabled()) {
+            log.warn("~ generation tournament round list for tournament id '{}' with systemType '{}' is prohibited.", tournamentId, tournament.getSystemType());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_GENERATION_ERROR,
+                    String.format("Generation tournament round list for tournament id '%s' with systemType '%s' " +
+                            "is prohibited. Check requested params.", tournamentId, tournament.getSystemType()));
+        }
+        boolean result = tournamentRoundService.initiateTournamentBracketsWithRounds(tournament);
         if (!result) {
             log.error("!> error while generated tournament round list for tournament id '{}' with user '{}'.", tournamentId, user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_GENERATION_ERROR,
@@ -174,12 +180,6 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
             throw new ValidationException(ExceptionMessages.TOURNAMENT_ROUND_VALIDATION_ERROR, "tournamentRoundDto",
                     "parameter 'tournamentRoundDto' is not set for get or modify tournament series");
         }
-        if (isNull(tournamentRoundDto.getTournamentId())) {
-            log.warn("~ parameter 'tournament id' is not set in tournamentSeriesDto for getVerifiedRoundByDto");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_ROUND_VALIDATION_ERROR, "tournament id",
-                    "parameter 'tournament id' is not set in tournamentRoundDto for get or modify tournament round");
-        }
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentRoundDto.getTournamentId());
 
         Set<ConstraintViolation<TournamentRoundDto>> violations = validator.validate(tournamentRoundDto);
         if (!violations.isEmpty()) {
@@ -188,7 +188,9 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
             throw new ConstraintViolationException(violations);
         }
 
-        // Check existence of tournament series and it's status
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentRoundDto.getTournamentId());
+
+        // Check existence of tournament round and it's status
         // Set round number to
         if (nonNull(tournamentRoundDto.getId())) {
             TournamentRound existedTournamentRound = this.getVerifiedRoundById(tournamentRoundDto.getId());

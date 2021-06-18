@@ -2,6 +2,7 @@ package com.freetonleague.core.domain.dto;
 
 import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.DocketStatusType;
+import com.freetonleague.core.domain.enums.DocketSystemType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 /**
- * View of universal docket (lists) for different purpose
+ * View of docket (universal lists) for different purpose
  */
 @SuperBuilder
 @NoArgsConstructor
@@ -41,13 +42,22 @@ public class DocketDto {
     @Builder.Default
     @NotNull
     @ApiModelProperty(required = true)
+    private DocketSystemType systemType = DocketSystemType.DEFAULT;
+
+    @Builder.Default
+    @NotNull
+    @ApiModelProperty(required = true)
     private AccessType accessType = AccessType.FREE_ACCESS;
 
     @Size(max = 450)
     @ApiModelProperty(allowableValues = "range[0, 450]")
     private String imageUrl;
 
+    @ApiModelProperty(notes = "Default or minimum participation fee")
     private Double participationFee;
+
+    @ApiModelProperty(notes = "Maximum participation fee")
+    private Double maxParticipationFee;
 
     @ApiModelProperty(notes = "optional")
     private Integer maxProposalCount;

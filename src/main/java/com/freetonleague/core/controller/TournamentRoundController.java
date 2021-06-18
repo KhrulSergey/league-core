@@ -49,11 +49,11 @@ public class TournamentRoundController {
         return new ResponseEntity<>(restTournamentRoundFacade.getRoundList(pageable, tournamentId, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Generate tournament next (active) round for tournament (only for orgs)")
+    @ApiOperation("Generate rounds (brackets) for specified tournament (only for orgs)")
     @PostMapping(path = PATH_GENERATE)
-    public ResponseEntity<Void> generateRound(@PathVariable("tournament_id") long tournamentId,
-                                              @ApiIgnore @AuthenticationPrincipal User user) {
-        restTournamentRoundFacade.generateRoundForTournament(tournamentId, user);
+    public ResponseEntity<Void> generateRounds(@PathVariable("tournament_id") long tournamentId,
+                                               @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentRoundFacade.generateRoundsForTournament(tournamentId, user);
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
