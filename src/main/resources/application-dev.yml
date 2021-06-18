@@ -15,6 +15,12 @@ spring:
     password: postgres
     username: postgres
 
+app:
+  user:
+    register-bonus:
+      utm-source: test-source
+      amount: 0
+
 config:
   broxus-client:
     debug: false # change to true for mock Client use
