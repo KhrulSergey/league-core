@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -174,9 +175,13 @@ public class UserEventServiceImpl implements UserEventService {
             AccountInfoDto accountInfoDto = financialClientService.createAccountByHolderInfo(user.getLeagueId(),
                     AccountHolderType.USER, user.getUsername());
 
-            if (appUserProperties.getRegisterBonus().getUtmSource().equals(user.getUtmSource())) {
+            Map<String, Double> bonusMap = appUserProperties.getUtmSourceRegisterBonusMap();
+
+            if (bonusMap != null && bonusMap.containsKey(user.getUtmSource())) {
+                Double bonusAmount = bonusMap.get(user.getUtmSource());
+
                 AccountTransaction accountTransaction = AccountTransaction.builder()
-                        .amount(appUserProperties.getRegisterBonus().getAmount())
+                        .amount(bonusAmount)
                         .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(accountInfoDto.getGUID())))
                         .transactionType(TransactionType.DEPOSIT)
                         .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
