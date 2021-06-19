@@ -20,7 +20,7 @@ public interface DocketUserProposalRepository extends JpaRepository<DocketUserPr
     Page<DocketUserProposal> findAllByDocketAndStateIn(@PageableDefault Pageable pageable,
                                                        Docket docket, List<ParticipationStateType> state);
 
-    Page<DocketUserProposal> findAllByDocketAndState(@PageableDefault Pageable pageable, Docket docket, ParticipationStateType state);
+    List<DocketUserProposal> findAllByDocketAndState(Docket docket, ParticipationStateType state);
 
     Integer countByDocketAndState(Docket docket, ParticipationStateType state);
 }
