@@ -17,9 +17,8 @@ spring:
 
 app:
   user:
-    register-bonus:
-      utm-source: test-source
-      amount: 0
+    utm-source-register-bonus-map:
+      test-source: 0
 
 config:
   broxus-client:
