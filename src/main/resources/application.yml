@@ -51,6 +51,9 @@ freetonleague:
     league-storage:
       url: league-storage:7702/api
       service-token: EqUEcXc3#iZCu5hQS!l33O6I3
+  docket:
+    first_ton_docket_id: 4 #identifier of docket to automatically pay it's participant first ton to their account
+    first_ton_bonus_amount: 1
   team:
     invitation:
       token-duration-in-sec: 432000
