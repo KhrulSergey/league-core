@@ -34,6 +34,7 @@ public class NotificationServiceImpl implements NotificationService {
                     notificationDto);
             return;
         }
+        log.debug("^ try to send notification '{}'", notificationDto);
         executor.submit(() -> sendNotificationToKafka(notificationDto));
     }
 
