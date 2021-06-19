@@ -37,8 +37,6 @@ public class DocketProposalController {
 
     private final RestDocketProposalFacade restDocketProposalFacade;
 
-    private static int responseWait = 120;
-
     /**
      * The same value as from "${freetonleague.session.service-token-name}"
      */
