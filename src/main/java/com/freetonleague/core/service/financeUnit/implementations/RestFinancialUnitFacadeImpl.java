@@ -108,7 +108,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
      */
     @Override
     public AccountInfoDto findAccountByGUID(String GUID) {
-        log.debug("^ requested findAccountByGUID with token GUID:'{}'", GUID);
+        log.debug("^ requested findAccountByGUID by GUID:'{}'", GUID);
         return accountMapper.toDto(this.getVerifiedAccountByGUID(GUID, null));
     }
 
@@ -153,7 +153,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
      */
     @Override
     public AccountTransactionInfoDto findTransactionByGUID(String transactionGUID) {
-        log.debug("^ requested findAccountByGUID with token GUID:'{}'", transactionGUID);
+        log.debug("^ requested findAccountByGUID by GUID:'{}'", transactionGUID);
         return accountTransactionFinUnitMapper.toDto(financialUnitService.getTransaction(UUID.fromString(transactionGUID)));
     }
 

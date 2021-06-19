@@ -17,6 +17,10 @@ public enum TransactionType {
             TransactionType.TRANSFER
     );
 
+    public boolean isDeposit() {
+        return this == DEPOSIT;
+    }
+
     public boolean isTransfer() {
         return this == TRANSFER;
     }
