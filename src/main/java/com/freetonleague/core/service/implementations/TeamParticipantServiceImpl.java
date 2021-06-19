@@ -210,9 +210,11 @@ public class TeamParticipantServiceImpl implements TeamParticipantService {
      */
     @Override
     public List<TeamParticipant> filterTeamParticipantFoPublic(List<TeamParticipant> teamParticipantList) {
+        // Check conditionals: TeamParticipant is active participant, Team is active, Team is not virtual
         return isNotEmpty(teamParticipantList) ? teamParticipantList.parallelStream()
                 .filter(p -> TeamParticipantStatusType.activeStatusList.contains(p.getStatus()))
                 .filter(p -> TeamStateType.activeStatusList.contains(p.getTeam().getStatus()))
+                .filter(p -> !p.getTeam().getIsVirtual())
                 .collect(Collectors.toList())
                 : null;
     }

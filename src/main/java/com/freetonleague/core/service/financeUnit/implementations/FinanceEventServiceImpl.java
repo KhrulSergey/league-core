@@ -38,7 +38,7 @@ public class FinanceEventServiceImpl implements FinanceEventService {
     public void processTransactionStatusChange(AccountTransaction accountTransaction, AccountTransactionStatusType newAccountTransactionStatusType) {
         log.debug("^ try to process transaction.guid {} status change to {}", accountTransaction.getGUID(), newAccountTransactionStatusType);
         //notify user about balance amount change
-        this.sendSourceTransactionNotification(accountTransaction);
+//        this.sendSourceTransactionNotification(accountTransaction);
         this.composeTargetTransactionNotification(accountTransaction);
     }
 
@@ -84,10 +84,8 @@ public class FinanceEventServiceImpl implements FinanceEventService {
         try {
             notification = NotificationDto.builder()
                     .leagueId(targetAccount.getHolder().getHolderExternalGUID())
-                    .message(String.format("The deposit transaction to your account '%s' of amount '%s' with purpose '%s - %s' was successfully completed",
-                            targetAccount.getGUID(), accountTransaction.getAmount(),
-                            accountTransaction.getTransactionType(), accountTransaction.getTransactionTemplateType()))
-                    .title("Deposit transaction")
+                    .message(String.format("Ваш на счет пришло %s TON", accountTransaction.getAmount()))
+                    .title("Пополнение")
                     .type(NotificationType.SYSTEM)
                     .build();
         } catch (NullPointerException exc) {
