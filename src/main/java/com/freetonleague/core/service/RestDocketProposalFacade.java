@@ -8,6 +8,8 @@ import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 /**
  * Service-facade for managing docket user proposal
  */
@@ -35,7 +37,7 @@ public interface RestDocketProposalFacade {
      * @param accessToken access token to method
      * @param docketId    identify of docket
      */
-    Page<DocketUserProposalBonusDto> getProposalListByDocketForBonus(Pageable pageable, String accessToken, long docketId);
+    List<DocketUserProposalBonusDto> getProposalListByDocketForBonus(String accessToken, long docketId);
 
     /**
      * Registry new user to docket
