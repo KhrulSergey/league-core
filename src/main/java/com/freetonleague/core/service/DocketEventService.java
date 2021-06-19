@@ -1,7 +1,6 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.enums.DocketStatusType;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.Docket;
@@ -11,8 +10,6 @@ import java.util.List;
 
 
 public interface DocketEventService {
-
-    EventDto add(EventDto event);
 
     /**
      * Process docket status changing
