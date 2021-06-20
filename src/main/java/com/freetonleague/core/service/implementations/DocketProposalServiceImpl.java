@@ -8,6 +8,7 @@ import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.DocketUserProposalRepository;
 import com.freetonleague.core.service.DocketEventService;
 import com.freetonleague.core.service.DocketProposalService;
+import com.freetonleague.core.service.FinancialClientService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +31,7 @@ import static java.util.Objects.nonNull;
 public class DocketProposalServiceImpl implements DocketProposalService {
 
     private final DocketUserProposalRepository docketProposalRepository;
+    private final FinancialClientService financialClientService;
 
     @Lazy
     @Autowired
