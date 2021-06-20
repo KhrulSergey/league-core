@@ -17,9 +17,8 @@ spring:
 
 app:
   user:
-    register-bonus:
-      utm-source: test-source
-      amount: 0
+    utm-source-register-bonus-map:
+      test-source: 0
 
 config:
   broxus-client:
@@ -53,6 +52,9 @@ freetonleague:
       first-ton-bonus-name: first_ton_2021 # name bonus advertisement company (equals utm_source)
       auto-abort-transaction: true
       min-withdraw-value: 10
+  docket:
+    first_ton_docket_id: 4 #identifier of docket to automatically pay it's participant first ton to their account
+    first_ton_bonus_amount: 1
   team:
     invitation:
       token-duration-in-sec: 432000

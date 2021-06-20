@@ -64,7 +64,7 @@ public interface DocketProposalService {
     /**
      * Returns list of approved user proposal list for specified docket with bonus-logic filtering.
      */
-    Page<DocketUserProposal> getProposalListByDocketForBonusService(Pageable pageable, Docket docket);
+    List<DocketUserProposal> getProposalListByDocketForBonusService(Docket docket);
 
     /**
      * Returns count of approved user proposal's list for specified docket.

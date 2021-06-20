@@ -178,7 +178,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
             }
             accountHolder.setAccount(account);
             log.debug("^ send request to save account holder with embedded Account in DB: '{}'", accountHolder);
-            accountHolder = this.saveAccountHolder(accountHolder);
+            this.saveAccountHolder(accountHolder);
         } catch (Exception exc) {
             log.error("!!> requesting createAccountHolderWithAccount for holder '{}' cause unexpected Error '{}'." +
                     " Check stack trace", accountHolder, exc.getMessage());
@@ -217,9 +217,6 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         log.debug("^ trying to find transaction with guid '{}'", GUID);
         return accountTransactionRepository.findByGUID(GUID);
     }
-    //endregion
-
-    //region Transactions
 
     /**
      * Get list of transactions for specified account and status list. Search in both source and target.
