@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.TournamentProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.*;

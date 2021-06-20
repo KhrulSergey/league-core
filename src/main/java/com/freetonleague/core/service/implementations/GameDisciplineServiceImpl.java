@@ -3,8 +3,8 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.model.GameDiscipline;
 import com.freetonleague.core.domain.model.GameDisciplineSettings;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.GameDisciplineSettingsManageException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.repository.GameDisciplineRepository;
 import com.freetonleague.core.repository.GameDisciplineSettingsRepository;
 import com.freetonleague.core.service.GameDisciplineService;

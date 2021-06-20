@@ -68,7 +68,7 @@ public interface RestDocketProposalFacade {
     /**
      * Returns docket user proposal by id and user with privacy check
      */
-    DocketUserProposal getVerifiedUserProposalById(long id);
+    DocketUserProposal getVerifiedDocketProposalById(long id);
 }
 
 
