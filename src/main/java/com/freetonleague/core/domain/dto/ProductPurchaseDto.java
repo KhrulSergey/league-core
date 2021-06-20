@@ -12,7 +12,6 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Map;
 
 /**
  * View of user proposals to docket (Universal lists)
@@ -37,7 +36,7 @@ public class ProductPurchaseDto {
     @ApiModelProperty(required = true)
     private Long productId;
 
-    private Map<String, Object> selectedProductParameters;
+    private List<ProductPropertyDto> selectedProductParameters;
 
     @Builder.Default
     @DecimalMin("0.0000000000000001")
@@ -51,6 +50,13 @@ public class ProductPurchaseDto {
     @NotNull
     @ApiModelProperty(required = true)
     private PurchaseStateType state = PurchaseStateType.CREATED;
+
+
+    @ApiModelProperty(notes = "Comment from user about purchase")
+    private String buyerComment;
+
+    @ApiModelProperty(notes = "Comment from manager about purchase. Available only in Edit mode.")
+    private String managerComment;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ApiModelProperty(readOnly = true, notes = "Saved version of purchase payment transaction")

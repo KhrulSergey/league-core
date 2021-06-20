@@ -157,6 +157,7 @@ public class ExceptionMessages {
     public static final String PRODUCT_CREATION_ERROR = "Product creation failed. Please try again";
     public static final String PRODUCT_VALIDATION_ERROR = "Product was specified with errors. Please check request parameters";
     public static final String PRODUCT_MODIFICATION_ERROR = "Product modifying failed. Please try again";
+    public static final String PRODUCT_PROPERTIES_CONVERTED_ERROR = "Product properties was badly specified. Please try to modify request";
 
     public static final String PRODUCT_PURCHASE_NOT_FOUND_ERROR = "Product purchase was not found. Please check request parameters";
     public static final String PRODUCT_PURCHASE_VALIDATION_ERROR = "Product purchase was specified with errors. Please check request parameters";
@@ -164,6 +165,7 @@ public class ExceptionMessages {
     public static final String PRODUCT_PURCHASE_CREATION_ERROR = "Product purchase creation failed. Please try again";
     public static final String PRODUCT_IS_OUT_OF_STOCK_ERROR = "Product is out of stock. Product purchase creation failed.";
     public static final String PRODUCT_PURCHASE_MODIFICATION_ERROR = "Product purchase modifying failed. Please try again";
+    public static final String PRODUCT_PURCHASE_PROPERTIES_CONVERTED_ERROR = "Product purchase properties was badly specified. Please try to modify request";
 
     public static final String NOTIFICATION_VALIDATION_ERROR = "Notification was specified with errors. Please check request parameters";
 

@@ -46,7 +46,7 @@ public interface RestProductPurchaseFacade {
      * @param currentPurchaseState new status of purchase
      * @return Modified purchase
      */
-    ProductPurchaseDto editPurchase(Long purchaseId, PurchaseStateType currentPurchaseState, User currentUser);
+    ProductPurchaseDto editPurchase(Long purchaseId, PurchaseStateType currentPurchaseState, String managerComment, User currentUser);
 
     /**
      * Returns product purchase by id with privacy check

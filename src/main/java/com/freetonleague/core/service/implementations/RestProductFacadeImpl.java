@@ -12,6 +12,7 @@ import com.freetonleague.core.security.permissions.CanManageProduct;
 import com.freetonleague.core.service.ProductService;
 import com.freetonleague.core.service.RestProductFacade;
 import com.freetonleague.core.service.RestUserFacade;
+import com.freetonleague.core.util.ProductPropertyConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -148,6 +149,8 @@ public class RestProductFacadeImpl implements RestProductFacade {
             log.debug("^ transmitted ProductDto: '{}' have constraint violations: '{}'", productDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        return productMapper.fromDto(productDto);
+        Product product = productMapper.fromDto(productDto);
+        product.setProductParameters(ProductPropertyConverter.convertAndValidateProperties(product.getProductParameters()));
+        return product;
     }
 }

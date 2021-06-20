@@ -3,8 +3,10 @@ package com.freetonleague.core.mapper;
 
 import com.freetonleague.core.domain.dto.GameIndicatorTypeDto;
 import com.freetonleague.core.domain.dto.MatchPropertyTypeDto;
+import com.freetonleague.core.domain.dto.ProductPropertyTypeDto;
 import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.MatchPropertyType;
+import com.freetonleague.core.domain.enums.ProductPropertyType;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -22,7 +24,12 @@ public interface NsiMapper {
     @Mapping(target = "name", expression = "java(propertyType.name())")
     MatchPropertyTypeDto toDto(MatchPropertyType propertyType);
 
+    @Mapping(target = "name", expression = "java(propertyType.name())")
+    ProductPropertyTypeDto toDto(ProductPropertyType propertyType);
+
     List<GameIndicatorTypeDto> toDto(GameIndicatorType[] indicatorType);
 
     List<MatchPropertyTypeDto> toDto(MatchPropertyType[] indicatorType);
+
+    List<ProductPropertyTypeDto> toDto(ProductPropertyType[] indicatorType);
 }

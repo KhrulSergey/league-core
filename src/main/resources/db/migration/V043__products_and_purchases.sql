@@ -45,6 +45,8 @@ create table if not exists public.product_purchases
     purchase_total_amount       bigint,
     selected_product_parameters jsonb,
     state                       varchar(255),
+    buyer_comment               text,
+    manager_comment             text,
     purchase_payment_list       jsonb,
     created_by_league_id        UUID
         constraint fk_created_by_league_id references public.users (league_id),

@@ -13,7 +13,7 @@ import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.Map;
+import java.util.List;
 
 /**
  * View of universal docket (lists) for different purpose
@@ -37,7 +37,7 @@ public class ProductDto {
      * Detailed parameters (text labels) for product
      */
     @ApiModelProperty(notes = "Detailed parameters (text labels) for product")
-    private Map<String, Object> productParameters;
+    private List<ProductPropertyDto> productParameters;
 
     @ApiModelProperty(required = true)
     @Builder.Default

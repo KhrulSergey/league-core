@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.model;
 
+import com.freetonleague.core.domain.dto.ProductPropertyDto;
 import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.ProductStatusType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -13,7 +14,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static java.util.Objects.nonNull;
@@ -53,7 +53,7 @@ public class Product extends ExtendedBaseEntity {
      */
     @Type(type = "jsonb")
     @Column(name = "product_parameters", columnDefinition = "jsonb")
-    private Map<String, Object> productParameters;
+    private List<ProductPropertyDto> productParameters;
 
     @Builder.Default
     @NotNull

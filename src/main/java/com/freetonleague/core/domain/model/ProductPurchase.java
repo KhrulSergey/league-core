@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.model;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.ProductPropertyDto;
 import com.freetonleague.core.domain.enums.PurchaseStateType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
@@ -12,7 +13,6 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -48,7 +48,7 @@ public class ProductPurchase extends ExtendedBaseEntity {
      */
     @Type(type = "jsonb")
     @Column(name = "selected_product_parameters", columnDefinition = "jsonb")
-    private Map<String, Object> selectedProductParameters;
+    private List<ProductPropertyDto> selectedProductParameters;
 
     @Column(name = "purchase_quantity")
     private Double purchaseQuantity;
@@ -67,6 +67,12 @@ public class ProductPurchase extends ExtendedBaseEntity {
 
     @Transient
     private PurchaseStateType prevState;
+
+    @Column(name = "buyer_comment")
+    private String buyerComment;
+
+    @Column(name = "managerComment")
+    private String managerComment;
 
     /**
      * Saved version of purchase payment transaction

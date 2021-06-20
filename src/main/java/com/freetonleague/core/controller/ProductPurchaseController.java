@@ -62,11 +62,12 @@ public class ProductPurchaseController {
         return new ResponseEntity<>(productPurchaseFacade.createPurchase(productPurchaseDto, user), HttpStatus.OK);
     }
 
-    @ApiOperation("Change product purchase by purchaseId (available edit only state, for orgs)")
+    @ApiOperation("Change product purchase by purchaseId (available edit only state and comment, for orgs)")
     @PutMapping(path = PATH_EDIT_PRODUCT_PURCHASE)
     public ResponseEntity<ProductPurchaseDto> editProductPurchase(@RequestParam(value = "purchase_id") long purchaseId,
                                                                   @RequestParam(value = "purchase_state") PurchaseStateType purchaseState,
+                                                                  @RequestParam(value = "manager_comment", required = false) String managerComment,
                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
-        return new ResponseEntity<>(productPurchaseFacade.editPurchase(purchaseId, purchaseState, user), HttpStatus.OK);
+        return new ResponseEntity<>(productPurchaseFacade.editPurchase(purchaseId, purchaseState, managerComment, user), HttpStatus.OK);
     }
 }

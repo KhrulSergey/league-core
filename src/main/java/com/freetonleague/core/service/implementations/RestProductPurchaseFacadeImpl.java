@@ -11,6 +11,7 @@ import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.ProductPurchaseMapper;
 import com.freetonleague.core.security.permissions.CanManageProduct;
 import com.freetonleague.core.service.*;
+import com.freetonleague.core.util.ProductPropertyConverter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -66,6 +67,7 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
     public ProductPurchaseDto createPurchase(ProductPurchaseDto productPurchaseDto, User currentUser) {
         productPurchaseDto.setId(null);
         productPurchaseDto.setState(PurchaseStateType.APPROVE);
+        productPurchaseDto.setManagerComment(null);
         ProductPurchase newProductPurchase = this.getVerifiedProductPurchaseByDto(productPurchaseDto);
 
         if (!newProductPurchase.getUser().equals(currentUser)) {
@@ -126,8 +128,7 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
      */
     @CanManageProduct
     @Override
-    public ProductPurchaseDto editPurchase(Long purchaseId, PurchaseStateType currentProductPurchaseState, User currentUser) {
-        //check if user is org
+    public ProductPurchaseDto editPurchase(Long purchaseId, PurchaseStateType currentProductPurchaseState, String managerComment, User currentUser) {
         ProductPurchase userPurchase = this.getVerifiedProductPurchaseById(purchaseId);
 
         if (isNull(userPurchase)) {
@@ -137,6 +138,7 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
         }
 
         userPurchase.setState(currentProductPurchaseState);
+        userPurchase.setManagerComment(managerComment);
         ProductPurchase savedProductPurchase = productPurchaseService.editPurchase(userPurchase);
         if (isNull(savedProductPurchase)) {
             log.error("!> error while modifying user purchase to product '{}'.", userPurchase);
@@ -171,12 +173,13 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
             log.debug("^ transmitted ProductPurchaseDto: '{}' have constraint violations: '{}'", productPurchaseDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        ProductPurchase productProductPurchase = productPurchaseMapper.fromDto(productPurchaseDto);
-
+        ProductPurchase productPurchase = productPurchaseMapper.fromDto(productPurchaseDto);
+        productPurchase.setSelectedProductParameters(ProductPropertyConverter.
+                convertAndValidateSelectedProperties(productPurchase.getSelectedProductParameters()));
         User user = restUserFacade.getVerifiedUserByLeagueId(productPurchaseDto.getLeagueId());
         Product product = restProductFacade.getVerifiedProductById(productPurchaseDto.getProductId());
-        productProductPurchase.setProduct(product);
-        productProductPurchase.setUser(user);
-        return productProductPurchase;
+        productPurchase.setProduct(product);
+        productPurchase.setUser(user);
+        return productPurchase;
     }
 }
