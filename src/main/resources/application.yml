@@ -52,6 +52,9 @@ freetonleague:
     league-storage:
       url: league-storage:7702/api
       service-token: EqUEcXc3#iZCu5hQS!l33O6I3
+    telegram-client:
+      url: http://telegram.host:3385
+      service-token: 6qlW08oPKpItBumDah61hE
   docket:
     first_ton_docket_id: 4 #identifier of docket to automatically pay it's participant first ton to their account
     first_ton_bonus_amount: 1

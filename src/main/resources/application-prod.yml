@@ -52,6 +52,9 @@ freetonleague:
       first-ton-bonus-name: first_ton_2021 # name bonus advertisement company (equals utm_source)
       auto-abort-transaction: false
       min-withdraw-value: 10
+    telegram-client:
+      url: http://telegram.host:3385
+      service-token: 6qlW08oPKpItBumDah61hE
   docket:
     first_ton_docket_id: 4 #identifier of docket to automatically pay it's participant first ton to their account
     first_ton_bonus_amount: 1
