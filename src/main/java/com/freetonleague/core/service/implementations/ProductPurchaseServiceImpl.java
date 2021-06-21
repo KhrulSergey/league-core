@@ -64,7 +64,7 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
         boolean filterByUserEnabled = nonNull(user);
         log.debug("^ trying to get product purchase list with pageable params: '{}', filterByProductEnabled '{}', filterByUserEnabled '{}', statusList '{}'",
                 pageable, filterByProductEnabled, filterByUserEnabled, filteredProposalStateList);
-        Page<ProductPurchase> productPurchaseList = null;
+        Page<ProductPurchase> productPurchaseList;
         if (filterByProductEnabled && filterByUserEnabled) {
             productPurchaseList = productPurchaseRepository.findAllByProductAndUserAndStateIn(pageable, product, user, filteredProposalStateList);
         } else if (filterByUserEnabled) {
@@ -100,6 +100,8 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
             // make payment from buyer to service account
             List<AccountTransactionInfoDto> paymentList = productEventService.processProductPurchasePayment(productPurchase);
             productPurchase.setPurchasePaymentList(paymentList);
+        } else {
+            productPurchase.setPurchaseTotalAmount(0.0);
         }
         //TODO уменьшать кол-во продукта на складе
         if (product.hasQuantityLimit()) {

@@ -43,7 +43,7 @@ public class ProductPropertyConverter {
         try {
             selectedProductPropertyList.forEach(productProperty -> {
                 currentIndicator.set(productProperty);
-                composeVerifiedValue(productProperty);
+                composeVerifiedSelectedValue(productProperty);
             });
         } catch (Exception exc) {
             throw new GameDisciplineManageException(ExceptionMessages.PRODUCT_PURCHASE_PROPERTIES_CONVERTED_ERROR,

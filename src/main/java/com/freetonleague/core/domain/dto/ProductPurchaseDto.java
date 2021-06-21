@@ -44,7 +44,7 @@ public class ProductPurchaseDto {
 
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    private Double purchaseTotalAmount;
+    private Double purchaseTotalAmount = 0.0;
 
     @Builder.Default
     @NotNull
