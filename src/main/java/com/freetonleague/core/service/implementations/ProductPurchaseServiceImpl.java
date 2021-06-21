@@ -113,7 +113,9 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
             product.setQuantityInStock(product.getQuantityInStock() - productPurchase.getPurchaseQuantity());
             productService.editProduct(product);
         }
-        return productPurchaseRepository.save(productPurchase);
+        productPurchaseRepository.save(productPurchase);
+        this.handleProductPurchaseStateChanged(productPurchase);
+        return productPurchase;
     }
 
     /**
@@ -181,6 +183,7 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
     private void handleProductPurchaseStateChanged(ProductPurchase productPurchase) {
         log.warn("~ status for product purchase with id '{}' was changed from '{}' to '{}' ",
                 productPurchase.getId(), productPurchase.getPrevState(), productPurchase.getState());
+        productEventService.processProductPurchaseStateChange(productPurchase, productPurchase.getState());
         productPurchase.setPrevState(productPurchase.getState());
     }
 }

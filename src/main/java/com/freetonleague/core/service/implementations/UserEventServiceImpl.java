@@ -5,13 +5,7 @@ import com.freetonleague.core.config.properties.AppUserProperties;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.dto.UserDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.EventOperationType;
-import com.freetonleague.core.domain.enums.EventProducerModelType;
-import com.freetonleague.core.domain.enums.TransactionTemplateType;
-import com.freetonleague.core.domain.enums.TransactionType;
-import com.freetonleague.core.domain.enums.UserStatusType;
+import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.EventService;
@@ -24,7 +18,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -47,12 +40,6 @@ public class UserEventServiceImpl implements UserEventService {
     private final Set<UUID> cachedInitiatedUserLeagueId = Collections.synchronizedSet(new HashSet<>());
 
     private final Set<UUID> cachedActiveUserLeagueId = Collections.synchronizedSet(new HashSet<>());
-
-    @Override
-    public EventDto add(EventDto event) {
-        log.info("! handle add EventDto");
-        return null;
-    }
 
     //every 10 minutes, timeout before start 1 min
     @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)

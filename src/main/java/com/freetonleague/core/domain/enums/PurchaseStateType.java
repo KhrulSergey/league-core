@@ -8,6 +8,7 @@ import java.util.List;
 public enum PurchaseStateType {
     CREATED,
     APPROVE,
+    FROZEN,
     REJECT,
     CANCELLED;
 

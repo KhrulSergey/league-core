@@ -50,7 +50,7 @@ public class RestNotificationFacadeImpl implements RestNotificationFacade {
                         .type(notificationDto.getType())
                         .leagueId(leagueId)
                         .build())
-                .forEach(notificationService::sendNotification);
+                .forEach(notificationService::sendBrokerNotification);
         return true;
     }
 }

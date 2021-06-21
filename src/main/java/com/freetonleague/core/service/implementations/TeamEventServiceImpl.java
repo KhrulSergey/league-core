@@ -1,6 +1,5 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.TeamStateType;
 import com.freetonleague.core.domain.model.Team;
@@ -18,12 +17,6 @@ public class TeamEventServiceImpl implements TeamEventService {
 
     private final EventService eventService;
     private final FinancialClientService financialClientService;
-
-    @Override
-    public EventDto add(EventDto event) {
-        log.info("! handle add EventDto");
-        return null;
-    }
 
     /**
      * Process user status changing

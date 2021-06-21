@@ -8,6 +8,7 @@ public enum EventProducerModelType {
     TOURNAMENT_MATCH("TOURNAMENT_MATCH"),
     TEAM("TEAM"),
     USER("USER"),
+    PRODUCT_PURCHASE("PRODUCT_PURCHASE"),
     TEST_DATA("TEST_DATA"),
     INPUT_DATA("INPUT_DATA");
 
