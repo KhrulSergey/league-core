@@ -6,7 +6,7 @@ import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.CustomUnexpectedException;
-import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentProposalService;
 import com.freetonleague.core.service.TournamentRoundService;

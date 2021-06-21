@@ -23,7 +23,7 @@ import java.util.List;
 @RestController
 @RequestMapping(path = DocketProposalController.BASE_PATH)
 @RequiredArgsConstructor
-@Api(value = "Docket Activity From Team Management Controller")
+@Api(value = "Docket Proposal Activity Management Controller")
 public class DocketProposalController {
 
     public static final String BASE_PATH = "/api/docket/proposal";
@@ -75,7 +75,7 @@ public class DocketProposalController {
 
     @ApiOperation("Change user proposal to docket by userProposalId (available edit only state, for orgs)")
     @PutMapping(path = PATH_EDIT_USER_PROPOSAL)
-    public ResponseEntity<DocketUserProposalDto> editUserProposal(@RequestParam(value = "user_poposal_id", required = false) Long userProposalId,
+    public ResponseEntity<DocketUserProposalDto> editUserProposal(@RequestParam(value = "user_poposal_id") long userProposalId,
                                                                   @RequestParam(value = "user_poposal_state") ParticipationStateType userProposalState,
                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restDocketProposalFacade.editProposalToDocket(userProposalId, userProposalState, user), HttpStatus.OK);

@@ -8,9 +8,8 @@ import com.freetonleague.core.domain.model.Docket;
 import com.freetonleague.core.domain.model.DocketUserProposal;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.DocketManageException;
-import com.freetonleague.core.exception.ExceptionMessages;
-import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.DocketProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageDepositFinUnit;
 import com.freetonleague.core.security.permissions.CanManageDocket;
@@ -163,7 +162,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
             log.error("!> error while creating user proposal to docket by user.id '{}' to docket.id '{}'.",
                     userProposalDto.getDocketId(), userProposalDto.getDocketId());
             throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_CREATION_ERROR,
-                    "Team proposal was not saved on Portal. Check requested params.");
+                    "Docket proposal was not saved on Portal. Check requested params.");
         }
         return docketProposalMapper.toDto(newUserProposal);
     }
@@ -175,12 +174,12 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
     @Override
     public DocketUserProposalDto editProposalToDocket(Long userProposalId, ParticipationStateType currentUserProposalState, User currentUser) {
         //check if user is org
-        DocketUserProposal userProposal = this.getVerifiedUserProposalById(userProposalId);
+        DocketUserProposal userProposal = this.getVerifiedDocketProposalById(userProposalId);
 
         if (isNull(userProposal)) {
             log.debug("^ User proposal to docket with requested parameters userProposalId '{}' was not found. " +
                     "'editProposalToDocket' in RestDocketProposalFacade request denied", userProposalId);
-            throw new TeamManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR, "User proposal to docket with requested id " + userProposalId + " was not found");
+            throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR, "User proposal to docket with requested id " + userProposalId + " was not found");
         }
 
         userProposal.setState(currentUserProposalState);
@@ -205,13 +204,14 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
      * Returns docket currentUser proposal by id and currentUser with privacy check
      */
     @Override
-    public DocketUserProposal getVerifiedUserProposalById(long id) {
+    public DocketUserProposal getVerifiedDocketProposalById(long id) {
         DocketUserProposal docketUserProposal = docketProposalService.getProposalById(id);
         if (isNull(docketUserProposal)) {
-            log.debug("^ User proposal to docket with requested id '{}' was not found. 'getVerifiedTeamProposalById' in RestTournamentTeamFacadeImpl request denied", id);
-            throw new DocketManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_NOT_FOUND_ERROR, "Tournament team proposal  with requested id " + id + " was not found");
+            log.debug("^ User proposal to docket with requested id '{}' was not found. 'getVerifiedDocketProposalById' in RestTournamentDocketFacadeImpl request denied", id);
+            throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR, "Docket proposal with requested id " + id + " was not found");
         }
         //TODO check logic and make decision about need in restrict proposal modification for orgs
+        // or delete until 01/10/21
 //        if (docketUserProposal.getState().isRejected()) {
 //            log.debug("^ Docket user proposal with requested id '{}' was rejected by orgs. " +
 //                            "'getVerifiedUserProposalById' in RestDocketProposalFacade request denied", id);

@@ -9,9 +9,9 @@ import com.freetonleague.core.domain.model.AccountHolder;
 import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.CustomUnexpectedException;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.AccountFinUnitMapper;
 import com.freetonleague.core.mapper.AccountTransactionFinUnitMapper;
 import com.freetonleague.core.service.RestUserFacade;
@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import javax.validation.Validator;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -202,6 +203,9 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
                     accountTransaction, accountTransactionInfoDto, exc.getMessage());
             throw new CustomUnexpectedException("Saved transferring transaction returned NULL from DB");
         }
+        if (isNull(savedAccountTransaction.getCreatedAt())) {
+            savedAccountTransaction.setCreatedAt(LocalDateTime.now());
+        }
         return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
     }
 
@@ -285,42 +289,6 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         }
         return financialUnitService.isHolderMadeDeposit(account);
     }
-
-//    /**
-//     * Returns created transaction info for specified data
-//     */
-//    @Override
-//    public AccountTransactionInfoDto createWithdrawTransaction(AccountTransactionInfoDto accountTransactionInfoDto) {
-//        if (isNull(accountTransactionInfoDto)) {
-//            log.error("!!> requesting createWithdrawTransaction for NULL accountTransactionInfoDto. Check evoking clients");
-//            return null;
-//        }
-//        Set<ConstraintViolation<AccountTransactionInfoDto>> violations = validator.validate(accountTransactionInfoDto);
-//        if (!violations.isEmpty()) {
-//            log.error("!!> requesting createWithdrawTransaction for accountTransactionInfoDto:'{}' with ConstraintViolations '{}'. Check evoking clients",
-//                    accountTransactionInfoDto, violations);
-//            return null;
-//        }
-//        Account sourceAccount = this.getVerifyAccountByDto(accountTransactionInfoDto.getSourceAccount());
-//        Account targetAccount = this.getVerifyAccountByDto(accountTransactionInfoDto.getTargetAccount());
-//
-//        AccountTransaction accountTransaction = this.composeVerifiedTransferTransaction(sourceAccount, targetAccount,
-//                accountTransactionInfoDto.getAmount(), accountTransactionInfoDto.getTransactionType(),
-//                accountTransactionInfoDto.getTransactionTemplateType());
-//
-//        AccountTransaction savedAccountTransaction;
-//        try {
-//            savedAccountTransaction = financialUnitService.createTransaction(accountTransaction);
-//            if (isNull(savedAccountTransaction)) {
-//                throw new CustomUnexpectedException("Saved transaction returned NULL from DB");
-//            }
-//        } catch (Exception exc) {
-//            log.error("!!> saving transferring transaction '{}' from Dto '{}' cause error with message '{}'. Request denied",
-//                    accountTransaction, accountTransactionInfoDto, exc.getMessage());
-//            throw new CustomUnexpectedException("Saved transferring transaction returned NULL from DB");
-//        }
-//        return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
-//    }
 
     /**
      * Returns created account info for specified holder

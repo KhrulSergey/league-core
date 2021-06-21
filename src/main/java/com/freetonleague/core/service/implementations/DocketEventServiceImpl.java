@@ -7,8 +7,9 @@ import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.domain.model.Docket;
 import com.freetonleague.core.domain.model.DocketUserProposal;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.DocketManageException;
 import com.freetonleague.core.exception.TeamParticipantManageException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.service.DocketEventService;
 import com.freetonleague.core.service.DocketProposalService;
 import com.freetonleague.core.service.FinancialClientService;
@@ -64,9 +65,9 @@ public class DocketEventServiceImpl implements DocketEventService {
         Docket docket = docketUserProposal.getDocket();
         if (docket.getAccessType().isPaid()
                 && this.needToPaidParticipationFee(docketUserProposal)) {
-            log.debug("^ state of team proposal required participation fee purchase. Try to call withdraw transaction in Tournament Event Service.");
+            log.debug("^ state of docket proposal required participation fee purchase. " +
+                    "Try to call purchase (withdraw) transaction from user in DocketEventService.");
             paymentList = this.tryMakeParticipationFeePayment(docketUserProposal);
-
         }
         if (nonNull(firstTonCompanyDocketId) && firstTonCompanyDocketId.equals(docket.getId())) {
             log.debug("^ try to make bonus payment to docket.id '{}' participant.user.guid '{}' of amount '{}'.", firstTonCompanyDocketId,
@@ -85,7 +86,7 @@ public class DocketEventServiceImpl implements DocketEventService {
     }
 
     /**
-     * Returns sign: if prev status was non-active and new status is active we need to debit money from team
+     * Returns sign: if prev status was non-active and new status is active we need to debit money from user
      */
     private boolean needToPaidParticipationFee(DocketUserProposal docketUserProposal) {
         return (isNull(docketUserProposal.getPrevState())
@@ -95,7 +96,7 @@ public class DocketEventServiceImpl implements DocketEventService {
     }
 
     /**
-     * Try to make participation fee and commission from team to tournament
+     * Try to make participation fee and commission from user to docket
      */
     private List<AccountTransactionInfoDto> tryMakeParticipationFeePayment(DocketUserProposal docketUserProposal) {
         User user = docketUserProposal.getUser();
@@ -109,7 +110,7 @@ public class DocketEventServiceImpl implements DocketEventService {
                 AccountHolderType.USER);
         if (userAccountDto.getAmount() < userParticipationFeeAmount) {
             log.warn("~ forbiddenException for create new proposal for user '{}' to docket id '{}' and status '{}'. " +
-                            "User doesn't have enough fund to pay participation fee for all team members",
+                            "User doesn't have enough fund to pay participation fee",
                     user.getLeagueId(), docket.getId(), docket.getStatus());
             throw new TeamParticipantManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
                     String.format("User '%s' doesn't have enough fund to pay participation fee to docket.id '%s'. " +
@@ -125,7 +126,7 @@ public class DocketEventServiceImpl implements DocketEventService {
             log.warn("~ forbiddenException for create new proposal for user.id '{}' to docket id '{}'. " +
                             "Error while transferring fund to pat participation fee. Check requested params.",
                     user.getLeagueId(), docket.getId());
-            throw new TeamParticipantManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
+            throw new DocketManageException(ExceptionMessages.DOCKET_USER_PROPOSAL_VERIFICATION_ERROR,
                     "Error while transferring fund to pay participation fee. Check requested params.");
         }
         return Collections.singletonList(result);
@@ -133,9 +134,9 @@ public class DocketEventServiceImpl implements DocketEventService {
 
     private AccountTransactionInfoDto composeParticipationFeeTransaction(AccountInfoDto accountSourceDto,
                                                                          AccountInfoDto accountTargetDto,
-                                                                         double tournamentFundAmount) {
+                                                                         double docketParticipationFeeAmount) {
         return AccountTransactionInfoDto.builder()
-                .amount(tournamentFundAmount)
+                .amount(docketParticipationFeeAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
                 .transactionType(TransactionType.PAYMENT)
