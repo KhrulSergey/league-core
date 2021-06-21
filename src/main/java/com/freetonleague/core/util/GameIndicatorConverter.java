@@ -1,8 +1,8 @@
 package com.freetonleague.core.util;
 
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.GameDisciplineManageException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;

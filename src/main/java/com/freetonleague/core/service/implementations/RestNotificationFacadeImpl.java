@@ -2,8 +2,8 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.NotificationDto;
 import com.freetonleague.core.domain.dto.NotificationPublicDto;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.security.permissions.CanSendNotification;
 import com.freetonleague.core.service.NotificationService;
 import com.freetonleague.core.service.RestNotificationFacade;

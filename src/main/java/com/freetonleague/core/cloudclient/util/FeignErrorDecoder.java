@@ -1,6 +1,10 @@
 package com.freetonleague.core.cloudclient.util;
 
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.BadRequestException;
+import com.freetonleague.core.exception.CustomUnexpectedException;
+import com.freetonleague.core.exception.InnerServiceFeignException;
+import com.freetonleague.core.exception.NotFoundException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.exception.model.ApiError;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;

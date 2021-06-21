@@ -180,12 +180,11 @@ public class DocketProposalServiceImpl implements DocketProposalService {
     }
 
     /**
-     * Prototype for handle tournament team proposal state
+     * Prototype for handle docket proposal state
      */
     private void handleDocketUserProposalStateChanged(DocketUserProposal userProposal) {
         log.warn("~ status for user proposal to docket with id '{}' was changed from '{}' to '{}' ",
                 userProposal.getId(), userProposal.getPrevState(), userProposal.getState());
-//        tournamentEventService.processTournamentTeamProposalStateChange(tournamentTeamProposal, tournamentTeamProposal.getState());
         userProposal.setPrevState(userProposal.getState());
     }
 }

@@ -1,4 +1,4 @@
-package com.freetonleague.core.exception;
+package com.freetonleague.core.exception.config;
 
 public class ExceptionMessages {
 
@@ -131,8 +131,6 @@ public class ExceptionMessages {
 
     public static final String DOCKET_USER_PROPOSAL_NOT_FOUND_ERROR = "User proposal to Docket was not found. Please check request parameters";
     public static final String DOCKET_USER_PROPOSAL_EXIST_ERROR = "User proposal to Docket already existed. Creation duplicates is prohibited";
-    public static final String DOCKET_USER_PROPOSAL_QUIT_ERROR = "Quit from specified docket is prohibited. Request is rejected. Please contact to organizers to get more information.";
-    public static final String DOCKET_USER_PROPOSAL_VISIBLE_ERROR = "User proposal to Docket is not visible and modification forbidden. Please contact to organizers.";
     public static final String DOCKET_USER_PROPOSAL_VALIDATION_ERROR = "User proposal to Docket was specified with errors. Please check request parameters";
     public static final String DOCKET_USER_PROPOSAL_VERIFICATION_ERROR = "User can't participate in specified docket. Please check account balance or contact to organizers";
     public static final String DOCKET_USER_PROPOSAL_CREATION_ERROR = "User proposal to Docket creation failed. Please try again";
@@ -152,6 +150,22 @@ public class ExceptionMessages {
     public static final String NEWS_CREATION_ERROR = "News creation failed. Please try again";
     public static final String NEWS_VALIDATION_ERROR = "News was specified with errors. Please check request parameters";
     public static final String NEWS_MODIFICATION_ERROR = "News modifying failed. Please try again";
+
+    public static final String PRODUCT_NOT_FOUND_ERROR = "Product was not found. Please check request parameters";
+    public static final String PRODUCT_VISIBLE_ERROR = "Product is not visible and modification forbidden. Please contact to organizers.";
+    public static final String PRODUCT_STATUS_DELETE_ERROR = "Product delete should be done with specific request. Please try again with other method.";
+    public static final String PRODUCT_CREATION_ERROR = "Product creation failed. Please try again";
+    public static final String PRODUCT_VALIDATION_ERROR = "Product was specified with errors. Please check request parameters";
+    public static final String PRODUCT_MODIFICATION_ERROR = "Product modifying failed. Please try again";
+    public static final String PRODUCT_PROPERTIES_CONVERTED_ERROR = "Product properties was badly specified. Please try to modify request";
+
+    public static final String PRODUCT_PURCHASE_NOT_FOUND_ERROR = "Product purchase was not found. Please check request parameters";
+    public static final String PRODUCT_PURCHASE_VALIDATION_ERROR = "Product purchase was specified with errors. Please check request parameters";
+    public static final String PRODUCT_PURCHASE_VERIFICATION_ERROR = "User can't purchase specified product quantity. Please check account balance or contact to organizers";
+    public static final String PRODUCT_PURCHASE_CREATION_ERROR = "Product purchase creation failed. Please try again";
+    public static final String PRODUCT_IS_OUT_OF_STOCK_ERROR = "Product is out of stock. Product purchase creation failed.";
+    public static final String PRODUCT_PURCHASE_MODIFICATION_ERROR = "Product purchase modifying failed. Please try again";
+    public static final String PRODUCT_PURCHASE_PROPERTIES_CONVERTED_ERROR = "Product purchase properties was badly specified. Please try to modify request";
 
     public static final String NOTIFICATION_VALIDATION_ERROR = "Notification was specified with errors. Please check request parameters";
 

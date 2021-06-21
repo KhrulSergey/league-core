@@ -7,4 +7,8 @@ public enum AccessType {
     public boolean isPaid() {
         return this == PAID_ACCESS;
     }
+
+    public boolean isFree() {
+        return this == FREE_ACCESS;
+    }
 }

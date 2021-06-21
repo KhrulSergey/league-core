@@ -5,8 +5,8 @@ import com.freetonleague.core.domain.enums.DocketStatusType;
 import com.freetonleague.core.domain.model.Docket;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.DocketManageException;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.DocketMapper;
 import com.freetonleague.core.security.permissions.CanManageDocket;
 import com.freetonleague.core.service.DocketService;
@@ -46,7 +46,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
     }
 
     /**
-     * Returns list of all teams filtered by requested params with detailed info
+     * Returns list of all dockets filtered by requested params with detailed info
      */
     @Override
     public Page<DocketDto> getDocketList(Pageable pageable, String creatorLeagueId, List<DocketStatusType> statusList) {
@@ -99,9 +99,9 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
 
         modifiedDocket = docketService.editDocket(modifiedDocket);
         if (isNull(modifiedDocket)) {
-            log.error("!> error while modifying Media resource from dto '{}'.", docketDto);
+            log.error("!> error while modifying docket from dto '{}'.", docketDto);
             throw new DocketManageException(ExceptionMessages.DOCKET_MODIFICATION_ERROR,
-                    "Media resource was not updated on Portal. Check requested params.");
+                    "Docket was not updated on Portal. Check requested params.");
         }
         return docketMapper.toDto(modifiedDocket);
     }
@@ -131,7 +131,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
         Docket docket = docketService.getDocket(id);
         if (isNull(docket)) {
             log.debug("^ Docket with requested id '{}' was not found. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id);
-            throw new DocketManageException(ExceptionMessages.DOCKET_NOT_FOUND_ERROR, "Media resource with requested id " + id + " was not found");
+            throw new DocketManageException(ExceptionMessages.DOCKET_NOT_FOUND_ERROR, "Docket with requested id " + id + " was not found");
         }
         if (docket.getStatus().isDeleted()) {
             log.debug("^ Docket with requested id '{}' was '{}'. 'getVerifiedDocketById' in RestDocketFacadeImpl request denied", id, docket.getStatus());
