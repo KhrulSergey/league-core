@@ -45,6 +45,7 @@ create table if not exists public.product_purchases
     purchase_total_amount       bigint,
     selected_product_parameters jsonb,
     state                       varchar(255),
+    type                        varchar(255),
     buyer_comment               text,
     manager_comment             text,
     purchase_payment_list       jsonb,

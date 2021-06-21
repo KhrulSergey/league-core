@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 @Slf4j
@@ -150,6 +151,16 @@ public class RestProductFacadeImpl implements RestProductFacade {
             throw new ConstraintViolationException(violations);
         }
         Product product = productMapper.fromDto(productDto);
+        if (product.getAccessType().isFree() && nonNull(product.getCost())) {
+            log.debug("^ forbiddenException for create new product. Specified access type required NULL cost");
+            throw new ValidationException(ExceptionMessages.PRODUCT_VALIDATION_ERROR, "accessType",
+                    "specified parameter 'accessType' required NULL cost");
+        }
+        if (product.getAccessType().isPaid() && isNull(product.getCost())) {
+            log.debug("^ forbiddenException for create new product. Specified access type required NOT NULL cost");
+            throw new ValidationException(ExceptionMessages.PRODUCT_VALIDATION_ERROR, "accessType",
+                    "specified parameter 'accessType' required NOT NULL cost");
+        }
         product.setProductParameters(ProductPropertyConverter.convertAndValidateProperties(product.getProductParameters()));
         return product;
     }
