@@ -29,6 +29,8 @@ public class TournamentSeriesDto {
     @NotNull
     private TournamentStatusType status;
 
+    private Boolean isIncomplete = false;
+
     private LocalDateTime startPlannedDate;
 
     private LocalDateTime startDate;

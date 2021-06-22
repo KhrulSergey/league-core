@@ -55,12 +55,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     @Value("${freetonleague.tournament.auto-start:false}")
     private boolean tournamentAutoStartEnabled;
 
-    @Override
-    public EventDto add(EventDto event) {
-        log.info("! handle add EventDto");
-        return null;
-    }
-
     //every 10 minutes, timout before start 1 min
     @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
     void monitor() {

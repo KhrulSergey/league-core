@@ -1,6 +1,7 @@
 package com.freetonleague.core.mapper;
 
 import com.freetonleague.core.domain.dto.ProductPurchaseDto;
+import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
 import com.freetonleague.core.domain.model.ProductPurchase;
 import org.mapstruct.*;
 
@@ -15,6 +16,13 @@ public interface ProductPurchaseMapper {
     @Mapping(target = "productId", source = "entity.product.id")
     @Mapping(target = "leagueId", expression = "java(entity.getUser().getLeagueId().toString())")
     ProductPurchaseDto toDto(ProductPurchase entity);
+
+    @Mapping(target = "username", source = "entity.user.username")
+    @Mapping(target = "leagueId", expression = "java(entity.getUser().getLeagueId().toString())")
+    @Mapping(target = "productId", source = "entity.product.id")
+    @Mapping(target = "productName", source = "entity.product.name")
+    @Mapping(target = "purchaseState", source = "entity.state")
+    ProductPurchaseNotificationDto toNotification(ProductPurchase entity);
 
     ProductPurchase fromDto(ProductPurchaseDto dto);
 

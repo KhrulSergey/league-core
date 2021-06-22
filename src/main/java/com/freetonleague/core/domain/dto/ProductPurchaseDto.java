@@ -42,6 +42,7 @@ public class ProductPurchaseDto {
     @DecimalMin("0.0000000000000001")
     private Double purchaseQuantity = 1.0;
 
+    @Builder.Default
     @ApiModelProperty(readOnly = true)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Double purchaseTotalAmount = 0.0;
@@ -50,7 +51,6 @@ public class ProductPurchaseDto {
     @NotNull
     @ApiModelProperty(required = true)
     private PurchaseStateType state = PurchaseStateType.CREATED;
-
 
     @ApiModelProperty(notes = "Comment from user about purchase")
     private String buyerComment;
