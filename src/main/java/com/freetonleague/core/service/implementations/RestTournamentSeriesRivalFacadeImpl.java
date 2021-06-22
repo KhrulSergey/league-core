@@ -101,7 +101,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
                 log.warn("~ parameter 'SeriesRivalDto.tournamentSeriesId' isn't fit existed ref from SeriesRival to Series. " +
                         "Request to change reference from SeriesRival to other Series is prohibited in getVerifiedSeriesRivalByDto");
                 throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_VALIDATION_ERROR, "SeriesRivalDto.tournamentSeriesId",
-                        "parameter 'tournament organizer' is not Series by id to tournament for getVerifiedSeriesRivalByDto");
+                        "parameter 'tournamentSeriesId' isn't fit existed ref from SeriesRival to Series for getVerifiedSeriesRivalByDto");
             }
             tournamentSeriesRival.setStatus(seriesRivalDto.getStatus());
             tournamentSeriesRival.setWonPlaceInSeries(seriesRivalDto.getWonPlaceInSeries());
