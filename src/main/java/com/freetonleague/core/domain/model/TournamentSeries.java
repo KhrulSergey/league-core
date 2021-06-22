@@ -64,6 +64,9 @@ public class TournamentSeries extends ExtendedBaseEntity {
     @Transient
     private TournamentStatusType prevStatus;
 
+    @Column(name = "is_incomplete")
+    private Boolean isIncomplete = false;
+
     @EqualsAndHashCode.Exclude
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "tournament_series_parents",
