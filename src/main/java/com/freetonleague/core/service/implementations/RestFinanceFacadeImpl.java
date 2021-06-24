@@ -3,10 +3,14 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
+import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.TransactionTemplateType;
 import com.freetonleague.core.domain.enums.TransactionType;
+import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
+import com.freetonleague.core.domain.model.Account;
+import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.User;
@@ -17,7 +21,14 @@ import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.security.permissions.CanManageFinTransaction;
 import com.freetonleague.core.security.permissions.CanManageSystem;
-import com.freetonleague.core.service.*;
+import com.freetonleague.core.service.FinancialClientService;
+import com.freetonleague.core.service.RestFinanceFacade;
+import com.freetonleague.core.service.RestTeamFacade;
+import com.freetonleague.core.service.RestTournamentFacade;
+import com.freetonleague.core.service.RestUserFacade;
+import com.freetonleague.core.service.SettingsService;
+import com.freetonleague.core.service.financeUnit.FinancialUnitService;
+import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,10 +54,13 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
 
     //call core-service to get data about user accounting
     private final FinancialClientService financialClientService;
+    private final FinancialUnitService financialUnitService;
     private final RestTournamentFacade restTournamentFacade;
     private final RestTeamFacade restTeamFacade;
     private final RestUserFacade restUserFacade;
     private final UserMapper userMapper;
+    private final SettingsService settingsService;
+    private final RestFinancialUnitFacade restFinancialUnitFacade;
 
     @Value("${freetonleague.service.league-finance.min-withdraw-value:12.0}")
     private Double minWithdrawFundValue;
@@ -247,6 +261,40 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
                     "Applying coupon with hash " + couponHash + " was unsuccessful");
         }
         return account;
+    }
+
+    @Override
+    public MPubgTonExchangeAmountDto getMPubgExchangeAmountForTon(Double tonAmount) {
+        Double rate = Double.valueOf(settingsService.getValue(SettingsService.TON_TO_UC_EXCHANGE_RATE_KEY));
+
+        return MPubgTonExchangeAmountDto.builder()
+                .tonAmount(tonAmount)
+                .ucAmount(tonAmount * rate)
+                .build();
+    }
+
+    @Override
+    public void createMPubgWithdrawalTransaction(MPubgTonWithdrawalCreationFilter filter, User user) {
+        MPubgTonExchangeAmountDto amountDto = getMPubgExchangeAmountForTon(filter.getAmount());
+
+        Account account = financialUnitService.getAccountByHolderExternalGUIDAndType(
+                user.getLeagueId(), AccountHolderType.USER);
+
+        AccountInfoDto targetAccount = restFinancialUnitFacade.findAccountByExternalAddress("MPUBG");
+
+        AccountTransaction accountTransaction = AccountTransaction.builder()
+                .amount(filter.getAmount())
+                .sourceAccount(account)
+                .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(targetAccount.getGUID())))
+                .transactionType(TransactionType.PAYMENT)
+                .transactionTemplateType(TransactionTemplateType.PRODUCT_PURCHASE)
+                .status(AccountTransactionStatusType.FINISHED)
+                .build();
+
+        financialUnitService.createTransaction(accountTransaction);
+
+        //TODO: make rest client
+        log.info("From TON to UC request. {} TON to {} UC", filter.getAmount(), amountDto.getUcAmount());
     }
 
     /**
