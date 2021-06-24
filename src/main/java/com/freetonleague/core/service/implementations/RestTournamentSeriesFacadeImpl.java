@@ -11,6 +11,7 @@ import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.TournamentSeriesMapper;
@@ -136,6 +137,90 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
     }
 
     /**
+     * Edit tournament series by rivals (set only winner of series and wonPlaceInSeries for rival).
+     */
+    @Override
+    public TournamentSeriesDto editSeriesByRivals(long id, TournamentSeriesDto tournamentSeriesDto, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'editSeriesByRivals' in RestTournamentSeriesFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'editSeriesByRivals' request denied");
+        }
+        if (isNull(tournamentSeriesDto) || tournamentSeriesDto.getId() != id) {
+            log.warn("~ parameter 'tournamentSeriesDto.id' is not match specified id in parameters for editSeriesByRivals");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournamentSeriesDto.id",
+                    "parameter 'tournamentSeriesDto.id' is not match specified id in parameters for editSeriesByRivals");
+        }
+        Set<ConstraintViolation<TournamentSeriesDto>> settingsViolations = validator.validate(tournamentSeriesDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament series dto: '{}' have constraint violations: '{}'",
+                    tournamentSeriesDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+
+        // get current series by ID from DB
+        TournamentSeries tournamentSeries = this.getVerifiedSeriesById(tournamentSeriesDto.getId());
+        Boolean isSeriesModifiableByRival = tournamentSeriesService.isSeriesModifiableByRival(tournamentSeries);
+        if (isNull(isSeriesModifiableByRival) || !isSeriesModifiableByRival) {
+            log.warn("~ tournament series can be modified by rivals. Tournament is not self-hosted. Request rejected.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
+                    "Modifying tournament series by rival was rejected. Tournament is not self-hosted. Check requested params.");
+        }
+
+        if (TournamentStatusType.finishedStatusList.contains(tournamentSeries.getStatus())) {
+            log.warn("~ tournament series has finished, unable to modify by rival declined in editSeriesByRivals.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
+                    "Modifying finished tournament series by rival was rejected. Check requested params and method.");
+        }
+        if (!tournamentSeriesService.isUserSeriesRivalParticipant(tournamentSeries, user)) {
+            log.warn("~ user is not actively participate in specified tournament series has finished. Request to modify series is rejected.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
+                    "User is not actively participate in specified tournament series. Modifying tournament series was rejected.");
+        }
+
+        // check and compose match rival list (modify WonPlaceInMatch for existed rival)
+        List<TournamentSeriesRivalDto> tournamentSeriesRivalDtoList = tournamentSeriesDto.getSeriesRivalList();
+        List<TournamentSeriesRival> tournamentSeriesRivalList = null;
+        if (isNotEmpty(tournamentSeriesRivalDtoList)) {
+            tournamentSeriesRivalList = tournamentSeriesRivalDtoList.parallelStream()
+                    .map(restTournamentSeriesRivalFacade::getVerifiedSeriesRivalByDtoForRival)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+        }
+        if (isNotEmpty(tournamentSeriesRivalList)) {
+            for (TournamentSeriesRival tournamentSeriesRival : tournamentSeriesRivalList) {
+                tournamentSeriesRival.setTournamentSeries(tournamentSeries);
+            }
+            tournamentSeries.setSeriesRivalList(tournamentSeriesRivalList);
+        }
+
+        // try to define series winner from SeriesWinner field or rival from SeriesRivalList with First place
+        TournamentSeriesRivalDto seriesRivalWinnerDto = tournamentSeriesDto.getSeriesWinner();
+        TournamentSeriesRival seriesWinner = tournamentSeries.getSeriesWinner();
+        if (isNotEmpty(tournamentSeriesRivalList)) {
+            //try to find series winner (first place)
+            seriesWinner = tournamentSeriesRivalList.parallelStream()
+                    .filter(s -> nonNull(s.getWonPlaceInSeries())
+                            && s.getWonPlaceInSeries().isWinner())
+                    .findFirst().orElse(null);
+        } else if (nonNull(seriesRivalWinnerDto)) {
+            seriesRivalWinnerDto.setWonPlaceInSeries(TournamentWinnerPlaceType.FIRST);
+            seriesWinner = restTournamentSeriesRivalFacade.getVerifiedSeriesRivalByDtoForRival(seriesRivalWinnerDto);
+        }
+        if (nonNull(seriesWinner)) {
+            seriesWinner.setTournamentSeries(tournamentSeries);
+            tournamentSeries.setSeriesWinner(seriesWinner);
+        }
+
+        tournamentSeries = tournamentSeriesService.editSeries(tournamentSeries);
+        if (isNull(tournamentSeries)) {
+            log.error("!> error while editing tournament series by rival from dto '{}' for user '{}'.", tournamentSeriesDto, user);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
+                    "Tournament series was not updated on Portal. Check requested params.");
+        }
+        return tournamentSeriesMapper.toDto(tournamentSeries);
+    }
+
+    /**
      * Mark 'deleted' tournament series.
      */
     @CanManageTournament
@@ -177,7 +262,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         if (isNull(tournamentSeriesDto)) {
             log.warn("~ parameter 'tournamentSeriesDto' is NULL for getVerifiedSeriesByDto");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_VALIDATION_ERROR, "tournamentSeriesDto",
-                    "parameter 'tournamentSeriesDto' is not set for get or modify tournament series");
+                    "parameter 'tournamentSeriesDto' is not set for add or modify tournament series");
         }
         Set<ConstraintViolation<TournamentSeriesDto>> settingsViolations = validator.validate(tournamentSeriesDto);
         if (!settingsViolations.isEmpty()) {
@@ -196,7 +281,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             tournamentSeries.setSeriesRivalList(existedSeries.getSeriesRivalList());
         }
 
-        // check and compose match rival list (modify only WonPlaceInMatch for rival)
+        // check and compose match rival list (modify Status, WonPlaceInMatch, Indicators for rival)
         List<TournamentSeriesRivalDto> tournamentSeriesRivalDtoList = tournamentSeriesDto.getSeriesRivalList();
         List<TournamentSeriesRival> tournamentSeriesRivalList = null;
         if (isNotEmpty(tournamentSeriesRivalDtoList)) {
@@ -205,7 +290,7 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
-        if (nonNull(tournamentSeriesRivalList)) {
+        if (isNotEmpty(tournamentSeriesRivalList)) {
             tournamentSeriesRivalList = tournamentSeriesRivalList.parallelStream()
                     .peek(s -> s.setTournamentSeries(tournamentSeries)).collect(Collectors.toList());
             tournamentSeries.setSeriesRivalList(tournamentSeriesRivalList);

@@ -82,7 +82,7 @@ public class TournamentTeamProposal extends BaseEntity {
      * Team participant list with their role (status) in tournament
      */
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentTeamProposal", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "tournamentTeamProposal", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 
     @Transient

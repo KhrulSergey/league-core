@@ -15,7 +15,6 @@ import com.freetonleague.core.service.UserService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -42,7 +41,7 @@ public class UserEventServiceImpl implements UserEventService {
     private final Set<UUID> cachedActiveUserLeagueId = Collections.synchronizedSet(new HashSet<>());
 
     //every 10 minutes, timeout before start 1 min
-    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
+//    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
     private void monitorForActiveUsers() {
         log.debug("^ Run UserEventService monitor For Update Active Users");
 
@@ -75,7 +74,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 2 hours, timeout before start 2 min
-    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
+//    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
     private void monitorForInitiatedUsers() {
         log.debug("^ Run UserEventService monitor For Initiated Users");
 

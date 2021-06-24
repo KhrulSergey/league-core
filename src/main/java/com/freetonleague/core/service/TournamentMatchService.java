@@ -68,6 +68,14 @@ public interface TournamentMatchService {
     boolean isExistsTournamentMatchById(long id);
 
     /**
+     * Returns sign if tournament match can be modified by match rival participant
+     *
+     * @param tournamentMatch to check settings
+     * @return true if match can be modified or false - if not
+     */
+    Boolean isMatchModifiableByRival(TournamentMatch tournamentMatch);
+
+    /**
      * Returns sign of all match for series was finished.
      */
     boolean isAllMatchesFinishedBySeries(TournamentSeries tournamentSeries);

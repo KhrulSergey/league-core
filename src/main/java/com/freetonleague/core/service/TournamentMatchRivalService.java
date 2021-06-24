@@ -4,6 +4,7 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentMatchRivalParticipant;
+import com.freetonleague.core.domain.model.User;
 
 import java.util.List;
 
@@ -80,6 +81,15 @@ public interface TournamentMatchRivalService {
      * @return true is tournament match rival participant exists, false - if not
      */
     boolean isExistsTournamentMatchRivalParticipantById(long id);
+
+    /**
+     * Returns sign if user is tournament match rival participant
+     *
+     * @param tournamentMatch to check participation
+     * @param user            to check participation in match
+     * @return true if user is participant of match or false - if not
+     */
+    boolean isUserMatchRivalParticipant(TournamentMatch tournamentMatch, User user);
 
     /**
      * Verify tournament match rival info with validation and business check

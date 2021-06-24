@@ -61,6 +61,5 @@ public class TournamentMatchRivalParticipant extends ExtendedBaseEntity {
     @Type(type = "jsonb")
     @Column(name = "indicators", columnDefinition = "jsonb")
     private List<GameDisciplineIndicatorDto> participantIndicator;
-
 }
 
