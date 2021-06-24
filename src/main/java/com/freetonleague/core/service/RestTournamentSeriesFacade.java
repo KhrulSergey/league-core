@@ -62,6 +62,16 @@ public interface RestTournamentSeriesFacade {
     TournamentSeriesDto editSeries(long id, TournamentSeriesDto tournamentSeriesDto, User user);
 
     /**
+     * Edit tournament series by rivals (set only winner of series and wonPlaceInSeries for rival).
+     *
+     * @param id                  Identity of a series
+     * @param tournamentSeriesDto data to be edited
+     * @param user                current user from Session
+     * @return Edited tournament series
+     */
+    TournamentSeriesDto editSeriesByRivals(long id, TournamentSeriesDto tournamentSeriesDto, User user);
+
+    /**
      * Mark 'deleted' tournament series.
      *
      * @param id   identify series to be deleted

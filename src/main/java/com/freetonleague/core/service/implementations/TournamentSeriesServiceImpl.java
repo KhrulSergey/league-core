@@ -131,7 +131,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     @Override
     public TournamentSeries editSeries(TournamentSeries tournamentSeries) {
         boolean checkEmbeddedMatchList = true;
-        if (!this.isExistsTournamentSeriesById(tournamentSeries.getId())) {
+        if (isNull(tournamentSeries.getId())) {
             log.error("!> requesting modify tournament series '{}' for non-existed tournament series. Check evoking clients",
                     tournamentSeries.getId());
             return null;
@@ -203,6 +203,22 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
     @Override
     public TournamentSeriesRival getSeriesRival(long id) {
         return tournamentSeriesRivalRepository.findById(id).orElse(null);
+    }
+
+    /**
+     * Returns sign if user is tournament series rival participant
+     */
+    @Override
+    public boolean isUserSeriesRivalParticipant(TournamentSeries tournamentSeries, User user) {
+        return tournamentSeriesRivalRepository.isUserParticipateInSeries(tournamentSeries, user.getLeagueId());
+    }
+
+    /**
+     * Returns sign if tournament series can be modified by series rival participant
+     */
+    @Override
+    public Boolean isSeriesModifiableByRival(TournamentSeries tournamentSeries) {
+        return tournamentSeriesRepository.isSeriesModifiableByRival(tournamentSeries);
     }
 
     /**

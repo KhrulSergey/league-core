@@ -4,6 +4,7 @@ package com.freetonleague.core.service;
 import com.freetonleague.core.domain.model.TournamentRound;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.TournamentSeriesRival;
+import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -85,6 +86,23 @@ public interface TournamentSeriesService {
      * @return tournament series rival entity or NULL of not found
      */
     TournamentSeriesRival getSeriesRival(long id);
+
+    /**
+     * Returns sign if user is tournament series rival participant
+     *
+     * @param tournamentSeries to check participation
+     * @param user             to check participation in series
+     * @return true if user is participant of series or false - if not
+     */
+    boolean isUserSeriesRivalParticipant(TournamentSeries tournamentSeries, User user);
+
+    /**
+     * Returns sign if tournament series can be modified by series rival participant
+     *
+     * @param tournamentSeries to check settings
+     * @return true if series can be modified or false - if not
+     */
+    Boolean isSeriesModifiableByRival(TournamentSeries tournamentSeries);
 
     /**
      * Delete tournament series rival by id

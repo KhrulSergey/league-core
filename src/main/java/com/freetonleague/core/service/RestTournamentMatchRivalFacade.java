@@ -71,6 +71,11 @@ public interface RestTournamentMatchRivalFacade {
      */
     TournamentMatchRival getVerifiedMatchRivalByDto(TournamentMatchRivalDto matchRivalDto);
 
+    /**
+     * Returns tournament match rival by dto with privacy check for modifying by rivals
+     */
+    TournamentMatchRival getVerifiedMatchRivalByDtoForRival(TournamentMatchRivalDto matchRivalDto);
+
     TournamentMatchRival setGameIndicatorMultipliersToMatchRival(TournamentMatchRival rival, TournamentSeries tournamentSeries);
 
 }

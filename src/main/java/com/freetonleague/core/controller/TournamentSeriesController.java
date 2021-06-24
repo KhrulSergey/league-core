@@ -25,6 +25,7 @@ public class TournamentSeriesController {
     public static final String PATH_GET = "/{series_id}";
     public static final String PATH_ADD = "/";
     public static final String PATH_EDIT = "/{series_id}";
+    public static final String PATH_EDIT_BY_RIVALS = "/for-rivals/{series_id}";
     public static final String PATH_DELETE = "/{series_id}";
     public static final String PATH_DELETE_SERIES_RIVAL = "/rival/{rival_id}";
 
@@ -58,6 +59,14 @@ public class TournamentSeriesController {
                                                           @RequestBody TournamentSeriesDto tournamentSeriesDto,
                                                           @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentSeriesFacade.editSeries(id, tournamentSeriesDto, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Edit series winners (only for tournament participants/rivals)")
+    @PutMapping(path = PATH_EDIT_BY_RIVALS)
+    public ResponseEntity<TournamentSeriesDto> editSeriesByRivals(@PathVariable("series_id") long id,
+                                                                  @RequestBody TournamentSeriesDto tournamentSeriesDto,
+                                                                  @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentSeriesFacade.editSeriesByRivals(id, tournamentSeriesDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Delete (archive) series (only for orgs)")
