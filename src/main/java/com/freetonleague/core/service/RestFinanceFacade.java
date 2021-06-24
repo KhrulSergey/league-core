@@ -2,7 +2,9 @@ package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
+import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -91,4 +93,9 @@ public interface RestFinanceFacade {
      * @return updated Account Balance
      */
     AccountInfoDto applyCouponByHashForUser(String couponHash, User user);
+
+    MPubgTonExchangeAmountDto getMPubgExchangeAmountForTon(Double tonAmount);
+
+    void createMPubgWithdrawalTransaction(MPubgTonWithdrawalCreationFilter filter, User user);
+
 }
