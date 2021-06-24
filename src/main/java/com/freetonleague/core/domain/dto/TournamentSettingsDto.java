@@ -48,6 +48,8 @@ public class TournamentSettingsDto {
     @Min(1)
     private Integer matchCountPerSeries;
 
+    private Boolean selfHosted;
+
     private Map<Integer, TournamentRoundSettingDto> tournamentRoundSettingsList;
 
     @Min(0)

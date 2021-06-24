@@ -4,6 +4,7 @@ import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatus
 import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentMatchRivalParticipant;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TournamentMatchRivalParticipantRepository;
 import com.freetonleague.core.repository.TournamentMatchRivalRepository;
 import com.freetonleague.core.service.TournamentMatchRivalService;
@@ -156,6 +157,14 @@ public class TournamentMatchRivalServiceImpl implements TournamentMatchRivalServ
     @Override
     public boolean isExistsTournamentMatchRivalParticipantById(long id) {
         return tournamentMatchRivalParticipantRepository.existsById(id);
+    }
+
+    /**
+     * Returns sign if user is tournament match rival participant
+     */
+    @Override
+    public boolean isUserMatchRivalParticipant(TournamentMatch tournamentMatch, User user) {
+        return tournamentMatchRivalRepository.isUserParticipateInMatch(tournamentMatch, user.getLeagueId());
     }
 
     /**

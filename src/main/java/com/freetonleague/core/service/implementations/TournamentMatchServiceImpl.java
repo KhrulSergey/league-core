@@ -95,7 +95,7 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (!this.verifyTournamentMatch(tournamentMatch)) {
             return null;
         }
-        if (!this.isExistsTournamentMatchById(tournamentMatch.getId())) {
+        if (isNull(tournamentMatch.getId())) {
             log.error("!> requesting modify tournament match '{}' for non-existed tournament match. Check evoking clients",
                     tournamentMatch.getId());
             return null;
@@ -140,6 +140,14 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     @Override
     public boolean isExistsTournamentMatchById(long id) {
         return tournamentMatchRepository.existsById(id);
+    }
+
+    /**
+     * Returns sign if tournament match can be modified by match rival participant
+     */
+    @Override
+    public Boolean isMatchModifiableByRival(TournamentMatch tournamentMatch) {
+        return tournamentMatchRepository.isMatchModifiableByRival(tournamentMatch);
     }
 
     /**

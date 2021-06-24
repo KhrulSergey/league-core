@@ -86,7 +86,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
         if (isNull(seriesRivalDto)) {
             log.warn("~ parameter 'seriesRivalDto' is NULL for getVerifiedSeiesRivalByDto");
             throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_VALIDATION_ERROR, "seriesRivalDto",
-                    "parameter 'seriesRivalDto' is not set for get or modify tournament series rival");
+                    "parameter 'seriesRivalDto' is not set for add or modify tournament series rival");
         }
         Set<ConstraintViolation<TournamentSeriesRivalDto>> settingsViolations = validator.validate(seriesRivalDto);
         if (!settingsViolations.isEmpty()) {
@@ -122,6 +122,38 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
             }
         }
 
+        return tournamentSeriesRival;
+    }
+
+    /**
+     * Returns tournament series rival by dto with privacy check for modifying by rivals
+     */
+    @Override
+    public TournamentSeriesRival getVerifiedSeriesRivalByDtoForRival(TournamentSeriesRivalDto seriesRivalDto) {
+        if (isNull(seriesRivalDto)) {
+            log.warn("~ parameter 'seriesRivalDto' is NULL for getVerifiedSeriesRivalByDtoForRival");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_VALIDATION_ERROR, "seriesRivalDto",
+                    "parameter 'seriesRivalDto' is not set for modify tournament series rival");
+        }
+        if (isNull(seriesRivalDto.getId())) {
+            log.warn("~ parameter 'seriesRivalDto.id' is NULL for getVerifiedSeriesRivalByDtoForRival");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_VALIDATION_ERROR, "seriesRivalDto.id",
+                    "parameter 'seriesRivalDto.id' is not set for modify tournament series rival");
+        }
+        Set<ConstraintViolation<TournamentSeriesRivalDto>> settingsViolations = validator.validate(seriesRivalDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament series rival dto: '{}' have constraint violations: '{}'",
+                    seriesRivalDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+        TournamentSeriesRival tournamentSeriesRival = this.getVerifiedSeriesRivalById(seriesRivalDto.getId());
+        if (!seriesRivalDto.getTournamentSeriesId().equals(tournamentSeriesRival.getTournamentSeries().getId())) {
+            log.warn("~ parameter 'SeriesRivalDto.tournamentSeriesId' isn't fit existed ref from SeriesRival to Series. " +
+                    "Request to change reference from SeriesRival to other Series is prohibited in getVerifiedSeriesRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_SERIES_RIVAL_VALIDATION_ERROR, "SeriesRivalDto.tournamentSeriesId",
+                    "parameter 'tournamentSeriesId' isn't fit existed ref from SeriesRival to Series for getVerifiedSeriesRivalByDto");
+        }
+        tournamentSeriesRival.setWonPlaceInSeries(seriesRivalDto.getWonPlaceInSeries());
         return tournamentSeriesRival;
     }
 }

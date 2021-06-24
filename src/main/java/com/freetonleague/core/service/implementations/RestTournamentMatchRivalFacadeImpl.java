@@ -265,6 +265,40 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
         return tournamentMatchRival;
     }
 
+    /**
+     * Returns tournament match rival by dto with privacy check for modifying by rivals
+     */
+    @Override
+    public TournamentMatchRival getVerifiedMatchRivalByDtoForRival(TournamentMatchRivalDto matchRivalDto) {
+        if (isNull(matchRivalDto)) {
+            log.warn("~ parameter 'matchRivalDto' is NULL for getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchRivalDto",
+                    "parameter 'matchRivalDto' is not set for get or modify tournament match rival");
+        }
+        if (isNull(matchRivalDto.getId())) {
+            log.warn("~ parameter 'matchRivalDto.id' is NULL for getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchRivalDto.id",
+                    "parameter 'matchRivalDto.id' is not set for modify tournament match rival");
+        }
+        Set<ConstraintViolation<TournamentMatchRivalDto>> settingsViolations = validator.validate(matchRivalDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament match rival dto: '{}' have constraint violations: '{}'",
+                    matchRivalDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+        //check if match rival existed
+        TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId());
+        if (!matchRivalDto.getTournamentMatchId().equals(tournamentMatchRival.getTournamentMatch().getId())) {
+            log.warn("~ parameter 'matchRivalDto.tournamentMatchId' isn't fit existed ref from matchRival to match. " +
+                    "Request to change reference from matchRival to other match is prohibited in getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "matchRivalDto.tournamentMatchId",
+                    "parameter 'tournament organizer' is not match by id to tournament for getVerifiedMatchRivalByDto");
+        }
+
+        tournamentMatchRival.setWonPlaceInMatch(matchRivalDto.getWonPlaceInMatch());
+        return tournamentMatchRival;
+    }
+
 
     @Override
     public TournamentMatchRival setGameIndicatorMultipliersToMatchRival(TournamentMatchRival rival, TournamentSeries tournamentSeries) {

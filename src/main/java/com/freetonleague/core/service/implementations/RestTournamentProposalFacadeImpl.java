@@ -398,7 +398,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     /**
      * Returns new TournamentTeamParticipant from specified parameters
      */
-    public TournamentTeamParticipant createTournamentTeamParticipant(TeamParticipant teamParticipant, TournamentTeamProposal teamProposal) {
+    private TournamentTeamParticipant createTournamentTeamParticipant(TeamParticipant teamParticipant, TournamentTeamProposal teamProposal) {
         return TournamentTeamParticipant.builder()
                 .status(TournamentTeamParticipantStatusType.MAIN) //TODO change logic to getting team-participants type form requested DTO
                 .teamParticipant(teamParticipant)

@@ -72,6 +72,13 @@ public class TournamentSettings extends ExtendedBaseEntity {
     private Double prizeFund;
 
     /**
+     * Settings that allow tournament participants (rivals) to manage winners of the series and matches
+     */
+    @Builder.Default
+    @Column(name = "self_hosted")
+    private Boolean selfHosted = false;
+
+    /**
      * Schema of distribution prize fund between winners
      */
     @Type(type = "jsonb")
