@@ -17,18 +17,25 @@ public class ProductPurchaseNotificationDto {
 
     @Builder.Default
     @Setter(AccessLevel.NONE)
+    @ApiModelProperty(required = true)
     private String identifier = UUID.randomUUID().toString();
 
+    @ApiModelProperty(required = true)
     private String leagueId;
 
+    @ApiModelProperty(required = true)
     private String username;
 
+    @ApiModelProperty(required = true)
     private String productId;
 
+    @ApiModelProperty(required = true)
     private String productName;
 
+    @ApiModelProperty(required = true)
     private Double purchaseQuantity;
 
+    @ApiModelProperty(required = true)
     private PurchaseStateType purchaseState;
 
     private List<ProductPropertyDto> selectedProductParameters;
@@ -39,5 +46,6 @@ public class ProductPurchaseNotificationDto {
     @ApiModelProperty(notes = "Comment from manager about purchase. Available only in Edit mode.")
     private String managerComment;
 
+    @ApiModelProperty(required = true)
     private LocalDateTime createdAt;
 }
