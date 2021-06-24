@@ -3,7 +3,9 @@ package com.freetonleague.core.controller;
 import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
+import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestFinanceFacade;
 import io.swagger.annotations.Api;
@@ -15,9 +17,12 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import springfox.documentation.annotations.ApiIgnore;
 
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.List;
 
 import static java.util.Objects.nonNull;
@@ -41,6 +46,8 @@ public class FinancialAccountsController {
     public static final String PATH_CREATE_WITHDRAW = "/transaction/withdraw";
     public static final String PATH_CANCEL_WITHDRAW = "/transaction/withdraw/{transaction_guid}";
     public static final String PATH_MODERATE_WITHDRAW = "/transaction/withdraw/{transaction_guid}";
+
+    public static final String PATH_WITHDRAW_TO_MPUBG = "/transaction/withdraw/mpubg";
 
     public static final String PATH_APPLY_COUPON = "/apply-coupon/";
 
@@ -124,6 +131,26 @@ public class FinancialAccountsController {
                                                                                  @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFinanceFacade.editWithdrawRequest(transactionGUID, transactionDto, user), HttpStatus.OK);
     }
+
+    @GetMapping(path = PATH_WITHDRAW_TO_MPUBG)
+    @ApiOperation("Getting the amount of Mobile PUBG 'UC' in exchange for 'TON'")
+    public ResponseEntity<MPubgTonExchangeAmountDto> getMPubgExchangeAmount(
+            @Validated @Min(0) Double tonAmount
+    ) {
+        return ResponseEntity.ok(restFinanceFacade.getMPubgExchangeAmountForTon(tonAmount));
+    }
+
+    @PostMapping(path = PATH_WITHDRAW_TO_MPUBG)
+    @ApiOperation("Creating a transaction to withdrawal in Mobile PUBG 'UC' currency")
+    public ResponseEntity<Void> createMPubgWithdrawalTransaction(
+            @RequestBody @Valid MPubgTonWithdrawalCreationFilter filter,
+            @ApiIgnore @AuthenticationPrincipal User user
+    ) {
+        restFinanceFacade.createMPubgWithdrawalTransaction(filter, user);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     //TODO delete bonus payments method if no need until 01/09/2021
 //    @ApiOperation("Apply coupon by hash for user from session")
