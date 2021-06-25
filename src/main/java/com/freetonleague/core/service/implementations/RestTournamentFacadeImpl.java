@@ -62,20 +62,29 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
      */
     @CanManageTournament
     @Override
-    public Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<TournamentStatusType> statusList) {
-        User creatorUser = null;
-        if (!isBlank(creatorLeagueId)) {
-            creatorUser = restUserFacade.getVerifiedUserByLeagueId(creatorLeagueId);
-        }
-        return tournamentService.getTournamentList(pageable, creatorUser, statusList).map(tournamentMapper::toDto);
+    public Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<Long> disciplineIdList, List<TournamentStatusType> statusList) {
+        return this.getVerifiedTournamentList(pageable, creatorLeagueId, disciplineIdList, statusList);
     }
 
     /**
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<TournamentDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList) {
-        return tournamentService.getTournamentList(pageable, null, statusList).map(tournamentMapper::toDto);
+    public Page<TournamentDto> getTournamentList(Pageable pageable, User user, List<Long> disciplineIdList, List<TournamentStatusType> statusList) {
+        return this.getVerifiedTournamentList(pageable, null, disciplineIdList, statusList);
+    }
+
+    private Page<TournamentDto> getVerifiedTournamentList(Pageable pageable, String creatorLeagueId, List<Long> disciplineIdList, List<TournamentStatusType> statusList) {
+        User creatorUser = null;
+        if (!isBlank(creatorLeagueId)) {
+            creatorUser = restUserFacade.getVerifiedUserByLeagueId(creatorLeagueId);
+        }
+        List<GameDiscipline> disciplineList = null;
+        if (isNotEmpty(disciplineIdList)) {
+            disciplineList = disciplineIdList.parallelStream()
+                    .map(gameDisciplineFacade::getVerifiedDiscipline).collect(Collectors.toList());
+        }
+        return tournamentService.getTournamentList(pageable, creatorUser, disciplineList, statusList).map(tournamentMapper::toDto);
     }
 
     /**

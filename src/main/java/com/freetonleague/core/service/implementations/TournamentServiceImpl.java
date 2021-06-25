@@ -72,21 +72,25 @@ public class TournamentServiceImpl implements TournamentService {
      * Returns list of all teams filtered by requested params
      */
     @Override
-    public Page<Tournament> getTournamentList(Pageable pageable, User creatorUser, List<TournamentStatusType> statusList) {
+    public Page<Tournament> getTournamentList(Pageable pageable, User creatorUser, List<GameDiscipline> disciplineList,
+                                              List<TournamentStatusType> statusList) {
         if (isNull(pageable)) {
             log.error("!> requesting getTournamentList for NULL pageable. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get tournament list with pageable params: '{}' and status list '{}'", pageable, statusList);
-        boolean filterByStatusEnabled = isNotEmpty(statusList);
+        log.debug("^ trying to get tournament list with pageable params: '{}', disciplineList '{}' and status list '{}'",
+                pageable, disciplineList, statusList);
+        List<TournamentStatusType> statusFilterList = isNotEmpty(statusList) ? statusList : List.of(TournamentStatusType.values());
         boolean filterByCreatorEnabled = nonNull(creatorUser);
+        boolean filterByDisciplineEnabled = isNotEmpty(disciplineList);
 
-        if (filterByStatusEnabled && filterByCreatorEnabled) {
-            return tournamentRepository.findAllByStatusInAndCreatedBy(pageable, statusList, creatorUser);
-        } else if (filterByStatusEnabled) {
-            return tournamentRepository.findAllByStatusIn(pageable, statusList);
+        if (filterByCreatorEnabled && filterByDisciplineEnabled) {
+            return tournamentRepository.findAllByStatusInAndGameDisciplineInAndCreatedBy(pageable, statusFilterList,
+                    disciplineList, creatorUser);
         } else if (filterByCreatorEnabled) {
-            return tournamentRepository.findAllByCreatedBy(pageable, creatorUser);
+            return tournamentRepository.findAllByStatusInAndCreatedBy(pageable, statusFilterList, creatorUser);
+        } else if (filterByDisciplineEnabled) {
+            return tournamentRepository.findAllByStatusInAndGameDisciplineIn(pageable, statusFilterList, disciplineList);
         }
         return tournamentRepository.findAll(pageable);
     }
