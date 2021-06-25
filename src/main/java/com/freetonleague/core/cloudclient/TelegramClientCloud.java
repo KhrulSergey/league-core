@@ -1,6 +1,7 @@
 package com.freetonleague.core.cloudclient;
 
 import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.dto.TelegramMPubgExchangeNotification;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,4 +22,9 @@ public interface TelegramClientCloud {
     @PostMapping("/purchase")
     Boolean sendPurchaseNotification(@RequestParam(staticServiceTokenName) String serviceToken,
                                      @RequestBody ProductPurchaseNotificationDto purchaseNotificationDto);
+
+    @PostMapping("/mpubg-exchange")
+    Boolean sendMpubgExchangeNotification(@RequestParam(staticServiceTokenName) String serviceToken,
+                                     @RequestBody TelegramMPubgExchangeNotification purchaseNotificationDto);
+
 }
