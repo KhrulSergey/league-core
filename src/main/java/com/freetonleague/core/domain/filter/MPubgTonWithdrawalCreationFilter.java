@@ -7,7 +7,7 @@ import lombok.Data;
 @Builder
 public class MPubgTonWithdrawalCreationFilter {
 
-    private Double amount;
+    private Double tonAmount;
     private String pubgId;
 
 }

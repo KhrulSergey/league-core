@@ -275,7 +275,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
 
     @Override
     public void createMPubgWithdrawalTransaction(MPubgTonWithdrawalCreationFilter filter, User user) {
-        MPubgTonExchangeAmountDto amountDto = getMPubgExchangeAmountForTon(filter.getAmount());
+        MPubgTonExchangeAmountDto amountDto = getMPubgExchangeAmountForTon(filter.getTonAmount());
 
         Account account = financialUnitService.getAccountByHolderExternalGUIDAndType(
                 user.getLeagueId(), AccountHolderType.USER);
@@ -283,7 +283,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         AccountInfoDto targetAccount = restFinancialUnitFacade.findAccountByExternalAddress("MPUBG");
 
         AccountTransaction accountTransaction = AccountTransaction.builder()
-                .amount(filter.getAmount())
+                .amount(filter.getTonAmount())
                 .sourceAccount(account)
                 .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(targetAccount.getGUID())))
                 .transactionType(TransactionType.PAYMENT)
@@ -294,7 +294,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         financialUnitService.createTransaction(accountTransaction);
 
         //TODO: make rest client
-        log.info("From TON to UC request. {} TON to {} UC", filter.getAmount(), amountDto.getUcAmount());
+        log.info("From TON to UC request. {} TON to {} UC", filter.getTonAmount(), amountDto.getUcAmount());
     }
 
     /**
