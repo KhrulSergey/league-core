@@ -1,6 +1,7 @@
 package com.freetonleague.core.cloudclient;
 
 import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.dto.TelegramMPubgExchangeNotification;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +34,19 @@ public class TelegramClientService {
         // TODO change behaivor to async until 01/10/21 or delete comment
 //        executor.submit(() -> sendNotificationToKafka(purchaseNotificationDto));
         return this.sendPurchaseNotificationToTelegram(purchaseNotificationDto);
+    }
+
+    public boolean sendMPubgExchangeNotification(TelegramMPubgExchangeNotification notification) {
+        log.debug("^ try to send mpubg exchange notification '{}'", notification);
+
+        Boolean result = false;
+        try {
+            result = telegramClientCloud.sendMpubgExchangeNotification(telegramClientServiceToken, notification);
+        } catch (FeignException e) {
+            log.error("!> received new FeignException in TelegramClientService.sendNotificationToKafka message: '{}'. \nReturn success = false",
+                    e.getMessage(), e);
+        }
+        return result;
     }
 
     private Boolean sendPurchaseNotificationToTelegram(ProductPurchaseNotificationDto purchaseNotificationDto) {
