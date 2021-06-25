@@ -10,6 +10,7 @@ import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.TournamentRoundMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.RestTournamentFacade;
 import com.freetonleague.core.service.RestTournamentRoundFacade;
@@ -141,9 +142,9 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
      */
     @CanManageTournament
     @Override
-    public TournamentRoundDto deleteRound(long id, User user) {
+    public TournamentRoundDto archiveRound(long id, User user) {
         TournamentRound tournamentRound = this.getVerifiedRoundById(id);
-        tournamentRound = tournamentRoundService.deleteRound(tournamentRound);
+        tournamentRound = tournamentRoundService.archiveRound(tournamentRound);
 
         if (isNull(tournamentRound)) {
             log.error("!> error while deleting tournament round with id '{}' for user '{}'.", id, user);
@@ -154,6 +155,25 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
     }
 
     /**
+     * Remove round (force delete with cascade entries)
+     */
+    @CanManageSystem
+    @Override
+    public void removeRound(long id, User user) {
+        TournamentRound tournamentRound = tournamentRoundService.getRound(id);
+        if (isNull(tournamentRound)) {
+            log.debug("^ Tournament round with requested id '{}' was not found. 'removeRound' in RestTournamentRoundService request denied", id);
+            throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_NOT_FOUND_ERROR, "Tournament round  with requested id " + id + " was not found");
+        }
+        boolean result = tournamentRoundService.removeRound(tournamentRound);
+        if (!result) {
+            log.error("!> error while forced removing tournament round with id '{}' for user '{}'.", id, user);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ROUND_MODIFICATION_ERROR,
+                    "Tournament round was not forced removed on Portal. Check requested params.");
+        }
+    }
+
+    /**
      * Returns tournament round by id and user with privacy check
      */
     @Override
@@ -161,7 +181,7 @@ public class RestTournamentRoundFacadeImpl implements RestTournamentRoundFacade 
         TournamentRound tournamentRound = tournamentRoundService.getRound(id);
         if (isNull(tournamentRound)) {
             log.debug("^ Tournament round with requested id '{}' was not found. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id);
-            throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_NOT_FOUND_ERROR, "Tournament series  with requested id " + id + " was not found");
+            throw new TeamManageException(ExceptionMessages.TOURNAMENT_ROUND_NOT_FOUND_ERROR, "Tournament round  with requested id " + id + " was not found");
         }
         if (tournamentRound.getStatus().isDeleted()) {
             log.debug("^ Tournament round with requested id '{}' was '{}'. 'getVerifiedRoundById' in RestTournamentRoundService request denied", id, tournamentRound.getStatus());

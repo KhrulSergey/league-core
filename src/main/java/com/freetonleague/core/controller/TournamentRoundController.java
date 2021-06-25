@@ -29,7 +29,8 @@ public class TournamentRoundController {
     public static final String PATH_GET_LIST_BY_TOURNAMENT = "/list-by-tournament/{tournament_id}";
     public static final String PATH_ADD = "/";
     public static final String PATH_EDIT = "/{round_id}";
-    public static final String PATH_DELETE = "/{round_id}";
+    public static final String PATH_ARCHIVE = "/{round_id}";
+    public static final String PATH_REMOVE_CASCADE = "/remove/{round_id}";
 
     private final RestTournamentRoundFacade restTournamentRoundFacade;
 
@@ -73,10 +74,18 @@ public class TournamentRoundController {
     }
 
     @ApiOperation("Delete (archive) round (only for orgs)")
-    @DeleteMapping(path = PATH_DELETE)
-    public ResponseEntity<Void> deleteRound(@PathVariable("round_id") long id,
+    @DeleteMapping(path = PATH_ARCHIVE)
+    public ResponseEntity<Void> archiveRound(@PathVariable("round_id") long id,
+                                             @ApiIgnore @AuthenticationPrincipal User user) {
+        restTournamentRoundFacade.archiveRound(id, user);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    @ApiOperation("Remove (force delete with cascade entries) round (only for admin)")
+    @DeleteMapping(path = PATH_REMOVE_CASCADE)
+    public ResponseEntity<Void> removeRound(@PathVariable("round_id") long id,
                                             @ApiIgnore @AuthenticationPrincipal User user) {
-        restTournamentRoundFacade.deleteRound(id, user);
+        restTournamentRoundFacade.removeRound(id, user);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 }
