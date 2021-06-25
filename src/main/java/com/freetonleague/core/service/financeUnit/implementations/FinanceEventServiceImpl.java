@@ -79,7 +79,7 @@ public class FinanceEventServiceImpl implements FinanceEventService {
                     sourceAccount, exc);
             return;
         }
-        notificationService.sendNotification(notification);
+        notificationService.sendBrokerNotification(notification);
     }
 
     private void sendTargetAccountTransactionNotification(AccountTransaction accountTransaction) {
@@ -116,6 +116,6 @@ public class FinanceEventServiceImpl implements FinanceEventService {
                     targetAccount, exc);
             return;
         }
-        notificationService.sendNotification(notification);
+        notificationService.sendBrokerNotification(notification);
     }
 }

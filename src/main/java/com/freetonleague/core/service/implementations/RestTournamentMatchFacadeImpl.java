@@ -9,16 +9,13 @@ import com.freetonleague.core.domain.model.TournamentMatch;
 import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.TournamentMatchMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
-import com.freetonleague.core.service.RestTournamentMatchFacade;
-import com.freetonleague.core.service.RestTournamentMatchRivalFacade;
-import com.freetonleague.core.service.RestTournamentSeriesFacade;
-import com.freetonleague.core.service.TournamentMatchService;
+import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +44,7 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade {
 
     private final TournamentMatchService tournamentMatchService;
+    private final TournamentMatchRivalService tournamentMatchRivalService;
     private final TournamentMatchMapper tournamentMatchMapper;
     private final RestTournamentMatchRivalFacade restTournamentMatchRivalFacade;
     private final Validator validator;
@@ -128,6 +126,87 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
                     "Tournament series was not updated on Portal. Check requested params.");
         }
         return tournamentMatchMapper.toDto(tournamentMatch);
+    }
+
+    /**
+     * Edit tournament match by rivals (set only winner of match and wonPlaceInSeries for rival).
+     */
+    @Override
+    public TournamentMatchDto editMatchByRivals(long matchId, TournamentMatchDto tournamentMatchDto, User user) {
+        if (isNull(tournamentMatchDto) || tournamentMatchDto.getId() != matchId) {
+            log.warn("~ parameter 'tournamentMatchDto.id' is not match specified id in parameters for editMatch");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "tournamentMatchDto.id",
+                    "parameter 'tournamentMatchDto.id' is not match specified id in parameters for editMatch");
+        }
+        Set<ConstraintViolation<TournamentMatchDto>> settingsViolations = validator.validate(tournamentMatchDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament match dto: '{}' have constraint violations: '{}'",
+                    tournamentMatchDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+
+        //get current series by ID from DB
+        TournamentMatch tournamentMatch = this.getVerifiedMatchById(tournamentMatchDto.getId());
+        Boolean isMatchModifiableByRival = tournamentMatchService.isMatchModifiableByRival(tournamentMatch);
+        if (isNull(isMatchModifiableByRival) || !isMatchModifiableByRival) {
+            log.warn("~ tournament match can be modified by rivals. Tournament is not self-hosted. Request rejected.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
+                    "Modifying tournament match by rival was rejected. Tournament is not self-hosted. Check requested params.");
+        }
+        if (TournamentStatusType.finishedStatusList.contains(tournamentMatch.getStatus())) {
+            log.warn("~ tournament match has finished, unable to modify by rival declined in editMatchByRivals.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_MODIFICATION_ERROR,
+                    "Modifying finished tournament match by rival was rejected. Check requested params and method.");
+        }
+        if (!tournamentMatchRivalService.isUserMatchRivalParticipant(tournamentMatch, user)) {
+            log.warn("~ user is not actively participate in specified tournament match. Request to modify match is rejected.");
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_MODIFICATION_ERROR,
+                    "User is not actively participate in specified tournament match. Modifying tournament match was rejected.");
+        }
+
+        // check and compose match rival list
+        List<TournamentMatchRivalDto> tournamentMatchRivalDtoList = tournamentMatchDto.getMatchRivalList();
+        List<TournamentMatchRival> tournamentMatchRivalList = null;
+        if (isNotEmpty(tournamentMatchRivalDtoList)) {
+            tournamentMatchRivalList = tournamentMatchRivalDtoList.parallelStream()
+                    .map(restTournamentMatchRivalFacade::getVerifiedMatchRivalByDtoForRival)
+                    .peek(rival -> rival.setTournamentMatch(tournamentMatch))
+                    .collect(Collectors.toList());
+        }
+        if (isNotEmpty(tournamentMatchRivalList)) {
+            tournamentMatch.setMatchRivalList(tournamentMatchRivalList);
+        }
+
+        // check and compose match rival winner
+        TournamentMatchRivalDto matchWinnerDto = tournamentMatchDto.getMatchWinner();
+        TournamentMatchRival matchWinner = tournamentMatch.getMatchWinner();
+        if (isNotEmpty(tournamentMatchRivalList)) {
+            //try to find series winner (first place)
+            matchWinner = tournamentMatchRivalList.parallelStream()
+                    .filter(s -> nonNull(s.getWonPlaceInMatch())
+                            && s.getWonPlaceInMatch().isWinner())
+                    .findFirst().orElse(null);
+        } else if (nonNull(matchWinnerDto)) {
+            matchWinnerDto.setWonPlaceInMatch(TournamentWinnerPlaceType.FIRST);
+            if (isNull(matchWinnerDto.getId())) {
+                log.warn("~ parameter 'matchWinnerDto.id' is NULL for editMatchByRivals");
+                throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchWinnerDto.id",
+                        "parameter 'matchWinnerDto.id' is not set for add or modify tournament match");
+            }
+            matchWinner = restTournamentMatchRivalFacade.getVerifiedMatchRivalByDtoForRival(matchWinnerDto);
+        }
+
+        if (nonNull(matchWinner)) {
+            tournamentMatch.setMatchWinner(matchWinner);
+        }
+
+        TournamentMatch savedMatch = tournamentMatchService.editMatch(tournamentMatch);
+        if (isNull(savedMatch)) {
+            log.error("!> error while editing tournament match from dto '{}' for user '{}'.", tournamentMatchDto, user);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_MODIFICATION_ERROR,
+                    "Tournament series was not updated on Portal. Check requested params.");
+        }
+        return tournamentMatchMapper.toDto(savedMatch);
     }
 
     /**

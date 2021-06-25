@@ -8,7 +8,11 @@ import com.freetonleague.core.domain.dto.TournamentTeamParticipantDto;
 import com.freetonleague.core.domain.enums.GameIndicatorType;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.model.*;
-import com.freetonleague.core.exception.*;
+import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
+import com.freetonleague.core.exception.UnauthorizedException;
+import com.freetonleague.core.exception.ValidationException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.TournamentMatchRivalMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
 import com.freetonleague.core.service.*;
@@ -258,6 +262,40 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                         teamProposal.getMainTournamentTeamParticipantList());
             }
         }
+        return tournamentMatchRival;
+    }
+
+    /**
+     * Returns tournament match rival by dto with privacy check for modifying by rivals
+     */
+    @Override
+    public TournamentMatchRival getVerifiedMatchRivalByDtoForRival(TournamentMatchRivalDto matchRivalDto) {
+        if (isNull(matchRivalDto)) {
+            log.warn("~ parameter 'matchRivalDto' is NULL for getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchRivalDto",
+                    "parameter 'matchRivalDto' is not set for get or modify tournament match rival");
+        }
+        if (isNull(matchRivalDto.getId())) {
+            log.warn("~ parameter 'matchRivalDto.id' is NULL for getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "matchRivalDto.id",
+                    "parameter 'matchRivalDto.id' is not set for modify tournament match rival");
+        }
+        Set<ConstraintViolation<TournamentMatchRivalDto>> settingsViolations = validator.validate(matchRivalDto);
+        if (!settingsViolations.isEmpty()) {
+            log.debug("^ transmitted tournament match rival dto: '{}' have constraint violations: '{}'",
+                    matchRivalDto, settingsViolations);
+            throw new ConstraintViolationException(settingsViolations);
+        }
+        //check if match rival existed
+        TournamentMatchRival tournamentMatchRival = this.getVerifiedMatchRivalById(matchRivalDto.getId());
+        if (!matchRivalDto.getTournamentMatchId().equals(tournamentMatchRival.getTournamentMatch().getId())) {
+            log.warn("~ parameter 'matchRivalDto.tournamentMatchId' isn't fit existed ref from matchRival to match. " +
+                    "Request to change reference from matchRival to other match is prohibited in getVerifiedMatchRivalByDto");
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_VALIDATION_ERROR, "matchRivalDto.tournamentMatchId",
+                    "parameter 'tournament organizer' is not match by id to tournament for getVerifiedMatchRivalByDto");
+        }
+
+        tournamentMatchRival.setWonPlaceInMatch(matchRivalDto.getWonPlaceInMatch());
         return tournamentMatchRival;
     }
 

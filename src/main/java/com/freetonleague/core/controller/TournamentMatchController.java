@@ -29,11 +29,11 @@ public class TournamentMatchController {
 
     public static final String BASE_PATH = "/api/tournament/match";
     public static final String PATH_EDIT = "/{match_id}";
+    public static final String PATH_EDIT_BY_RIVALS = "/for-rivals/{match_id}";
     public static final String PATH_ADD = "/";
     public static final String PATH_GET = "/{match_id}";
     public static final String PATH_DELETE = "/{match_id}";
     public static final String PATH_GET_LIST_BY_SERIES = "/list-by-series/{series_id}";
-
     public static final String PATH_RIVAL_PARTICIPANT_EDIT = "{match_id}/rival/{rival_id}/participants";
     public static final String PATH_RIVAL_DELETE = "/rival/{rival_id}";
     public static final String PATH_RIVAL_PARTICIPANT_DELETE = "/rival/participant/{rival_participant_id}";
@@ -70,6 +70,14 @@ public class TournamentMatchController {
                                                         @RequestBody TournamentMatchDto tournamentMatchDto,
                                                         @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentMatchFacade.editMatch(matchId, tournamentMatchDto, user), HttpStatus.OK);
+    }
+
+    @ApiOperation("Edit match winners (only for tournament participants/rivals)")
+    @PutMapping(path = PATH_EDIT_BY_RIVALS)
+    public ResponseEntity<TournamentMatchDto> editMatchByRivals(@PathVariable("match_id") long matchId,
+                                                                @RequestBody TournamentMatchDto tournamentMatchDto,
+                                                                @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentMatchFacade.editMatchByRivals(matchId, tournamentMatchDto, user), HttpStatus.OK);
     }
 
     @ApiOperation("Delete (archive) match (only for orgs)")

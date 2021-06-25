@@ -28,7 +28,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final Validator validator;
 
     @Override
-    public void sendNotification(NotificationDto notificationDto) {
+    public void sendBrokerNotification(NotificationDto notificationDto) {
         if (!this.verifyNotification(notificationDto)) {
             log.error("!> requesting sendNotification for not properly defined notificationDto {}. Check evoking clients",
                     notificationDto);

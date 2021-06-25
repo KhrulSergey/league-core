@@ -21,7 +21,12 @@ public interface RestTournamentSeriesRivalFacade {
     TournamentSeriesRival getVerifiedSeriesRivalById(long id);
 
     /**
-     * Returns tournament series rival by dto with privacy check
+     * Returns tournament series rival by dto with privacy check (modify Status, WonPlaceInMatch, Indicators for existed rival)
      */
     TournamentSeriesRival getVerifiedSeriesRivalByDto(TournamentSeriesRivalDto seriesRivalDto);
+
+    /**
+     * Returns tournament series rival by dto with privacy check for modifying by rivals
+     */
+    TournamentSeriesRival getVerifiedSeriesRivalByDtoForRival(TournamentSeriesRivalDto seriesRivalDto);
 }

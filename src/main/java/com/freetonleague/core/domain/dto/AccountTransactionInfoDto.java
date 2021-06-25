@@ -36,6 +36,8 @@ public class AccountTransactionInfoDto {
 
     private UserDto approvedBy;
 
+    private LocalDateTime createdAt;
+
     private LocalDateTime finishedAt;
 
     private LocalDateTime abortedAt;

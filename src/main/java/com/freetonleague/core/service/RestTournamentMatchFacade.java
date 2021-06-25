@@ -43,9 +43,19 @@ public interface RestTournamentMatchFacade {
      * @param matchId            Identity of a match
      * @param tournamentMatchDto to be edited
      * @param user               current user from Session
-     * @return Edited tournament matches
+     * @return Edited tournament match
      */
     TournamentMatchDto editMatch(long matchId, TournamentMatchDto tournamentMatchDto, User user);
+
+    /**
+     * Edit tournament match by rivals (set only winner of match and wonPlaceInSeries for rival).
+     *
+     * @param matchId            Identity of a series
+     * @param tournamentMatchDto data to be edited
+     * @param user               current user from Session
+     * @return Edited tournament match
+     */
+    TournamentMatchDto editMatchByRivals(long matchId, TournamentMatchDto tournamentMatchDto, User user);
 
     /**
      * Mark 'deleted' tournament matches in DB.

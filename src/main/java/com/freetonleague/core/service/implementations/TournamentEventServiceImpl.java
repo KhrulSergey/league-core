@@ -6,15 +6,14 @@ import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.*;
-import com.freetonleague.core.exception.ExceptionMessages;
 import com.freetonleague.core.exception.TeamParticipantManageException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.service.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,8 +26,6 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,9 +38,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private final FinancialClientService financialClientService;
     private final TournamentService tournamentService;
     private final TournamentProposalService tournamentProposalService;
-
-    private final TeamParticipantService teamParticipantService;
-    private final RestTournamentProposalFacadeImpl restTournamentProposalFacade;
 
     @Lazy
     @Autowired
@@ -60,14 +54,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     @Value("${freetonleague.tournament.auto-start:false}")
     private boolean tournamentAutoStartEnabled;
 
-    @Override
-    public EventDto add(EventDto event) {
-        log.info("! handle add EventDto");
-        return null;
-    }
-
     //every 10 minutes, timout before start 1 min
-    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
+//    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
     void monitor() {
         log.debug("^ Run TournamentEventService monitor");
 
@@ -90,39 +78,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
             Tournament tournament = idToTournament.get(selectedKey);
             this.tryMakeStatusUpdateOperations(tournament);
         }
-    }
-
-    //TODO delete until 01/01/21
-    //every 20 hours, timout before start 30 sec
-    @Scheduled(fixedRate = 20 * 60 * 60 * 1000, initialDelay = 30 * 1000)
-    void monitorFix() {
-        log.debug("^ Run TournamentEventService monitor fix tournament proposals");
-        tournamentService.getAllActiveTournament().parallelStream()
-                .map(tournamentProposalService::getActiveTeamProposalListByTournament)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .map(this::fixProposal).filter(Objects::nonNull)
-                .map(tournamentProposalService::editProposal)
-                .collect(Collectors.toList());
-    }
-
-    //TODO delete until 01/01/21
-    private TournamentTeamProposal fixProposal(TournamentTeamProposal tournamentTeamProposal) {
-        if (isNotEmpty(tournamentTeamProposal.getTournamentTeamParticipantList())) {
-            return null;
-        }
-        List<TeamParticipant> activeTeamParticipant = teamParticipantService.getActiveParticipantByTeam(tournamentTeamProposal.getTeam());
-        if (isEmpty(activeTeamParticipant)) {
-            log.warn("~ forbiddenException for fix proposal for tournamentTeamProposal.id '{}'  to tournament id '{}'. " +
-                            "Team have no active participant",
-                    tournamentTeamProposal.getId(), tournamentTeamProposal.getTournament().getId());
-            return null;
-        }
-        List<TournamentTeamParticipant> tournamentTeamParticipantList = activeTeamParticipant.parallelStream()
-                .map(p -> restTournamentProposalFacade.createTournamentTeamParticipant(p, tournamentTeamProposal))
-                .collect(Collectors.toList());
-        tournamentTeamProposal.setTournamentTeamParticipantList(tournamentTeamParticipantList);
-        return tournamentTeamProposal;
     }
 
     /**

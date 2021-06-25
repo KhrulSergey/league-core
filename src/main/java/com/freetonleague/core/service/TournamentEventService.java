@@ -1,7 +1,6 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.*;
@@ -10,8 +9,6 @@ import java.util.List;
 
 
 public interface TournamentEventService {
-
-    EventDto add(EventDto event);
 
     /**
      * Process tournament status changing

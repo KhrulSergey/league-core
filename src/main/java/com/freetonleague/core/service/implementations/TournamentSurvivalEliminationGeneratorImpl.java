@@ -4,7 +4,7 @@ import com.freetonleague.core.domain.dto.TournamentRoundSettingDto;
 import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.exception.CustomUnexpectedException;
-import com.freetonleague.core.exception.ExceptionMessages;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.service.TournamentGenerator;
 import com.freetonleague.core.service.TournamentProposalService;
 import com.freetonleague.core.util.StringUtil;
