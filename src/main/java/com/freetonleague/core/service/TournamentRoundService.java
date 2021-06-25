@@ -64,10 +64,17 @@ public interface TournamentRoundService {
     /**
      * Mark 'deleted' tournament round in DB.
      *
-     * @param tournamentRound to be deleted
+     * @param tournamentRound to be archived
      * @return tournament round with updated fields and deleted status
      */
-    TournamentRound deleteRound(TournamentRound tournamentRound);
+    TournamentRound archiveRound(TournamentRound tournamentRound);
+
+    /**
+     * Force delete tournament round with cascade entries from DB.
+     *
+     * @param tournamentRound to be deleted
+     */
+    boolean removeRound(TournamentRound tournamentRound);
 
     /**
      * Returns sign of tournament round existence for specified id.
