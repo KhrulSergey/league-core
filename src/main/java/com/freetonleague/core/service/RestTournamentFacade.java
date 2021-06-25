@@ -33,17 +33,18 @@ public interface RestTournamentFacade {
      * @param statusList      filter params
      * @return list of team entities
      */
-    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<TournamentStatusType> statusList);
+    Page<TournamentDto> getTournamentDetailedList(Pageable pageable, User user, String creatorLeagueId, List<Long> disciplineIdList, List<TournamentStatusType> statusList);
 
     /**
      * Returns list of all tournament filtered by requested params with base info
      *
-     * @param pageable   filtered params to search tournament
-     * @param user       current user from Session
-     * @param statusList filter params
+     * @param pageable         filtered params to search tournament
+     * @param user             current user from Session
+     * @param disciplineIdList filter params of identifiers for game discipline
+     * @param statusList       filter params
      * @return list of tournament entities
      */
-    Page<TournamentDto> getTournamentList(Pageable pageable, User user, List<TournamentStatusType> statusList);
+    Page<TournamentDto> getTournamentList(Pageable pageable, User user, List<Long> disciplineIdList, List<TournamentStatusType> statusList);
 
     /**
      * Add new tournament to DB.

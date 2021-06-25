@@ -46,7 +46,7 @@ class FinancialAccountsApiTests extends IntegrationTest {
     private SettingsService settingsService;
 
     @Test
-    public void gettingTonToUcExchangeAmountShouldReturnCorrectValues(User user) {
+    public void gettingTonToUcExchangeAmountShouldReturnCorrectValues() {
         SettingsEntity settingsEntity = settingsRepository.findByKey(SettingsService.TON_TO_UC_EXCHANGE_RATE_KEY).get();
         settingsEntity.setValue("10.0");
         settingsRepository.save(settingsEntity);
@@ -64,6 +64,17 @@ class FinancialAccountsApiTests extends IntegrationTest {
         Assertions.assertNotNull(responseEntity.getBody());
         Assertions.assertEquals(expectedUcAmount, responseEntity.getBody().getUcAmount());
         Assertions.assertEquals(tonAmount, responseEntity.getBody().getTonAmount());
+
+    }
+
+    @Test
+    public void gettingTonToUcExchangeAmountShouldReturnBadRequestWithoutParameters() {
+        ResponseEntity<MPubgTonExchangeAmountDto> responseEntity = testRestTemplate.getForEntity(
+                FinancialAccountsController.BASE_PATH + FinancialAccountsController.PATH_WITHDRAW_TO_MPUBG,
+                MPubgTonExchangeAmountDto.class
+        );
+
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
 
     }
 
@@ -93,7 +104,7 @@ class FinancialAccountsApiTests extends IntegrationTest {
         }
 
         HttpEntity<MPubgTonWithdrawalCreationFilter> httpEntity = new HttpEntity<>(MPubgTonWithdrawalCreationFilter.builder()
-                .amount(10.0)
+                .tonAmount(10.0)
                 .pubgId("")
                 .build(),
                 httpHeaders

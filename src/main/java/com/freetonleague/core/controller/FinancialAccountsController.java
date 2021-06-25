@@ -5,6 +5,7 @@ import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
+import com.freetonleague.core.domain.filter.MPubgTonRateFilter;
 import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestFinanceFacade;
@@ -135,9 +136,9 @@ public class FinancialAccountsController {
     @GetMapping(path = PATH_WITHDRAW_TO_MPUBG)
     @ApiOperation("Getting the amount of Mobile PUBG 'UC' in exchange for 'TON'")
     public ResponseEntity<MPubgTonExchangeAmountDto> getMPubgExchangeAmount(
-            @Validated @Min(0) Double tonAmount
+            @Valid MPubgTonRateFilter tonRateFilter
     ) {
-        return ResponseEntity.ok(restFinanceFacade.getMPubgExchangeAmountForTon(tonAmount));
+        return ResponseEntity.ok(restFinanceFacade.getMPubgExchangeAmountForTon(tonRateFilter.getTonAmount()));
     }
 
     @PostMapping(path = PATH_WITHDRAW_TO_MPUBG)
