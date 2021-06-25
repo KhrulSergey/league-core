@@ -1,9 +1,11 @@
 package com.freetonleague.core.service.implementations;
 
+import com.freetonleague.core.cloudclient.TelegramClientService;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
+import com.freetonleague.core.domain.dto.TelegramMPubgExchangeNotification;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.TransactionTemplateType;
@@ -61,6 +63,7 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     private final UserMapper userMapper;
     private final SettingsService settingsService;
     private final RestFinancialUnitFacade restFinancialUnitFacade;
+    private final TelegramClientService telegramClientService;
 
     @Value("${freetonleague.service.league-finance.min-withdraw-value:12.0}")
     private Double minWithdrawFundValue;
@@ -293,8 +296,15 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
 
         financialUnitService.createTransaction(accountTransaction);
 
-        //TODO: make rest client
         log.info("From TON to UC request. {} TON to {} UC", filter.getTonAmount(), amountDto.getUcAmount());
+
+        telegramClientService.sendMPubgExchangeNotification(
+                TelegramMPubgExchangeNotification.builder()
+                        .pubgId(filter.getPubgId())
+                        .ucAmount(amountDto.getUcAmount())
+                        .tonAmount(amountDto.getTonAmount())
+                        .build()
+        );
     }
 
     /**
