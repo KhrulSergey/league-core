@@ -66,11 +66,19 @@ public interface RestTournamentRoundFacade {
     /**
      * Mark 'deleted' tournament round.
      *
-     * @param id   identify round to be deleted
+     * @param id   identify round to be archive
      * @param user current user from Session
      * @return tournament round with updated fields and deleted status
      */
-    TournamentRoundDto deleteRound(long id, User user);
+    TournamentRoundDto archiveRound(long id, User user);
+
+    /**
+     * Remove round (force delete with cascade entries)
+     *
+     * @param id   identify round to be removed
+     * @param user current user from Session
+     */
+    void removeRound(long id, User user);
 
     /**
      * Returns tournament round by id and user with privacy check
