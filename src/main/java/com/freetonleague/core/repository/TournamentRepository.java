@@ -37,6 +37,11 @@ public interface TournamentRepository extends JpaRepository<Tournament, Long>,
                                                           List<GameDiscipline> disciplineList);
 
     /**
+     * Returns all tournaments with status in the list and pageable params
+     */
+    Page<Tournament> findAllByStatusIn(Pageable pageable, List<TournamentStatusType> statusList);
+
+    /**
      * Returns all tournaments with status in the specified list and pageable params
      */
     @Query(value = "select t from Tournament t where t.status in :activeStatusList")

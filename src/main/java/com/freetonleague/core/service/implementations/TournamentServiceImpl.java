@@ -92,7 +92,7 @@ public class TournamentServiceImpl implements TournamentService {
         } else if (filterByDisciplineEnabled) {
             return tournamentRepository.findAllByStatusInAndGameDisciplineIn(pageable, statusFilterList, disciplineList);
         }
-        return tournamentRepository.findAll(pageable);
+        return tournamentRepository.findAllByStatusIn(pageable, statusFilterList);
     }
 
     /**
