@@ -248,6 +248,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
             log.error("!> requesting delete tournament round for non-existed tournament round. Check evoking clients");
             return false;
         }
+        log.warn("~ trying to forced remove tournament round '{}'", tournamentRound);
         tournamentRoundRepository.delete(tournamentRound);
         return true;
     }
