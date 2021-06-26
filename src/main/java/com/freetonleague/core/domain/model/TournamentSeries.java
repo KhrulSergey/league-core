@@ -49,6 +49,13 @@ public class TournamentSeries extends ExtendedBaseEntity {
     private TournamentSeriesRival seriesWinner;
 
     /**
+     * Sign if series ends with a double AFK. If false and status=Finished then seriesWinner should be set.
+     */
+    @Builder.Default
+    @JoinColumn(name = "has_no_winner")
+    private Boolean hasNoWinner = false;
+
+    /**
      * Bracket type for series
      */
     @NotNull
