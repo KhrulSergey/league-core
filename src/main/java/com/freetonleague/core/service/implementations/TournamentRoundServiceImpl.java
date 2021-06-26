@@ -224,7 +224,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
      * Mark 'deleted' tournament round in DB.
      */
     @Override
-    public TournamentRound deleteRound(TournamentRound tournamentRound) {
+    public TournamentRound archiveRound(TournamentRound tournamentRound) {
         if (!this.verifyTournamentRound(tournamentRound)) {
             return null;
         }
@@ -237,6 +237,20 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         tournamentRound = tournamentRoundRepository.save(tournamentRound);
         this.handleTournamentRoundStatusChanged(tournamentRound);
         return tournamentRound;
+    }
+
+    /**
+     * Force delete tournament round with cascade entries from DB.
+     */
+    @Override
+    public boolean removeRound(TournamentRound tournamentRound) {
+        if (!this.isExistsTournamentRoundById(tournamentRound.getId())) {
+            log.error("!> requesting delete tournament round for non-existed tournament round. Check evoking clients");
+            return false;
+        }
+        log.warn("~ trying to forced remove tournament round '{}'", tournamentRound);
+        tournamentRoundRepository.delete(tournamentRound);
+        return true;
     }
 
     /**
