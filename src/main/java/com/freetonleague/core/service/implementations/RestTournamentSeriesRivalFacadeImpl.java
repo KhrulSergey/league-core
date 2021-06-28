@@ -6,6 +6,7 @@ import com.freetonleague.core.domain.model.TournamentSeriesRival;
 import com.freetonleague.core.domain.model.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.TeamManageException;
+import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.TournamentSeriesRivalMapper;
@@ -94,6 +95,15 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
                     seriesRivalDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
+        boolean isRivalWasAFK = seriesRivalDto.getStatus().isAFK();
+        boolean isRivalHasNoneWinnerPlace = seriesRivalDto.getWonPlaceInSeries().isNone();
+        if (isRivalWasAFK && !isRivalHasNoneWinnerPlace) {
+            log.warn("~ tournament series rival.id '{}' can be set AFK status only with setting WonPlaceInSeries = NONE'. " +
+                    "Request for verify rival was rejected.", seriesRivalDto.getId());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR,
+                    "Tournament series rival.id '{}' can be set AFK status only with setting WonPlaceInSeries = NONE. Check requested params and method.");
+        }
+
         TournamentSeriesRival tournamentSeriesRival;
         if (nonNull(seriesRivalDto.getId())) {
             tournamentSeriesRival = this.getVerifiedSeriesRivalById(seriesRivalDto.getId());

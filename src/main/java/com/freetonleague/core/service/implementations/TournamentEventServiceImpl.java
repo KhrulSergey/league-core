@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -55,7 +56,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private boolean tournamentAutoStartEnabled;
 
     //every 10 minutes, timout before start 1 min
-//    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
+    @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
     void monitor() {
         log.debug("^ Run TournamentEventService monitor");
 
@@ -165,10 +166,10 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
-     * Process series dead head for rivals
+     * Process series hasNoWinner or dead head for rivals
      */
     @Override
-    public void processSeriesDeadHead(TournamentSeries tournamentSeries) {
+    public void processSeriesHasNoWinner(TournamentSeries tournamentSeries) {
         log.error("!> We have a dead head in series '{}'. Create new match manually", tournamentSeries);
     }
 

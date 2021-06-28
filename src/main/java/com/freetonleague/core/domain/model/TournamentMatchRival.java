@@ -81,7 +81,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 
-    public void setRivalParticipantsFromTournamentTeamParticipant(Set<TournamentTeamParticipant> tournamentTeamParticipants) {
+    public void setRivalParticipantsFromTournamentTeamParticipant(List<TournamentTeamParticipant> tournamentTeamParticipants) {
         rivalParticipantList = tournamentTeamParticipants.parallelStream()
                 .map(p -> new TournamentMatchRivalParticipant(this, p))
                 .collect(Collectors.toSet());

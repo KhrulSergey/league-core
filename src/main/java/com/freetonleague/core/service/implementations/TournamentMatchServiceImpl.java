@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
@@ -103,6 +104,9 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         log.debug("^ trying to modify tournament match '{}'", tournamentMatch);
         if (tournamentMatch.getStatus().isFinished()) {
             tournamentMatch.setFinishedDate(LocalDateTime.now());
+            if (isNull(this.getMatchWinner(tournamentMatch, false))) {
+                tournamentMatch.setHasNoWinner(true);
+            }
         }
         if (isNotEmpty(tournamentMatch.getMatchPropertyList())) {
             tournamentMatch.setMatchPropertyList(MatchPropertyConverter.convertAndValidate(tournamentMatch.getMatchPropertyList()));
@@ -164,6 +168,31 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     }
 
     /**
+     * Return saved to DB or calculated winner of the match. If forceCalculate=true, then winner will be exactly calculated
+     */
+    @Override
+    public TournamentMatchRival getMatchWinner(TournamentMatch tournamentMatch, boolean forceCalculate) {
+        if (!tournamentMatch.getStatus().isFinished()) {
+            log.error("!> requesting get match winner for not finished match id:'{}' name:'{}'. Check evoking clients",
+                    tournamentMatch.getId(), tournamentMatch.getName());
+            return null;
+        }
+        if (isEmpty(tournamentMatch.getMatchRivalList())) {
+            log.error("!> requesting get match winner for EMPTY match rival list in match id:'{}' name:'{}'. Check evoking clients",
+                    tournamentMatch.getId(), tournamentMatch.getName());
+            return null;
+        }
+        TournamentMatchRival matchWinner;
+        if (!forceCalculate && nonNull(tournamentMatch.getMatchWinner())) {
+            matchWinner = tournamentMatch.getMatchWinner();
+        } else {
+            matchWinner = tournamentMatch.getMatchRivalList().parallelStream()
+                    .filter(r -> r.getWonPlaceInMatch().isWinner()).findFirst().orElse(null);
+        }
+        return matchWinner;
+    }
+
+    /**
      * Verify tournament match info with validation and business check
      */
     @Override
@@ -174,7 +203,8 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         }
         Set<ConstraintViolation<TournamentMatch>> violations = validator.validate(tournamentMatch);
         if (!violations.isEmpty()) {
-            log.error("!> requesting modify tournament match id:'{}' name:'{}' with verifyTournamentMatch for tournament match with ConstraintViolations. Check evoking clients",
+            log.error("!> requesting modify tournament match id:'{}' name:'{}' with verifyTournamentMatch for " +
+                            "tournament match with ConstraintViolations. Check evoking clients",
                     tournamentMatch.getId(), tournamentMatch.getName());
             return false;
         }
@@ -182,7 +212,8 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         if (nonNull(tournamentMatchRivals)) {
             for (TournamentMatchRival matchRival : tournamentMatchRivals) {
                 if (!tournamentMatchRivalService.verifyTournamentMatchRival(matchRival)) {
-                    log.error("!> requesting modify tournament match id:'{}' name:'{}' with verifyTournamentMatch for tournament match rival with ConstraintViolations. Check evoking clients",
+                    log.error("!> requesting modify tournament match id:'{}' name:'{}' with verifyTournamentMatch for " +
+                                    "tournament match rival with ConstraintViolations. Check evoking clients",
                             tournamentMatch.getId(), tournamentMatch.getName());
                     return false;
                 }
@@ -197,7 +228,6 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     private void handleTournamentMatchStatusChanged(TournamentMatch tournamentMatch) {
         log.warn("~ status for tournament match id '{}' was changed from '{}' to '{}' ",
                 tournamentMatch.getId(), tournamentMatch.getPrevStatus(), tournamentMatch.getStatus());
-        //TODO check all match to be finished
         tournamentEventService.processMatchStatusChange(tournamentMatch, tournamentMatch.getStatus());
         tournamentMatch.setPrevStatus(tournamentMatch.getStatus());
     }

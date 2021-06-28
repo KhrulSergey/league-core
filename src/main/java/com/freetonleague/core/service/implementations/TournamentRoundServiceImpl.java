@@ -4,6 +4,8 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.Tournament;
 import com.freetonleague.core.domain.model.TournamentRound;
+import com.freetonleague.core.exception.CustomUnexpectedException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.repository.TournamentRoundRepository;
 import com.freetonleague.core.service.TournamentEventService;
 import com.freetonleague.core.service.TournamentGenerator;
@@ -166,8 +168,8 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
                 break;
         }
         if (isNull(tournamentRound)) {
-            log.error("!> error while composeNewRoundForTournament. Check stack trace");
-            return false;
+            log.error("!> next round generation with composeNextRoundForTournament caused error. tournamentRound is NULL. Check stack trace");
+            throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
         }
         log.debug("^ trying to generate and save next round for tournament.id {} with series, matches and rivals with data '{}'",
                 tournament.getId(), tournamentRound);

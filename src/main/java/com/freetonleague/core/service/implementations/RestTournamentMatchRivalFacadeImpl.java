@@ -214,6 +214,17 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
                     matchRivalDto, settingsViolations);
             throw new ConstraintViolationException(settingsViolations);
         }
+
+        boolean isRivalWasAFK = matchRivalDto.getStatus().isAFK();
+        boolean isRivalHasNoneWinnerPlace = nonNull(matchRivalDto.getWonPlaceInMatch()) && matchRivalDto.getWonPlaceInMatch().isNone();
+        if (isRivalWasAFK && !isRivalHasNoneWinnerPlace) {
+            log.warn("~ tournament match rival.id '{}' can be set AFK status only with setting WonPlaceInMatch = NONE'. " +
+                    "Request for verify rival was rejected.", matchRivalDto.getId());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR,
+                    String.format("Tournament match rival.id '%s' can be set AFK status only with setting " +
+                            "WonPlaceInMatch = NONE. Check requested params and method.", matchRivalDto.getId()));
+        }
+
         TournamentMatchRival tournamentMatchRival;
         //check if match rival already existed
         if (nonNull(matchRivalDto.getId())) {
@@ -404,10 +415,11 @@ public class RestTournamentMatchRivalFacadeImpl implements RestTournamentMatchRi
 
         // Check existence of entity (from TournamentMatchRivalParticipantDto.getId) and matching for tournamentMatchRival
         TournamentMatchRivalParticipant tournamentMatchRivalParticipant = this.getVerifiedMatchRivalParticipantById(rivalParticipantDto.getId());
-        if (tournamentMatchRivalParticipant.getTournamentMatchRival().equals(tournamentMatchRival)) {
-            log.warn("~ parameter 'tournamentTeamParticipantId' is not match specified tournamentTeamProposal for getVerifiedTournamentTeamParticipant");
-            throw new ValidationException(ExceptionMessages.TOURNAMENT_TEAM_PARTICIPANT_VALIDATION_ERROR, "tournamentTeamParticipantId",
-                    "parameter 'tournamentTeamParticipantId' is not match specified tournamentTeamProposal for getVerifiedTournamentTeamParticipant");
+        if (!tournamentMatchRivalParticipant.getTournamentMatchRival().getId().equals(tournamentMatchRival.getId())) {
+            log.warn("~ parameter 'tournamentMatchRivalParticipant.id' {} is not match specified tournamentMatchRival.id '{}' " +
+                    "for getVerifiedTournamentMatchRivalParticipantByDto", tournamentMatchRivalParticipant.getId(), tournamentMatchRival.getId());
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_PARTICIPANT_VALIDATION_ERROR, "tournamentMatchRivalParticipant.ID",
+                    "parameter 'tournamentMatchRivalParticipant.id' is not match specified tournamentMatchRival for getVerifiedTournamentMatchRivalParticipantByDto");
         }
         return tournamentMatchRivalParticipant;
     }
