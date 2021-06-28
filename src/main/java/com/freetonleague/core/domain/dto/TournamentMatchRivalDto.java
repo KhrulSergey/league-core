@@ -19,8 +19,10 @@ public class TournamentMatchRivalDto {
 
     @ApiModelProperty(notes = "system add all participant (member) from 'main' tournamentTeamProposal by default")
     Set<TournamentMatchRivalParticipantDto> rivalParticipantList;
+
     @ApiModelProperty(notes = "Required for creation.")
     private Long teamProposalId;
+
     @ApiModelProperty(readOnly = true, notes = "No need to set team id")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long teamId;

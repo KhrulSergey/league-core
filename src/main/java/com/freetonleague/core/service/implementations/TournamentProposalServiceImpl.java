@@ -181,8 +181,8 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
         }
         log.debug("^ trying to get Approved team proposal list by tournament with id: '{}'", tournament.getId());
 
-        return teamProposalRepository.findAllByTournamentAndStateIn(null,
-                tournament, ParticipationStateType.activeProposalStateList).getContent();
+        return teamProposalRepository.findAllByTournamentAndStateIn(tournament,
+                ParticipationStateType.activeProposalStateList);
     }
 
     /**

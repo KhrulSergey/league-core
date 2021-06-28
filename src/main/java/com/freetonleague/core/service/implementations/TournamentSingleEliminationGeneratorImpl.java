@@ -188,6 +188,7 @@ public class TournamentSingleEliminationGeneratorImpl implements TournamentGener
         if (isIncomplete) {
             currentSeries.setStatus(TournamentStatusType.FINISHED);
             if (!hasNoWinner) {
+                //take first rival from series and set him as winner (will not work for 3+ rivals per series)
                 TournamentSeriesRival winner = rivalList.get(0);
                 winner.setWonPlaceInSeries(TournamentWinnerPlaceType.FIRST);
                 currentSeries.setSeriesWinner(winner);

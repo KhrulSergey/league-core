@@ -205,7 +205,7 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         }
 
         // save round
-        tournamentRoundRepository.save(tournamentRound);
+        tournamentRound = tournamentRoundRepository.save(tournamentRound);
         // check if status was updated
         if (tournamentRound.isStatusChanged()) {
             this.handleTournamentRoundStatusChanged(tournamentRound);

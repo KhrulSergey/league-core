@@ -89,7 +89,7 @@ public class TournamentTeamProposal extends BaseEntity {
 
     public List<TournamentTeamParticipant> getMainTournamentTeamParticipantList() {
         if (isNull(mainTournamentTeamParticipantList)) {
-            mainTournamentTeamParticipantList = tournamentTeamParticipantList.parallelStream()
+            mainTournamentTeamParticipantList = tournamentTeamParticipantList.stream()
                     .filter(p -> p.getStatus() == TournamentTeamParticipantStatusType.MAIN)
                     .collect(Collectors.toList());
         }
