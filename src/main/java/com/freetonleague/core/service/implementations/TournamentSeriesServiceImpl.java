@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -142,10 +143,10 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             if (isNull(tournamentSeries.getSeriesWinner())) {
                 TournamentSeriesRival seriesWinner = this.getCalculatedSeriesWinner(tournamentSeries);
                 if (isNull(seriesWinner)) {
-                    log.error("!> requesting modify tournament series id '{}' was canceled. Series winner was not defined or found. Check stack trace.",
+                    log.warn("~ modifying tournament series id '{}' with warning: Series winner was not defined or calculated.",
                             tournamentSeries.getId());
-                    tournamentEventService.processSeriesDeadHead(tournamentSeries);
-                    tournamentSeries.setStatus(TournamentStatusType.PAUSE);
+                    tournamentEventService.processSeriesHasNoWinner(tournamentSeries);
+                    tournamentSeries.setHasNoWinner(true);
                 }
                 tournamentSeries.setSeriesWinner(seriesWinner);
             }
@@ -241,9 +242,17 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
 
     //TODO calculate all winners of series (from 1 to 8 place)
     private TournamentSeriesRival getCalculatedSeriesWinner(TournamentSeries tournamentSeries) {
-        Map<TournamentTeamProposal, Long> matchRivalWinnerMap = tournamentSeries.getMatchList().parallelStream()
-                .filter(m -> m.getStatus().isFinished())
-                .map(TournamentMatch::getMatchWinner)
+        List<TournamentMatch> finishedMatchList = tournamentSeries.getMatchList().parallelStream()
+                .filter(m -> TournamentStatusType.finishedStatusList.contains(m.getStatus()))
+                .collect(Collectors.toList());
+        if (finishedMatchList.size() != tournamentSeries.getMatchList().size()) {
+            log.error("!> requesting calculated series winner for not all match finished or declined in series.id: '{}'. " +
+                    "Check evoking clients", tournamentSeries.getId());
+            return null;
+        }
+        Map<TournamentTeamProposal, Long> matchRivalWinnerMap = finishedMatchList.parallelStream()
+                .filter(Predicate.not(TournamentMatch::getHasNoWinner))
+                .map(m -> tournamentMatchService.getMatchWinner(m, false))
                 .collect(Collectors.groupingBy(TournamentMatchRival::getTeamProposal, Collectors.counting()));
 
         TournamentTeamProposal seriesWinnerProposal = null;
@@ -259,10 +268,11 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         }
 
         if (isNull(seriesWinnerProposal)) {
-            log.error("!> requesting calculateSeriesWinner tournament series id '{}' for non-existed rival with advantage score. Check evoking clients",
+            log.warn("!> tournament series id '{}' has no rival with advantage score. Series has no winner",
                     tournamentSeries.getId());
             return null;
         }
+
         TournamentSeriesRival seriesWinner = tournamentSeriesRivalRepository.findByTournamentSeriesAndTeamProposal(
                 tournamentSeries, seriesWinnerProposal);
         if (isNull(seriesWinner)) {

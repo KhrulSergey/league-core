@@ -110,11 +110,16 @@ public class RestTournamentMatchFacadeImpl implements RestTournamentMatchFacade 
                     "Modifying tournament match was rejected. Check requested params and method.");
         }
 
-        //Match can be finished only with setting the winner of the match
-        if ((tournamentMatch.getStatus().isFinished() && isNull(tournamentMatch.getMatchWinner()))
-                || (nonNull(tournamentMatch.getMatchWinner()) && !tournamentMatch.getStatus().isFinished())) {
-            log.warn("~ tournament match can be finished only with setting the winner of the match. " +
-                    "Request to set status '{}' and winner '{}' was rejected.", tournamentMatch.getStatus(), tournamentMatch.getMatchWinner());
+        //Match can be finished only with setting the winner of the match or set hasNoWinner=false
+        boolean isMatchFinished = tournamentMatch.getStatus().isFinished();
+        boolean isMatchHasNoWinner = tournamentMatch.getHasNoWinner();
+        boolean isMatchWinnerIsSet = nonNull(tournamentMatch.getMatchWinner());
+
+        if ((isMatchFinished && ((isMatchHasNoWinner && isMatchWinnerIsSet) || (!isMatchHasNoWinner && !isMatchWinnerIsSet)))
+                || (isMatchWinnerIsSet && !isMatchFinished)) {
+            log.warn("~ tournament match can be finished only with setting parameter 'hasNoWinner=false' and/or the winner of the match. " +
+                            "Request to set status '{}', hasNoWinner '{}', and winner '{}' was rejected.",
+                    tournamentMatch.getStatus(), tournamentMatch.getHasNoWinner(), tournamentMatch.getMatchWinner());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_MATCH_STATUS_FINISHED_ERROR,
                     "Modifying tournament match was rejected. Check requested params and method.");
         }

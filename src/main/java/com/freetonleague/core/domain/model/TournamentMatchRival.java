@@ -4,10 +4,7 @@ import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -21,7 +18,8 @@ import java.util.stream.Collectors;
 /**
  * Model of team on current match
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, of = {"status", "wonPlaceInMatch"})
+@ToString(callSuper = true, of = {"status", "wonPlaceInMatch", "matchIndicator"})
 @NoArgsConstructor
 @SuperBuilder
 @Getter
@@ -35,7 +33,6 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
     /**
      * List of team participants on current match
      */
-    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "tournamentMatchRival", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     Set<TournamentMatchRivalParticipant> rivalParticipantList;
 
@@ -45,7 +42,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
     /**
      * Reference to team on tournament
      */
-    @EqualsAndHashCode.Exclude
+
     @ManyToOne
     @JoinColumn(name = "team_proposal_id")
     private TournamentTeamProposal teamProposal;
@@ -81,7 +78,7 @@ public class TournamentMatchRival extends ExtendedBaseEntity {
         return !this.status.equals(this.prevStatus);
     }
 
-    public void setRivalParticipantsFromTournamentTeamParticipant(Set<TournamentTeamParticipant> tournamentTeamParticipants) {
+    public void setRivalParticipantsFromTournamentTeamParticipant(List<TournamentTeamParticipant> tournamentTeamParticipants) {
         rivalParticipantList = tournamentTeamParticipants.parallelStream()
                 .map(p -> new TournamentMatchRivalParticipant(this, p))
                 .collect(Collectors.toSet());

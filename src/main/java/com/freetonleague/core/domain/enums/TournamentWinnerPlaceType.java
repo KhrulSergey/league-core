@@ -48,4 +48,8 @@ public enum TournamentWinnerPlaceType {
     public boolean isWinner() {
         return this == FIRST;
     }
+
+    public boolean isNone() {
+        return this == NONE;
+    }
 }
