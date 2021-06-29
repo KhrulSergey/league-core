@@ -117,12 +117,17 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
                     "Modifying tournament series was rejected. Check requested params and method.");
         }
 
+        boolean isSeriesFinished = tournamentSeries.getStatus().isFinished();
+        boolean isSeriesHasNoWinner = tournamentSeries.getHasNoWinner();
+        boolean isSeriesWinnerIsSet = nonNull(tournamentSeries.getSeriesWinner());
+
         //Series can be finished only with setting winner places in list of rivals
-        if (tournamentSeries.getStatus().isFinished() &&
-                !(nonNull(tournamentSeries.getSeriesWinner()) || nonNull(tournamentSeries.getSeriesRivalList()))) {
-            log.warn("~ tournament series can be finished only with setting the winner of the series " +
-                            "or set winner places in series rivals. Request to set status '{}', winner '{}' and rivals '{}' was rejected.",
-                    tournamentSeries.getStatus(), tournamentSeries.getSeriesWinner(), tournamentSeries.getSeriesRivalList());
+        if (isSeriesFinished && ((isSeriesHasNoWinner && isSeriesWinnerIsSet) || (!isSeriesHasNoWinner && !isSeriesWinnerIsSet))) {
+            log.warn("~ tournament series can be finished only with setting parameter 'hasNoWinner=false' and/or " +
+                            "the winner of the series or set winner places in series rivals. " +
+                            "Request to set status '{}', hasNoWinner '{}', winner '{}' and rivals '{}' was rejected.",
+                    tournamentSeries.getStatus(), tournamentSeries.getHasNoWinner(),
+                    tournamentSeries.getSeriesWinner(), tournamentSeries.getSeriesRivalList());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_SERIES_STATUS_FINISHED_ERROR,
                     "Modifying tournament series was rejected. Check requested params and method.");
         }

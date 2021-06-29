@@ -36,9 +36,9 @@ public interface TournamentEventService {
     void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus);
 
     /**
-     * Process series dead head for rivals
+     * Process series hasNoWinner or dead head for rivals
      */
-    void processSeriesDeadHead(TournamentSeries tournamentSeries);
+    void processSeriesHasNoWinner(TournamentSeries tournamentSeries);
 
     /**
      * Process tournament team proposal status changing

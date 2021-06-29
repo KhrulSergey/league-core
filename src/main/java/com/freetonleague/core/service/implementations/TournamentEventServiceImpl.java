@@ -207,10 +207,10 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     }
 
     /**
-     * Process series dead head for rivals
+     * Process series hasNoWinner or dead head for rivals
      */
     @Override
-    public void processSeriesDeadHead(TournamentSeries tournamentSeries) {
+    public void processSeriesHasNoWinner(TournamentSeries tournamentSeries) {
         log.error("!> We have a dead head in series '{}'. Create new match manually", tournamentSeries);
     }
 

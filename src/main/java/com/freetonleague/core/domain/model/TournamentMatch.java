@@ -33,12 +33,19 @@ public class TournamentMatch extends ExtendedBaseEntity {
     private List<TournamentMatchRival> matchRivalList;
 
     /**
-     * Winner of current (finished) match. If null - then there were a dead heat
+     * Winner of current (finished) match. If null - then there were a dead heat or double AFK
      */
     @EqualsAndHashCode.Exclude
     @OneToOne(cascade = CascadeType.REFRESH)
     @JoinColumn(name = "winner_match_rival_id")
     private TournamentMatchRival matchWinner;
+
+    /**
+     * Sign if match ends with a dead heat or double AFK. If false and status=Finished then matchWinner should be set.
+     */
+    @Builder.Default
+    @JoinColumn(name = "has_no_winner")
+    private Boolean hasNoWinner = false;
 
     @NotNull
     @Column(name = "status")
