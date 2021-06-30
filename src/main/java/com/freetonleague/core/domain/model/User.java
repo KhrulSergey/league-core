@@ -51,12 +51,21 @@ public class User extends BaseEntity implements UserDetails {
     @Column(name = "discord_id")
     private String discordId;
 
+    @Column(name = "steam_id")
+    private String steamId;
+
     @Column(name = "email")
     private String email;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private UserStatusType status;
+
+    /**
+     * External bank account address (broxus)
+     */
+    @Column(name = "bank_account_address")
+    private String bankAccountAddress;
 
     @Transient
     private UserStatusType prevStatus;
