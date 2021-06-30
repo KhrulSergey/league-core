@@ -1,7 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
+import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.UserExternalInfo;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
 import com.freetonleague.core.domain.model.Role;
@@ -62,11 +64,14 @@ public class UserServiceImpl implements UserService {
             log.warn("~ User [ '{}' ] have constraint violations: '{}'", user, violations);
             throw new ConstraintViolationException(violations);
         }
-        log.debug("^ User [ '{}' ] binding is successful", user);
+        log.debug("^ try to create new user with data: '{}'", user);
         user.setRoles(Collections.singleton(this.getRegularRole()));
         user.setStatus(UserStatusType.ACTIVE);
+        AccountInfoDto userAccountDto = userEventService.processUserStatusChange(user, UserStatusType.CREATED);
+        if (nonNull(userAccountDto)) {
+            user.setBankAccountAddress(userAccountDto.getExternalAddress());
+        }
         user = userRepository.saveAndFlush(user);
-        userEventService.processUserStatusChange(user, UserStatusType.CREATED);
         return user;
     }
 
@@ -86,7 +91,7 @@ public class UserServiceImpl implements UserService {
             UserDto userDto = leagueIdClientService.getUserByLeagueId(leagueId);
             if (nonNull(userDto)) {
                 //create new user
-                return this.add(userDto);
+                return this.createFromDto(userDto);
             } else {
                 log.warn("~ No user with leagueId '{}' found in LeagueId-module", leagueId);
             }
@@ -110,7 +115,7 @@ public class UserServiceImpl implements UserService {
             UserDto userDto = leagueIdClientService.getUserByUserName(username);
             if (nonNull(userDto)) {
                 //create new user
-                user = this.add(userDto);
+                user = this.createFromDto(userDto);
             } else {
                 log.warn("~ No user with username '{}' found in LeagueId-module", username);
             }
@@ -130,11 +135,42 @@ public class UserServiceImpl implements UserService {
             UserDto userDto = leagueIdClientService.getUser(sessionToken);
             if (nonNull(userDto)) {
                 //create new user
-                user = this.add(userDto);
+                user = this.createFromDto(userDto);
             } else {
                 log.warn("~ No user with leagueId '{}' found in LeagueId-module", leagueId);
             }
         }
+        return user;
+    }
+
+    @Override
+    public User importUserToPlatform(UserExternalInfo userExternalInfo) {
+        if (isNull(userExternalInfo)) {
+            log.error("!> requesting importUserToPlatform for NULL userExternalInfo. Check evoking clients");
+            return null;
+        }
+        log.debug("^ try to import user with info '{}' to system", userExternalInfo);
+        User user = null;
+        UserDto userDto = leagueIdClientService.getByUserExternalId(userExternalInfo);
+        if (isNull(userDto)) {
+            userDto = leagueIdClientService.createByExternalInfo(userExternalInfo);
+        }
+        log.debug("^ found or create user with info '{}' in LeagueId module", userDto);
+        if (isNull(userDto)) {
+            log.warn("~ Error while creating user with userExternalInfo '{}' in LeagueId-module", userExternalInfo);
+            return null;
+        }
+        user = this.findByLeagueId(userDto.getLeagueId());
+
+        if (isNull(user)) {
+            //create new user from dto
+            user = this.createFromDto(userDto);
+        }
+        if (isNull(user)) {
+            log.warn("~ Error while creating user from userExternalInfo '{}' in LeagueCore-module", userExternalInfo);
+            return null;
+        }
+        log.debug("^ found or create user with info '{}' in LeagueId module", userDto);
         return user;
     }
 
@@ -196,7 +232,6 @@ public class UserServiceImpl implements UserService {
         return user;
     }
 
-
     /**
      * Check if user already existed on platform
      */
@@ -205,9 +240,9 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * Add user to DB from LeagueId source data
+     * Create user to DB from LeagueId source data
      */
-    private User add(UserDto userDto) {
+    private User createFromDto(UserDto userDto) {
         Set<ConstraintViolation<UserDto>> violations = validator.validate(userDto);
         if (!violations.isEmpty()) {
             log.warn("~ user: '{}' have constraint violations: '{}'", userDto, violations);
@@ -218,6 +253,7 @@ public class UserServiceImpl implements UserService {
             throw new UserManageException(ExceptionMessages.USER_DUPLICATE_FOUND_ERROR,
                     String.format("Found duplicates by username '%s' on auth and data modules", userDto.getUsername()));
         }
+        log.debug("^ try to create new user from dto: '{}'", userDto);
         return this.add(mapper.fromDto(userDto));
     }
 

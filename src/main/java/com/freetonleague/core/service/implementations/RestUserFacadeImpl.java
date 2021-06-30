@@ -8,13 +8,17 @@ import com.freetonleague.core.exception.UserManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.UserMapper;
+import com.freetonleague.core.security.permissions.CanManageSystem;
 import com.freetonleague.core.service.RestUserFacade;
 import com.freetonleague.core.service.UserService;
+import com.freetonleague.core.util.CsvFileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.OutputStream;
 import java.util.UUID;
 
 import static java.util.Objects.isNull;
@@ -28,7 +32,6 @@ public class RestUserFacadeImpl implements RestUserFacade {
 
     private final UserService userService;
     private final UserMapper userMapper;
-
 
     /**
      * Returns founded user by leagueId
@@ -99,4 +102,15 @@ public class RestUserFacadeImpl implements RestUserFacade {
         return userMapper.toDto(selectedUser);
     }
 
+    /**
+     * Import users from file to disk and specified outputStream (only for admin)
+     * Data: list of user External Id and Bank Account Address
+     */
+    @Override
+    @CanManageSystem
+    public void importUsersDataFromFile(OutputStream outputStream) {
+        log.debug("^ try to get import file with user data from disk");
+        String exportFilePath = System.getProperty("user.dir") + File.separator + "user_data_export.csv";
+        CsvFileUtil.saveFileToOutputStream(exportFilePath, outputStream);
+    }
 }

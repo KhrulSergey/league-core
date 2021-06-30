@@ -120,6 +120,9 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
             return null;
         }
         AccountHolder accountHolder = this.getAccountHolderByExternalGUID(externalHolderGUID, holderType);
+        if (isNull(accountHolder)) {
+            return null;
+        }
         return this.getAccountByHolder(accountHolder);
     }
 
@@ -169,7 +172,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
                 accountHolder.getHolderExternalGUID(), accountHolder.getHolderName(), accountType);
         Account account = null;
         try {
-            account = this.createAccountForHolder(accountHolder, accountType);
+            account = this.composeAccountForHolder(accountHolder, accountType);
             if (isNull(account)) {
                 log.error("!!> requesting createAccountForHolder in createAccountHolderWithAccount " +
                                 "returned NULL core-account for holder '{}' and account-type '{}'. Check stack trace",
@@ -182,6 +185,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         } catch (Exception exc) {
             log.error("!!> requesting createAccountHolderWithAccount for holder '{}' cause unexpected Error '{}'." +
                     " Check stack trace", accountHolder, exc.getMessage());
+            account = null;
+            throw exc;
         }
         return account;
     }
@@ -461,7 +466,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     /**
      * Create new core-account with external address from trusted bank-provider
      */
-    private Account createAccountForHolder(AccountHolder accountHolder, AccountType accountType) {
+    private Account composeAccountForHolder(AccountHolder accountHolder, AccountType accountType) {
         log.debug("^ trying to compose account with type '{}' and create external account for holder: '{}'", accountType, accountHolder);
         Account account = Account.builder()
                 .holder(accountHolder)

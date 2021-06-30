@@ -1,6 +1,7 @@
 package com.freetonleague.core.service;
 
 
+import com.freetonleague.core.domain.dto.UserExternalInfo;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -37,6 +38,14 @@ public interface UserService extends UserDetailsService {
      * Loading user from DB or import from LeagueId-module.
      */
     User loadWithLeagueId(String leagueId, String sessionToken);
+
+    /**
+     * Returns creating user
+     *
+     * @param userExternalInfo
+     * @return
+     */
+    User importUserToPlatform(UserExternalInfo userExternalInfo);
 
     /**
      * Edit an existing user in DB.

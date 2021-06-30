@@ -2,22 +2,28 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.config.properties.AppUserProperties;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.*;
 import com.freetonleague.core.domain.enums.*;
 import com.freetonleague.core.domain.model.AccountTransaction;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.service.EventService;
 import com.freetonleague.core.service.FinancialClientService;
 import com.freetonleague.core.service.UserEventService;
 import com.freetonleague.core.service.UserService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
+import com.freetonleague.core.util.CsvFileUtil;
+import com.freetonleague.core.util.StringUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -40,6 +46,14 @@ public class UserEventServiceImpl implements UserEventService {
     private final Set<UUID> cachedInitiatedUserLeagueId = Collections.synchronizedSet(new HashSet<>());
 
     private final Set<UUID> cachedActiveUserLeagueId = Collections.synchronizedSet(new HashSet<>());
+
+
+    @Value("${app.user.import:false}")
+    private boolean importUser;
+
+
+    @Value("${app.user.import-test-data:true}")
+    private boolean importTestData;
 
     //every 10 minutes, timeout before start 1 min
     @Scheduled(fixedRate = 10 * 60 * 1000, initialDelay = 60 * 1000)
@@ -100,6 +114,53 @@ public class UserEventServiceImpl implements UserEventService {
         }
     }
 
+    //every 3 days, timeout before start 1 min
+    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
+    public void importUsersDataFromFile() {
+        log.debug("^ Run importUsersDataFromFile task to Import Users");
+        if (importUser) {
+            try {
+                String importFileName = importTestData ? "user_data_raw_temp.csv" : "user_data_raw.csv";
+                InputStream importFileStream = new ClassPathResource(importFileName).getInputStream();
+                String exportFilePath = System.getProperty("user.dir") + File.separator + "user_data_export.csv";
+
+                this.importUserFromInfoListToDisk(importFileStream, exportFilePath);
+            } catch (IOException e) {
+                throw new CustomUnexpectedException("Error while import user data from disk" + e.getMessage());
+            }
+        }
+        log.debug("^ End importUsersDataFromFile task to Import Users. All data saved to disk");
+    }
+
+    private void importUserFromInfoListToDisk(InputStream importFileStream, String exportFilePath) {
+        List<UserImportExternalInfo> userImportInfoList = CsvFileUtil.readCsvUserImportInfo(true, importFileStream);
+
+        userImportInfoList = userImportInfoList.stream().map(this::importUserFromInfo)
+                .filter(Objects::nonNull).collect(Collectors.toList());
+        CsvFileUtil.writeCsvUserImportInfo(userImportInfoList, exportFilePath);
+    }
+
+    /**
+     * Return updated user info with bank account address after import him to platform
+     */
+    private UserImportExternalInfo importUserFromInfo(UserImportExternalInfo userImportInfo) {
+        String username = StringUtil.generateRandomName();
+        UserExternalInfo userExternalInfo = UserExternalInfo.builder()
+                .externalProvider(userImportInfo.getExternalProvider().toUpperCase())
+                .externalId(userImportInfo.getExternalId())
+                .externalUsername(username)
+                .name("Unknown")
+                .build();
+        User user = userService.importUserToPlatform(userExternalInfo);
+        if (nonNull(user)) {
+            userImportInfo.setAccountExternalAddress(user.getBankAccountAddress());
+            userImportInfo.setLeagueId(user.getLeagueId().toString());
+        } else {
+            userImportInfo = null;
+        }
+        return userImportInfo;
+    }
+
     private void tryUpdateInfoFromLeagueIdModule(User user) {
         log.debug("^ try to define update events for user: '{}'", user.getLeagueId());
         try {
@@ -156,10 +217,11 @@ public class UserEventServiceImpl implements UserEventService {
      * Process user status changing
      */
     @Override
-    public void processUserStatusChange(User user, UserStatusType newUserStatusType) {
+    public AccountInfoDto processUserStatusChange(User user, UserStatusType newUserStatusType) {
         log.debug("^ new status changed for user '{}' with new status '{}'.", user, newUserStatusType);
+        AccountInfoDto accountInfoDto = null;
         if (newUserStatusType.isCreated()) {
-            AccountInfoDto accountInfoDto = financialClientService.createAccountByHolderInfo(user.getLeagueId(),
+            accountInfoDto = financialClientService.createAccountByHolderInfo(user.getLeagueId(),
                     AccountHolderType.USER, user.getUsername());
 
             Map<String, Double> bonusMap = appUserProperties.getUtmSourceRegisterBonusMap();
@@ -178,6 +240,7 @@ public class UserEventServiceImpl implements UserEventService {
                 financialUnitService.createTransaction(accountTransaction);
             }
         }
+        return accountInfoDto;
     }
 
     private void handleUserStatusChange(User user, UserStatusType newUserStatusType) {
