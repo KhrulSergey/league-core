@@ -31,6 +31,8 @@ public class UserDto {
 
     private String discordId;
 
+    private String steamId;
+
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     @ApiModelProperty(access = "hidden")
     private String utmSource;

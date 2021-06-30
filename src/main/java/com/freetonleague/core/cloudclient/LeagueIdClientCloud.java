@@ -2,11 +2,9 @@ package com.freetonleague.core.cloudclient;
 
 import com.freetonleague.core.domain.dto.SessionDto;
 import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.UserExternalInfo;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 
 /**
@@ -33,6 +31,15 @@ public interface LeagueIdClientCloud {
     @GetMapping("/user/get-by-username")
     UserDto getUserByUsername(@RequestParam(staticServiceTokenName) String serviceToken,
                               @RequestParam("username") String username);
+
+    @GetMapping("/user/get-by-externalId")
+    UserDto getByUserExternalId(@RequestParam(staticServiceTokenName) String serviceToken,
+                                @RequestParam("providerType") String providerType,
+                                @RequestParam("externalId") String externalId);
+
+    @PostMapping("/user/create-by-admin")
+    UserDto createByExternalInfo(@RequestParam(staticServiceTokenName) String serviceToken,
+                                 @RequestBody UserExternalInfo userExternalInfo);
 
     @PostMapping("/auth/session")
     SessionDto getSession(@RequestHeader(headerTokenName) String token);

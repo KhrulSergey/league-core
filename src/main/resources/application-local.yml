@@ -21,6 +21,8 @@ app:
   user:
     utm-source-register-bonus-map:
       test-source: 0
+    import: true
+    import-test-data: true
 
 config:
   broxus-client:
