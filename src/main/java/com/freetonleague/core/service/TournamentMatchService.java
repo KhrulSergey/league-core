@@ -2,6 +2,7 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.model.TournamentMatch;
+import com.freetonleague.core.domain.model.TournamentMatchRival;
 import com.freetonleague.core.domain.model.TournamentSeries;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -81,7 +82,14 @@ public interface TournamentMatchService {
     boolean isAllMatchesFinishedBySeries(TournamentSeries tournamentSeries);
 
     /**
+     * Return saved to DB or calculated winner of the match.
+     * If forceCalculate=true, then winner will be exactly calculated
+     */
+    TournamentMatchRival getMatchWinner(TournamentMatch tournamentMatch, boolean forceCalculate);
+
+    /**
      * Verify tournament match info with validation and business check
      */
     boolean verifyTournamentMatch(TournamentMatch tournamentMatch);
+
 }

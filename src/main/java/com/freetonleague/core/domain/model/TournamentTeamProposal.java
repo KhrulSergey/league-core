@@ -17,7 +17,6 @@ import org.hibernate.annotations.TypeDef;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -82,17 +81,17 @@ public class TournamentTeamProposal extends BaseEntity {
      * Team participant list with their role (status) in tournament
      */
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "tournamentTeamProposal", fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @OneToMany(mappedBy = "tournamentTeamProposal", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private List<TournamentTeamParticipant> tournamentTeamParticipantList;
 
     @Transient
-    private Set<TournamentTeamParticipant> mainTournamentTeamParticipantList;
+    private List<TournamentTeamParticipant> mainTournamentTeamParticipantList;
 
-    public Set<TournamentTeamParticipant> getMainTournamentTeamParticipantList() {
+    public List<TournamentTeamParticipant> getMainTournamentTeamParticipantList() {
         if (isNull(mainTournamentTeamParticipantList)) {
-            mainTournamentTeamParticipantList = tournamentTeamParticipantList.parallelStream()
+            mainTournamentTeamParticipantList = tournamentTeamParticipantList.stream()
                     .filter(p -> p.getStatus() == TournamentTeamParticipantStatusType.MAIN)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         }
         return mainTournamentTeamParticipantList;
     }

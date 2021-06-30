@@ -23,6 +23,8 @@ public interface TournamentTeamProposalRepository extends JpaRepository<Tourname
 
     Page<TournamentTeamProposal> findAllByTournamentAndStateIn(@PageableDefault Pageable pageable, Tournament tournament, List<ParticipationStateType> state);
 
+    List<TournamentTeamProposal> findAllByTournamentAndStateIn(Tournament tournament, List<ParticipationStateType> state);
+
     List<TournamentTeamProposal> findAllByTournamentAndState(Tournament tournament, ParticipationStateType state);
 
     @Query(value = "select p from TournamentTeamProposal p where p.tournament = :tournament and p.team.captain.user = :userCapitan")

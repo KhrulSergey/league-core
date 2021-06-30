@@ -55,6 +55,10 @@ public class TournamentSeriesDto {
 
     private TournamentSeriesRivalDto seriesWinner;
 
+    @ApiModelProperty(notes = "Sign if series ends with a double AFK. If false and status=Finished then seriesWinner should be set.")
+    @NotNull
+    private Boolean hasNoWinner = false;
+
     @ApiModelProperty(readOnly = true, notes = "The field is set automatically")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private TournamentTeamProposalDto teamProposalWinner;

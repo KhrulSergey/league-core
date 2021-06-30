@@ -3,10 +3,7 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
 import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -18,7 +15,8 @@ import java.util.List;
 /**
  * Model of team participant on current match
  */
-@EqualsAndHashCode(callSuper = true)
+@EqualsAndHashCode(callSuper = true, of = {"status"})
+@ToString(callSuper = true, of = {"status"})
 @NoArgsConstructor
 @SuperBuilder
 @Getter

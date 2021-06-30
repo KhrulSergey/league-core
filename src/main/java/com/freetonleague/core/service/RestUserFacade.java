@@ -5,6 +5,8 @@ import com.freetonleague.core.domain.dto.UserPublicDto;
 import com.freetonleague.core.domain.filter.UserInfoFilter;
 import com.freetonleague.core.domain.model.User;
 
+import java.io.OutputStream;
+
 /**
  * Service-facade for managing user in League-Core module
  */
@@ -31,4 +33,9 @@ public interface RestUserFacade {
 
     UserDto updateUserInfoByFilter(UserInfoFilter filter, User user);
 
+    /**
+     * Import users from file to disk and specified outputStream (only for admin)
+     * Data: list of user External Id and Bank Account Address
+     */
+    void importUsersDataFromFile(OutputStream outputStream);
 }

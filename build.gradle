@@ -41,8 +41,7 @@ dependencies {
     // https://mvnrepository.com/artifact/com.google.code.findbugs/jsr305
     implementation 'com.google.code.findbugs:jsr305:3.0.2'
     implementation 'org.hibernate:hibernate-envers:5.4.30.Final'
-
-
+    implementation 'com.opencsv:opencsv:5.4'
 
     compile 'io.springfox:springfox-swagger2:2.7.0'
     compile 'io.springfox:springfox-swagger-ui:2.7.0'

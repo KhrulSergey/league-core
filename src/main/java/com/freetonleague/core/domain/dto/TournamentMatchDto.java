@@ -34,6 +34,10 @@ public class TournamentMatchDto {
 
     private TournamentMatchRivalDto matchWinner;
 
+    @ApiModelProperty(notes = "Sign if match ends with a dead heat or double AFK. If false and status=Finished then matchWinner should be set.")
+    @NotNull
+    private Boolean hasNoWinner = false;
+
     @ApiModelProperty(required = true)
     @NotNull
     private LocalDateTime startPlannedDate;
