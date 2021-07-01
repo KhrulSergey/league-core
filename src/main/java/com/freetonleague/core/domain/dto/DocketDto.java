@@ -3,6 +3,7 @@ package com.freetonleague.core.domain.dto;
 import com.freetonleague.core.domain.enums.AccessType;
 import com.freetonleague.core.domain.enums.DocketStatusType;
 import com.freetonleague.core.domain.enums.DocketSystemType;
+import com.freetonleague.core.domain.model.DocketPromoEntity;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.UUID;
 
 /**
  * View of docket (universal lists) for different purpose
@@ -61,4 +63,7 @@ public class DocketDto {
 
     @ApiModelProperty(notes = "optional")
     private Integer maxProposalCount;
+
+    private Long promoId;
+
 }

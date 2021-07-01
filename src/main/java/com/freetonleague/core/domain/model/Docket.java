@@ -105,6 +105,9 @@ public class Docket extends ExtendedBaseEntity {
     @Column(name = "finished_at")
     private LocalDateTime finishedDate;
 
+    @ManyToOne
+    private DocketPromoEntity promo;
+
     public void setStatus(DocketStatusType status) {
         prevStatus = this.status;
         this.status = status;
