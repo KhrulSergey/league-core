@@ -13,6 +13,7 @@ import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.DocketProposalMapper;
 import com.freetonleague.core.security.permissions.CanManageDepositFinUnit;
 import com.freetonleague.core.security.permissions.CanManageDocket;
+import com.freetonleague.core.service.DocketPromoService;
 import com.freetonleague.core.service.DocketProposalService;
 import com.freetonleague.core.service.RestDocketFacade;
 import com.freetonleague.core.service.RestDocketProposalFacade;
@@ -41,6 +42,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
     private final RestUserFacade restUserFacade;
     private final DocketProposalService docketProposalService;
     private final DocketProposalMapper docketProposalMapper;
+    private final DocketPromoService docketPromoService;
     private final Validator validator;
 
     /**
@@ -154,6 +156,16 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
             log.warn("~ parameter 'textLabelAnswer' is not set for proposal to createProposalToDocket");
             throw new ValidationException(ExceptionMessages.DOCKET_USER_PROPOSAL_VALIDATION_ERROR, "textLabelAnswer",
                     "parameter textLabelAnswer is required for createProposalToDocket");
+        }
+
+        if (docket.getPromo() != null) {
+            try {
+                docketPromoService.usePromo(userProposalDto.getPromoCode(), currentUser);
+            } catch (Exception e) {
+                log.warn("~ parameter 'promoCode' is invalid");
+                throw new ValidationException(ExceptionMessages.DOCKET_USER_PROPOSAL_VALIDATION_ERROR, "promo",
+                        "parameter 'promoCode' is invalid");
+            }
         }
 
         //save proposal
