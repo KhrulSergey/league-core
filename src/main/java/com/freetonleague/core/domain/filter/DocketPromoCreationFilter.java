@@ -5,16 +5,19 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MPubgTonWithdrawalCreationFilter {
+public class DocketPromoCreationFilter {
 
+    @Min(1)
+    @Max(100)
     @NotNull
-    private Double tonAmount;
-    private String pubgId;
+    private Integer maxUsages;
 
 }
