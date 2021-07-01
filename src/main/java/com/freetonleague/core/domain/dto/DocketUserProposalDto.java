@@ -47,4 +47,7 @@ public class DocketUserProposalDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @ApiModelProperty(readOnly = true)
     private List<AccountTransactionInfoDto> participatePaymentList;
+
+    private String promoCode;
+
 }

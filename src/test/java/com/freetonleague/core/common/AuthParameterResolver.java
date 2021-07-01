@@ -26,7 +26,7 @@ public class AuthParameterResolver implements ParameterResolver {
     public Object resolveParameter(ParameterContext parameterContext, ExtensionContext extensionContext) throws ParameterResolutionException {
         initParameterResolverBean(extensionContext);
 
-        return authParameterResolverBean.resolveParameter(parameterContext);
+        return authParameterResolverBean.resolveParameter(parameterContext, extensionContext);
     }
 
     private void initParameterResolverBean(ExtensionContext extensionContext) {
