@@ -3,12 +3,14 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.dto.DocketDto;
 import com.freetonleague.core.domain.enums.DocketStatusType;
 import com.freetonleague.core.domain.model.Docket;
+import com.freetonleague.core.domain.model.DocketPromoEntity;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.DocketManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.DocketMapper;
 import com.freetonleague.core.security.permissions.CanManageDocket;
+import com.freetonleague.core.service.DocketPromoService;
 import com.freetonleague.core.service.DocketService;
 import com.freetonleague.core.service.RestDocketFacade;
 import com.freetonleague.core.service.RestUserFacade;
@@ -35,6 +37,7 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
     private final DocketService docketService;
     private final DocketMapper docketMapper;
     private final RestUserFacade restUserFacade;
+    private final DocketPromoService docketPromoService;
     private final Validator validator;
 
     /**
@@ -150,6 +153,15 @@ public class RestDocketFacadeImpl implements RestDocketFacade {
             log.debug("^ transmitted DocketDto: '{}' have constraint violations: '{}'", docketDto, violations);
             throw new ConstraintViolationException(violations);
         }
-        return docketMapper.fromDto(docketDto);
+
+        Docket docket = docketMapper.fromDto(docketDto);
+
+        if (docketDto.getPromoId() != null) {
+            DocketPromoEntity docketPromo = docketPromoService.getById(docketDto.getPromoId());
+
+            docket.setPromo(docketPromo);
+        }
+
+        return docket;
     }
 }

@@ -11,10 +11,12 @@ import java.util.List;
 public interface DocketMapper {
 
     @Named(value = "toDto")
+    @Mapping(target = "promoId", source = "promo.id")
     DocketDto toDto(Docket entity);
 
     Docket fromDto(DocketDto dto);
 
     @IterableMapping(qualifiedByName = "toDto")
     List<DocketDto> toDto(List<Docket> entities);
+
 }
