@@ -43,6 +43,15 @@ public enum TournamentStatusType {
             TournamentStatusType.DELETED
     );
 
+    /**
+     * Returns "canceled" statuses for tournaments
+     */
+    public static final List<TournamentStatusType> checkInStatusList = List.of(
+            TournamentStatusType.SIGN_UP,
+            TournamentStatusType.ADJUSTMENT,
+            TournamentStatusType.STARTED
+    );
+
     public boolean isFinished() {
         return this == FINISHED;
     }

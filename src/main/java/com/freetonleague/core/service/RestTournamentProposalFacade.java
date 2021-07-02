@@ -27,13 +27,23 @@ public interface RestTournamentProposalFacade {
     TournamentTeamProposalDto getProposalFromTeamForTournament(long tournamentId, long teamId, User user);
 
     /**
+     * Get team proposal for tournament with lobby-elimination from user (virtual team)
+     *
+     * @param tournamentId identify of tournament
+     * @param leagueId     identify of user
+     * @param user         current user from Session
+     */
+    TournamentTeamProposalDto getProposalFromUserForTournament(long tournamentId, String leagueId, User user);
+
+    /**
      * Get team proposal list for tournament
      *
      * @param pageable     filtered params to search tournament
      * @param tournamentId identify of tournament
      * @param stateList    filter params
      */
-    Page<TournamentTeamProposalDto> getProposalListForTournament(Pageable pageable, long tournamentId, List<ParticipationStateType> stateList);
+    Page<TournamentTeamProposalDto> getProposalListForTournament(Pageable pageable, long tournamentId, Boolean confirmed,
+                                                                 List<ParticipationStateType> stateList);
 
     /**
      * Registry team proposal to tournament
@@ -46,18 +56,6 @@ public interface RestTournamentProposalFacade {
      */
     TournamentTeamProposalDto createProposalToTournament(long tournamentId, long teamId, TournamentTeamProposalDto teamProposalDto, User user);
 
-
-//    /**
-//     * Registry new "single" team for user and create tournament proposal
-//     *
-//     * @param tournamentId identify of tournament
-//     * @param leagueId     identify of user
-//     * @param user         current user from Session
-//     * @return Added team proposal
-//     */
-//    TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user);
-
-
     /**
      * Registry new "single" team for user and create tournament proposal
      *
@@ -67,6 +65,16 @@ public interface RestTournamentProposalFacade {
      * @return Added team proposal
      */
     TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user);
+
+    /**
+     * Registry new "single" team for user and create tournament proposal
+     *
+     * @param tournamentId   identify of tournament
+     * @param teamProposalId identify of team proposal
+     * @param user           current user from Session
+     * @return Added team proposal
+     */
+    TournamentTeamProposalDto checkInParticipationToTournament(long tournamentId, long teamProposalId, User user);
 
     /**
      * Edit team proposal to tournament (only state)
