@@ -4,6 +4,7 @@ import com.freetonleague.core.domain.enums.FundGatheringType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
@@ -15,6 +16,7 @@ import java.util.Map;
 @Builder
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class TournamentSettingsDto {
 
     private Long id;
