@@ -16,10 +16,11 @@ public interface TeamMapper {
     Team fromDto(TeamExtendedDto dto);
 
     @Named(value = "toDto")
+    @Mapping(target = "captain", source = "entity.captain", qualifiedByName = "toDto")
     TeamDto toDto(Team entity);
 
     @Named(value = "toExtendedDto")
-    @Mapping(target = "participantList", source = "entity.participantList", qualifiedByName = "toDtoList")
+    @Mapping(target = "participantList", source = "entity.participantList", qualifiedByName = "toDtoSet")
     TeamExtendedDto toExtendedDto(Team entity);
 
     @IterableMapping(qualifiedByName = "toDto")

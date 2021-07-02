@@ -10,11 +10,12 @@ import org.mapstruct.*;
 import java.util.List;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE)
+        unmappedTargetPolicy = ReportingPolicy.IGNORE, uses = {TeamParticipantMapper.class, TeamMapper.class})
 public interface TournamentProposalMapper {
 
     @Named(value = "toDto")
     @Mapping(target = "tournamentId", source = "entity.tournament.id")
+    @Mapping(target = "team", source = "entity.team", qualifiedByName = "toDto")
     @Mapping(target = "tournamentTeamParticipantList", source = "entity.tournamentTeamParticipantList", qualifiedByName = "toDtoList")
     TournamentTeamProposalDto toDto(TournamentTeamProposal entity);
 

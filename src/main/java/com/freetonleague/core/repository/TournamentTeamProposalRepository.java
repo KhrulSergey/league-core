@@ -21,11 +21,17 @@ public interface TournamentTeamProposalRepository extends JpaRepository<Tourname
 
     TournamentTeamProposal findByTeamAndTournament(Team team, Tournament tournament);
 
-    Page<TournamentTeamProposal> findAllByTournamentAndStateIn(@PageableDefault Pageable pageable, Tournament tournament, List<ParticipationStateType> state);
+    Page<TournamentTeamProposal> findAllByTournamentAndStateIn(@PageableDefault Pageable pageable,
+                                                               Tournament tournament, List<ParticipationStateType> state);
+
+    Page<TournamentTeamProposal> findAllByTournamentAndConfirmedAndStateIn(@PageableDefault Pageable pageable, Tournament tournament,
+                                                                           boolean confirmed, List<ParticipationStateType> state);
 
     List<TournamentTeamProposal> findAllByTournamentAndStateIn(Tournament tournament, List<ParticipationStateType> state);
 
-    List<TournamentTeamProposal> findAllByTournamentAndState(Tournament tournament, ParticipationStateType state);
+    @Query(value = "select p from TournamentTeamProposal p where p.tournament = :tournament and p.confirmed = true " +
+            "and p.state = com.freetonleague.core.domain.enums.ParticipationStateType.APPROVE")
+    List<TournamentTeamProposal> findAllApprovedProposalsByTournament(@Param("tournament") Tournament tournament);
 
     @Query(value = "select p from TournamentTeamProposal p where p.tournament = :tournament and p.team.captain.user = :userCapitan")
     List<TournamentTeamProposal> findProposalByUserCapitanAndTournament(@Param("userCapitan") User userCapitan,

@@ -3,6 +3,7 @@ package com.freetonleague.core.domain.dto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.enums.TournamentParticipantType;
 import com.freetonleague.core.domain.enums.TournamentTeamType;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,6 +25,9 @@ public class TournamentTeamProposalDto {
     private TeamDto team;
 
     private ParticipationStateType state;
+
+    @ApiModelProperty(notes = "Confirmation of tournament participation from team (check-in)")
+    private Boolean confirmed;
 
     private TournamentTeamType type;
 
