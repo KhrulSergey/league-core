@@ -162,7 +162,7 @@ public class RestDocketProposalFacadeImpl implements RestDocketProposalFacade {
             try {
                 docketPromoService.usePromo(userProposalDto.getPromoCode(), currentUser);
             } catch (Exception e) {
-                log.warn("~ parameter 'promoCode' is invalid");
+                log.warn("~ parameter 'promoCode' is invalid", e);
                 throw new ValidationException(ExceptionMessages.DOCKET_USER_PROPOSAL_VALIDATION_ERROR, "promo",
                         "parameter 'promoCode' is invalid");
             }

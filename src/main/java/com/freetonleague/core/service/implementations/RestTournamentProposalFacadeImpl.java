@@ -15,11 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
@@ -31,11 +33,15 @@ import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 @Service
 public class RestTournamentProposalFacadeImpl implements RestTournamentProposalFacade {
 
+    private final RestUserFacade restUserFacade;
     private final RestTeamFacade restTeamFacade;
     private final RestTournamentFacade restTournamentFacade;
     private final TournamentProposalService tournamentProposalService;
     private final TournamentProposalMapper tournamentProposalMapper;
     private final TeamParticipantService teamParticipantService;
+
+    // Start time of check-in = tournament.start_at - CHECK_IN_DURATION_IN_HOURS
+    private final int CHECK_IN_DURATION_IN_HOURS = 24;
 
     /**
      * Get team proposal for tournament
@@ -49,13 +55,38 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     }
 
     /**
+     * Get team proposal for tournament with lobby-elimination from user (virtual team)
+     */
+    @Override
+    public TournamentTeamProposalDto getProposalFromUserForTournament(long tournamentId, String leagueId, User user) {
+        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
+        //check accessible type of tournament
+        if (!tournament.getParticipantType().isAccessibleToUser()) {
+            log.debug("^ tournament.id '{}' is not intended for proposal from user and have participantType '{}'. " +
+                            "User '{}' can't be participate in tournament",
+                    tournament.getId(), tournament.getParticipantType(), leagueId);
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
+                    String.format("Tournament '%s' is not intended for proposal from user and have participantType '%s'. Request rejected.",
+                            tournament.getId(), tournament.getParticipantType()));
+        }
+        User userParticipant = restUserFacade.getVerifiedUserByLeagueId(leagueId);
+        //try to find proposal by user
+        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getProposalByCapitanUserAndTournament(userParticipant, tournament);
+        if (isNotEmpty(teamProposalList)) {
+            return tournamentProposalMapper.toDto(teamProposalList.get(0));
+        }
+        return null;
+    }
+
+    /**
      * Get team proposal list for tournament
      */
     @Override
     public Page<TournamentTeamProposalDto> getProposalListForTournament(Pageable pageable, long tournamentId,
+                                                                        Boolean confirmed,
                                                                         List<ParticipationStateType> stateList) {
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-        return tournamentProposalService.getProposalListForTournament(pageable, tournament, stateList)
+        return tournamentProposalService.getProposalListForTournament(pageable, tournament, confirmed, stateList)
                 .map(tournamentProposalMapper::toDto);
     }
 
@@ -230,6 +261,50 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                     "Team proposal was not saved on Portal. Check requested params.");
         }
         return tournamentProposalMapper.toDto(newTeamProposal);
+    }
+
+    /**
+     * Registry new "single" team for user and create tournament proposal
+     */
+    @Override
+    public TournamentTeamProposalDto checkInParticipationToTournament(long tournamentId, long teamProposalId, User user) {
+        TournamentTeamProposal teamProposal = this.getVerifiedTeamProposalById(teamProposalId);
+        Team team = teamProposal.getTeam();
+        if (!team.isCaptain(user)) {
+            log.warn("~ forbiddenException for check-in participation to tournament for teamProposal.id '{}' and user '{}' from team '{}'.",
+                    teamProposalId, user.getLeagueId(), team.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
+                    "Only captain can apply and modify proposals to tournaments from team.");
+        }
+        if (isTrue(teamProposal.getConfirmed())) {
+            log.debug("^ re-confirmation of participation in the tournament is prohibited for teamProposal.id '{}' and user '{}' from team '{}'.",
+                    teamProposalId, user.getLeagueId(), team.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
+                    "No need to retry check-in participation to tournament. Re-confirmation request is rejected.");
+        }
+        Tournament tournament = teamProposal.getTournament();
+        if (!TournamentStatusType.checkInStatusList.contains(tournament.getStatus())) {
+            log.debug("^ Tournament with requested id '{}' was '{}'. 'checkInParticipationToTournament' in " +
+                    "RestTournamentProposalFacade request denied", tournament.getId(), tournament.getStatus());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_ACTIVE_ERROR,
+                    "Tournament" + tournament.getId() + "is not active for requested proposal " + teamProposalId);
+        }
+        LocalDateTime checkInStartDate = tournament.getStartPlannedDate().minusHours(CHECK_IN_DURATION_IN_HOURS);
+        if (checkInStartDate.isAfter(LocalDateTime.now()) || LocalDateTime.now().isAfter(tournament.getStartPlannedDate())) {
+            log.debug("^ wrong time to make check-in to tournament for teamProposal.id '{}' and user '{}' from team '{}'.",
+                    teamProposalId, user.getLeagueId(), team.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
+                    "Wrong time to make check-in to tournament. Confirmation request is rejected.");
+        }
+
+        teamProposal.setConfirmed(true);
+        TournamentTeamProposal savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
+        if (isNull(savedTeamProposal)) {
+            log.error("!> error while modifying tournament team proposal '{}' for user '{}'.", teamProposal, user.getLeagueId());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
+                    "Team proposal was not saved on Portal. Check requested params.");
+        }
+        return tournamentProposalMapper.toDto(savedTeamProposal);
     }
 
     /**

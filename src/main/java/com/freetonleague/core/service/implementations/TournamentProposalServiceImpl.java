@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Set;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
@@ -78,18 +79,27 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
      */
     @Override
     public Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament,
+                                                                     Boolean confirmed,
                                                                      List<ParticipationStateType> stateList) {
         if (isNull(pageable) || isNull(tournament)) {
             log.error("!> requesting getTournamentList for NULL pageable '{}' or NULL tournament '{}'. Check evoking clients",
                     pageable, tournament);
             return null;
         }
-
+        boolean filterByConfirmed = nonNull(confirmed);
         List<ParticipationStateType> filteredProposalStateList = isNotEmpty(stateList) ? stateList
                 : List.of(ParticipationStateType.values());
-        log.debug("^ trying to get tournament team proposal list with pageable params: '{}' and for tournament.id '{}' and stateList '{}'",
-                pageable, tournament.getId(), filteredProposalStateList);
-        return teamProposalRepository.findAllByTournamentAndStateIn(pageable, tournament, filteredProposalStateList);
+        log.debug("^ trying to get tournament team proposal list with pageable params: '{}' and for tournament.id '{}' " +
+                "and for confirmed '{}' and stateList '{}'", pageable, tournament.getId(), confirmed, filteredProposalStateList);
+        Page<TournamentTeamProposal> tournamentTeamProposalList;
+        if (filterByConfirmed) {
+            tournamentTeamProposalList = teamProposalRepository
+                    .findAllByTournamentAndConfirmedAndStateIn(pageable, tournament, confirmed, filteredProposalStateList);
+        } else {
+            tournamentTeamProposalList = teamProposalRepository
+                    .findAllByTournamentAndStateIn(pageable, tournament, filteredProposalStateList);
+        }
+        return tournamentTeamProposalList;
     }
 
     /**
@@ -164,9 +174,8 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
             log.error("!> requesting getActiveTeamProposalByTournament for NULL tournament. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to get Approved team proposal list by tournament with id: '{}'", tournament.getId());
-
-        return teamProposalRepository.findAllByTournamentAndState(tournament, ParticipationStateType.APPROVE);
+        log.debug("^ trying to get Approved and check-in team proposal list by tournament with id: '{}'", tournament.getId());
+        return teamProposalRepository.findAllApprovedProposalsByTournament(tournament);
     }
 
 

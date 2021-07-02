@@ -13,13 +13,17 @@ public interface TeamParticipantMapper {
 
     TeamParticipant fromDto(TeamParticipantDto dto);
 
+    @Named(value = "toDto")
     @Mapping(target = "teamId", source = "entity.team.id")
     TeamParticipantDto toDto(TeamParticipant entity);
 
     List<TeamParticipant> fromDto(List<TeamParticipantDto> dtoList);
 
-    List<TeamParticipantDto> toDto(List<TeamParticipant> entities);
+    @Named(value = "toDtoSet")
+    @IterableMapping(qualifiedByName = "toDto")
+    Set<TeamParticipantDto> toDto(Set<TeamParticipant> entities);
 
     @Named(value = "toDtoList")
-    Set<TeamParticipantDto> toDto(Set<TeamParticipant> entities);
+    @IterableMapping(qualifiedByName = "toDto")
+    List<TeamParticipantDto> toDto(List<TeamParticipant> entities);
 }

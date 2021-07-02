@@ -44,7 +44,8 @@ public interface TournamentProposalService {
      * @param tournament params to search tournament team proposal
      * @return list of tournament team proposal entities
      */
-    Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament, List<ParticipationStateType> stateList);
+    Page<TournamentTeamProposal> getProposalListForTournament(Pageable pageable, Tournament tournament, Boolean confirmed,
+                                                              List<ParticipationStateType> stateList);
 
     /**
      * Returns tournament team proposal (request to participate on tournament).

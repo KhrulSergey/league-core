@@ -57,6 +57,12 @@ public class TournamentTeamProposal extends BaseEntity {
     @Transient
     private ParticipationStateType prevState;
 
+    /**
+     * Confirmation of tournament participation from team (check-in)
+     */
+    @Column(name = "confirmed")
+    private Boolean confirmed;
+
     @Type(type = "jsonb")
     @Column(name = "participate_payment_list", columnDefinition = "jsonb")
     private List<AccountTransactionInfoDto> participatePaymentList;
