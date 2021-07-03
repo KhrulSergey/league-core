@@ -135,7 +135,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         Account account = this.getVerifiedAccountByHolder(holderExternalGUID, holderType);
         if (nonNull(account)) {
             //TODO decide if it's need to throw error
-            log.error("^ request for create new Account for holderGUID '{}' and holderType '{}' was rejected. Account already existed:'{}'", holderExternalGUID, holderType, account);
+            log.warn("~ request for create new Account for holderGUID '{}' and holderType '{}' was rejected. Account already existed:'{}'", holderExternalGUID, holderType, account);
             return accountMapper.toDto(account);
         }
 
