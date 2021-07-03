@@ -79,7 +79,7 @@ public class TournamentProposalController {
     @ApiOperation("Check-in participation in tournament")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_CHECK_IN_TO_TOURNAMENT)
     public ResponseEntity<TournamentTeamProposalDto> checkInToTournamentFromTeam(@RequestParam(value = "tournament_id") long tournamentId,
-                                                                                 @RequestParam(value = "team_poposal_id", required = false) Long teamProposalId,
+                                                                                 @RequestParam(value = "team_proposal_id", required = false) Long teamProposalId,
                                                                                  @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.checkInParticipationToTournament(tournamentId, teamProposalId, user), HttpStatus.OK);
     }
@@ -88,7 +88,7 @@ public class TournamentProposalController {
     @PutMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_EDIT_TEAM_PROPOSAL)
     public ResponseEntity<TournamentTeamProposalDto> editTeamProposal(@RequestParam(value = "tournament_id", required = false) Long tournamentId,
                                                                       @RequestParam(value = "team_id", required = false) Long teamId,
-                                                                      @RequestParam(value = "team_poposal_id", required = false) Long teamProposalId,
+                                                                      @RequestParam(value = "team_proposal_id", required = false) Long teamProposalId,
                                                                       @RequestParam(value = "team_poposal_state") ParticipationStateType teamProposalState,
                                                                       @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.editProposalToTournament(tournamentId, teamId, teamProposalId, teamProposalState, user), HttpStatus.OK);
@@ -97,7 +97,7 @@ public class TournamentProposalController {
     @ApiOperation("Quit team from tournament by tournament and team id")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_QUIT_FROM_TOURNAMENT)
     public ResponseEntity<TournamentTeamProposalDto> quitFromTournamentById(@RequestParam(value = "tournament_id") long tournamentId,
-                                                                            @RequestParam(value = "team_poposal_id") long teamProposalId,
+                                                                            @RequestParam(value = "team_proposal_id") long teamProposalId,
                                                                             @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restTournamentProposalFacade.quitFromTournament(tournamentId, teamProposalId, user), HttpStatus.OK);
     }
