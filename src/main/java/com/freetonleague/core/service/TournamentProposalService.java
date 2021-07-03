@@ -65,11 +65,11 @@ public interface TournamentProposalService {
 
     /**
      * Quit requested team (in team proposal) from tournament.
-     * TournamentTeamProposal marked as CANCELLED
+     * TournamentTeamProposal should be marked as CANCELLED or REJECTED
      *
-     * @param tournamentTeamProposal changed team proposal to tournament
+     * @param tournamentTeamProposal modified team proposal to tournament
      */
-    TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal);
+    TournamentTeamProposal cancelProposal(TournamentTeamProposal tournamentTeamProposal);
 
     /**
      * Returns list of approved team proposal list for specified tournament.

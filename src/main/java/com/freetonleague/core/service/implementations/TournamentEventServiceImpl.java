@@ -14,7 +14,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -135,8 +134,11 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         if (tournament.getAccessType().isPaid() && TournamentStatusType.canceledStatusList.contains(newTournamentMatchStatus)) {
             List<TournamentTeamProposal> activeProposalList = tournamentProposalService.getActiveTeamProposalListByTournament(tournament);
             for (TournamentTeamProposal proposal : activeProposalList) {
-                proposal.setParticipatePaymentList(this.tryMakeParticipationFeeRefund(proposal, false));
-                tournamentProposalService.editProposal(proposal);
+                // check if proposal is active and reject/cancel wasn't made earlier
+                if (nonNull(proposal.getState()) && ParticipationStateType.activeProposalStateList.contains(proposal.getState())) {
+                    proposal.setState(ParticipationStateType.CANCELLED);
+                    tournamentProposalService.cancelProposal(proposal);
+                }
             }
         }
     }
@@ -225,11 +227,13 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         List<AccountTransactionInfoDto> paymentList = null;
         if (tournamentTeamProposal.getTournament().getAccessType().isPaid()) {
             if (this.needToPaidParticipationFee(tournamentTeamProposal)) {
-                log.debug("^ state of team proposal required participation fee purchase. Try to call withdraw transaction in Tournament Event Service.");
+                log.debug("^ state of team proposal '{}' required participation fee purchase. Trying to call withdraw " +
+                        "transaction in Tournament Event Service.", tournamentTeamProposal);
                 paymentList = this.tryMakeParticipationFeePayment(tournamentTeamProposal);
             } else if (this.needToRefundParticipationFee(tournamentTeamProposal)) {
-                log.debug("^ state of team proposal required refund of participation fee. Try to call debit transaction in Tournament Event Service.");
-                this.bankServiceRefundMockMethod(tournamentTeamProposal);
+                log.debug("^ state of team proposal '{}' required refund of participation fee. Trying to call debit " +
+                        "transaction in Tournament Event Service.", tournamentTeamProposal);
+                paymentList = this.tryMakeParticipationFeeRefund(tournamentTeamProposal, false);
             }
         }
         return paymentList;
@@ -252,11 +256,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         return nonNull(tournamentTeamProposal.getPrevState())
                 && ParticipationStateType.activeProposalStateList.contains(tournamentTeamProposal.getPrevState())
                 && ParticipationStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState());
-    }
-
-    //TODO delete method
-    private void bankServiceRefundMockMethod(TournamentTeamProposal teamProposal) {
-        //make some staff
     }
 
     /**
@@ -319,20 +318,14 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      * Try to make refund of participation fee and commission to team
      */
     private List<AccountTransactionInfoDto> tryMakeParticipationFeeRefund(TournamentTeamProposal teamProposal, Boolean needToPayPenalty) {
-        if (isNull(teamProposal.getState()) || !ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
-            log.warn("~ forbiddenException for refund to proposal for team '{}' with state {} to tournament. " +
-                            "Error while refund transferring of participation fee. Check requested params.",
-                    teamProposal.getTeam().getId(), teamProposal.getState());
-            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_VERIFICATION_ERROR,
-                    "Error while transferring fund to pay commission participation fee. Check requested params.");
-        }
         log.debug("^ try to refund tournament participation fee and commission to team.id '{}' and teamProposal.id '{}'",
                 teamProposal.getTeam().getId(), teamProposal.getId());
         // abort transaction
-        List<AccountTransactionInfoDto> updatedParticipatePaymentList = teamProposal.getParticipatePaymentList().parallelStream()
+        List<AccountTransactionInfoDto> updatedParticipatePaymentList = teamProposal.getParticipatePaymentList().stream()
                 .map(financialClientService::abortTransaction).collect(Collectors.toList());
         if (needToPayPenalty) {
-            //TODO implement penalty payments
+            //implement penalty payments
+            log.error("!> penalty payments not implemented with tryMakeParticipationFeeRefund");
         }
         log.debug("^ successfully refund to team.id '{}' and teamProposal.id '{}'", teamProposal.getTeam().getId(), teamProposal.getId());
         return updatedParticipatePaymentList;

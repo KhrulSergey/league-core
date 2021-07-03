@@ -96,11 +96,10 @@ public class TournamentProposalController {
 
     @ApiOperation("Quit team from tournament by tournament and team id")
     @PostMapping(path = BASE_PROPOSALS_POSTFIX_PATH + PATH_QUIT_FROM_TOURNAMENT)
-    public ResponseEntity<Void> quitFromTournamentById(@RequestParam(value = "tournament_id") long tournamentId,
-                                                       @RequestParam(value = "team_id") long teamId,
-                                                       @ApiIgnore @AuthenticationPrincipal User user) {
-        restTournamentProposalFacade.quitFromTournament(tournamentId, teamId, user);
-        return new ResponseEntity<>(HttpStatus.OK);
+    public ResponseEntity<TournamentTeamProposalDto> quitFromTournamentById(@RequestParam(value = "tournament_id") long tournamentId,
+                                                                            @RequestParam(value = "team_poposal_id") long teamProposalId,
+                                                                            @ApiIgnore @AuthenticationPrincipal User user) {
+        return new ResponseEntity<>(restTournamentProposalFacade.quitFromTournament(tournamentId, teamProposalId, user), HttpStatus.OK);
     }
 
     @ApiPageable
