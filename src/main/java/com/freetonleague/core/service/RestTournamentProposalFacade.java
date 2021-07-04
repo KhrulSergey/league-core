@@ -92,11 +92,11 @@ public interface RestTournamentProposalFacade {
     /**
      * Quit team from tournament
      *
-     * @param tournamentId identify of tournament
-     * @param teamId       identify of team
-     * @param user         current user from Session
+     * @param tournamentId   identify of tournament
+     * @param teamProposalId identify of team proposal
+     * @param user           current user from Session
      */
-    void quitFromTournament(long tournamentId, long teamId, User user);
+    TournamentTeamProposalDto quitFromTournament(long tournamentId, long teamProposalId, User user);
 
     /**
      * Returns tournament team proposal by id with privacy check

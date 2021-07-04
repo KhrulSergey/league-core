@@ -28,7 +28,8 @@ public class DocketPromoEntity extends BaseEntity {
     private boolean enabled;
 
     @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @EqualsAndHashCode.Exclude
+    @OneToMany(mappedBy = "promo", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<DocketPromoUsageEntity> usages;
 
 }

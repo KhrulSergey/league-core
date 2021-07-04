@@ -376,8 +376,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         log.debug("^ trying to abort transaction '{}'", transaction);
 
         Account targetAccount = transaction.getTargetAccount();
-        log.debug("^ trying to abort (lower) balance of target account with GUID '{}' from transaction GUID: '{}'",
-                targetAccount.getGUID(), transaction.getGUID());
+        log.debug("^ trying to abort (lower) balance of target account with GUID '{}' from transaction GUID: '{}' and amount '{}'",
+                targetAccount.getGUID(), transaction.getGUID(), transaction.getAmount());
         double targetBalance = targetAccount.getAmount();
         targetAccount.setAmount(targetBalance - transaction.getAmount());
         targetAccount = this.editAccount(targetAccount);
@@ -390,8 +390,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
 
         Account sourceAccount = transaction.getSourceAccount();
         if (nonNull(sourceAccount)) {
-            log.debug("^ trying to abort (return) balance of source account with GUID '{}' from transaction GUID: '{}'",
-                    sourceAccount.getGUID(), transaction.getGUID());
+            log.debug("^ trying to abort (return) balance of source account with GUID '{}' from transaction GUID: '{}' and amount '{}'",
+                    sourceAccount.getGUID(), transaction.getGUID(), transaction.getAmount());
             double sourceBalance = sourceAccount.getAmount();
             sourceAccount.setAmount(sourceBalance + transaction.getAmount());
             sourceAccount = this.editAccount(sourceAccount);
@@ -406,7 +406,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         transaction.setStatus(AccountTransactionStatusType.ABORTED);
 
         this.handleTransactionStatusChanged(transaction);
-        transaction = accountTransactionRepository.save(transaction);
+        transaction = accountTransactionRepository.saveAndFlush(transaction);
         log.debug("^ successfully abort transaction '{}'", transaction.getGUID());
         return transaction;
     }
@@ -461,6 +461,14 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         log.debug("^ account with GUID '{}' have specified fund amount: ", result);
         return result;
     }
+
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Double getAccountAmount(Account account) {
+        log.debug("^ trying to get amount of account.GUID '{}'", account.getGUID());
+        Double amount = accountsRepository.getAmountForAccount(account);
+        log.debug("^ account with GUID '{}' have fund amount: ", amount);
+        return amount;
+    }
     //endregion
 
     /**
@@ -496,7 +504,8 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         return accountHolderRepository.save(accountHolder);
     }
 
-    private Account editAccount(Account account) {
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public Account editAccount(Account account) {
         if (isNull(account)) {
             log.error("!> requesting editAccount for NULL account. Check evoking clients");
             return null;
@@ -509,7 +518,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         }
 
         log.debug("^ trying to modify account in DB: '{}'", account);
-        return accountsRepository.save(account);
+        return accountsRepository.saveAndFlush(account);
     }
 
     /**

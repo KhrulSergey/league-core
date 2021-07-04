@@ -6,7 +6,9 @@ import com.freetonleague.core.controller.api.DocketPromoApi;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.filter.DocketPromoCreationFilter;
 import com.freetonleague.core.domain.model.DocketPromoEntity;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.DocketPromoRepository;
+import com.freetonleague.core.service.DocketPromoService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 public class DocketPromoApiTests extends IntegrationTest {
+
+    @Autowired
+    private DocketPromoService docketPromoService;
 
     @Autowired
     private DocketPromoRepository docketPromoRepository;
@@ -70,6 +75,15 @@ public class DocketPromoApiTests extends IntegrationTest {
         ResponseEntity<DocketPromoEntity> responseEntity = create(filter, httpHeaders);
 
         Assertions.assertEquals(HttpStatus.FORBIDDEN, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void docketPromoShouldUsed(User user) {
+        DocketPromoEntity createdPromo = docketPromoService.createByFilter(DocketPromoCreationFilter.builder()
+                .maxUsages(1)
+                .build());
+
+        docketPromoService.usePromo(createdPromo.getPromoCode(), user);
     }
 
     private ResponseEntity<DocketPromoEntity> getById(Long id, HttpHeaders httpHeaders) {

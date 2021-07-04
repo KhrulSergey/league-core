@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @EqualsAndHashCode(callSuper = true)
+@ToString(of = {"leagueId", "name", "username", "status"})
 @SuperBuilder
 @NoArgsConstructor
 @Data
@@ -84,7 +85,6 @@ public class User extends BaseEntity implements UserDetails {
 
     @JsonIgnore
     @EqualsAndHashCode.Exclude
-    @ToString.Exclude
     @OneToMany(mappedBy = "user", cascade = CascadeType.REFRESH, fetch = FetchType.LAZY)
     private List<TeamParticipant> userTeamParticipantList;
 
