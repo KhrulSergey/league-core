@@ -47,6 +47,12 @@ public class SessionServiceImpl implements SessionService {
         return sessionRepository.findByToken(token);
     }
 
+
+    public Session saveSession(Session session) {
+        log.debug("^ trying to save new session: '{}'", session);
+        return sessionRepository.save(session);
+    }
+
     /**
      * Returns session if it was found in DB or imported from LeagueId-module
      */
@@ -99,7 +105,7 @@ public class SessionServiceImpl implements SessionService {
     public void revoke(Session session) {
         if (nonNull(session) && session.getExpiration().isAfter(LocalDateTime.now())) {
             session.setExpiration(LocalDateTime.now());
-            sessionRepository.save(session);
+            this.saveSession(session);
         }
     }
 
@@ -124,13 +130,13 @@ public class SessionServiceImpl implements SessionService {
         }
         Session session = mapper.fromDto(sessionDto);
         session.setUser(user);
-        return sessionRepository.save(session);
+        return this.saveSession(session);
     }
 
     /**
      * Create new session for service user onlye in Core-module
      */
-    private Session createSessionForServiceUser(User user) {
+    public Session createSessionForServiceUser(User user) {
         if (isNull(user)) {
             log.error("!> error while creating new session for NULL user. Check evoking params ");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_SESSION_ERROR,
@@ -142,7 +148,7 @@ public class SessionServiceImpl implements SessionService {
                 .authProvider("CORE")
                 .token(UUID.randomUUID().toString())
                 .build();
-        return sessionRepository.save(session);
+        return this.saveSession(session);
     }
 
     private Session getByUser(User user) {

@@ -2,7 +2,6 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.*;
 import com.freetonleague.core.repository.TournamentTeamParticipantRepository;
 import com.freetonleague.core.repository.TournamentTeamProposalRepository;
@@ -15,6 +14,8 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -134,6 +135,10 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
                     tournamentTeamProposal.getId());
             return null;
         }
+        if (ParticipationStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState())) {
+            log.error("!> requesting quitFromTournament for tournamentTeamProposal with not disabled status. Check evoking clients");
+            return null;
+        }
         log.debug("^ trying to modify tournament team proposal '{}'", tournamentTeamProposal);
         if (tournamentTeamProposal.isStateChanged()) {
             this.handleTeamProposalStateChanged(tournamentTeamProposal);
@@ -145,23 +150,24 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
      * Quit requested team (in team proposal) from tournament.
      * TournamentTeamProposal marked as CANCELLED
      */
+    @Transactional(isolation = Isolation.SERIALIZABLE)
     @Override
-    public TournamentTeamProposal quitFromTournament(TournamentTeamProposal tournamentTeamProposal) {
+    public TournamentTeamProposal cancelProposal(TournamentTeamProposal tournamentTeamProposal) {
         if (isNull(tournamentTeamProposal) || isNull(tournamentTeamProposal.getTournament())) {
             log.error("!> requesting addProposal for NULL tournamentTeamProposal '{}' or embedded Tournament '{}'. Check evoking clients",
                     tournamentTeamProposal, tournamentTeamProposal != null ? tournamentTeamProposal.getTournament() : null);
             return null;
         }
-        if (!TournamentStatusType.activeStatusList.contains(tournamentTeamProposal.getTournament().getStatus())) {
-            log.error("!> requesting quitFromTournament for tournament that is not active. Check evoking clients");
+        if (!ParticipationStateType.disabledProposalStateList.contains(tournamentTeamProposal.getState())) {
+            log.error("!> requesting quitFromTournament for tournamentTeamProposal with not disabled status. Check evoking clients");
             return null;
         }
-        log.debug("^ trying to quit team with proposal '{}' form tournament", tournamentTeamProposal);
-        tournamentTeamProposal.setState(ParticipationStateType.CANCELLED);
 
-        if (tournamentTeamProposal.isStateChanged()) {
-            this.handleTeamProposalStateChanged(tournamentTeamProposal);
-        }
+        log.debug("^ trying to cancel team with proposal '{}' form tournament", tournamentTeamProposal);
+        List<AccountTransactionInfoDto> paymentList = tournamentEventService.processTournamentTeamProposalStateChange(
+                tournamentTeamProposal, tournamentTeamProposal.getState());
+        tournamentTeamProposal.setParticipatePaymentList(paymentList);
+        this.handleTeamProposalStateChanged(tournamentTeamProposal);
         return teamProposalRepository.save(tournamentTeamProposal);
     }
 
@@ -235,8 +241,6 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
     private void handleTeamProposalStateChanged(TournamentTeamProposal tournamentTeamProposal) {
         log.debug("~ status for tournament team proposal id '{}' was changed from '{}' to '{}' ",
                 tournamentTeamProposal.getId(), tournamentTeamProposal.getPrevState(), tournamentTeamProposal.getState());
-        //TODO unlock auto-payment in processTournamentTeamProposalStateChange when auto-refund will be ready
-//        tournamentEventService.processTournamentTeamProposalStateChange(tournamentTeamProposal, tournamentTeamProposal.getState());
         tournamentTeamProposal.setPrevState(tournamentTeamProposal.getState());
     }
 }

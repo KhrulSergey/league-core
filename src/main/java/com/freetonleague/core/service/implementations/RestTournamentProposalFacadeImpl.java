@@ -283,6 +283,13 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
                     "No need to retry check-in participation to tournament. Re-confirmation request is rejected.");
         }
         Tournament tournament = teamProposal.getTournament();
+        if (!tournament.getId().equals(tournamentId)) {
+            log.warn("~ parameter 'tournamentId' '{}' is not match 'teamProposalId' '{}' for checkInParticipationToTournament",
+                    tournamentId, teamProposalId);
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "tournamentId",
+                    "parameter 'tournamentId' is not match by id to 'teamProposalId' for checkInParticipationToTournament");
+
+        }
         if (!TournamentStatusType.checkInStatusList.contains(tournament.getStatus())) {
             log.debug("^ Tournament with requested id '{}' was '{}'. 'checkInParticipationToTournament' in " +
                     "RestTournamentProposalFacade request denied", tournament.getId(), tournament.getStatus());
@@ -340,7 +347,13 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         }
 
         teamProposal.setState(teamProposalState);
-        TournamentTeamProposal savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
+        TournamentTeamProposal savedTeamProposal;
+        if (ParticipationStateType.disabledProposalStateList.contains(teamProposalState)) {
+            savedTeamProposal = tournamentProposalService.cancelProposal(teamProposal);
+        } else {
+            savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
+        }
+
         if (isNull(savedTeamProposal)) {
             log.error("!> error while modifying tournament team proposal '{}' for user '{}'.", teamProposal, user.getLeagueId());
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
@@ -352,42 +365,67 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     /**
      * Quit team from tournament
      */
-    @CanManageTournament
     @Override
-    public void quitFromTournament(long tournamentId, long teamId, User user) {
-        Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
-        //TODO enable editing proposal by Team Capitan or delete until 01/12/2021
-//        if (!team.isCaptain(user)) {
-//            log.warn("~ forbiddenException for modify proposal to tournament for user '{}' from team '{}'.", user, team);
-//            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
-//                    "Only captain can apply and modify proposals to tournaments from team.");
-//        }
-        Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-
-        // check if tournament is already started
-        if (TournamentStatusType.startedStatusList.contains(tournament.getStatus())) {
-            log.warn("~ forbiddenException for modify proposal to started tournament.id '{}' for user '{}' from team '{}'.",
-                    tournament.getId(), user.getLeagueId(), team);
-            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
-                    "Quit from already started or finished tournament is prohibited. Request is rejected.");
+    public TournamentTeamProposalDto quitFromTournament(long tournamentId, long teamProposalId, User user) {
+        TournamentTeamProposal teamProposal = this.getVerifiedTeamProposalById(teamProposalId);
+        Team team = teamProposal.getTeam();
+        if (!team.isCaptain(user)) {
+            log.warn("~ forbiddenException for quitFromTournament for teamProposal.id '{}' and user '{}' from team '{}'.",
+                    teamProposalId, user.getLeagueId(), team.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_FORBIDDEN_ERROR,
+                    "Only captain can quit from tournaments his team.");
         }
-        TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
-
+        if (isTrue(teamProposal.getConfirmed())) {
+            log.debug("^ Proposal.id  '{}' to tournament.id '{}' was confirmed by participant." +
+                            " QuitFromTournament in RestTournamentProposalFacade request denied",
+                    teamProposalId, tournamentId);
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
+                    "Quit from tournament with already confirmed participation is prohibited. Request is rejected." + teamProposalId);
+        }
         // check if proposal is active
         if (!ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
-            log.warn("~ forbiddenException for modify non-active proposal with state '{}' to tournament.id '{}' for user '{}' from team '{}'.",
-                    teamProposal.getState(), tournament.getId(), user.getLeagueId(), team);
+            log.warn("~ forbiddenException for modify non-active proposal in RestTournamentProposalFacade 'quitFromTournament' " +
+                            "with state '{}' to tournament.id '{}' for user '{}' from team '{}'.",
+                    teamProposal.getState(), tournamentId, user.getLeagueId(), team);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
-                    String.format("Modify non-active proposal with state '%s' is prohibited. Request is rejected.",
+                    String.format("Modify non-active proposal with state '%s' is prohibited. Quit request is rejected.",
                             teamProposal.getState()));
         }
 
-        teamProposal = tournamentProposalService.quitFromTournament(teamProposal);
+        Tournament tournament = teamProposal.getTournament();
+        if (!tournament.getId().equals(tournamentId)) {
+            log.warn("~ parameter 'tournamentId' '{}' is not match 'teamProposalId' '{}' for quitFromTournament",
+                    tournamentId, teamProposalId);
+            throw new ValidationException(ExceptionMessages.TOURNAMENT_MATCH_RIVAL_VALIDATION_ERROR, "tournamentId",
+                    "parameter 'tournamentId' is not match by id to 'teamProposalId' for quitFromTournament");
+        }
+
+        // check if tournament is ready for quit
+        if (!TournamentStatusType.checkInStatusList.contains(tournament.getStatus())) {
+            log.debug("^ Tournament with requested id '{}' was '{}'. 'quitFromTournament' in " +
+                    "RestTournamentProposalFacade request denied", tournament.getId(), tournament.getStatus());
+            throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_QUIT_ERROR,
+                    "Quit from already started or finished Tournament" + tournament.getId() + "is prohibited. Request is rejected." + teamProposalId);
+        }
+
+        LocalDateTime checkInStartDate = tournament.getStartPlannedDate().minusHours(CHECK_IN_DURATION_IN_HOURS);
+        if (LocalDateTime.now().isBefore(tournament.getSignUpStartDate()) || LocalDateTime.now().isAfter(checkInStartDate)) {
+            log.debug("^ Tournament not able to process participant quit with SignUpStartDate '{}' and check-in start date '{}'. " +
+                            "Request for quit is rejected teamProposal.id '{}' and user '{}' from team '{}'.",
+                    tournament.getSignUpStartDate(), checkInStartDate, teamProposalId, user.getLeagueId(), team.getId());
+            throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_MODIFICATION_ERROR,
+                    String.format("Wrong time to make quit from tournament signUpStartDate '%s' and check-in start date '%s'." +
+                            "Quit request is rejected.", tournament.getSignUpStartDate(), checkInStartDate));
+        }
+
+        teamProposal.setState(ParticipationStateType.QUIT);
+        teamProposal = tournamentProposalService.cancelProposal(teamProposal);
         if (isNull(teamProposal)) {
             log.error("!> error while quiting from tournament id '{}' for team id '{}' by user '{}'.", tournament.getId(), team.getId(), user);
             throw new TournamentManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_CREATION_ERROR,
                     "Team proposal was not modified on Portal and rejected by system. Check requested params.");
         }
+        return tournamentProposalMapper.toDto(teamProposal);
     }
 
     /**
