@@ -36,3 +36,4 @@ out/
 ### VS Code ###
 .vscode/
 /temp/
+/user_data_export.csv

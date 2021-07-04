@@ -50,8 +50,7 @@ public class UserController {
     @PutMapping
     public ResponseEntity<UserDto> updateSelfInfo(
             @Valid @RequestBody UserInfoFilter filter,
-            @ApiIgnore @AuthenticationPrincipal User user
-    ) {
+            @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(restFacade.updateUserInfoByFilter(filter, user), HttpStatus.OK);
     }
 
