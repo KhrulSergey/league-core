@@ -51,6 +51,11 @@ public interface TournamentSeriesService {
     TournamentSeries generateOmtForSeries(TournamentSeries tournamentSeries);
 
     /**
+     * Compose new matches and rivals for next round (fill existed prototypes of series).
+     */
+    boolean composeSequentialSeriesForPrevSeries(TournamentSeries prevTournamentSeries);
+
+    /**
      * Edit tournament series in DB.
      *
      * @param tournamentSeries to be edited

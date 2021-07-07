@@ -52,6 +52,8 @@ public class TournamentSettingsDto {
 
     private Boolean selfHosted;
 
+    private Boolean isSequentialSeriesEnabled = false;
+
     private Map<Integer, TournamentRoundSettingDto> tournamentRoundSettingsList;
 
     @Min(0)

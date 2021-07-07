@@ -82,6 +82,13 @@ public class TournamentSeries extends ExtendedBaseEntity {
             inverseJoinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"))
     private List<TournamentSeries> parentSeriesList;
 
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinTable(name = "tournament_series_parents",
+            joinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "child_series_id", referencedColumnName = "id"))
+    private TournamentSeries childSeries;
+
     @Column(name = "start_planned_at")
     private LocalDateTime startPlannedDate;
 

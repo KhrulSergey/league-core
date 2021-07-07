@@ -78,6 +78,26 @@ public class TournamentSettings extends ExtendedBaseEntity {
     @Column(name = "self_hosted")
     private Boolean selfHosted = false;
 
+    @Builder.Default
+    @Column(name = "is_auto_finish_round_enabled")
+    private Boolean isAutoFinishRoundEnabled = true;
+
+    @Builder.Default
+    @Column(name = "is_generation_round_enabled")
+    private Boolean isGenerationRoundEnabled = true;
+
+    @Builder.Default
+    @Column(name = "is_sequential_series_enabled")
+    private Boolean isSequentialSeriesEnabled = false;
+
+    @Builder.Default
+    @Column(name = "is_auto_finish_series_enabled")
+    private Boolean isAutoFinishSeriesEnabled = true;
+
+    @Builder.Default
+    @Column(name = "is_generation_series_enabled")
+    private Boolean isGenerationSeriesEnabled = true;
+
     /**
      * Schema of distribution prize fund between winners
      */

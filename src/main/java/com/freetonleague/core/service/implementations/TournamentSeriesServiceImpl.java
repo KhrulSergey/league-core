@@ -4,6 +4,8 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.exception.CustomUnexpectedException;
+import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.repository.TournamentSeriesRepository;
 import com.freetonleague.core.repository.TournamentSeriesRivalRepository;
 import com.freetonleague.core.service.TournamentEventService;
@@ -122,6 +124,47 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         tournamentSeries.setMatchList(matchList);
         log.debug("^ trying to save updated series with embedded new match '{}'", tournamentSeries);
         return tournamentSeriesRepository.save(tournamentSeries);
+    }
+
+    /**
+     * Compose new matches and rivals for next round (fill existed prototypes of series).
+     */
+    @Override
+    public boolean composeSequentialSeriesForPrevSeries(TournamentSeries prevTournamentSeries) {
+        if (isNull(prevTournamentSeries)) {
+            log.error("!> requesting composeSeriesRivalForTournamentSeries for NULL prevTournamentSeries. Check evoking clients");
+            return false;
+        }
+
+        Tournament tournament = prevTournamentSeries.getTournamentRound().getTournament();
+        if (!tournament.getTournamentSettings().getIsSequentialSeriesEnabled()) {
+            log.error("!> requesting composeSeriesRivalForTournamentSeries for tournament with " +
+                    "IsSequentialSeriesOn = false for series '{}'. Check evoking clients", prevTournamentSeries);
+            return false;
+        }
+        log.debug("^ trying to compose and save next series for tournament.id {} for prevSeries with series, matches and rivals with data '{}'",
+                tournament.getId(), prevTournamentSeries);
+        TournamentSeries tournamentSeries = null;
+        switch (tournament.getSystemType()) {
+            case SINGLE_ELIMINATION:
+                tournamentSeries = singleEliminationGenerator.composeRivalForChildTournamentSeries(prevTournamentSeries);
+                break;
+            case DOUBLE_ELIMINATION:
+                tournamentSeries = doubleEliminationGenerator.composeRivalForChildTournamentSeries(prevTournamentSeries);
+                break;
+            case SURVIVAL_ELIMINATION:
+                tournamentSeries = survivalEliminationGenerator.composeRivalForChildTournamentSeries(prevTournamentSeries);
+                break;
+            default:
+                break;
+        }
+        if (isNull(tournamentSeries)) {
+            log.error("!> next series generation with composeSeriesRivalForTournamentSeries caused error. tournamentSeries is NULL. Check stack trace");
+            throw new CustomUnexpectedException(ExceptionMessages.TOURNAMENT_SERIES_GENERATION_ERROR);
+        }
+
+        tournamentSeries = this.editSeries(tournamentSeries);
+        return nonNull(tournamentSeries);
     }
 
 
