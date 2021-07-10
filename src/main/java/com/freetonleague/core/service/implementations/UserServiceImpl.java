@@ -4,6 +4,7 @@ import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.domain.dto.AccountInfoDto;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserExternalInfo;
+import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
 import com.freetonleague.core.domain.model.Role;
@@ -13,6 +14,7 @@ import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.repository.RoleRepository;
 import com.freetonleague.core.repository.UserRepository;
+import com.freetonleague.core.service.FinancialClientService;
 import com.freetonleague.core.service.UserEventService;
 import com.freetonleague.core.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +51,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper mapper;
     private final LeagueIdClientService leagueIdClientService;
     private final Validator validator;
+
+    @Lazy
+    @Autowired
+    private FinancialClientService financialClientService;
 
     @Lazy
     @Autowired
@@ -150,21 +156,20 @@ public class UserServiceImpl implements UserService {
             return null;
         }
         log.debug("^ try to import user with info '{}' to system", userExternalInfo);
-        User user = null;
-        UserDto userDto = leagueIdClientService.getByUserExternalId(userExternalInfo);
-        if (isNull(userDto)) {
-            userDto = leagueIdClientService.createByExternalInfo(userExternalInfo);
-        }
+        UserDto userDto = leagueIdClientService.createByExternalInfo(userExternalInfo);
         log.debug("^ found or create user with info '{}' in LeagueId module", userDto);
         if (isNull(userDto)) {
             log.warn("~ Error while creating user with userExternalInfo '{}' in LeagueId-module", userExternalInfo);
             return null;
         }
-        user = this.findByLeagueId(userDto.getLeagueId());
+        User user = this.findByLeagueId(userDto.getLeagueId());
 
         if (isNull(user)) {
             //create new user from dto
             user = this.createFromDto(userDto);
+        } else {
+            AccountInfoDto accountInfo = financialClientService.getAccountByHolderInfo(user.getLeagueId(), AccountHolderType.USER);
+            user.setBankAccountAddress(accountInfo.getExternalAddress());
         }
         if (isNull(user)) {
             log.warn("~ Error while creating user from userExternalInfo '{}' in LeagueCore-module", userExternalInfo);
@@ -192,7 +197,7 @@ public class UserServiceImpl implements UserService {
             throw new ConstraintViolationException(violations);
         }
         log.debug("user: '{}' is edited", user);
-        updatedUser = userRepository.saveAndFlush(user);
+        updatedUser = userRepository.save(user);
         //todo check changed status
         userEventService.processUserStatusChange(user, user.getStatus());
         return updatedUser;
