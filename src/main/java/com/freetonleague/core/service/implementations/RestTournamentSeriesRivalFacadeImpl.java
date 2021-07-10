@@ -96,7 +96,7 @@ public class RestTournamentSeriesRivalFacadeImpl implements RestTournamentSeries
             throw new ConstraintViolationException(settingsViolations);
         }
         boolean isRivalWasAFK = seriesRivalDto.getStatus().isAFK();
-        boolean isRivalHasNoneWinnerPlace = seriesRivalDto.getWonPlaceInSeries().isNone();
+        boolean isRivalHasNoneWinnerPlace = nonNull(seriesRivalDto.getWonPlaceInSeries()) && seriesRivalDto.getWonPlaceInSeries().isNone();
         if (isRivalWasAFK && !isRivalHasNoneWinnerPlace) {
             log.warn("~ tournament series rival.id '{}' can be set AFK status only with setting WonPlaceInSeries = NONE'. " +
                     "Request for verify rival was rejected.", seriesRivalDto.getId());
