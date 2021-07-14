@@ -150,8 +150,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processTournamentBracketsChanged(Tournament tournament) {
-        log.debug("^ brackets for tournament.id '{}' was changed.", tournament.getId());
-        //compose and update tournaments setting according to tournament template
+        log.debug("^ brackets for tournament.id '{}' was changed. " +
+                "Compose and update tournaments setting according to tournament template", tournament.getId());
         tournamentService.composeAdditionalSettings(tournament);
     }
 
@@ -162,8 +162,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
         log.debug("^ status of match was changed from '{}' to '{}'. Process match status change in Tournament Event Service.",
                 tournamentMatch.getPrevStatus(), newTournamentMatchStatus);
-        // check all match is finished, and tournament system type assume automation
-        // then we finish the series
 
         TournamentSeries tournamentSeries = tournamentMatch.getTournamentSeries();
         Tournament tournament = tournamentSeries.getTournamentRound().getTournament();
@@ -171,6 +169,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())
                 && tournament.getSystemType().isAutoFinishSeriesEnabled()
                 && !tournamentSeries.getStatus().isFinished()) {
+            log.debug("^ checked all match is finished for series.id {}, tournament system type assume automation ->" +
+                    "so we finish the series", tournamentSeries.getId());
             this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
         }
     }
@@ -187,16 +187,44 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         Tournament tournament = tournamentRound.getTournament();
         TournamentSettings tournamentSettings = tournament.getTournamentSettings();
 
-        // check all series is finished, round of the series is not already finished and tournament system type assume automation
-        // then we finish the round
         if (newTournamentSeriesStatus.isFinished()) {
-            if (tournamentSettings.getIsSequentialSeriesEnabled()) {
+            if ((nonNull(tournamentSeries.getPrevStatus()) && !tournamentSeries.getPrevStatus().isFinished())
+                    && tournamentSettings.getIsSequentialSeriesEnabled()
+                    && !tournamentRound.getIsLast()) {
+                log.debug("^ series.id '{}' is finished, prevStatus is '{}', tournament settings IsSequentialSeriesEnabled=true ->" +
+                        "so we start composeSequentialSeriesForPrevSeries", tournamentSeries.getId(), tournamentSeries.getPrevStatus());
                 tournamentSeriesService.composeSequentialSeriesForPrevSeries(tournamentSeries);
             }
             if (tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())
                     && !tournamentRound.getStatus().isFinished()
                     && tournament.getSystemType().isAutoFinishRoundEnabled()) {
+                log.debug("^ checked all series is finished for round.id '{}', round is not already finished" +
+                        " and tournament system type assume automation -> so we finish the round", tournamentRound.getId());
                 this.handleRoundStatusChange(tournamentRound, TournamentStatusType.FINISHED);
+            }
+        }
+    }
+
+    /**
+     * Process round status changing
+     */
+    @Override
+    public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType
+            newTournamentRoundStatus) {
+        log.debug("^ status of round was changed from '{}' to '{}'. Process round status change in Tournament Event Service.",
+                tournamentRound.getPrevStatus(), newTournamentRoundStatus);
+        Tournament tournament = tournamentRound.getTournament();
+        // check if round is finished then we automatically generate new round or finish tournament
+        if (newTournamentRoundStatus.isFinished() && tournament.getSystemType().isGenerationRoundEnabled()) {
+            // check if round is not last or not all rounds is already finished
+            boolean isAllRoundsFinished = !tournamentRoundService.isAllRoundsFinishedByTournament(tournament);
+            boolean isLastRound = isTrue(tournamentRound.getIsLast());
+            boolean isRoundsNotFinishedInTournament = !isLastRound || !isAllRoundsFinished;
+            if (!tournament.getTournamentSettings().getIsSequentialSeriesEnabled() && isRoundsNotFinishedInTournament) {
+                tournamentRoundService.composeNextRoundForTournament(tournament);
+            } else if (!isRoundsNotFinishedInTournament) {
+                // last (all rounds) is finished, so finishing the tournament
+                this.handleTournamentStatusChange(tournament, TournamentStatusType.FINISHED);
             }
         }
     }

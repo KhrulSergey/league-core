@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -142,7 +143,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
                     "IsSequentialSeriesOn = false for series '{}'. Check evoking clients", prevTournamentSeries);
             return false;
         }
-        log.debug("^ trying to compose and save next series for tournament.id {} for prevSeries with series, matches and rivals with data '{}'",
+        log.debug("^ trying to compose and save next series for tournament.id {} for prevSeries '{}'. Composing series with rivals and matches",
                 tournament.getId(), prevTournamentSeries);
         TournamentSeries tournamentSeries = null;
         switch (tournament.getSystemType()) {
@@ -183,13 +184,15 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         log.debug("^ trying to modify tournament series '{}'", tournamentSeries);
         if (tournamentSeries.getStatus().isFinished()) {
             tournamentSeries.setFinishedDate(LocalDateTime.now());
-            if (isNull(tournamentSeries.getSeriesWinner())) {
+            if (!isTrue(tournamentSeries.getHasNoWinner()) && isNull(tournamentSeries.getSeriesWinner())) {
                 TournamentSeriesRival seriesWinner = this.getCalculatedSeriesWinner(tournamentSeries);
                 if (isNull(seriesWinner)) {
                     log.warn("~ modifying tournament series id '{}' with warning: Series winner was not defined or calculated.",
                             tournamentSeries.getId());
                     tournamentEventService.processSeriesHasNoWinner(tournamentSeries);
                     tournamentSeries.setHasNoWinner(true);
+                } else {
+                    tournamentSeries.setHasNoWinner(false);
                 }
                 tournamentSeries.setSeriesWinner(seriesWinner);
             }
@@ -198,7 +201,9 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
         if (!this.verifyTournamentSeries(tournamentSeries, checkEmbeddedMatchList)) {
             return null;
         }
-        tournamentSeries = tournamentSeriesRepository.save(tournamentSeries);
+        TournamentStatusType prevStatus = tournamentSeries.getPrevStatus();
+        tournamentSeries = tournamentSeriesRepository.saveAndFlush(tournamentSeries);
+        tournamentSeries.setPrevStatus(prevStatus);
         if (tournamentSeries.isStatusChanged()) {
             this.handleTournamentSeriesStatusChanged(tournamentSeries);
         }
@@ -285,6 +290,7 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
 
     //TODO calculate all winners of series (from 1 to 8 place)
     private TournamentSeriesRival getCalculatedSeriesWinner(TournamentSeries tournamentSeries) {
+        log.debug("^ trying to calculate winner for series.id '{}'", tournamentSeries.getId());
         List<TournamentMatch> finishedMatchList = tournamentSeries.getMatchList().parallelStream()
                 .filter(m -> TournamentStatusType.finishedStatusList.contains(m.getStatus()))
                 .collect(Collectors.toList());
@@ -325,6 +331,8 @@ public class TournamentSeriesServiceImpl implements TournamentSeriesService {
             return null;
         }
         seriesWinner.setWonPlaceInSeries(TournamentWinnerPlaceType.FIRST);
+        log.debug("^ calculated winner for series.id '{}' is rival.id '{}' with proposal.id '{}'", tournamentSeries.getId(),
+                seriesWinner.getId(), seriesWinner.getTeamProposal().getId());
         return seriesWinner;
     }
 

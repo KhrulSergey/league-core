@@ -1,6 +1,7 @@
 package com.freetonleague.core.domain.dto;
 
 import com.freetonleague.core.domain.enums.FundGatheringType;
+import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -52,6 +53,8 @@ public class TournamentSettingsDto {
 
     private Boolean selfHosted;
 
+    @ApiModelProperty(notes = "Enable generating series without waiting rounds. Only for SingleElimination (default - false)")
+    @Builder.Default
     private Boolean isSequentialSeriesEnabled = false;
 
     private Map<Integer, TournamentRoundSettingDto> tournamentRoundSettingsList;

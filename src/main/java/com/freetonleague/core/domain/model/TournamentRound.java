@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 @EqualsAndHashCode(callSuper = true)
 @NoArgsConstructor
 @SuperBuilder
@@ -90,4 +92,9 @@ public class TournamentRound extends ExtendedBaseEntity {
     public boolean isStatusChanged() {
         return !this.status.equals(this.prevStatus);
     }
+
+    public boolean getLast() {
+        return isTrue(isLast);
+    }
+
 }

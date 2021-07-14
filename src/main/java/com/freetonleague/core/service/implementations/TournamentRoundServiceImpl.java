@@ -203,9 +203,10 @@ public class TournamentRoundServiceImpl implements TournamentRoundService {
         if (tournamentRound.getStatus().isFinished()) {
             tournamentRound.setFinishedDate(LocalDateTime.now());
         }
-
+        TournamentStatusType prevStatus = tournamentRound.getPrevStatus();
         // save round
         tournamentRound = tournamentRoundRepository.save(tournamentRound);
+        tournamentRound.setPrevStatus(prevStatus);
         // check if status was updated
         if (tournamentRound.isStatusChanged()) {
             this.handleTournamentRoundStatusChanged(tournamentRound);
