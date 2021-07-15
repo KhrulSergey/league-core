@@ -150,7 +150,7 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                     "parameter 'tournament settings' is not match by id to tournament for editTournament");
         }
 
-        //Match can be finished only with setting the winner of the match
+        //Tournament can be finished only with setting the winner of the match
         if (this.verifyTournamentStatusBadlyFinished(tournamentDto.getStatus(), tournamentDto.getTournamentWinnerList(),
                 tournamentDto.getIsForcedFinished())) {
             log.warn("~ tournament can be finished only with setting the winners of the tournament and flag isForcedFinished. " +
@@ -455,6 +455,4 @@ public class RestTournamentFacadeImpl implements RestTournamentFacade {
                 && (!status.isFinished() || isNull(isForcesFinished) || !isForcesFinished);
         return isFinishedButNotWithWinnerList || isWinnerListSetButStatusNotFinished;
     }
-
-
 }
