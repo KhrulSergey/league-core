@@ -166,6 +166,16 @@ public class TournamentSurvivalEliminationGeneratorImpl implements TournamentGen
     }
 
     /**
+     * Compose rival for next series (child) by get winner of parent-specified series. If next series is full of rivals then compose matches.
+     * Look to specified series - find it's winner X. Look to specified series - find it's child series Y. Compose rival od series Y as winner X.
+     */
+    @Override
+    public TournamentSeries composeRivalForChildTournamentSeries(TournamentSeries tournamentSeries) {
+        log.error("!> composeRivalForChildSeriesForTournament not implemented in survivalEliminationGenerator. Just return child (next) series as is");
+        return tournamentSeries.getChildSeries();
+    }
+
+    /**
      * Generate new match (OMT) for series.
      */
     @Override

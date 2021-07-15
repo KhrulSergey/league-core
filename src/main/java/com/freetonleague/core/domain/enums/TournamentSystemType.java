@@ -29,4 +29,7 @@ public enum TournamentSystemType {
         return fullyGeneratedTournamentSystem.contains(this) || partialGeneratedTournamentSystem.contains(this);
     }
 
+    public boolean isAutoFinishRoundEnabled() {
+        return fullyGeneratedTournamentSystem.contains(this) || partialGeneratedTournamentSystem.contains(this);
+    }
 }

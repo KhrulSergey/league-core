@@ -235,7 +235,7 @@ public class TournamentServiceImpl implements TournamentService {
     }
 
     private List<TournamentWinner> getCalculatedTeamProposalWinnerList(Tournament tournament) {
-
+        log.debug("^ try to calculatedTeamProposalWinnerList for tournament.id '{}'", tournament.getId());
         List<TournamentWinner> winnerTeamProposal = new ArrayList<>();
         TournamentRound tournamentRound = tournament.getTournamentRoundList().stream()
                 .max(Comparator.comparingInt(TournamentRound::getRoundNumber))

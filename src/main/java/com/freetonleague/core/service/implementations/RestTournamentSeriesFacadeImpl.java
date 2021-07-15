@@ -282,8 +282,11 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
         if (nonNull(tournamentSeriesDto.getId())) {
             TournamentSeries existedSeries = getVerifiedSeriesById(tournamentSeriesDto.getId());
             tournamentSeries.setParentSeriesList(existedSeries.getParentSeriesList());
+            tournamentSeries.setChildSeries(existedSeries.getChildSeries());
             tournamentSeries.setMatchList(existedSeries.getMatchList());
             tournamentSeries.setSeriesRivalList(existedSeries.getSeriesRivalList());
+            tournamentSeries.setTournamentRound(existedSeries.getTournamentRound());
+            tournamentSeries.setPrevStatus(existedSeries.getStatus());
         }
 
         // check and compose match rival list (modify Status, WonPlaceInMatch, Indicators for rival)
@@ -318,8 +321,10 @@ public class RestTournamentSeriesFacadeImpl implements RestTournamentSeriesFacad
             tournamentSeries.setSeriesWinner(seriesWinner);
         }
 
-        TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId());
-        tournamentSeries.setTournamentRound(tournamentRound);
+        if (isNull(tournamentSeries.getTournamentRound())) {
+            TournamentRound tournamentRound = restTournamentRoundFacade.getVerifiedRoundById(tournamentSeriesDto.getTournamentRoundId());
+            tournamentSeries.setTournamentRound(tournamentRound);
+        }
         return tournamentSeries;
     }
 }

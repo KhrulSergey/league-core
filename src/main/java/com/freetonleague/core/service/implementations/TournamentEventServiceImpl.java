@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
@@ -149,8 +150,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processTournamentBracketsChanged(Tournament tournament) {
-        log.debug("^ brackets for tournament.id '{}' was changed.", tournament.getId());
-        //compose and update tournaments setting according to tournament template
+        log.debug("^ brackets for tournament.id '{}' was changed. " +
+                "Compose and update tournaments setting according to tournament template", tournament.getId());
         tournamentService.composeAdditionalSettings(tournament);
     }
 
@@ -161,13 +162,15 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     public void processMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
         log.debug("^ status of match was changed from '{}' to '{}'. Process match status change in Tournament Event Service.",
                 tournamentMatch.getPrevStatus(), newTournamentMatchStatus);
-        // check all match is finished, and tournament system type assume automation
-        // then we finish the series
+
+        TournamentSeries tournamentSeries = tournamentMatch.getTournamentSeries();
+        Tournament tournament = tournamentSeries.getTournamentRound().getTournament();
         if (newTournamentMatchStatus.isFinished()
                 && tournamentMatchService.isAllMatchesFinishedBySeries(tournamentMatch.getTournamentSeries())
-                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isAutoFinishSeriesEnabled()
-                && !tournamentMatch.getTournamentSeries().getStatus().isFinished()
-                && tournamentMatch.getTournamentSeries().getTournamentRound().getTournament().getSystemType().isGenerationRoundEnabled()) {
+                && tournament.getSystemType().isAutoFinishSeriesEnabled()
+                && !tournamentSeries.getStatus().isFinished()) {
+            log.debug("^ checked all match is finished for series.id {}, tournament system type assume automation ->" +
+                    "so we finish the series", tournamentSeries.getId());
             this.handleSeriesStatusChange(tournamentMatch.getTournamentSeries(), TournamentStatusType.FINISHED);
         }
     }
@@ -179,13 +182,26 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     public void processSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
         log.debug("^ status of series was changed from '{}' to '{}'. Process series status change in Tournament Event Service.",
                 tournamentSeries.getPrevStatus(), newTournamentSeriesStatus);
-        // check all series is finished, round of the series is not already finished and tournament system type assume automation
-        // then we finish the round
-        if (newTournamentSeriesStatus.isFinished()
-                && tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())
-                && !tournamentSeries.getTournamentRound().getStatus().isFinished()
-                && tournamentSeries.getTournamentRound().getTournament().getSystemType().isGenerationRoundEnabled()) {
-            this.handleRoundStatusChange(tournamentSeries.getTournamentRound(), TournamentStatusType.FINISHED);
+
+        TournamentRound tournamentRound = tournamentSeries.getTournamentRound();
+        Tournament tournament = tournamentRound.getTournament();
+        TournamentSettings tournamentSettings = tournament.getTournamentSettings();
+
+        if (newTournamentSeriesStatus.isFinished()) {
+            if ((nonNull(tournamentSeries.getPrevStatus()) && !tournamentSeries.getPrevStatus().isFinished())
+                    && tournamentSettings.getIsSequentialSeriesEnabled()
+                    && !tournamentRound.getIsLast()) {
+                log.debug("^ series.id '{}' is finished, prevStatus is '{}', tournament settings IsSequentialSeriesEnabled=true ->" +
+                        "so we start composeSequentialSeriesForPrevSeries", tournamentSeries.getId(), tournamentSeries.getPrevStatus());
+                tournamentSeriesService.composeSequentialSeriesForPrevSeries(tournamentSeries);
+            }
+            if (tournamentSeriesService.isAllSeriesFinishedByRound(tournamentSeries.getTournamentRound())
+                    && !tournamentRound.getStatus().isFinished()
+                    && tournament.getSystemType().isAutoFinishRoundEnabled()) {
+                log.debug("^ checked all series is finished for round.id '{}', round is not already finished" +
+                        " and tournament system type assume automation -> so we finish the round", tournamentRound.getId());
+                this.handleRoundStatusChange(tournamentRound, TournamentStatusType.FINISHED);
+            }
         }
     }
 
@@ -193,18 +209,22 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      * Process round status changing
      */
     @Override
-    public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
+    public void processRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType
+            newTournamentRoundStatus) {
         log.debug("^ status of round was changed from '{}' to '{}'. Process round status change in Tournament Event Service.",
                 tournamentRound.getPrevStatus(), newTournamentRoundStatus);
+        Tournament tournament = tournamentRound.getTournament();
         // check if round is finished then we automatically generate new round or finish tournament
-        if (newTournamentRoundStatus.isFinished() && tournamentRound.getTournament().getSystemType().isGenerationRoundEnabled()) {
+        if (newTournamentRoundStatus.isFinished() && tournament.getSystemType().isGenerationRoundEnabled()) {
             // check if round is not last or not all rounds is already finished
-            if (isFalse(tournamentRound.getIsLast())
-                    || !tournamentRoundService.isAllRoundsFinishedByTournament(tournamentRound.getTournament())) {
-                tournamentRoundService.composeNextRoundForTournament(tournamentRound.getTournament());
-            } else if (!tournamentRound.getTournament().getStatus().isFinished()) {
+            boolean isAllRoundsFinished = !tournamentRoundService.isAllRoundsFinishedByTournament(tournament);
+            boolean isLastRound = isTrue(tournamentRound.getIsLast());
+            boolean isRoundsNotFinishedInTournament = !isLastRound || !isAllRoundsFinished;
+            if (!tournament.getTournamentSettings().getIsSequentialSeriesEnabled() && isRoundsNotFinishedInTournament) {
+                tournamentRoundService.composeNextRoundForTournament(tournament);
+            } else if (!isRoundsNotFinishedInTournament) {
                 // last (all rounds) is finished, so finishing the tournament
-                this.handleTournamentStatusChange(tournamentRound.getTournament(), TournamentStatusType.FINISHED);
+                this.handleTournamentStatusChange(tournament, TournamentStatusType.FINISHED);
             }
         }
     }
@@ -214,7 +234,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
      */
     @Override
     public void processSeriesHasNoWinner(TournamentSeries tournamentSeries) {
-        log.error("!> We have a dead head in series '{}'. Create new match manually", tournamentSeries);
+        log.error("!> We have no winner or a dead head in series '{}'. Create new match manually", tournamentSeries);
     }
 
     /**
@@ -280,13 +300,12 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                             "Request rejected.", teamCapitan));
         }
 
-        double tournamentOwnerCommissionPercentage = teamProposal.getTournament()
-                .getTournamentSettings().getOrganizerCommission() / 100;
+        double tournamentOwnerCommissionPercentage = tournament.getTournamentSettings().getOrganizerCommission() / 100;
         double commissionAmount = teamParticipationFee * tournamentOwnerCommissionPercentage;
         double tournamentFundAmount = teamParticipationFee - commissionAmount;
 
         AccountInfoDto tournamentOwnerAccountDto = financialClientService.getAccountByHolderInfo(
-                teamProposal.getTournament().getCreatedBy().getLeagueId(), AccountHolderType.USER);
+                tournament.getCreatedBy().getLeagueId(), AccountHolderType.USER);
         AccountInfoDto tournamentAccountDto = financialClientService.getAccountByHolderInfo(
                 tournament.getCoreId(), AccountHolderType.TOURNAMENT);
 
@@ -318,7 +337,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     /**
      * Try to make refund of participation fee and commission to team
      */
-    private List<AccountTransactionInfoDto> tryMakeParticipationFeeRefund(TournamentTeamProposal teamProposal, Boolean needToPayPenalty) {
+    private List<AccountTransactionInfoDto> tryMakeParticipationFeeRefund(TournamentTeamProposal
+                                                                                  teamProposal, Boolean needToPayPenalty) {
         log.debug("^ try to refund tournament participation fee and commission to team.id '{}' and teamProposal.id '{}'",
                 teamProposal.getTeam().getId(), teamProposal.getId());
         // abort transaction
@@ -368,7 +388,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
     private void tryMakeStatusUpdateOperations(Tournament tournament) {
         log.debug("^ try to define events for tournament: '{}'", tournament.getId());
         final TournamentStatusType tournamentStatus = tournament.getStatus();
-        boolean result = true;
         if (tournamentStatus.isBefore(TournamentStatusType.SIGN_UP)
                 && tournament.getSignUpStartDate().isBefore(LocalDateTime.now())) {
             this.handleTournamentStatusChange(tournament, TournamentStatusType.SIGN_UP);
@@ -409,7 +428,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         tournamentService.editTournament(tournament);
     }
 
-    private void handleRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType newTournamentRoundStatus) {
+    private void handleRoundStatusChange(TournamentRound tournamentRound, TournamentStatusType
+            newTournamentRoundStatus) {
         log.debug("^ handle changing status of round to '{}' in Tournament Event Service.", newTournamentRoundStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentRoundStatus
@@ -435,7 +455,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         tournamentRoundService.editRound(tournamentRound);
     }
 
-    private void handleSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType newTournamentSeriesStatus) {
+    private void handleSeriesStatusChange(TournamentSeries tournamentSeries, TournamentStatusType
+            newTournamentSeriesStatus) {
         log.debug("^ handle changing status of series to '{}' in Tournament Event Service.", newTournamentSeriesStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentSeriesStatus
@@ -461,7 +482,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         tournamentSeriesService.editSeries(tournamentSeries);
     }
 
-    public void handleMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType newTournamentMatchStatus) {
+    public void handleMatchStatusChange(TournamentMatch tournamentMatch, TournamentStatusType
+            newTournamentMatchStatus) {
         log.debug("^ handle changing status of match to '{}' in Tournament Event Service.", newTournamentMatchStatus);
         Map<String, Object> updateFields = Map.of(
                 "status", newTournamentMatchStatus

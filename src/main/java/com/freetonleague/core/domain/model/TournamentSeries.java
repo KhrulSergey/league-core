@@ -44,7 +44,7 @@ public class TournamentSeries extends ExtendedBaseEntity {
     private List<TournamentSeriesRival> seriesRivalList;
 
     @EqualsAndHashCode.Exclude
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.REFRESH)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "winner_series_rival_id")
     private TournamentSeriesRival seriesWinner;
 
@@ -81,6 +81,13 @@ public class TournamentSeries extends ExtendedBaseEntity {
             joinColumns = @JoinColumn(name = "child_series_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"))
     private List<TournamentSeries> parentSeriesList;
+
+    @EqualsAndHashCode.Exclude
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinTable(name = "tournament_series_parents",
+            joinColumns = @JoinColumn(name = "parent_series_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "child_series_id", referencedColumnName = "id"))
+    private TournamentSeries childSeries;
 
     @Column(name = "start_planned_at")
     private LocalDateTime startPlannedDate;
