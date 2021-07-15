@@ -62,6 +62,9 @@ public class TournamentSettingsDto {
     @Min(0)
     private Double prizeFund;
 
+    @ApiModelProperty(notes = "Score distribution for rivals in series/matches")
+    private List<TournamentScoreWinnersDistributionDto> scoreDistributionWithinRivals;
+
     @NotNull
     @NotEmpty
     private List<TournamentPrizePoolDistributionDto> prizePoolDistribution;

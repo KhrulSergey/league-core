@@ -89,7 +89,7 @@ public class TournamentEventServiceImpl implements TournamentEventService {
 
     //TODO delete until 01/01/21
     //every 20 hours, timout before start 30 sec
-    @Scheduled(fixedRate = 20 * 60 * 60 * 1000, initialDelay = 30 * 1000)
+//    @Scheduled(fixedRate = 20 * 60 * 60 * 1000, initialDelay = 30 * 1000)
     void monitorFix() {
         log.debug("^ Run TournamentEventService monitor fix tournament proposals");
         tournamentService.getAllActiveTournament().parallelStream()

@@ -3,7 +3,9 @@ package com.freetonleague.core.domain.model;
 import com.freetonleague.core.domain.dto.TournamentPrizePoolDistributionDto;
 import com.freetonleague.core.domain.dto.TournamentQuitPenaltyDistributionDto;
 import com.freetonleague.core.domain.dto.TournamentRoundSettingDto;
+import com.freetonleague.core.domain.dto.TournamentScoreWinnersDistributionDto;
 import com.freetonleague.core.domain.enums.FundGatheringType;
+import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -97,6 +99,10 @@ public class TournamentSettings extends ExtendedBaseEntity {
     @Builder.Default
     @Column(name = "is_generation_series_enabled")
     private Boolean isGenerationSeriesEnabled = true;
+
+    @Type(type = "jsonb")
+    @Column(name = "score_distribution_within_rivals", columnDefinition = "jsonb")
+    private List<TournamentScoreWinnersDistributionDto> scoreDistributionWithinRivals;
 
     /**
      * Schema of distribution prize fund between winners
