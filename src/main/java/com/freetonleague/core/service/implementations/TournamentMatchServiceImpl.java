@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
@@ -104,15 +105,18 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
         log.debug("^ trying to modify tournament match '{}'", tournamentMatch);
         if (tournamentMatch.getStatus().isFinished()) {
             tournamentMatch.setFinishedDate(LocalDateTime.now());
-            if (isNull(this.getMatchWinner(tournamentMatch, false))) {
+            TournamentMatchRival winner = this.getMatchWinner(tournamentMatch, false);
+            if (isNull(winner)) {
                 tournamentMatch.setHasNoWinner(true);
             }
+            tournamentMatch.setMatchWinner(winner);
         }
         if (isNotEmpty(tournamentMatch.getMatchPropertyList())) {
             tournamentMatch.setMatchPropertyList(MatchPropertyConverter.convertAndValidate(tournamentMatch.getMatchPropertyList()));
         }
-
+        TournamentStatusType prevStatus = tournamentMatch.getPrevStatus();
         tournamentMatch = tournamentMatchRepository.save(tournamentMatch);
+        tournamentMatch.setPrevStatus(prevStatus);
         if (tournamentMatch.isStatusChanged()) {
             this.handleTournamentMatchStatusChanged(tournamentMatch);
         }
@@ -174,6 +178,11 @@ public class TournamentMatchServiceImpl implements TournamentMatchService {
     public TournamentMatchRival getMatchWinner(TournamentMatch tournamentMatch, boolean forceCalculate) {
         if (!tournamentMatch.getStatus().isFinished()) {
             log.error("!> requesting get match winner for not finished match id:'{}' name:'{}'. Check evoking clients",
+                    tournamentMatch.getId(), tournamentMatch.getName());
+            return null;
+        }
+        if (isTrue(tournamentMatch.getHasNoWinner())) {
+            log.debug("^ we have no winner in match.id '{}' name '{}'. Please Set match has no winner. getMatchWinner returns NULL.",
                     tournamentMatch.getId(), tournamentMatch.getName());
             return null;
         }

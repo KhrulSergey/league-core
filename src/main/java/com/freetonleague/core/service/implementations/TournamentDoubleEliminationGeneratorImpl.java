@@ -53,6 +53,18 @@ public class TournamentDoubleEliminationGeneratorImpl implements TournamentGener
     }
 
     /**
+     * Compose rival for next series (child) by get winner of parent-specified series. If next series is full of rivals then compose matches.
+     * Look to specified series - find it's winner X. Look to specified series - find it's child series Y. Compose rival od series Y as winner X.
+     *
+     * @param tournamentSeries to get winner and child series
+     * @return tournament series with composed rival and matches
+     */
+    @Override
+    public TournamentSeries composeRivalForChildTournamentSeries(TournamentSeries tournamentSeries) {
+        return null;
+    }
+
+    /**
      * Generate new match (OMT) for series.
      *
      * @param tournamentSeries to compose series for

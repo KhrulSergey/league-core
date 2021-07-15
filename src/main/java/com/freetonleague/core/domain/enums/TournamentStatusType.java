@@ -5,8 +5,8 @@ import java.util.List;
 public enum TournamentStatusType {
     CREATED(1), // just created and started advertising
     SIGN_UP(2), // ready to collect proposals
-    ADJUSTMENT(3), // approve all proposals
-    STARTED(4), // started and mathes began
+    ADJUSTMENT(3), // time to approve/reject all proposals
+    STARTED(4), // started and matches began
     PAUSE(5), // pause for further instructions
     FINISHED(6), // successfully finished
     DECLINED(0), //  canceled before started

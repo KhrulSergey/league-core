@@ -89,7 +89,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 2 hours, timeout before start 2 min
-    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
+//    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
     private void monitorForInitiatedUsers() {
         log.debug("^ Run UserEventService monitor For Initiated Users");
 
@@ -115,7 +115,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 3 days, timeout before start 1 min
-    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
+//    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
     public void importUsersDataFromFile() {
         log.debug("^ Run importUsersDataFromFile task to Import Users");
         if (importUser) {

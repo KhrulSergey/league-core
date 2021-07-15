@@ -12,7 +12,8 @@ import java.util.List;
         TournamentProposalMapper.class, TournamentSeriesRivalMapper.class})
 public interface TournamentSeriesMapper {
 
-    //    @Mapping(target = "seriesRivalList", source = "dto.seriesRivalList", qualifiedByName = "fromDtoList")
+    @Mapping(target = "seriesWinner", ignore = true)
+    @Mapping(target = "seriesRivalList", ignore = true)
     TournamentSeries fromDto(TournamentSeriesDto dto);
 
     @Mapping(target = "tournamentRoundId", source = "entity.tournamentRound.id")
@@ -21,6 +22,7 @@ public interface TournamentSeriesMapper {
     @Mapping(target = "teamProposalWinner", source = "entity.teamProposalWinner", qualifiedByName = "toDto")
     @Mapping(target = "parentSeriesList", source = "entity.parentSeriesList", qualifiedByName = "toParentDtoSet")
     @Mapping(target = "seriesRivalList", source = "entity.seriesRivalList", qualifiedByName = "toDtoList")
+    @Mapping(target = "seriesWinner", source = "entity.seriesWinner", qualifiedByName = "toDto")
     @Named(value = "toDto")
     TournamentSeriesDto toDto(TournamentSeries entity);
 
