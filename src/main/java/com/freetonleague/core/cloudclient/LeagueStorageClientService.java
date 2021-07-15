@@ -3,7 +3,7 @@ package com.freetonleague.core.cloudclient;
 import com.freetonleague.core.domain.dto.MediaResourceDto;
 import com.freetonleague.core.domain.enums.ResourcePrivacyType;
 import com.freetonleague.core.domain.model.Team;
-import com.freetonleague.core.domain.model.Tournament;
+import com.freetonleague.core.domain.model.tournament.Tournament;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

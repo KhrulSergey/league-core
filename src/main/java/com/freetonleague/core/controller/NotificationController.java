@@ -1,7 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.domain.dto.NotificationPublicDto;
-import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseNotificationDto;
 import com.freetonleague.core.service.RestNotificationFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

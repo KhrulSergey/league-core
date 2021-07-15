@@ -1,6 +1,6 @@
 package com.freetonleague.core.util;
 
-import com.freetonleague.core.domain.dto.GameDisciplineIndicatorDto;
+import com.freetonleague.core.domain.dto.tournament.GameDisciplineIndicatorDto;
 import com.freetonleague.core.exception.GameDisciplineManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 

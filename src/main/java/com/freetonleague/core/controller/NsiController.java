@@ -1,8 +1,8 @@
 package com.freetonleague.core.controller;
 
-import com.freetonleague.core.domain.dto.GameIndicatorTypeDto;
-import com.freetonleague.core.domain.dto.MatchPropertyTypeDto;
-import com.freetonleague.core.domain.dto.ProductPropertyTypeDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentMatchPropertyTypeDto;
+import com.freetonleague.core.domain.dto.tournament.GameIndicatorTypeDto;
+import com.freetonleague.core.domain.dto.product.ProductPropertyTypeDto;
 import com.freetonleague.core.service.RestNsiFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -35,7 +35,7 @@ public class NsiController {
 
     @ApiOperation("Get match property list with names and values")
     @GetMapping(path = PATH_MATCH_PROPERTY_LIST)
-    public ResponseEntity<List<MatchPropertyTypeDto>> getMatchPropertyList() {
+    public ResponseEntity<List<TournamentMatchPropertyTypeDto>> getMatchPropertyList() {
         return new ResponseEntity<>(restNsiFacade.getMatchPropertyList(), HttpStatus.OK);
     }
 
