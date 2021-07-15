@@ -1,6 +1,6 @@
 package com.freetonleague.core.util;
 
-import com.freetonleague.core.domain.dto.ProductPropertyDto;
+import com.freetonleague.core.domain.dto.product.ProductPropertyDto;
 import com.freetonleague.core.domain.enums.IndicatorValueClassType;
 import com.freetonleague.core.domain.enums.IndicatorValueMultiplicityType;
 import com.freetonleague.core.exception.GameDisciplineManageException;

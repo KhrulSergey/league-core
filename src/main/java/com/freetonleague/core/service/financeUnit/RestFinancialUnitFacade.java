@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.financeUnit;
 
-import com.freetonleague.core.domain.dto.AccountDepositFinUnitDto;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountDepositFinUnitDto;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.BankProviderType;

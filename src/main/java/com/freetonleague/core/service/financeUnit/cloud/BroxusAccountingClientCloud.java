@@ -1,6 +1,6 @@
 package com.freetonleague.core.service.financeUnit.cloud;
 
-import com.freetonleague.core.domain.dto.AccountBroxusResponseDto;
+import com.freetonleague.core.domain.dto.finance.AccountBroxusResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;

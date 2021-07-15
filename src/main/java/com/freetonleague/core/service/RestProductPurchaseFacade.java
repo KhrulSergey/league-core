@@ -1,8 +1,8 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.ProductPurchaseDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
 import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

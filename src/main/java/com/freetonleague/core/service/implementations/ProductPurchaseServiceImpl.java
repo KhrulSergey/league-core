@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.ProductPurchaseRepository;
 import com.freetonleague.core.service.ProductEventService;

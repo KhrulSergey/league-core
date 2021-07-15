@@ -1,12 +1,12 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
-import com.freetonleague.core.domain.dto.AccountDepositFinUnitDto;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountDepositFinUnitDto;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.Account;
-import com.freetonleague.core.domain.model.AccountHolder;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.model.finance.Account;
+import com.freetonleague.core.domain.model.finance.AccountHolder;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.FinancialUnitManageException;
