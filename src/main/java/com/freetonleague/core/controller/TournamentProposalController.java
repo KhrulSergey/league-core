@@ -1,10 +1,10 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.TournamentTeamProposalDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentTeamProposalDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.RestTournamentProposalFacade;
+import com.freetonleague.core.service.tournament.RestTournamentProposalFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

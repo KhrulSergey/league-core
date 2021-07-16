@@ -1,9 +1,9 @@
 package com.freetonleague.core.controller;
 
-import com.freetonleague.core.domain.dto.GameDisciplineDto;
-import com.freetonleague.core.domain.dto.GameDisciplineSettingsDto;
+import com.freetonleague.core.domain.dto.tournament.GameDisciplineDto;
+import com.freetonleague.core.domain.dto.tournament.GameDisciplineSettingsDto;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.RestGameDisciplineFacade;
+import com.freetonleague.core.service.tournament.RestGameDisciplineFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

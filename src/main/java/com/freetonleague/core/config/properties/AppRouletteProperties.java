@@ -5,18 +5,29 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.validation.annotation.Validated;
 
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+
 @Data
 @Validated
 @Configuration
 @ConfigurationProperties("app.roulette")
 public class AppRouletteProperties {
 
-    private Double minBetAmount;
+    private Long minBetAmount;
 
-    private Double maxBetAmount;
+    private Long maxBetAmount;
 
-    private Double startBetAmount;
+    private Long startBetAmount;
 
     private Long startDelaySeconds;
+
+    private Integer minPlayersCount;
+
+    private Integer maxPlayersCount;
+
+    @Min(0)
+    @Max(1)
+    private Double commissionFactor;
 
 }

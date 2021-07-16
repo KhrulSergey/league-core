@@ -1,7 +1,7 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;

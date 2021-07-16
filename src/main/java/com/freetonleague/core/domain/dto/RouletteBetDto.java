@@ -20,6 +20,6 @@ public class RouletteBetDto {
 
     private Double tonAmount;
 
-    private Long chance;
+    private Double chance;
 
 }

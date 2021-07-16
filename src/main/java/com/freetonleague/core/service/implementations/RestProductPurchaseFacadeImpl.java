@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.ProductPurchaseDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
 import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ProductManageException;
 import com.freetonleague.core.exception.TeamManageException;

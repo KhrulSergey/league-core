@@ -1,8 +1,8 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionParentInfoDto;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionParentInfoDto;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import org.mapstruct.*;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR,

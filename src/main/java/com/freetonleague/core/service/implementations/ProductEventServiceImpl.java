@@ -1,13 +1,13 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.TelegramClientService;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseNotificationDto;
 import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.ProductManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;

@@ -1,11 +1,11 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.TournamentDiscordInfoListDto;
-import com.freetonleague.core.domain.dto.TournamentDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentDiscordInfoListDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentDto;
 import com.freetonleague.core.domain.enums.TournamentStatusType;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.RestTournamentFacade;
+import com.freetonleague.core.service.tournament.RestTournamentFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

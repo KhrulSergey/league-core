@@ -1,8 +1,8 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.ProductPurchaseDto;
-import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import org.mapstruct.*;
 
 import java.util.List;

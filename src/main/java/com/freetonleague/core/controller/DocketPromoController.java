@@ -2,8 +2,8 @@ package com.freetonleague.core.controller;
 
 import com.freetonleague.core.controller.api.DocketPromoApi;
 import com.freetonleague.core.domain.filter.DocketPromoCreationFilter;
-import com.freetonleague.core.domain.model.DocketPromoEntity;
-import com.freetonleague.core.service.DocketPromoService;
+import com.freetonleague.core.domain.model.docket.DocketPromoEntity;
+import com.freetonleague.core.service.docket.DocketPromoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 

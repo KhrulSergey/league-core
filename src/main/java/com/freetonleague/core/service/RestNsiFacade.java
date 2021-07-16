@@ -1,8 +1,8 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.GameIndicatorTypeDto;
-import com.freetonleague.core.domain.dto.MatchPropertyTypeDto;
-import com.freetonleague.core.domain.dto.ProductPropertyTypeDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentMatchPropertyTypeDto;
+import com.freetonleague.core.domain.dto.tournament.GameIndicatorTypeDto;
+import com.freetonleague.core.domain.dto.product.ProductPropertyTypeDto;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public interface RestNsiFacade {
      *
      * @return match property list
      */
-    List<MatchPropertyTypeDto> getMatchPropertyList();
+    List<TournamentMatchPropertyTypeDto> getMatchPropertyList();
 
     /**
      * Returns all entries of Product Property Type

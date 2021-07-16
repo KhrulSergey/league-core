@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.financeUnit.cloud;
 
-import com.freetonleague.core.domain.dto.AccountBroxusDataDto;
-import com.freetonleague.core.domain.dto.AccountBroxusResponseDto;
+import com.freetonleague.core.domain.dto.finance.AccountBroxusDataDto;
+import com.freetonleague.core.domain.dto.finance.AccountBroxusResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

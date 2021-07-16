@@ -1,9 +1,9 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.DocketDto;
+import com.freetonleague.core.domain.dto.docket.DocketDto;
 import com.freetonleague.core.domain.enums.DocketStatusType;
-import com.freetonleague.core.service.RestDocketFacade;
+import com.freetonleague.core.service.docket.RestDocketFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;
