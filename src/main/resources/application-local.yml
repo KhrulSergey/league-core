@@ -17,12 +17,20 @@ spring:
 
 app:
   common:
-    settings-refresh-rate: 1000
+    settings-refresh-rate: 10000000000
   user:
     utm-source-register-bonus-map:
       test-source: 0
     import: false
-    import-test-data: true
+    import-test-data: false
+  roulette:
+    min-bet-amount: 1
+    max-bet-amount: 500
+    start-bet-amount: 500
+    start-delay-seconds: 600
+    min-players-count: 2
+    max-players-count: 50
+    commission-factor: 0.95
 
 config:
   broxus-client:

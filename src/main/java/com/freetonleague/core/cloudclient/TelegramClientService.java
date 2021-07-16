@@ -1,6 +1,6 @@
 package com.freetonleague.core.cloudclient;
 
-import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseNotificationDto;
 import com.freetonleague.core.domain.dto.TelegramMPubgExchangeNotification;
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;

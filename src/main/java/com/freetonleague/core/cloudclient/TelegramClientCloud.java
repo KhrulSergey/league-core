@@ -1,6 +1,6 @@
 package com.freetonleague.core.cloudclient;
 
-import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseNotificationDto;
 import com.freetonleague.core.domain.dto.TelegramMPubgExchangeNotification;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;

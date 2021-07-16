@@ -7,24 +7,28 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Data
 @Entity
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-@Table(schema = "public", name = "roulette_match_bet")
+@Table(schema = "public", name = "roulette_match_bets")
 public class RouletteBetEntity extends BaseEntity {
 
     @ManyToOne
+    @JoinColumn(name = "league_id", referencedColumnName = "league_id", nullable = false)
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "match_id")
     private RouletteMatchEntity match;
 
     private Long ticketNumberFrom;

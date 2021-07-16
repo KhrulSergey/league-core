@@ -2,9 +2,9 @@ package com.freetonleague.core.controller;
 
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.TournamentRoundDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentRoundDto;
 import com.freetonleague.core.domain.model.User;
-import com.freetonleague.core.service.RestTournamentRoundFacade;
+import com.freetonleague.core.service.tournament.RestTournamentRoundFacade;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

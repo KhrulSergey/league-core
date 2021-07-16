@@ -2,6 +2,7 @@ package com.freetonleague.core.mapper;
 
 import com.freetonleague.core.domain.dto.NewsDto;
 import com.freetonleague.core.domain.model.News;
+import com.freetonleague.core.mapper.docket.DocketProposalMapper;
 import org.mapstruct.*;
 
 import java.util.List;

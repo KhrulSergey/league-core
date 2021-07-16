@@ -1,7 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.ProductPurchaseDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
 import com.freetonleague.core.domain.enums.PurchaseStateType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestProductPurchaseFacade;

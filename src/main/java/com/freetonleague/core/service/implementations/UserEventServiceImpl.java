@@ -3,8 +3,9 @@ package com.freetonleague.core.service.implementations;
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.config.properties.AppUserProperties;
 import com.freetonleague.core.domain.dto.*;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.service.EventService;
@@ -89,7 +90,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 2 hours, timeout before start 2 min
-    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
+//    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
     private void monitorForInitiatedUsers() {
         log.debug("^ Run UserEventService monitor For Initiated Users");
 
@@ -115,7 +116,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 3 days, timeout before start 1 min
-    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
+//    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
     public void importUsersDataFromFile() {
         log.debug("^ Run importUsersDataFromFile task to Import Users");
         if (importUser) {

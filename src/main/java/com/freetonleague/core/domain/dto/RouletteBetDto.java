@@ -13,13 +13,13 @@ import java.util.UUID;
 @AllArgsConstructor
 public class RouletteBetDto {
 
-    private UUID userId;
+    private UUID userLeagueId;
 
     private Integer ticketNumberFrom;
     private Integer ticketNumberTo;
 
     private Double tonAmount;
 
-    private Long chance;
+    private Double chance;
 
 }
