@@ -15,7 +15,8 @@ public class RouletteBetDto {
 
     private UUID userId;
 
-    private Integer ticketNumber;
+    private Integer ticketNumberFrom;
+    private Integer ticketNumberTo;
 
     private Double tonAmount;
 
