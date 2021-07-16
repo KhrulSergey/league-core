@@ -47,7 +47,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     private final TeamParticipantService teamParticipantService;
 
     // Start time of check-in = tournament.start_at - CHECK_IN_DURATION_IN_HOURS
-    private final int CHECK_IN_DURATION_IN_HOURS = 24;
+    private final int CHECK_IN_DURATION_IN_HOURS = 1;
 
     /**
      * Get team proposal for tournament
