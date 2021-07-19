@@ -1,12 +1,12 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
-import com.freetonleague.core.domain.dto.AccountBroxusResponseDto;
-import com.freetonleague.core.domain.dto.AccountExternalInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionExternalInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountBroxusResponseDto;
+import com.freetonleague.core.domain.dto.finance.AccountExternalInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionExternalInfoDto;
 import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.BankProviderType;
-import com.freetonleague.core.domain.model.Account;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.model.finance.Account;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.exception.InnerServiceFeignException;
 import com.freetonleague.core.service.financeUnit.cloud.BroxusAccountingClientCloud;
 import feign.FeignException;

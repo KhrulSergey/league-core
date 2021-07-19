@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserExternalInfo;
 import com.freetonleague.core.domain.enums.AccountHolderType;

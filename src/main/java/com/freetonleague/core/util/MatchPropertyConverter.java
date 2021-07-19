@@ -1,6 +1,6 @@
 package com.freetonleague.core.util;
 
-import com.freetonleague.core.domain.dto.MatchPropertyDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentMatchPropertyDto;
 import com.freetonleague.core.exception.GameDisciplineManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 
@@ -12,11 +12,11 @@ public class MatchPropertyConverter {
     /**
      * Verified MatchProperty List field entry form DB (from jsonB type) to correct type entity
      */
-    public static List<MatchPropertyDto> convertAndValidate(List<MatchPropertyDto> matchPropertyList) {
+    public static List<TournamentMatchPropertyDto> convertAndValidate(List<TournamentMatchPropertyDto> matchPropertyList) {
         if (matchPropertyList == null) {
             return null;
         }
-        AtomicReference<MatchPropertyDto> currentProperty = new AtomicReference<>();
+        AtomicReference<TournamentMatchPropertyDto> currentProperty = new AtomicReference<>();
         try {
             matchPropertyList.forEach(matchProperty -> {
                 currentProperty.set(matchProperty);

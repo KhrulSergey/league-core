@@ -1,7 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.ProductDto;
+import com.freetonleague.core.domain.dto.product.ProductDto;
 import com.freetonleague.core.domain.enums.ProductStatusType;
 import com.freetonleague.core.service.RestProductFacade;
 import io.swagger.annotations.Api;
