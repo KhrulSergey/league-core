@@ -23,6 +23,14 @@ app:
       test-source: 0
     import: true
     import-test-data: false
+  roulette:
+    min-bet-amount: 1
+    max-bet-amount: 500
+    start-bet-amount: 500
+    start-delay-seconds: 600
+    min-players-count: 2
+    max-players-count: 50
+    commission-factor: 0.95
 
 config:
   broxus-client:
