@@ -7,13 +7,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class MatchHistoryItemDto {
+@NoArgsConstructor
+public class RandomLongDto {
 
-    private Long id;
-    private String randomOrgId;
-    private Long winnerUserId;
-    private Long betSum;
+    private Long value;
+    private String randomizeId;
 
 }

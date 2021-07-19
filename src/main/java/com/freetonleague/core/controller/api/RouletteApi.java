@@ -29,7 +29,7 @@ public interface RouletteApi {
 
     @GetMapping(POST_MAKE_BET_PATH)
     @ApiOperation("Make bet by user")
-    List<MatchHistoryItemDto> makeBet(
+    void makeBet(
             @RequestBody @Valid RouletteBetFilter filter,
             @ApiIgnore @AuthenticationPrincipal User user
     );
