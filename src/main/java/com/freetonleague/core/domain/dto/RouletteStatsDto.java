@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class RouletteStatsDto {
 
-    private Integer gamesPlayedToday;
+    private Long gamesPlayedToday;
     private Long tonAmountForToday;
     private Long tonAmountForAllTime;
 

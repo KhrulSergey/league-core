@@ -1,6 +1,6 @@
 package com.freetonleague.core.controller.api;
 
-import com.freetonleague.core.domain.dto.MatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.filter.RouletteBetFilter;
 import com.freetonleague.core.domain.model.User;
@@ -25,7 +25,7 @@ public interface RouletteApi {
 
     @GetMapping(GET_HISTORY_PATH)
     @ApiOperation("Getting roulette matches history")
-    List<MatchHistoryItemDto> getMatchesHistory();
+    List<RouletteMatchHistoryItemDto> getMatchesHistory();
 
     @GetMapping(POST_MAKE_BET_PATH)
     @ApiOperation("Make bet by user")

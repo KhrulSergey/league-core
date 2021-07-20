@@ -18,6 +18,4 @@ public interface RouletteMatchRepository extends JpaRepository<RouletteMatchEnti
 
     List<RouletteMatchEntity> findAllByFinishedTrueOrderByCreatedAt();
 
-    Integer countAll();
-
 }
