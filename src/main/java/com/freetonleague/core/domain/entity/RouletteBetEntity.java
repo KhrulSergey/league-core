@@ -24,7 +24,7 @@ import javax.persistence.Table;
 public class RouletteBetEntity extends BaseEntity {
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "league_id", referencedColumnName = "league_id", nullable = false)
     private User user;
 
     @ManyToOne

@@ -1,6 +1,6 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.MatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.model.User;
 
@@ -14,6 +14,6 @@ public interface RouletteService {
 
     RouletteStatsDto getStats();
 
-    List<MatchHistoryItemDto> getMatchHistory();
+    List<RouletteMatchHistoryItemDto> getMatchHistory();
 
 }

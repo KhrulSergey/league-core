@@ -1,7 +1,7 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.controller.api.RouletteApi;
-import com.freetonleague.core.domain.dto.MatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.filter.RouletteBetFilter;
 import com.freetonleague.core.domain.model.User;
@@ -23,7 +23,7 @@ public class RouletteController implements RouletteApi {
     }
 
     @Override
-    public List<MatchHistoryItemDto> getMatchesHistory() {
+    public List<RouletteMatchHistoryItemDto> getMatchesHistory() {
         return rouletteService.getMatchHistory();
     }
 

@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.config.properties.AppRouletteProperties;
-import com.freetonleague.core.domain.dto.MatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RandomLongDto;
 import com.freetonleague.core.domain.dto.RouletteBetDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
@@ -28,10 +28,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Clock;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -129,7 +126,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .collect(Collectors.toList());
 
         return RouletteStatsDto.builder()
-                .gamesPlayedToday(rouletteMatchRepository.countAll())
+                .gamesPlayedToday(rouletteMatchRepository.count())
                 .tonAmountForToday(sumForToday)
                 .tonAmountForAllTime(sumForAllTime)
                 .minBetAmount(rouletteProperties.getMinBetAmount())
@@ -141,7 +138,7 @@ public class RouletteServiceImpl implements RouletteService {
     }
 
     @Override
-    public List<MatchHistoryItemDto> getMatchHistory() {
+    public List<RouletteMatchHistoryItemDto> getMatchHistory() {
         return rouletteMapper.toMatchHistoryList(
                 rouletteMatchRepository.findAllByFinishedTrueOrderByCreatedAt()
         );

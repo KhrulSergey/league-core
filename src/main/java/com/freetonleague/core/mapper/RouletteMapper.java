@@ -1,6 +1,6 @@
 package com.freetonleague.core.mapper;
 
-import com.freetonleague.core.domain.dto.MatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RouletteBetDto;
 import com.freetonleague.core.domain.entity.RouletteBetEntity;
 import com.freetonleague.core.domain.entity.RouletteMatchEntity;
@@ -12,12 +12,12 @@ import java.util.List;
 @Mapper
 public interface RouletteMapper {
 
-    @Mapping(target = "winnerUserId", source = "winnerBet.user.id")
-    MatchHistoryItemDto toMatchHistoryItem(RouletteMatchEntity rouletteMatchEntity);
+    @Mapping(target = "winnerUserLeagueId", source = "winnerBet.user.leagueId")
+    RouletteMatchHistoryItemDto toMatchHistoryItem(RouletteMatchEntity rouletteMatchEntity);
 
-    List<MatchHistoryItemDto> toMatchHistoryList(List<RouletteMatchEntity> allByFinishedTrueOrderByCreatedAt);
+    List<RouletteMatchHistoryItemDto> toMatchHistoryList(List<RouletteMatchEntity> allByFinishedTrueOrderByCreatedAt);
 
-    @Mapping(target = "userId", source = "user.id")
+    @Mapping(target = "userLeagueId", source = "rouletteBetEntity.user.leagueId")
     RouletteBetDto toBetDto(RouletteBetEntity rouletteBetEntity, Double chance);
 
 }

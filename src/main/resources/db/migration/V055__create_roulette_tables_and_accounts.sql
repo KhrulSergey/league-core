@@ -20,8 +20,8 @@ create table if not exists public.roulette_match_bets
         constraint roulette_match_bets_pk primary key,
     created_at         timestamp default now(),
     updated_at         timestamp,
-    user_id            bigint
-        constraint fk_roulette_match_bets_user_id references public.users (id),
+    league_id          uuid
+        constraint fk_roulette_match_bets_user_league_id references public.users (league_id),
     match_id           bigint
         constraint fk_roulette_match_bets_match_id references public.roulette_matches (id),
     ticket_number_from bigint,
@@ -57,9 +57,9 @@ values (nextval('league_finance.accounts_id_seq'),
         'ROULETTE_BANK',
         0,
         'DEPOSIT',
-        'NOT_TRACKING',
+        'ACTIVE',
         'ROULETTE_BANK',
-        'UNKNOWN',
+        'FREETON_LEAGUE',
         null,
         null,
         null,
