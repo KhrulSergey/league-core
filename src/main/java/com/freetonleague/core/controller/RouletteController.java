@@ -2,14 +2,15 @@ package com.freetonleague.core.controller;
 
 import com.freetonleague.core.controller.api.RouletteApi;
 import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchStatsDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.filter.RouletteBetFilter;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RouletteService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,8 +24,13 @@ public class RouletteController implements RouletteApi {
     }
 
     @Override
-    public List<RouletteMatchHistoryItemDto> getMatchesHistory() {
-        return rouletteService.getMatchHistory();
+    public RouletteMatchStatsDto getMatchStatsById(Long matchId) {
+        return rouletteService.getMatchStatsById(matchId);
+    }
+
+    @Override
+    public Page<RouletteMatchHistoryItemDto> getMatchesHistory(Pageable pageable) {
+        return rouletteService.getMatchHistory(pageable);
     }
 
     @Override

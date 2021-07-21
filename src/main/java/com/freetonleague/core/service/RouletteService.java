@@ -1,10 +1,11 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchStatsDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.model.User;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface RouletteService {
 
@@ -14,6 +15,7 @@ public interface RouletteService {
 
     RouletteStatsDto getStats();
 
-    List<RouletteMatchHistoryItemDto> getMatchHistory();
+    Page<RouletteMatchHistoryItemDto> getMatchHistory(Pageable pageable);
 
+    RouletteMatchStatsDto getMatchStatsById(Long matchId);
 }
