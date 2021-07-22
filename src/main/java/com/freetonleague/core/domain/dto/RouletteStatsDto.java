@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -12,6 +13,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class RouletteStatsDto {
+
+    private Long id;
 
     private Long gamesPlayedToday;
     private Long tonAmountForToday;
@@ -22,6 +25,8 @@ public class RouletteStatsDto {
     private Long startBetAmount;
 
     private Long currentBetAmount;
+
+    private LocalDateTime shouldStartedAfter;
 
     private List<RouletteBetDto> betList;
 
