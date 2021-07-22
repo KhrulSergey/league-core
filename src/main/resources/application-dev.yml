@@ -29,6 +29,7 @@ app:
     min-players-count: 2
     max-players-count: 50
     commission-factor: 0.95
+    random-org-api-key:
 
 config:
   broxus-client:

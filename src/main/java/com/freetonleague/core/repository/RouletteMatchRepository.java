@@ -1,6 +1,8 @@
 package com.freetonleague.core.repository;
 
 import com.freetonleague.core.domain.entity.RouletteMatchEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 
@@ -16,6 +18,6 @@ public interface RouletteMatchRepository extends JpaRepository<RouletteMatchEnti
 
     RouletteMatchEntity findByFinishedFalse();
 
-    List<RouletteMatchEntity> findAllByFinishedTrueOrderByCreatedAt();
+    Page<RouletteMatchEntity> findAllByFinishedTrueOrderByCreatedAt(Pageable pageable);
 
 }
