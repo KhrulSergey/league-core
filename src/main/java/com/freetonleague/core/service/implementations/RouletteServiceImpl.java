@@ -82,6 +82,14 @@ public class RouletteServiceImpl implements RouletteService {
     public void makeBet(User authUser, Long betAmount) {
         User user = userService.findByUsername(authUser.getUsername());
 
+        if (betAmount > rouletteProperties.getMaxBetAmount()) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
+
+        if (betAmount < rouletteProperties.getMinBetAmount()) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
+
         RouletteMatchEntity currentMatch = getCurrentMatchLocked();
 
         List<RouletteBetEntity> bets = currentMatch.getBets();
@@ -120,7 +128,9 @@ public class RouletteServiceImpl implements RouletteService {
         Long sumForToday = 0L;// = rouletteMatchRepository.betSumForToday();
         Long sumForAllTime = 0L;// = rouletteMatchRepository.betSumForAllTime();
 
-        List<RouletteBetEntity> bets = getCurrentMatch().getBets();
+        RouletteMatchEntity currentMatch = getCurrentMatch();
+
+        List<RouletteBetEntity> bets = currentMatch.getBets();
 
         long sum = bets.stream()
                 .mapToLong(RouletteBetEntity::getTonAmount)
@@ -131,6 +141,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .collect(Collectors.toList());
 
         return RouletteStatsDto.builder()
+                .id(currentMatch.getId())
                 .gamesPlayedToday(rouletteMatchRepository.count())
                 .tonAmountForToday(sumForToday)
                 .tonAmountForAllTime(sumForAllTime)
@@ -138,6 +149,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .maxBetAmount(rouletteProperties.getMaxBetAmount())
                 .startBetAmount(rouletteProperties.getStartBetAmount())
                 .currentBetAmount(sum)
+                .shouldStartedAfter(currentMatch.getShouldStartedAfter())
                 .betList(betList)
                 .build();
     }
@@ -186,7 +198,6 @@ public class RouletteServiceImpl implements RouletteService {
         List<RouletteBetEntity> bets = match.getBets();
 
         int playersCount = bets.size();
-
 
         if (rouletteProperties.getMinPlayersCount() < playersCount) {
             return false;
