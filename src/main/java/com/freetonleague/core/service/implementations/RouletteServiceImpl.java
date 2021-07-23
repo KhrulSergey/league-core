@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.config.properties.AppRouletteProperties;
-import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RandomLongDto;
 import com.freetonleague.core.domain.dto.RouletteBetDto;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RouletteMatchStatsDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
@@ -33,7 +33,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -79,7 +81,7 @@ public class RouletteServiceImpl implements RouletteService {
 
     @Override
     @Transactional
-    public void makeBet(User authUser, Long betAmount) {
+    public RouletteStatsDto makeBet(User authUser, Long betAmount) {
         User user = userService.findByUsername(authUser.getUsername());
 
         if (betAmount > rouletteProperties.getMaxBetAmount()) {
@@ -121,16 +123,23 @@ public class RouletteServiceImpl implements RouletteService {
                 .build();
 
         financialUnitService.createTransaction(accountTransaction);
+
+        return getStatsForMatch(currentMatch);
     }
 
     @Override
     public RouletteStatsDto getStats() {
-        Long sumForToday = 0L;// = rouletteMatchRepository.betSumForToday();
-        Long sumForAllTime = 0L;// = rouletteMatchRepository.betSumForAllTime();
+        return getStatsForMatch(getCurrentMatch());
+    }
 
-        RouletteMatchEntity currentMatch = getCurrentMatch();
+    private RouletteStatsDto getStatsForMatch(RouletteMatchEntity match) {
+        Long sumForToday = rouletteBetRepository.sumForAllTime();
+        Long sumForAllTime = rouletteBetRepository.sumForPeriod(
+                LocalDateTime.of(LocalDate.now(), LocalTime.MIN),
+                LocalDateTime.of(LocalDate.now(), LocalTime.MAX)
+        );
 
-        List<RouletteBetEntity> bets = currentMatch.getBets();
+        List<RouletteBetEntity> bets = match.getBets();
 
         long sum = bets.stream()
                 .mapToLong(RouletteBetEntity::getTonAmount)
@@ -141,7 +150,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .collect(Collectors.toList());
 
         return RouletteStatsDto.builder()
-                .id(currentMatch.getId())
+                .id(match.getId())
                 .gamesPlayedToday(rouletteMatchRepository.count())
                 .tonAmountForToday(sumForToday)
                 .tonAmountForAllTime(sumForAllTime)
@@ -149,7 +158,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .maxBetAmount(rouletteProperties.getMaxBetAmount())
                 .startBetAmount(rouletteProperties.getStartBetAmount())
                 .currentBetAmount(sum)
-                .shouldStartedAfter(currentMatch.getShouldStartedAfter())
+                .shouldStartedAfter(match.getShouldStartedAfter())
                 .betList(betList)
                 .build();
     }

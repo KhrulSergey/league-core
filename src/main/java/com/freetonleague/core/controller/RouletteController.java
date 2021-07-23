@@ -34,8 +34,8 @@ public class RouletteController implements RouletteApi {
     }
 
     @Override
-    public void makeBet(RouletteBetFilter filter, User user) {
-        rouletteService.makeBet(user, filter.getBetAmount());
+    public RouletteStatsDto makeBet(RouletteBetFilter filter, User user) {
+        return rouletteService.makeBet(user, filter.getBetAmount());
     }
 
 }
