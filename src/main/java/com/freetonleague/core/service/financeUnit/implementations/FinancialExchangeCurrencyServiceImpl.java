@@ -40,7 +40,7 @@ public class FinancialExchangeCurrencyServiceImpl implements FinancialExchangeCu
 
     private final FinancialUnitService financialUnitService;
     private final PaymentGatewayClientService paymentGatewayClientService;// call payment gateway
-    private final CurrencyMarketClientService currencyMarketClientService;// call currency market provider
+    private final CurrencyMarketService currencyMarketService;// call currency market provider
     private final ExchangeOrderRepository exchangeOrderRepository;
     private final ExchangeRatioRepository exchangeRatioRepository;
     private final Validator validator;
@@ -226,7 +226,7 @@ public class FinancialExchangeCurrencyServiceImpl implements FinancialExchangeCu
             return null;
         }
         log.debug("^ try to load exchange currency rate from market for currencyPairType '{}'.", currencyPairType);
-        ExchangeRatioResponseDto exchangeRatioMarketResponse = currencyMarketClientService.
+        ExchangeRatioResponseDto exchangeRatioMarketResponse = currencyMarketService.
                 getExchangeRateForCurrencies(currencyPairType);
         //e.g TON_USDT: toBuy -> Currency.TON, toSell -> Currency.USDT, CurrencyPairDirectionType.FORWARD,
         // ratio =  1 $ / ASK price. Ratio * USDT amount = TON amount

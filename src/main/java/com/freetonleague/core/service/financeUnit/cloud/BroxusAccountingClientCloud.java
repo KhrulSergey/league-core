@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Rest client for interact with Third-party Bank Accounting Provider "Broxus"
  */
-@FeignClient(name = "broxus-client", url = "${config.broxus-client.url}")
+@FeignClient(name = "broxus-interlayer-client", url = "${config.broxus-client.url}")
 public interface BroxusAccountingClientCloud {
 
     String AUTH_TOKEN = "token";
