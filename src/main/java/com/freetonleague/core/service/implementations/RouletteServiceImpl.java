@@ -1,9 +1,10 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.config.properties.AppRouletteProperties;
+import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RandomLongDto;
 import com.freetonleague.core.domain.dto.RouletteBetDto;
-import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
+import com.freetonleague.core.domain.dto.RouletteMatchStatsDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.entity.RouletteBetEntity;
@@ -24,9 +25,13 @@ import com.freetonleague.core.service.UserService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -77,6 +82,14 @@ public class RouletteServiceImpl implements RouletteService {
     public void makeBet(User authUser, Long betAmount) {
         User user = userService.findByUsername(authUser.getUsername());
 
+        if (betAmount > rouletteProperties.getMaxBetAmount()) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
+
+        if (betAmount < rouletteProperties.getMinBetAmount()) {
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
+
         RouletteMatchEntity currentMatch = getCurrentMatchLocked();
 
         List<RouletteBetEntity> bets = currentMatch.getBets();
@@ -115,7 +128,9 @@ public class RouletteServiceImpl implements RouletteService {
         Long sumForToday = 0L;// = rouletteMatchRepository.betSumForToday();
         Long sumForAllTime = 0L;// = rouletteMatchRepository.betSumForAllTime();
 
-        List<RouletteBetEntity> bets = getCurrentMatch().getBets();
+        RouletteMatchEntity currentMatch = getCurrentMatch();
+
+        List<RouletteBetEntity> bets = currentMatch.getBets();
 
         long sum = bets.stream()
                 .mapToLong(RouletteBetEntity::getTonAmount)
@@ -126,6 +141,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .collect(Collectors.toList());
 
         return RouletteStatsDto.builder()
+                .id(currentMatch.getId())
                 .gamesPlayedToday(rouletteMatchRepository.count())
                 .tonAmountForToday(sumForToday)
                 .tonAmountForAllTime(sumForAllTime)
@@ -133,15 +149,41 @@ public class RouletteServiceImpl implements RouletteService {
                 .maxBetAmount(rouletteProperties.getMaxBetAmount())
                 .startBetAmount(rouletteProperties.getStartBetAmount())
                 .currentBetAmount(sum)
+                .shouldStartedAfter(currentMatch.getShouldStartedAfter())
                 .betList(betList)
                 .build();
     }
 
     @Override
-    public List<RouletteMatchHistoryItemDto> getMatchHistory() {
-        return rouletteMapper.toMatchHistoryList(
-                rouletteMatchRepository.findAllByFinishedTrueOrderByCreatedAt()
+    public Page<RouletteMatchHistoryItemDto> getMatchHistory(Pageable pageable) {
+        return rouletteMapper.toMatchHistoryPage(
+                rouletteMatchRepository.findAllByFinishedTrueOrderByCreatedAt(pageable)
         );
+    }
+
+    @Override
+    public RouletteMatchStatsDto getMatchStatsById(Long matchId) {
+        RouletteMatchEntity matchEntity = rouletteMatchRepository.findById(matchId)
+                .orElseThrow(() -> new HttpClientErrorException(HttpStatus.NOT_FOUND));
+
+        List<RouletteBetEntity> bets = matchEntity.getBets();
+
+        long sum = bets.stream()
+                .mapToLong(RouletteBetEntity::getTonAmount)
+                .sum();
+
+        List<RouletteBetDto> betList = bets.stream()
+                .map(entity -> rouletteMapper.toBetDto(entity, (double) (entity.getTonAmount() * 100 / sum)))
+                .collect(Collectors.toList());
+
+        return RouletteMatchStatsDto.builder()
+                .winnerBet(
+                        rouletteMapper.toBetDto(matchEntity.getWinnerBet(),
+                                (double) (matchEntity.getWinnerBet().getTonAmount() * 100 / sum))
+                )
+                .betAmount(sum)
+                .betList(betList)
+                .build();
     }
 
     private RouletteMatchEntity getCurrentMatchLocked() {
@@ -156,7 +198,6 @@ public class RouletteServiceImpl implements RouletteService {
         List<RouletteBetEntity> bets = match.getBets();
 
         int playersCount = bets.size();
-
 
         if (rouletteProperties.getMinPlayersCount() < playersCount) {
             return false;

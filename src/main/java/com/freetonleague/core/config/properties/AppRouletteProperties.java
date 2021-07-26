@@ -30,4 +30,6 @@ public class AppRouletteProperties {
     @Max(1)
     private Double commissionFactor;
 
+    private String randomOrgApiKey;
+
 }
