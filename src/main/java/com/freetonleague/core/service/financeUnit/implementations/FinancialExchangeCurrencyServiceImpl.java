@@ -228,7 +228,8 @@ public class FinancialExchangeCurrencyServiceImpl implements FinancialExchangeCu
         log.debug("^ try to load exchange currency rate from market for currencyPairType '{}'.", currencyPairType);
         ExchangeRatioResponseDto exchangeRatioMarketResponse = currencyMarketClientService.
                 getExchangeRateForCurrencies(currencyPairType);
-        //e.g TON_USDT: toBuy -> Currency.TON, toSell -> Currency.USDT, CurrencyPairDirectionType.FORWARD, ratio =  1 $ / ASK price = TON amount
+        //e.g TON_USDT: toBuy -> Currency.TON, toSell -> Currency.USDT, CurrencyPairDirectionType.FORWARD,
+        // ratio =  1 $ / ASK price. Ratio * USDT amount = TON amount
         return ExchangeRatio.builder()
                 .currencyPairType(currencyPairType)
                 .currencyToBuy(currencyPairType.getCurrencyToBuy())

@@ -103,7 +103,6 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
         } else {
             productPurchase.setPurchaseTotalAmount(0.0);
         }
-        //TODO уменьшать кол-во продукта на складе
         if (product.hasQuantityLimit()) {
             double newQuantityInStock = product.getQuantityInStock() - productPurchase.getPurchaseQuantity();
             if (newQuantityInStock < 0) {

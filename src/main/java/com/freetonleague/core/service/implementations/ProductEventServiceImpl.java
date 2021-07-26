@@ -170,8 +170,8 @@ public class ProductEventServiceImpl implements ProductEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
-        // или удалить коммент
+        // TODO remove direct data change invocation and message designer from Kafka before 01/10/21
+        //or remove comment
         productPurchase.setState(newState);
         productPurchaseService.editPurchase(productPurchase);
     }

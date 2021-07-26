@@ -27,7 +27,7 @@ public class ExchangeRatioDto {
 
     private Currency currencyToSell;
 
-    @ApiModelProperty(readOnly = true)
+    @ApiModelProperty(readOnly = true, notes = "exchangeRatio * amount_to_sell = amount_to_buy")
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Double ratio;
 
