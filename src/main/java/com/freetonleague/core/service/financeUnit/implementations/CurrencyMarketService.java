@@ -1,6 +1,7 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
 import com.freetonleague.core.cloudclient.BroxusClientService;
+import com.freetonleague.core.domain.dto.finance.ExchangeRatioKunaResponseDto;
 import com.freetonleague.core.domain.dto.finance.ExchangeRatioResponseDto;
 import com.freetonleague.core.domain.enums.finance.CurrencyPairType;
 import com.freetonleague.core.mapper.finance.ExchangeRatioResponseMapper;
@@ -39,15 +40,15 @@ public class CurrencyMarketService {
             return null;
         }
         log.debug("^ try to getExchangeRateForCurrencies in CurrencyMarketClientService for currencyPair '{}'", currencyPair);
-        ExchangeRatioResponseDto exchangeRatioResponse = null;
+        ExchangeRatioResponseDto exchangeRatioResponse;
         switch (currencyPair.getPreferredProvider()) {
             case BROXUS:
                 exchangeRatioResponse = broxusClientService.getExchangeCurrencyRate(currencyPair);
                 break;
-//            case KUNA:
-//            default:
-//                exchangeRatioResponse = this.getExchangeCurrencyRateFromKuna(currencyPair);
-//                break;
+            case KUNA:
+            default:
+                exchangeRatioResponse = this.getExchangeCurrencyRateFromKuna(currencyPair);
+                break;
         }
         if (isNull(exchangeRatioResponse) || isNull(exchangeRatioResponse.getRatio())) {
             log.error("!!> Error in response from market provider while getExchangeRateForCurrencies in " +
@@ -60,26 +61,26 @@ public class CurrencyMarketService {
         return exchangeRatioResponse;
     }
 
-//    private ExchangeRatioResponseDto getExchangeCurrencyRateFromKuna(CurrencyPairType currencyPair) {
-//        log.debug("^ try to get exchange currency rate from Kuna in CurrencyMarketClientService for currencyPair '{}'", currencyPair);
-//        ExchangeRatioKunaResponseDto exchangeRatioKunaResponse = this.getCurrentKunaClient()
-//                .getExchangeCurrencyRate(currencyPair.getCode());
-//        log.debug("^ received response from Kuna for currencyPair '{}' in getExchangeCurrencyRateFromKuna of data '{}'", currencyPair, exchangeRatioKunaResponse);
-//        exchangeRatioKunaResponse.setCurrencyPairTypeCode(currencyPair.getCode());
-//        exchangeRatioKunaResponse.setCurrencyPairType(currencyPair);
-//        ExchangeRatioResponseDto exchangeRatioResponse = responseMapper.fromRaw(exchangeRatioKunaResponse);
-//        Double ratio = currencyPair.getPairDirection().isForward() ?
-//                1 / exchangeRatioKunaResponse.getExchangeRatioTicker().getAskPrice()
-//                : exchangeRatioKunaResponse.getExchangeRatioTicker().getBidPrice();
-//        exchangeRatioResponse.setRatio(ratio);
-//        return exchangeRatioResponse;
-//    }
+    private ExchangeRatioResponseDto getExchangeCurrencyRateFromKuna(CurrencyPairType currencyPair) {
+        log.debug("^ try to get exchange currency rate from Kuna in CurrencyMarketClientService for currencyPair '{}'", currencyPair);
+        ExchangeRatioKunaResponseDto exchangeRatioKunaResponse = this.getCurrentKunaClient()
+                .getExchangeCurrencyRate(currencyPair.getCode());
+        log.debug("^ received response from Kuna for currencyPair '{}' in getExchangeCurrencyRateFromKuna of data '{}'", currencyPair, exchangeRatioKunaResponse);
+        exchangeRatioKunaResponse.setCurrencyPairTypeCode(currencyPair.getCode());
+        exchangeRatioKunaResponse.setCurrencyPairType(currencyPair);
+        ExchangeRatioResponseDto exchangeRatioResponse = responseMapper.fromRaw(exchangeRatioKunaResponse);
+        Double ratio = currencyPair.getPairDirection().isForward() ?
+                1 / exchangeRatioKunaResponse.getExchangeRatioTicker().getAskPrice()
+                : exchangeRatioKunaResponse.getExchangeRatioTicker().getBidPrice();
+        exchangeRatioResponse.setRatio(ratio);
+        return exchangeRatioResponse;
+    }
 
-//    public KunaMarketInfoProviderCloud getCurrentKunaClient() {
-//        if (isMarketInfoProviderMockEnabled) {
-//            log.warn("~ kuna MOCK client enabled. Work with kunaMarketInfoProviderMock service implementation in CurrencyMarketClientService");
-//            return kunaMarketInfoProviderMock;
-//        }
-//        return kunaMarketInfoProviderCloud;
-//    }
+    public KunaMarketInfoProviderCloud getCurrentKunaClient() {
+        if (isMarketInfoProviderMockEnabled) {
+            log.warn("~ kuna MOCK client enabled. Work with kunaMarketInfoProviderMock service implementation in CurrencyMarketClientService");
+            return kunaMarketInfoProviderMock;
+        }
+        return kunaMarketInfoProviderCloud;
+    }
 }
