@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.financeUnit;
 
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.AccountType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountType;
 import com.freetonleague.core.domain.model.finance.Account;
 import com.freetonleague.core.domain.model.finance.AccountHolder;
 import com.freetonleague.core.domain.model.finance.AccountTransaction;

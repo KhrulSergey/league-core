@@ -1,6 +1,6 @@
 package com.freetonleague.core.repository.tournament;
 
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
 import com.freetonleague.core.domain.model.tournament.Tournament;
 import com.freetonleague.core.domain.model.tournament.TournamentRound;
 import org.springframework.data.domain.Page;

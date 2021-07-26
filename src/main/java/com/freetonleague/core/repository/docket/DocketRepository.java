@@ -1,8 +1,8 @@
 package com.freetonleague.core.repository.docket;
 
-import com.freetonleague.core.domain.enums.DocketStatusType;
-import com.freetonleague.core.domain.model.docket.Docket;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.docket.Docket;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

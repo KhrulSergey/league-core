@@ -1,9 +1,9 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
-import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.product.ProductPurchase;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -28,7 +28,7 @@ public interface RestProductPurchaseFacade {
      * @param leagueId  identify of user-buyer
      * @param productId identify of product
      */
-    Page<ProductPurchaseDto> getPurchaseList(Pageable pageable, String leagueId, Long productId, List<PurchaseStateType> statusList);
+    Page<ProductPurchaseDto> getPurchaseList(Pageable pageable, String leagueId, Long productId, List<ProductPurchaseStateType> statusList);
 
     /**
      * Registry new product purchase
@@ -46,7 +46,7 @@ public interface RestProductPurchaseFacade {
      * @param currentPurchaseState new status of purchase
      * @return Modified purchase
      */
-    ProductPurchaseDto editPurchase(Long purchaseId, PurchaseStateType currentPurchaseState, String managerComment, User currentUser);
+    ProductPurchaseDto editPurchase(Long purchaseId, ProductPurchaseStateType currentPurchaseState, String managerComment, User currentUser);
 
     /**
      * Returns product purchase by id with privacy check

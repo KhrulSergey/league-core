@@ -1,7 +1,10 @@
 package com.freetonleague.core.domain.model.tournament;
 
 import com.freetonleague.core.domain.enums.AccessType;
-import com.freetonleague.core.domain.enums.*;
+import com.freetonleague.core.domain.enums.UserParameterType;
+import com.freetonleague.core.domain.enums.tournament.TournamentParticipantType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentSystemType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

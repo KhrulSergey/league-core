@@ -2,7 +2,7 @@ package com.freetonleague.core.domain.model.product;
 
 import com.freetonleague.core.domain.dto.product.ProductPropertyDto;
 import com.freetonleague.core.domain.enums.AccessType;
-import com.freetonleague.core.domain.enums.ProductStatusType;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;

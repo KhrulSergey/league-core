@@ -1,15 +1,25 @@
 package com.freetonleague.core.service.tournament.implementations;
 
 
+import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.domain.enums.EventOperationType;
+import com.freetonleague.core.domain.enums.EventProducerModelType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.model.TeamParticipant;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.*;
 import com.freetonleague.core.exception.TeamParticipantManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
-import com.freetonleague.core.service.*;
+import com.freetonleague.core.service.EventService;
+import com.freetonleague.core.service.FinancialClientService;
+import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.tournament.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -360,8 +370,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .amount(tournamentFundAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }
@@ -373,8 +383,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .amount(commissionAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_COMMISSION)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.TOURNAMENT_ENTRANCE_COMMISSION)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }

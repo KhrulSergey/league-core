@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.dto.product;
 
-import com.freetonleague.core.domain.enums.ProductPropertyType;
+import com.freetonleague.core.domain.enums.product.ProductPropertyType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.dto.tournament;
 
-import com.freetonleague.core.domain.enums.GameIndicatorType;
+import com.freetonleague.core.domain.enums.tournament.GameIndicatorType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

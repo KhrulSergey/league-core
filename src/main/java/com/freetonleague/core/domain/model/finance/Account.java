@@ -1,9 +1,8 @@
 package com.freetonleague.core.domain.model.finance;
 
-import com.freetonleague.core.domain.enums.AccountStatusType;
-import com.freetonleague.core.domain.enums.AccountType;
-import com.freetonleague.core.domain.enums.BankProviderType;
-import com.freetonleague.core.domain.model.FinancialBaseEntity;
+import com.freetonleague.core.domain.enums.finance.AccountStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountType;
+import com.freetonleague.core.domain.enums.finance.BankProviderType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -20,7 +19,8 @@ import static java.util.Objects.nonNull;
 @SuperBuilder
 @NoArgsConstructor
 @ToString(callSuper = true)
-@Data
+@Getter
+@Setter
 @Entity
 @Table(schema = "league_finance", name = "accounts")
 @SequenceGenerator(name = "base_financial_entity_seq", sequenceName = "accounts_id_seq", schema = "league_finance", allocationSize = 1)

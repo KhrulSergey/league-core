@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.enums.AccountHolderType;
 import com.freetonleague.core.domain.enums.TeamStateType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.service.EventService;
 import com.freetonleague.core.service.FinancialClientService;

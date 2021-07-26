@@ -1,19 +1,19 @@
 package com.freetonleague.core.service.docket.implementations;
 
 import com.freetonleague.core.domain.dto.docket.DocketDto;
-import com.freetonleague.core.domain.enums.DocketStatusType;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.docket.Docket;
 import com.freetonleague.core.domain.model.docket.DocketPromoEntity;
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.DocketManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.docket.DocketMapper;
 import com.freetonleague.core.security.permissions.CanManageDocket;
+import com.freetonleague.core.service.RestUserFacade;
 import com.freetonleague.core.service.docket.DocketPromoService;
 import com.freetonleague.core.service.docket.DocketService;
 import com.freetonleague.core.service.docket.RestDocketFacade;
-import com.freetonleague.core.service.RestUserFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

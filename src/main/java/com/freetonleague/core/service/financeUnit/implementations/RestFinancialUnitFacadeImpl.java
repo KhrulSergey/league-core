@@ -1,20 +1,19 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
-import com.freetonleague.core.domain.dto.finance.AccountDepositFinUnitDto;
-import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
-import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.finance.Account;
-import com.freetonleague.core.domain.model.finance.AccountHolder;
-import com.freetonleague.core.domain.model.finance.AccountTransaction;
+import com.freetonleague.core.domain.dto.finance.*;
+import com.freetonleague.core.domain.enums.finance.*;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.finance.*;
+import com.freetonleague.core.exception.AccountFinanceManageException;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
-import com.freetonleague.core.mapper.AccountFinUnitMapper;
-import com.freetonleague.core.mapper.AccountTransactionFinUnitMapper;
+import com.freetonleague.core.mapper.finance.AccountFinUnitMapper;
+import com.freetonleague.core.mapper.finance.AccountTransactionFinUnitMapper;
+import com.freetonleague.core.mapper.finance.ExchangeOrderFinUnitMapper;
 import com.freetonleague.core.service.RestUserFacade;
+import com.freetonleague.core.service.financeUnit.FinancialExchangeCurrencyService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
@@ -46,8 +45,10 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
 
     private final FinancialUnitService financialUnitService;    //call service to get/save data from DB
+    private final FinancialExchangeCurrencyService financialExchangeCurrencyService;
     private final AccountFinUnitMapper accountMapper;
     private final AccountTransactionFinUnitMapper accountTransactionFinUnitMapper;
+    private final ExchangeOrderFinUnitMapper accountExchangeOrderFinUnitMapper;
     private final Validator validator;
 
     private final RestUserFacade restUserFacade;
@@ -177,6 +178,17 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
     }
 
     /**
+     * Get exchange rate for specified currencies
+     */
+    @Override
+    public ExchangeRatioDto getExchangeRateForCurrencies(Currency currencyToBuy, Currency currencyToSell) {
+        log.debug("^ try to define exchange rates for currencyToBuy '{}' and  currencyToSell '{}'" +
+                " with getExchangeRateForCurrencies in RestFinancialUnitFacade", currencyToBuy, currencyToSell);
+        return accountExchangeOrderFinUnitMapper.toDto(
+                this.getVerifiedExchangeRateForCurrencyPair(currencyToBuy, currencyToSell));
+    }
+
+    /**
      * Returns created transaction info for specified data
      */
     @Override
@@ -208,6 +220,73 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         }
         return accountTransactionFinUnitMapper.toDto(savedAccountTransaction);
     }
+
+    /**
+     * Approve exchange order by specified GUID and make payment to client Account
+     */
+    @Override
+    public ExchangeOrderDto approveExchangeOrder(String orderGUID) {
+        if (isBlank(orderGUID)) {
+            log.error("!!> Can't approveExchangeOrder for BLANK GUID. Request denied");
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_EXCHANGE_ORDER_NOT_FOUND_ERROR,
+                    String.format("exchange order for specified GUID '%s' was not found. " +
+                            "approveExchangeOrder request was rejected", orderGUID));
+        }
+        ExchangeOrder exchangeOrder = financialExchangeCurrencyService.getExchangeOrderByGuid(UUID.fromString(orderGUID));
+        if (isNull(exchangeOrder)) {
+            log.warn("~ exchange order for specified GUID '{}' was not found. " +
+                    "'approveExchangeOrder' in RestFinancialUnitFacade request was rejected", orderGUID);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_EXCHANGE_ORDER_NOT_FOUND_ERROR,
+                    String.format("exchange order for specified GUID '%s' was not found. " +
+                            "approveExchangeOrder request was rejected", orderGUID));
+        }
+        if (!exchangeOrder.getStatus().isOpen()) {
+            log.warn("~ exchange order.GUID '{}' is not open and have status '{}'. " +
+                    "'approveExchangeOrder' in RestFinancialUnitFacade request was rejected", orderGUID, exchangeOrder.getStatus());
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_EXCHANGE_ORDER_NOT_FOUND_ERROR,
+                    String.format("exchange order for specified GUID '%s' was not found. " +
+                            "approveExchangeOrder request was rejected", orderGUID));
+        }
+        log.debug("^ try to approve exchange order for data '{}'", exchangeOrder);
+        ExchangeOrder savedExchangeOrder = financialExchangeCurrencyService.approveExchangeOrder(exchangeOrder);
+        if (isNull(savedExchangeOrder)) {
+            log.error("!!> Can't approve exchange currency order with financialUnitService of data '{}'. " +
+                    "Check stack trace. Request denied", exchangeOrder);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_EXCHANGE_ORDER_NOT_FOUND_ERROR,
+                    String.format("exchange order for specified GUID '%s' was not approve. " +
+                            "Check requested params for approveExchangeOrder or contact organizer", orderGUID));
+        }
+        return accountExchangeOrderFinUnitMapper.toDto(savedExchangeOrder);
+    }
+
+    /**
+     * Create exchange order and transaction for specified currencies and account
+     */
+    @Override
+    public ExchangeOrderDto createExchangeCurrencyOrder(Double amountToBuy, Currency currencyToBuy, Currency currencyToSell,
+                                                        String userAccountExternalAddress) {
+        log.debug("^ try to create exchange currency order for currencyToBuy '{}, currencyToSell '{}', userAccount.extAddress '{}'" +
+                " with getExchangeRateForCurrencies in RestFinancialUnitFacade", currencyToBuy, currencyToSell, userAccountExternalAddress);
+        ExchangeRatio exchangeRatio = this.getVerifiedExchangeRateForCurrencyPair(currencyToBuy, currencyToSell);
+        Account clientAccount = this.getVerifiedAccountByExternalAddress(userAccountExternalAddress);
+        if (isNull(clientAccount)) {
+            log.error("!!> account for specified external address '{}' was not found. createExchangeCurrencyOrder request was rejected",
+                    userAccountExternalAddress);
+            throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_ACCOUNT_NOT_FOUND_ERROR,
+                    String.format("account for specified external address '%s' was not found. " +
+                            "CreateExchangeCurrencyOrder request was rejected", userAccountExternalAddress));
+        }
+
+        ExchangeOrder exchangeOrder = this.composeVerifiedExchangeOrder(amountToBuy, exchangeRatio, clientAccount);
+        ExchangeOrder savedExchangeOrder = financialExchangeCurrencyService.createExchangeOrder(exchangeOrder);
+        if (isNull(savedExchangeOrder)) {
+            log.error("!!> Can't save exchange currency order with financialUnitService of data '{}'. " +
+                    "Check stack trace. Request denied", exchangeOrder);
+            return null;
+        }
+        return accountExchangeOrderFinUnitMapper.toDto(savedExchangeOrder);
+    }
+
 
     /**
      * Returns modified transaction info for specified data
@@ -367,12 +446,30 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         AccountTransaction accountTransaction = AccountTransaction.builder()
                 .amount(amount)
                 .targetAccount(account)
-                .transactionType(TransactionType.DEPOSIT)
-                .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
+                .transactionType(AccountTransactionType.DEPOSIT)
+                .transactionTemplateType(AccountTransactionTemplateType.EXTERNAL_PROVIDER)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
         accountTransaction.generateGUID();
         return accountTransaction;
+    }
+
+    /**
+     * Compose exchange order for specified data
+     */
+    private ExchangeOrder composeVerifiedExchangeOrder(Double amountToBuy, ExchangeRatio exchangeRatio, Account clientAccount) {
+
+        //exchangeRatio * amount_to_sell = amount_to_buy, so  amount_to_sell = amount_to_buy / exchangeRatio
+        Double amount = amountToBuy / exchangeRatio.getRatio();
+        return ExchangeOrder.builder()
+                .currencyToBuy(exchangeRatio.getCurrencyToBuy())
+                .currencyToSell(exchangeRatio.getCurrencyToSell())
+                .amountToBuy(amountToBuy)
+                .exchangeRatio(exchangeRatio)
+                .amountToSell(amount)
+                .status(ExchangeOrderStatus.OPEN)
+                .clientAccount(clientAccount)
+                .build();
     }
 
     private AccountTransaction getVerifiedAccountTransactionByGUID(String transactionGUID) {
@@ -449,7 +546,7 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
             throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_ACCOUNT_NOT_FOUND_ERROR,
                     "Financial account with requested id " + accountGUID + " was not found");
         }
-        // TODO temporary off validating of extAddress
+        // TODO temporary off validating of extAddress. Delete until 01/11/2021
         //  Есть формат в HEX который как ты прислал. А есть в base64. То есть один адрес кодироваться в тоне может по разному
 //        if (!isBlank(externalAddress) && !account.getExternalAddress().equals(externalAddress)) {
 //            log.error("!!> Specified account address '{}' is not match saved in DB exteral address for user account '{}'. Request denied",
@@ -460,15 +557,8 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
         if (!account.getStatus().isActive()) {
             log.error("!!> Specified account with address '{}' and GUID '{}' is not active. Request passed, but be aware",
                     externalAddress, accountGUID);
-            //TODO process deposit to non-active account
+            //TODO process deposit to non-active account. Delete until 01/11/2021
         }
-        //TODO удалить до 01.06.2021 если не используется
-//        if (isNull(account.getAmount())) {
-//            log.error("!!> Specified account with address '{}' and GUID '{}' has NULL amount. Request denied",
-//                    externalAddress, accountGUID);
-//            throw new ValidationException(ExceptionMessages.FINANCE_UNIT_TOKEN_VALIDATION_ERROR, "account amount",
-//                    "Parameter account amount is NULL. Request denied.");
-//        }
         return account;
     }
 
@@ -490,5 +580,41 @@ public class RestFinancialUnitFacadeImpl implements RestFinancialUnitFacade {
             account = this.getVerifiedAccountByHolder(UUID.fromString(accountInfo.getOwnerGUID()), accountInfo.getOwnerType());
         }
         return account;
+    }
+
+    /**
+     * Define and verify exchange rate for specified currencies from FinancialUnitService
+     */
+    private ExchangeRatio getVerifiedExchangeRateForCurrencyPair(Currency currencyToBuy, Currency currencyToSell) {
+        if (!this.verifyExchangeCurrencyRateBusinessLogic(currencyToBuy, currencyToSell)) {
+            log.debug("^ Exchange currency rate request is badly set with data currencyToBuy '{}', " +
+                            "currencyToSell '{}'. Available only deal with TON and RUB." +
+                            " 'getExchangeRateForCurrencies' in  RestFinanceFacade request denied",
+                    currencyToBuy, currencyToSell);
+            throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR,
+                    "Exchange currency rate request data is badly set. Available only deal with TON and RUB.");
+        }
+        ExchangeRatio exchangeRatio = financialExchangeCurrencyService.getExchangeCurrencyRate(currencyToBuy, currencyToSell);
+        if (isNull(exchangeRatio)) {
+            log.error("!> Exchange currency rate request was not created for specified data currencyToBuy '{}', currencyToSell '{}'." +
+                    " Check stack trace!", currencyToBuy, currencyToSell);
+            throw new AccountFinanceManageException(ExceptionMessages.EXCHANGE_CURRENCY_RATE_CREATION_ERROR,
+                    "Exchange currency rate request was not created for specified data. Check provider data");
+        }
+        return exchangeRatio;
+    }
+
+    /**
+     * Verify business logic of exchange currency rate request.
+     * ! NOW Available only sell/buy TON by RUB
+     */
+    private boolean verifyExchangeCurrencyRateBusinessLogic(Currency currencyToBuy, Currency currencyToSell) {
+        if (!(currencyToSell == Currency.TON || currencyToBuy == Currency.TON) ||
+                !(currencyToSell == Currency.RUB || currencyToBuy == Currency.RUB)) {
+            log.debug("^ requested to exchange not permitted currency pair currencyToBuy '{}', currencyToSell '{}'." +
+                    " 'verifyExchangeCurrencyBusinessLogic' request return false", currencyToBuy, currencyToSell);
+            return false;
+        }
+        return true;
     }
 }

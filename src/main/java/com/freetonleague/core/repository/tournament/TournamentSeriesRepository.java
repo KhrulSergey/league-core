@@ -15,6 +15,7 @@ public interface TournamentSeriesRepository extends JpaRepository<TournamentSeri
 
     Page<TournamentSeries> findAllByTournamentRound(Pageable pageable, TournamentRound tournamentRound);
 
-    @Query(value = "select ts.selfHosted from TournamentSettings ts where :series in (select s from TournamentSeries s where s.tournamentRound.tournament.tournamentSettings = ts) ")
+    @Query(value = "select ts.selfHosted from TournamentSettings ts where :series in " +
+            "(select s from TournamentSeries s where s.tournamentRound.tournament.tournamentSettings = ts) ")
     Boolean isSeriesModifiableByRival(@Param("series") TournamentSeries tournamentSeries);
 }

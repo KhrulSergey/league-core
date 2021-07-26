@@ -1,11 +1,7 @@
 package com.freetonleague.core.domain.model.finance;
 
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.model.FinancialBaseEntity;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -17,9 +13,11 @@ import java.util.UUID;
 
 
 @EqualsAndHashCode(callSuper = true)
+@ToString(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(schema = "league_finance", name = "account_holders")
 @SequenceGenerator(name = "base_financial_entity_seq", sequenceName = "account_holders_id_seq", schema = "league_finance", allocationSize = 1)

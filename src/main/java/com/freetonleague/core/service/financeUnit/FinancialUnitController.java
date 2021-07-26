@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.financeUnit;
 
 import com.freetonleague.core.domain.dto.finance.AccountDepositFinUnitDto;
-import com.freetonleague.core.domain.enums.BankProviderType;
+import com.freetonleague.core.domain.enums.finance.BankProviderType;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.RequiredArgsConstructor;

@@ -2,7 +2,7 @@ package com.freetonleague.core.domain.dto.product;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.enums.AccessType;
-import com.freetonleague.core.domain.enums.ProductStatusType;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;

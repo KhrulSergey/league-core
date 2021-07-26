@@ -1,8 +1,8 @@
 package com.freetonleague.core.domain.dto.tournament;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentSeriesBracketType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 

@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.product.ProductDto;
-import com.freetonleague.core.domain.enums.ProductStatusType;
-import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.product.Product;
 import com.freetonleague.core.exception.ProductManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
