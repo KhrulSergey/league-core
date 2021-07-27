@@ -328,6 +328,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         }
 
         teamProposal.setConfirmed(true);
+        teamProposal.setState(ParticipationStateType.APPROVE);
         TournamentTeamProposal savedTeamProposal = tournamentProposalService.editProposal(teamProposal);
         if (isNull(savedTeamProposal)) {
             log.error("!> error while modifying tournament team proposal '{}' for user '{}'.", teamProposal, user.getLeagueId());
