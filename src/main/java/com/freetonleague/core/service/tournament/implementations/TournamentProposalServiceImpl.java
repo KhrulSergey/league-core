@@ -51,8 +51,7 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
     /**
      * Returns tournament team proposal (request to participate on tournament) by team and tournament.
      */
-    @Override
-    public TournamentTeamProposal getProposalByTeamAndTournament(Team team, Tournament tournament) {
+    public TournamentTeamProposal getLastProposalByTeamAndTournament(Team team, Tournament tournament) {
         if (isNull(team) || isNull(tournament)) {
             log.error("!> requesting getProposalByTeamAndTournament for NULL team '{}' or NULL tournament '{}'. Check evoking clients",
                     team, tournament);
@@ -60,14 +59,14 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
         }
         log.debug("^ trying to get tournament team proposal for team: '{}' and tournament '{}'",
                 team.getId(), tournament.getId());
-        return teamProposalRepository.findByTeamAndTournament(team, tournament);
+        List<TournamentTeamProposal> tournamentTeamProposalList = teamProposalRepository.findAllByTeamAndTournamentOrderByCreatedAtDesc(team, tournament);
+        return isNotEmpty(tournamentTeamProposalList) ? tournamentTeamProposalList.get(0) : null;
     }
 
     /**
      * Returns tournament team proposal (request to participate on tournament) by capitan of team and tournament.
      */
-    @Override
-    public List<TournamentTeamProposal> getProposalByCapitanUserAndTournament(User userCapitan, Tournament tournament) {
+    public TournamentTeamProposal getLastProposalByCapitanUserAndTournament(User userCapitan, Tournament tournament) {
         if (isNull(userCapitan) || isNull(tournament)) {
             log.error("!> requesting getProposalByTeamAndTournament for NULL userCapitan '{}' or NULL tournament '{}'. Check evoking clients",
                     userCapitan, tournament);
@@ -75,7 +74,8 @@ public class TournamentProposalServiceImpl implements TournamentProposalService 
         }
         log.debug("^ trying to get tournament proposal for userCapitan.id: '{}' and tournament '{}'",
                 userCapitan.getLeagueId(), tournament.getId());
-        return teamProposalRepository.findProposalByUserCapitanAndTournament(userCapitan, tournament);
+        List<TournamentTeamProposal> tournamentTeamProposalList = teamProposalRepository.findProposalByUserCapitanAndTournament(userCapitan, tournament);
+        return isNotEmpty(tournamentTeamProposalList) ? tournamentTeamProposalList.get(0) : null;
     }
 
     /**

@@ -194,7 +194,7 @@ public class TeamServiceImpl implements TeamService {
         // from all active tournament
         return tournamentService.getAllActiveTournament().parallelStream()
                 // find team proposal if exists
-                .map(t -> tournamentProposalService.getProposalByTeamAndTournament(team, t))
+                .map(t -> tournamentProposalService.getLastProposalByTeamAndTournament(team, t))
                 .filter(Objects::nonNull)
                 // check if any of proposal is approved (active)
                 .map(TournamentTeamProposal::getState)

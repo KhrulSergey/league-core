@@ -29,7 +29,7 @@ public interface TournamentProposalService {
      * @param tournament info to search proposal
      * @return tournament team proposal entity
      */
-    TournamentTeamProposal getProposalByTeamAndTournament(Team team, Tournament tournament);
+    TournamentTeamProposal getLastProposalByTeamAndTournament(Team team, Tournament tournament);
 
     /**
      * Returns tournament team proposal list (request to participate on tournament) by capitan of team and tournament.
@@ -38,7 +38,7 @@ public interface TournamentProposalService {
      * @param tournament  to search connected proposal
      * @return tournament team proposal entity
      */
-    List<TournamentTeamProposal> getProposalByCapitanUserAndTournament(User userCapitan, Tournament tournament);
+    TournamentTeamProposal getLastProposalByCapitanUserAndTournament(User userCapitan, Tournament tournament);
 
     /**
      * Returns list of all tournament team proposal filtered by requested params
