@@ -1,15 +1,24 @@
 package com.freetonleague.core.service.tournament.implementations;
 
 
+import com.freetonleague.core.domain.dto.EventDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.domain.enums.EventOperationType;
+import com.freetonleague.core.domain.enums.EventProducerModelType;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.*;
 import com.freetonleague.core.exception.TeamParticipantManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
-import com.freetonleague.core.service.*;
+import com.freetonleague.core.service.EventService;
+import com.freetonleague.core.service.FinancialClientService;
+import com.freetonleague.core.service.TeamParticipantService;
 import com.freetonleague.core.service.tournament.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,8 +38,6 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
-import static org.apache.commons.lang3.ObjectUtils.isEmpty;
-import static org.apache.commons.lang3.ObjectUtils.isNotEmpty;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -87,42 +94,6 @@ public class TournamentEventServiceImpl implements TournamentEventService {
             this.tryMakeStatusUpdateOperations(tournament);
         }
     }
-
-    //TODO delete until 01/01/21
-    //every 20 hours, timout before start 30 sec
-//    @Scheduled(fixedRate = 20 * 60 * 60 * 1000, initialDelay = 30 * 1000)
-    void monitorFix() {
-        log.debug("^ Run TournamentEventService monitor fix tournament proposals");
-        tournamentService.getAllActiveTournament().parallelStream()
-                .map(tournamentProposalService::getActiveTeamProposalListByTournament)
-                .filter(Objects::nonNull)
-                .flatMap(Collection::stream)
-                .map(this::fixProposal).filter(Objects::nonNull)
-                .map(tournamentProposalService::editProposal)
-                .collect(Collectors.toList());
-    }
-
-    //TODO delete until 01/01/21
-    private TournamentTeamProposal fixProposal(TournamentTeamProposal tournamentTeamProposal) {
-        if (isNotEmpty(tournamentTeamProposal.getTournamentTeamParticipantList())) {
-            return null;
-        }
-        List<TeamParticipant> activeTeamParticipant = teamParticipantService.getActiveParticipantByTeam(tournamentTeamProposal.getTeam());
-        if (isEmpty(activeTeamParticipant)) {
-            log.warn("~ forbiddenException for fix proposal for tournamentTeamProposal.id '{}'  to tournament id '{}'. " +
-                            "Team have no active participant",
-                    tournamentTeamProposal.getId(), tournamentTeamProposal.getTournament().getId());
-            return null;
-        }
-        List<TournamentTeamParticipant> tournamentTeamParticipantList = activeTeamParticipant.parallelStream()
-                .map(p -> restTournamentProposalFacade.createTournamentTeamParticipant(p, tournamentTeamProposal))
-                .collect(Collectors.toList());
-        tournamentTeamProposal.setTournamentTeamParticipantList(tournamentTeamParticipantList);
-        log.debug("^ tournament team proposal.id '{}' was chosen for fixing participants {}",
-                tournamentTeamProposal.getId(), tournamentTeamParticipantList);
-        return tournamentTeamProposal;
-    }
-
 
     /**
      * Process tournament status changing
@@ -360,8 +331,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .amount(tournamentFundAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.TOURNAMENT_ENTRANCE_FEE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }
@@ -373,8 +344,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
                 .amount(commissionAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.TOURNAMENT_ENTRANCE_COMMISSION)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.TOURNAMENT_ENTRANCE_COMMISSION)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }
@@ -450,8 +421,8 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
-        // или удалить коммент
+        // TODO remove direct data change invocation and message designer from Kafka before 01/10/21
+        //or remove comment
         tournamentRound.setStatus(newTournamentRoundStatus);
         tournamentRoundService.editRound(tournamentRound);
     }
@@ -477,8 +448,9 @@ public class TournamentEventServiceImpl implements TournamentEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
-        // или удалить коммент
+
+        // TODO remove direct data change invocation and message designer from Kafka before 01/10/21
+        //or remove comment
         tournamentSeries.setStatus(newTournamentSeriesStatus);
         tournamentSeriesService.editSeries(tournamentSeries);
     }

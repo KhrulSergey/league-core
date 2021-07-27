@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.docket;
 
 import com.freetonleague.core.domain.dto.docket.DocketDto;
-import com.freetonleague.core.domain.enums.DocketStatusType;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
 import com.freetonleague.core.domain.model.docket.Docket;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

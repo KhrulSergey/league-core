@@ -1,12 +1,12 @@
 package com.freetonleague.core.mapper;
 
 
-import com.freetonleague.core.domain.dto.tournament.TournamentMatchPropertyTypeDto;
-import com.freetonleague.core.domain.dto.tournament.GameIndicatorTypeDto;
 import com.freetonleague.core.domain.dto.product.ProductPropertyTypeDto;
-import com.freetonleague.core.domain.enums.GameIndicatorType;
+import com.freetonleague.core.domain.dto.tournament.GameIndicatorTypeDto;
+import com.freetonleague.core.domain.dto.tournament.TournamentMatchPropertyTypeDto;
 import com.freetonleague.core.domain.enums.MatchPropertyType;
-import com.freetonleague.core.domain.enums.ProductPropertyType;
+import com.freetonleague.core.domain.enums.product.ProductPropertyType;
+import com.freetonleague.core.domain.enums.tournament.GameIndicatorType;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

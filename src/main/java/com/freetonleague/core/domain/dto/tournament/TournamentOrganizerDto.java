@@ -2,7 +2,7 @@ package com.freetonleague.core.domain.dto.tournament;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.freetonleague.core.domain.dto.UserDto;
-import com.freetonleague.core.domain.enums.TournamentOrganizerStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentOrganizerStatusType;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;

@@ -2,7 +2,7 @@ package com.freetonleague.core.mapper.docket;
 
 import com.freetonleague.core.domain.dto.docket.DocketUserProposalBonusDto;
 import com.freetonleague.core.domain.dto.docket.DocketUserProposalDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
 import com.freetonleague.core.domain.model.docket.DocketUserProposal;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.service.FinancialClientService;

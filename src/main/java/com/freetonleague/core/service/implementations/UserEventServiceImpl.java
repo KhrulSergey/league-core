@@ -2,11 +2,20 @@ package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
 import com.freetonleague.core.config.properties.AppUserProperties;
-import com.freetonleague.core.domain.dto.*;
+import com.freetonleague.core.domain.dto.EventDto;
+import com.freetonleague.core.domain.dto.UserDto;
+import com.freetonleague.core.domain.dto.UserExternalInfo;
+import com.freetonleague.core.domain.dto.UserImportExternalInfo;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
-import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.finance.AccountTransaction;
+import com.freetonleague.core.domain.enums.EventOperationType;
+import com.freetonleague.core.domain.enums.EventProducerModelType;
+import com.freetonleague.core.domain.enums.UserStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.service.EventService;
 import com.freetonleague.core.service.FinancialClientService;
@@ -90,7 +99,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 2 hours, timeout before start 2 min
-//    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
+    @Scheduled(fixedRate = 2 * 60 * 60 * 1000, initialDelay = 2 * 60 * 1000)
     private void monitorForInitiatedUsers() {
         log.debug("^ Run UserEventService monitor For Initiated Users");
 
@@ -116,7 +125,7 @@ public class UserEventServiceImpl implements UserEventService {
     }
 
     //every 3 days, timeout before start 1 min
-//    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
+    @Scheduled(fixedRate = 3 * 24 * 60 * 60 * 1000, initialDelay = 1 * 60 * 1000)
     public void importUsersDataFromFile() {
         log.debug("^ Run importUsersDataFromFile task to Import Users");
         if (importUser) {
@@ -233,8 +242,8 @@ public class UserEventServiceImpl implements UserEventService {
                 AccountTransaction accountTransaction = AccountTransaction.builder()
                         .amount(bonusAmount)
                         .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(accountInfoDto.getGUID())))
-                        .transactionType(TransactionType.DEPOSIT)
-                        .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
+                        .transactionType(AccountTransactionType.DEPOSIT)
+                        .transactionTemplateType(AccountTransactionTemplateType.EXTERNAL_PROVIDER)
                         .status(AccountTransactionStatusType.FINISHED)
                         .build();
 

@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.docket;
 
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.DocketStatusType;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
 import com.freetonleague.core.domain.model.docket.Docket;
 import com.freetonleague.core.domain.model.docket.DocketUserProposal;
 

@@ -1,15 +1,15 @@
 package com.freetonleague.core.service.tournament.implementations;
 
 import com.freetonleague.core.domain.dto.tournament.*;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.*;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.tournament.TournamentMapper;
 import com.freetonleague.core.security.permissions.CanManageTournament;
-import com.freetonleague.core.service.*;
+import com.freetonleague.core.service.RestUserFacade;
 import com.freetonleague.core.service.tournament.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

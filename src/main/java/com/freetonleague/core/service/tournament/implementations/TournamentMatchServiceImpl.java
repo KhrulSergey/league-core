@@ -1,6 +1,6 @@
 package com.freetonleague.core.service.tournament.implementations;
 
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
 import com.freetonleague.core.domain.model.tournament.TournamentMatch;
 import com.freetonleague.core.domain.model.tournament.TournamentMatchRival;
 import com.freetonleague.core.domain.model.tournament.TournamentSeries;

@@ -1,7 +1,7 @@
 package com.freetonleague.core.service.tournament.implementations;
 
 
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
 import com.freetonleague.core.domain.model.tournament.Tournament;
 import com.freetonleague.core.domain.model.tournament.TournamentRound;
 import com.freetonleague.core.exception.CustomUnexpectedException;

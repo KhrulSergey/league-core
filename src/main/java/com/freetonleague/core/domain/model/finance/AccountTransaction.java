@@ -1,13 +1,13 @@
 package com.freetonleague.core.domain.model.finance;
 
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.TransactionTemplateType;
-import com.freetonleague.core.domain.enums.TransactionType;
-import com.freetonleague.core.domain.model.FinancialBaseEntity;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
 import com.freetonleague.core.domain.model.User;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
@@ -22,7 +22,8 @@ import static java.util.Objects.nonNull;
 @EqualsAndHashCode(callSuper = true)
 @SuperBuilder
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Entity
 @Table(schema = "league_finance", name = "transactions")
 @SequenceGenerator(name = "base_financial_entity_seq", sequenceName = "transactions_id_seq", schema = "league_finance", allocationSize = 1)
@@ -54,8 +55,8 @@ public class AccountTransaction extends FinancialBaseEntity implements Serializa
     @JoinColumn(name = "parent_transaction_guid", referencedColumnName = "guid")
     private AccountTransaction parentTransaction;
 
-    @Column(name = "name")
-    private String name;
+    @Column(name = "description")
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -66,11 +67,11 @@ public class AccountTransaction extends FinancialBaseEntity implements Serializa
 
     @Column(name = "type")
     @Enumerated(EnumType.STRING)
-    private TransactionType transactionType;
+    private AccountTransactionType transactionType;
 
     @Column(name = "template_type")
     @Enumerated(EnumType.STRING)
-    private TransactionTemplateType transactionTemplateType;
+    private AccountTransactionTemplateType transactionTemplateType;
 
     @EqualsAndHashCode.Exclude
     @ManyToOne

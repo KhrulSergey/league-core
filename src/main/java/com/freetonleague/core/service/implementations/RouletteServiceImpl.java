@@ -9,10 +9,10 @@ import com.freetonleague.core.domain.dto.RouletteStatsDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.entity.RouletteBetEntity;
 import com.freetonleague.core.domain.entity.RouletteMatchEntity;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.TransactionTemplateType;
-import com.freetonleague.core.domain.enums.TransactionType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.finance.Account;
 import com.freetonleague.core.domain.model.finance.AccountTransaction;
@@ -117,8 +117,8 @@ public class RouletteServiceImpl implements RouletteService {
                 .amount(betAmount.doubleValue())
                 .sourceAccount(userAccount)
                 .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(bankAccount.getGUID())))
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.PRODUCT_PURCHASE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.PRODUCT_PURCHASE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
 
@@ -255,8 +255,8 @@ public class RouletteServiceImpl implements RouletteService {
                 .amount(winAmount)
                 .sourceAccount(financialUnitService.getAccountByGUID(UUID.fromString(bankAccount.getGUID())))
                 .targetAccount(winnerAccount)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.PRODUCT_PURCHASE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.PRODUCT_PURCHASE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
 

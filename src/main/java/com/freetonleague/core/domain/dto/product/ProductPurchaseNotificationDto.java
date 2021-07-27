@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.dto.product;
 
-import com.freetonleague.core.domain.enums.PurchaseStateType;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
@@ -36,7 +36,7 @@ public class ProductPurchaseNotificationDto {
     private Double purchaseQuantity;
 
     @ApiModelProperty(required = true)
-    private PurchaseStateType purchaseState;
+    private ProductPurchaseStateType purchaseState;
 
     private List<ProductPropertyDto> selectedProductParameters;
 

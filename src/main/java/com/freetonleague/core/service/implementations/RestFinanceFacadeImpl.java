@@ -1,21 +1,20 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.TelegramClientService;
-import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
-import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
 import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.dto.TelegramMPubgExchangeNotification;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.TransactionTemplateType;
-import com.freetonleague.core.domain.enums.TransactionType;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.finance.ExchangeOrderDto;
+import com.freetonleague.core.domain.dto.finance.ExchangeRatioDto;
+import com.freetonleague.core.domain.enums.finance.*;
 import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
+import com.freetonleague.core.domain.model.Team;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.finance.Account;
 import com.freetonleague.core.domain.model.finance.AccountTransaction;
-import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.tournament.Tournament;
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.AccountFinanceManageException;
 import com.freetonleague.core.exception.UnauthorizedException;
 import com.freetonleague.core.exception.ValidationException;
@@ -23,14 +22,10 @@ import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.UserMapper;
 import com.freetonleague.core.security.permissions.CanManageFinTransaction;
 import com.freetonleague.core.security.permissions.CanManageSystem;
-import com.freetonleague.core.service.FinancialClientService;
-import com.freetonleague.core.service.RestFinanceFacade;
-import com.freetonleague.core.service.RestTeamFacade;
-import com.freetonleague.core.service.tournament.RestTournamentFacade;
-import com.freetonleague.core.service.RestUserFacade;
-import com.freetonleague.core.service.SettingsService;
+import com.freetonleague.core.service.*;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
+import com.freetonleague.core.service.tournament.RestTournamentFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,8 +49,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 @RequiredArgsConstructor
 public class RestFinanceFacadeImpl implements RestFinanceFacade {
 
-    //call core-service to get data about user accounting
-    private final FinancialClientService financialClientService;
+    //TODO delete and user directly RestFinancialUnitFacade
+    private final FinancialClientService financialClientService;    //call core-service to get data about user accounting
     private final FinancialUnitService financialUnitService;
     private final RestTournamentFacade restTournamentFacade;
     private final RestTeamFacade restTeamFacade;
@@ -182,8 +177,8 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
                 .targetAccount(targetAccount)
                 .amount(amount)
                 .status(AccountTransactionStatusType.FROZEN) //Pause transaction and wait for manager approve
-                .transactionType(TransactionType.WITHDRAW)
-                .transactionTemplateType(TransactionTemplateType.EXTERNAL_BANK)
+                .transactionType(AccountTransactionType.WITHDRAW)
+                .transactionTemplateType(AccountTransactionTemplateType.EXTERNAL_BANK)
                 .build();
         AccountTransactionInfoDto savedTransactionInfoDto = financialClientService.applyWithdrawTransaction(accountTransactionInfoDto);
         if (isNull(savedTransactionInfoDto)) {
@@ -289,8 +284,8 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
                 .amount(filter.getTonAmount())
                 .sourceAccount(account)
                 .targetAccount(financialUnitService.getAccountByGUID(UUID.fromString(targetAccount.getGUID())))
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.PRODUCT_PURCHASE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.PRODUCT_PURCHASE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
 
@@ -308,6 +303,75 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
     }
 
     /**
+     * Get exchange rate for specified currencies
+     */
+    @Override
+    public ExchangeRatioDto getExchangeRateForCurrencies(Currency currencyToBuy, Currency currencyToSell) {
+        ExchangeRatioDto exchangeRatioDto = restFinancialUnitFacade.getExchangeRateForCurrencies(currencyToBuy, currencyToSell);
+        if (isNull(exchangeRatioDto)) {
+            log.error("!> Exchange currency rate request was not created for specified data currencyToBuy '{}', currencyToSell '{}'." +
+                    " . Check stack trace!", currencyToBuy, currencyToSell);
+            throw new AccountFinanceManageException(ExceptionMessages.EXCHANGE_CURRENCY_RATE_CREATION_ERROR,
+                    "Exchange currency rate request was not created for specified data. Check provider data");
+        }
+        return exchangeRatioDto;
+    }
+
+    /**
+     * Create exchange transaction for specified currencies and account GUID (or from user session)
+     * Now it's available to buy only TON crystals
+     */
+    @Override
+    public ExchangeOrderDto createExchangeOrder(Double amountToBuy, Currency currencyToBuy,
+                                                Currency currencyToSell, String targetAccountGUID, User user) {
+        if (isNull(user)) {
+            log.debug("^ user is not authenticate. 'createExchangeTransaction' in RestFinanceFacade request denied");
+            throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'createExchangeOrder' request denied");
+        }
+        if (!this.verifyExchangeCurrencyOrderBusinessLogic(amountToBuy, currencyToBuy, currencyToSell)) {
+            log.debug("^ Exchange currency transaction is badly set with data amountToBuy: '{}', currencyToBuy '{}', " +
+                    "currencyToSell '{}', targetAccountGUID '{}', user.id '{}'. 'createExchangeOrder' in " +
+                    "RestFinanceFacade request denied", amountToBuy, currencyToBuy, currencyToSell, targetAccountGUID, user.getLeagueId());
+            throw new AccountFinanceManageException(ExceptionMessages.TRANSACTION_VALIDATION_ERROR,
+                    "Exchange currency transaction data is badly set");
+        }
+        String userAccountExternalAddress;
+        if (!isBlank(targetAccountGUID)) {
+            userAccountExternalAddress = this.getVerifiedAccountByGUID(targetAccountGUID, user, false).getExternalAddress();
+        } else if (!isBlank(user.getBankAccountAddress())) {
+            userAccountExternalAddress = user.getBankAccountAddress();
+        } else {
+            userAccountExternalAddress = this.getVerifiedAccountByHolder(user.getLeagueId(),
+                    AccountHolderType.USER, user, false).getExternalAddress();
+        }
+        if (isBlank(userAccountExternalAddress)) {
+            log.debug("^ Account for specified user '{}' was not found. " +
+                    "'createExchangeTransaction' in RestFinanceFacade request denied", user.getLeagueId());
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR,
+                    "Account for requested user '" + user.getLeagueId() + "' was not found for createExchangeOrder");
+        }
+        ExchangeOrderDto exchangeOrderDto = restFinancialUnitFacade.createExchangeCurrencyOrder(amountToBuy,
+                currencyToBuy, currencyToSell, userAccountExternalAddress);
+        if (isNull(exchangeOrderDto)) {
+            log.error("!> Exchange currency order was not created for specified data amountToBuy: '{}', currencyToBuy '{}', " +
+                            "currencyToSell '{}', targetAccountGUID '{}', user.id '{}'. Check stack trace!", amountToBuy,
+                    currencyToBuy, currencyToSell, targetAccountGUID, user.getLeagueId());
+            throw new AccountFinanceManageException(ExceptionMessages.EXCHANGE_CURRENCY_ORDER_CREATION_ERROR,
+                    "Exchange currency order was not created for specified data. Check provider data");
+        }
+        return exchangeOrderDto;
+    }
+
+    /**
+     * Approve exchange order by specified GUID and make payment to client Account
+     */
+    @CanManageSystem
+    @Override
+    public ExchangeOrderDto approveExchangeOrder(String exchangeOrderGUID, User user) {
+        return restFinancialUnitFacade.approveExchangeOrder(exchangeOrderGUID);
+    }
+
+    /**
      * Returns account info by account GUID and user with privacy check
      */
     public AccountInfoDto getVerifiedAccountByGUID(String GUID, User user, boolean checkUser) {
@@ -319,6 +383,10 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
         if (isNull(account)) {
             log.debug("^ Account for requested GUID '{}' was not found. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID);
             throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_INFO_NOT_FOUND_ERROR, "Account with requested id '" + GUID + "' was not found");
+        }
+        if (!account.getOwnerExternalGUID().equals(user.getLeagueId().toString()) && !account.getOwnerType().equals(AccountHolderType.USER)) {
+            log.debug("^ Specified account.guid '{}' not belong to for specified user.leagueId '{}'. 'getVerifiedAccount' in RestFinanceFacade request denied", GUID, user.getLeagueId());
+            throw new AccountFinanceManageException(ExceptionMessages.ACCOUNT_NOT_BELONG_TO_USER, "Account for requested guid '" + GUID + "' was not belongs to user");
         }
         return account;
     }
@@ -364,5 +432,30 @@ public class RestFinanceFacadeImpl implements RestFinanceFacade {
                     String.format("Transaction with requested GUID '%s' is not found. Request rejected.", transactionGUID));
         }
         return existedTransaction;
+    }
+
+    /**
+     * Verify business logic of exchange currency order request.
+     */
+    private boolean verifyExchangeCurrencyOrderBusinessLogic(Double amountToBuy, Currency currencyToBuy, Currency currencyToSell) {
+        if (amountToBuy < 0) {
+            log.debug("^ requested to exchange negative amountToBuy '{}' of currency. " +
+                    "'verifyExchangeCurrencyBusinessLogic' request return false", amountToBuy);
+            return false;
+        }
+        return verifyExchangeCurrencyRateBusinessLogic(currencyToBuy, currencyToSell);
+    }
+
+    /**
+     * Verify business logic of exchange currency rate request.
+     * Available only exchanging TON to other currency
+     */
+    private boolean verifyExchangeCurrencyRateBusinessLogic(Currency currencyToBuy, Currency currencyToSell) {
+        if (!(currencyToSell == Currency.TON || currencyToBuy == Currency.TON)) {
+            log.debug("^ requested to exchange not permitted currency pair currencyToBuy '{}', currencyToSell '{}'." +
+                    " 'verifyExchangeCurrencyBusinessLogic' request return false", currencyToBuy, currencyToSell);
+            return false;
+        }
+        return true;
     }
 }

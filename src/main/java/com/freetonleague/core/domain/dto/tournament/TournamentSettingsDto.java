@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.dto.tournament;
 
-import com.freetonleague.core.domain.enums.FundGatheringType;
+import com.freetonleague.core.domain.enums.tournament.FundGatheringType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

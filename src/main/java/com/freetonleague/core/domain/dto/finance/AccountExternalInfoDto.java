@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.dto.finance;
 
-import com.freetonleague.core.domain.enums.BankProviderType;
+import com.freetonleague.core.domain.enums.finance.BankProviderType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

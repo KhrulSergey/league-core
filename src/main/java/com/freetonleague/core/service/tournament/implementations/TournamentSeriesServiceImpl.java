@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.tournament.implementations;
 
 
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
-import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentWinnerPlaceType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.*;
 import com.freetonleague.core.exception.CustomUnexpectedException;
 import com.freetonleague.core.exception.config.ExceptionMessages;

@@ -2,7 +2,7 @@ package com.freetonleague.core.service.tournament;
 
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
 import com.freetonleague.core.domain.model.tournament.*;
 
 import java.util.List;

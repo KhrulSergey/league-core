@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.docket.implementations;
 
-import com.freetonleague.core.domain.enums.DocketStatusType;
-import com.freetonleague.core.domain.model.docket.Docket;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.docket.Docket;
 import com.freetonleague.core.repository.docket.DocketRepository;
 import com.freetonleague.core.service.docket.DocketEventService;
 import com.freetonleague.core.service.docket.DocketService;

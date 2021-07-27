@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
-import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.UserService;
 import com.freetonleague.core.service.financeUnit.FinancialCouponService;

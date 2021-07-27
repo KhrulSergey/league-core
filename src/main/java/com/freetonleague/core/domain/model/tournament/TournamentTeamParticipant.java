@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.model.tournament;
 
-import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentTeamParticipantStatusType;
 import com.freetonleague.core.domain.model.BaseEntity;
 import com.freetonleague.core.domain.model.TeamParticipant;
 import com.freetonleague.core.domain.model.User;

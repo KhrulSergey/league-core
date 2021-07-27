@@ -3,8 +3,8 @@ package com.freetonleague.core.service.financeUnit.implementations;
 import com.freetonleague.core.domain.dto.finance.AccountBroxusResponseDto;
 import com.freetonleague.core.domain.dto.finance.AccountExternalInfoDto;
 import com.freetonleague.core.domain.dto.finance.AccountTransactionExternalInfoDto;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.BankProviderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.BankProviderType;
 import com.freetonleague.core.domain.model.finance.Account;
 import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.exception.InnerServiceFeignException;
@@ -34,8 +34,8 @@ public class BankAccountingClientService {
     private final BroxusAccountingClientCloud broxusAccountingClientCloud;
 
     @Autowired
-    @Qualifier("broxusMock")
-    private BroxusAccountingClientCloud broxusAccountingMockClient;
+    @Qualifier("broxusInterlayerClientMock")
+    private BroxusAccountingClientCloud broxusAccountingClientMock;
 
     @Value("${config.broxus-client.token:}")
     private String broxusClientToken;
@@ -63,7 +63,7 @@ public class BankAccountingClientService {
         log.debug("^ try to create external bank account (address) for specified core-account with guid '{}' for holder '{}'",
                 coreAccount.getGUID(), coreAccount.getHolder());
 
-        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
+        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingClientMock
                 : broxusAccountingClientCloud;
         try {
             externalAccountInfo = currentBroxusClient.createBroxusAccount(this.broxusClientToken,
@@ -114,7 +114,7 @@ public class BankAccountingClientService {
         log.debug("^ try to get balance from external bank provider for specified core-account guid '{}' for holder '{}'",
                 coreAccount.getGUID(), coreAccount.getHolder());
 
-        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
+        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingClientMock
                 : broxusAccountingClientCloud;
         try {
             externalAccountInfo = currentBroxusClient.getAccountBalance(this.broxusClientToken,
@@ -160,7 +160,7 @@ public class BankAccountingClientService {
         }
         log.debug("^ trying to send request to register transaction to Bank Client '{}'", accountTransaction.getGUID());
         AccountBroxusResponseDto transactionInfo;
-        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingMockClient
+        BroxusAccountingClientCloud currentBroxusClient = isBroxusClientMock ? broxusAccountingClientMock
                 : broxusAccountingClientCloud;
         try {
             transactionInfo = currentBroxusClient.registerWithdrawTransaction(this.broxusClientToken,

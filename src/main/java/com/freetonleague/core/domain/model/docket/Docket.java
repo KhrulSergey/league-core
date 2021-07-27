@@ -1,8 +1,8 @@
 package com.freetonleague.core.domain.model.docket;
 
 import com.freetonleague.core.domain.enums.AccessType;
-import com.freetonleague.core.domain.enums.DocketStatusType;
-import com.freetonleague.core.domain.enums.DocketSystemType;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
+import com.freetonleague.core.domain.enums.docket.DocketSystemType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

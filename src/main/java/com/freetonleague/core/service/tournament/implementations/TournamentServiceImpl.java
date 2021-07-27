@@ -2,9 +2,9 @@ package com.freetonleague.core.service.tournament.implementations;
 
 
 import com.freetonleague.core.cloudclient.LeagueStorageClientService;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
-import com.freetonleague.core.domain.model.*;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentWinnerPlaceType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.*;
 import com.freetonleague.core.repository.tournament.TournamentRepository;
 import com.freetonleague.core.repository.tournament.TournamentSettingsRepository;

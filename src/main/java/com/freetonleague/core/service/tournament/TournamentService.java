@@ -1,11 +1,11 @@
 package com.freetonleague.core.service.tournament;
 
 
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.GameDiscipline;
 import com.freetonleague.core.domain.model.tournament.Tournament;
 import com.freetonleague.core.domain.model.tournament.TournamentSettings;
-import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

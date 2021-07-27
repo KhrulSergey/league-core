@@ -2,17 +2,22 @@ package com.freetonleague.core.service.docket.implementations;
 
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.finance.AccountTransaction;
+import com.freetonleague.core.domain.enums.ParticipationStateType;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.docket.Docket;
 import com.freetonleague.core.domain.model.docket.DocketUserProposal;
-import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.exception.DocketManageException;
 import com.freetonleague.core.exception.TeamParticipantManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
+import com.freetonleague.core.service.FinancialClientService;
 import com.freetonleague.core.service.docket.DocketEventService;
 import com.freetonleague.core.service.docket.DocketProposalService;
-import com.freetonleague.core.service.FinancialClientService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -75,8 +80,8 @@ public class DocketEventServiceImpl implements DocketEventService {
             AccountTransaction accountTransaction = AccountTransaction.builder()
                     .amount(firstTonCompanyPaymentAmount)
                     .targetAccount(financialUnitService.getAccountByHolderExternalGUIDAndType(docketUserProposal.getUser().getLeagueId(), AccountHolderType.USER))
-                    .transactionType(TransactionType.DEPOSIT)
-                    .transactionTemplateType(TransactionTemplateType.EXTERNAL_PROVIDER)
+                    .transactionType(AccountTransactionType.DEPOSIT)
+                    .transactionTemplateType(AccountTransactionTemplateType.EXTERNAL_PROVIDER)
                     .status(AccountTransactionStatusType.FINISHED)
                     .build();
 
@@ -139,8 +144,8 @@ public class DocketEventServiceImpl implements DocketEventService {
                 .amount(docketParticipationFeeAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.DOCKET_ENTRANCE_FEE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.DOCKET_ENTRANCE_FEE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }

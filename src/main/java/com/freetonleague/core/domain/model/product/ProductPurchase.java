@@ -2,7 +2,7 @@ package com.freetonleague.core.domain.model.product;
 
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.product.ProductPropertyDto;
-import com.freetonleague.core.domain.enums.PurchaseStateType;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import com.freetonleague.core.domain.model.User;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
@@ -65,10 +65,10 @@ public class ProductPurchase extends ExtendedBaseEntity {
     @NotNull
     @Column(name = "state")
     @Enumerated(EnumType.STRING)
-    private PurchaseStateType state;
+    private ProductPurchaseStateType state;
 
     @Transient
-    private PurchaseStateType prevState;
+    private ProductPurchaseStateType prevState;
 
     @Column(name = "buyer_comment")
     private String buyerComment;
@@ -83,7 +83,7 @@ public class ProductPurchase extends ExtendedBaseEntity {
     @Column(name = "purchase_payment_list", columnDefinition = "jsonb")
     private List<AccountTransactionInfoDto> purchasePaymentList;
 
-    public void setState(PurchaseStateType state) {
+    public void setState(ProductPurchaseStateType state) {
         prevState = this.state;
         this.state = state;
     }
