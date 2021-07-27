@@ -139,11 +139,14 @@ public class ExceptionMessages {
     public static final String DOCKET_USER_PROPOSAL_MODIFICATION_ERROR = "User proposal to Docket modifying failed. Please try again";
 
     public static final String ACCOUNT_INFO_NOT_FOUND_ERROR = "Financial account info was not found. Please check request parameters";
+    public static final String ACCOUNT_NOT_BELONG_TO_USER = "Financial account not belong to requested user. Please check request parameters";
     public static final String TRANSACTION_WITHDRAW_CREATION_ERROR = "Request for financial withdraw transaction was rejected by provider. Please check request parameters or try again later";
     public static final String TRANSACTION_VALIDATION_ERROR = "Request for financial transaction was specified with errors. Please check request parameters";
     public static final String TRANSACTION_NOT_FOUND_ERROR = "Financial transaction info was not found. Please check request parameters";
     public static final String ACCOUNT_COUPON_APPLY_ERROR = "Applying coupon by advertisement company hash was unsuccessful." +
             "Please check request parameters or contact organizers";
+    public static final String EXCHANGE_CURRENCY_ORDER_CREATION_ERROR = "Request for financial exchange order was rejected by provider. Please check request parameters or try again later";
+    public static final String EXCHANGE_CURRENCY_RATE_CREATION_ERROR = "Request for financial exchange order was rejected by provider. Please check request parameters or try again later";
 
     public static final String NEWS_NOT_FOUND_ERROR = "News was not found. Please check request parameters";
     public static final String NEWS_VISIBLE_ERROR = "Docket is not visible and modification forbidden. Please contact to organizers.";
@@ -181,4 +184,5 @@ public class ExceptionMessages {
     public static final String FINANCE_UNIT_TRANSACTION_ABORT_ERROR = "Financial transaction can't be aborted. Request denied";
     public static final String FINANCE_UNIT_TRANSACTION_MODIFY_FINISHED_ERROR = "Only aborted operation available for finished transaction. Request denied";
     public static final String FINANCE_UNIT_TOKEN_VALIDATION_ERROR = "Specified token is not valid for operate with deposit transactions. Request denied";
+    public static final String FINANCE_UNIT_EXCHANGE_ORDER_NOT_FOUND_ERROR = "Financial exchange currency order was not found. Please check request parameters";
 }

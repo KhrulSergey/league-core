@@ -1,7 +1,7 @@
 package com.freetonleague.core.domain.model.tournament;
 
 import com.freetonleague.core.domain.dto.tournament.GameDisciplineIndicatorDto;
-import com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentMatchRivalParticipantStatusType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;

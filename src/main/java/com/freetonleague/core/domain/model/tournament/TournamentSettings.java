@@ -4,7 +4,7 @@ import com.freetonleague.core.domain.dto.tournament.TournamentPrizePoolDistribut
 import com.freetonleague.core.domain.dto.tournament.TournamentQuitPenaltyDistributionDto;
 import com.freetonleague.core.domain.dto.tournament.TournamentRoundSettingDto;
 import com.freetonleague.core.domain.dto.tournament.TournamentScoreWinnersDistributionDto;
-import com.freetonleague.core.domain.enums.FundGatheringType;
+import com.freetonleague.core.domain.enums.tournament.FundGatheringType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
 import lombok.*;

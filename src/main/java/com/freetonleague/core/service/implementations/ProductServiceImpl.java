@@ -1,8 +1,8 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.enums.ProductStatusType;
-import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.product.Product;
 import com.freetonleague.core.repository.ProductRepository;
 import com.freetonleague.core.service.ProductEventService;
 import com.freetonleague.core.service.ProductService;

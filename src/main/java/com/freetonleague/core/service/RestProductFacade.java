@@ -1,7 +1,7 @@
 package com.freetonleague.core.service;
 
 import com.freetonleague.core.domain.dto.product.ProductDto;
-import com.freetonleague.core.domain.enums.ProductStatusType;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
 import com.freetonleague.core.domain.model.product.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

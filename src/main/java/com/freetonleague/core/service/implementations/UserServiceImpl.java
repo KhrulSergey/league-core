@@ -1,12 +1,12 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.LeagueIdClientService;
-import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.UserDto;
 import com.freetonleague.core.domain.dto.UserExternalInfo;
-import com.freetonleague.core.domain.enums.AccountHolderType;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.enums.UserRoleType;
 import com.freetonleague.core.domain.enums.UserStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
 import com.freetonleague.core.domain.model.Role;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.UserManageException;
@@ -201,6 +201,23 @@ public class UserServiceImpl implements UserService {
         //todo check changed status
         userEventService.processUserStatusChange(user, user.getStatus());
         return updatedUser;
+    }
+
+    /**
+     * Update user bank account info
+     *
+     * @return updated user
+     */
+    @Override
+    public User updateUserAccountInfo(UUID leagueId, AccountInfoDto accountInfoDto) {
+        log.debug("^ try to update user account info for user '{}' and data '{}'", leagueId, accountInfoDto);
+        User user = this.findByLeagueId(leagueId);
+        if (!isBlank(user.getBankAccountAddress())) {
+            log.debug("^ user '{}' already have saved bank account address in DB. Skip updating process", leagueId);
+            return user;
+        }
+        user.setBankAccountAddress(accountInfoDto.getExternalAddress());
+        return userRepository.save(user);
     }
 
     /**

@@ -3,12 +3,12 @@ package com.freetonleague.core.service.tournament.implementations;
 
 import com.freetonleague.core.domain.dto.tournament.TournamentMatchDto;
 import com.freetonleague.core.domain.dto.tournament.TournamentMatchRivalDto;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
-import com.freetonleague.core.domain.enums.TournamentWinnerPlaceType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentWinnerPlaceType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.tournament.TournamentMatch;
 import com.freetonleague.core.domain.model.tournament.TournamentMatchRival;
 import com.freetonleague.core.domain.model.tournament.TournamentSeries;
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.TournamentManageException;
 import com.freetonleague.core.exception.ValidationException;

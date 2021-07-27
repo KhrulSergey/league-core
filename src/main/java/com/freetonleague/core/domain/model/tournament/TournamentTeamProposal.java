@@ -2,9 +2,9 @@ package com.freetonleague.core.domain.model.tournament;
 
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
-import com.freetonleague.core.domain.enums.TournamentParticipantType;
-import com.freetonleague.core.domain.enums.TournamentTeamParticipantStatusType;
-import com.freetonleague.core.domain.enums.TournamentTeamType;
+import com.freetonleague.core.domain.enums.tournament.TournamentParticipantType;
+import com.freetonleague.core.domain.enums.tournament.TournamentTeamParticipantStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentTeamType;
 import com.freetonleague.core.domain.model.BaseEntity;
 import com.freetonleague.core.domain.model.Team;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;

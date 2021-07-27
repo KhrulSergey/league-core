@@ -2,8 +2,8 @@ package com.freetonleague.core.domain.dto.tournament;
 
 import com.freetonleague.core.domain.dto.TeamDto;
 import com.freetonleague.core.domain.enums.ParticipationStateType;
-import com.freetonleague.core.domain.enums.TournamentParticipantType;
-import com.freetonleague.core.domain.enums.TournamentTeamType;
+import com.freetonleague.core.domain.enums.tournament.TournamentParticipantType;
+import com.freetonleague.core.domain.enums.tournament.TournamentTeamType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;

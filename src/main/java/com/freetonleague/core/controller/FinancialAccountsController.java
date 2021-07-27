@@ -1,10 +1,10 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
+import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
 import com.freetonleague.core.domain.filter.MPubgTonRateFilter;
 import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
 import com.freetonleague.core.domain.model.User;
@@ -43,7 +43,6 @@ public class FinancialAccountsController {
     public static final String PATH_GET_MY_TRANSACTION_LIST = "/transaction/list/my";
     public static final String PATH_GET_TRANSACTION_LIST = "/transaction/list";
     public static final String PATH_CREATE_WITHDRAW = "/transaction/withdraw";
-    public static final String PATH_CANCEL_WITHDRAW = "/transaction/withdraw/{transaction_guid}";
     public static final String PATH_MODERATE_WITHDRAW = "/transaction/withdraw/{transaction_guid}";
 
     public static final String PATH_WITHDRAW_TO_MPUBG = "/transaction/withdraw/mpubg";

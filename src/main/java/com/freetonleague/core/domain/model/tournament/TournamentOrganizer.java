@@ -1,6 +1,6 @@
 package com.freetonleague.core.domain.model.tournament;
 
-import com.freetonleague.core.domain.enums.TournamentOrganizerStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentOrganizerStatusType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import com.freetonleague.core.domain.model.User;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;

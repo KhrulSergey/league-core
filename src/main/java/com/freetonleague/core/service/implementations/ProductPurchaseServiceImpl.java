@@ -1,10 +1,10 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.PurchaseStateType;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
+import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.domain.model.product.Product;
 import com.freetonleague.core.domain.model.product.ProductPurchase;
-import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.ProductPurchaseRepository;
 import com.freetonleague.core.service.ProductEventService;
 import com.freetonleague.core.service.ProductPurchaseService;
@@ -54,12 +54,12 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
      * Returns list of all product purchase filtered by requested params
      */
     @Override
-    public Page<ProductPurchase> getPurchaseListForProduct(Pageable pageable, User user, Product product, List<PurchaseStateType> statusList) {
+    public Page<ProductPurchase> getPurchaseListForProduct(Pageable pageable, User user, Product product, List<ProductPurchaseStateType> statusList) {
         if (isNull(pageable)) {
             log.error("!> requesting getProposalListForProduct for NULL pageable. Check evoking clients");
             return null;
         }
-        List<PurchaseStateType> filteredProposalStateList = List.of(PurchaseStateType.values());
+        List<ProductPurchaseStateType> filteredProposalStateList = List.of(ProductPurchaseStateType.values());
         boolean filterByProductEnabled = nonNull(product);
         boolean filterByUserEnabled = nonNull(user);
         log.debug("^ trying to get product purchase list with pageable params: '{}', filterByProductEnabled '{}', filterByUserEnabled '{}', statusList '{}'",
@@ -103,7 +103,6 @@ public class ProductPurchaseServiceImpl implements ProductPurchaseService {
         } else {
             productPurchase.setPurchaseTotalAmount(0.0);
         }
-        //TODO уменьшать кол-во продукта на складе
         if (product.hasQuantityLimit()) {
             double newQuantityInStock = product.getQuantityInStock() - productPurchase.getPurchaseQuantity();
             if (newQuantityInStock < 0) {

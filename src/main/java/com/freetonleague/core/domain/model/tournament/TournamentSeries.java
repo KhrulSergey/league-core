@@ -1,7 +1,7 @@
 package com.freetonleague.core.domain.model.tournament;
 
-import com.freetonleague.core.domain.enums.TournamentSeriesBracketType;
-import com.freetonleague.core.domain.enums.TournamentStatusType;
+import com.freetonleague.core.domain.enums.tournament.TournamentSeriesBracketType;
+import com.freetonleague.core.domain.enums.tournament.TournamentStatusType;
 import com.freetonleague.core.domain.model.ExtendedBaseEntity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

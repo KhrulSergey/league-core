@@ -1,8 +1,8 @@
 package com.freetonleague.core.domain.dto.docket;
 
 import com.freetonleague.core.domain.enums.AccessType;
-import com.freetonleague.core.domain.enums.DocketStatusType;
-import com.freetonleague.core.domain.enums.DocketSystemType;
+import com.freetonleague.core.domain.enums.docket.DocketStatusType;
+import com.freetonleague.core.domain.enums.docket.DocketSystemType;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Builder;
 import lombok.Data;

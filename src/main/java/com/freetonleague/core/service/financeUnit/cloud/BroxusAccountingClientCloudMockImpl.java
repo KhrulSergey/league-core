@@ -13,7 +13,7 @@ import java.util.UUID;
  */
 @Slf4j
 @RequiredArgsConstructor
-@Component("broxusMock")
+@Component("broxusInterlayerClientMock")
 public class BroxusAccountingClientCloudMockImpl implements BroxusAccountingClientCloud {
 
     @Override

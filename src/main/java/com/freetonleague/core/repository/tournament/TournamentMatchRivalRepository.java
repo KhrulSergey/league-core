@@ -17,7 +17,7 @@ public interface TournamentMatchRivalRepository extends JpaRepository<Tournament
 
     @Query(value = "select case when count(r)> 0 then true else false end " +
             "from TournamentMatchRival r where r.tournamentMatch = :match "
-            + "and r.status = com.freetonleague.core.domain.enums.TournamentMatchRivalParticipantStatusType.ACTIVE "
+            + "and r.status = com.freetonleague.core.domain.enums.tournament.TournamentMatchRivalParticipantStatusType.ACTIVE "
             + "and :leagueId in (select p.tournamentTeamParticipant.user.leagueId from TournamentMatchRivalParticipant p where p.tournamentMatchRival = r)"
     )
     boolean isUserParticipateInMatch(@Param("match") TournamentMatch tournamentMatch, @Param("leagueId") UUID leagueId);

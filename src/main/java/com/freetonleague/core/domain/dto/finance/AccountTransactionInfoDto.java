@@ -1,9 +1,9 @@
 package com.freetonleague.core.domain.dto.finance;
 
 import com.freetonleague.core.domain.dto.UserDto;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.TransactionTemplateType;
-import com.freetonleague.core.domain.enums.TransactionType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -44,9 +44,9 @@ public class AccountTransactionInfoDto {
     private LocalDateTime abortedAt;
 
     @NotNull
-    private TransactionType transactionType;
+    private AccountTransactionType transactionType;
 
     @Builder.Default
     @NotNull
-    private TransactionTemplateType transactionTemplateType = TransactionTemplateType.DEFAULT;
+    private AccountTransactionTemplateType transactionTemplateType = AccountTransactionTemplateType.DEFAULT;
 }

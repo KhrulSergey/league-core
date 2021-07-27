@@ -1,9 +1,12 @@
 package com.freetonleague.core.service;
 
+import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
 import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.dto.MPubgTonExchangeAmountDto;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
+import com.freetonleague.core.domain.dto.finance.ExchangeOrderDto;
+import com.freetonleague.core.domain.dto.finance.ExchangeRatioDto;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.Currency;
 import com.freetonleague.core.domain.filter.MPubgTonWithdrawalCreationFilter;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
@@ -98,4 +101,27 @@ public interface RestFinanceFacade {
 
     void createMPubgWithdrawalTransaction(MPubgTonWithdrawalCreationFilter filter, User user);
 
+    /**
+     * Get exchange rate for specified currencies
+     *
+     * @return exchange ratio for specified currencies pair
+     */
+    ExchangeRatioDto getExchangeRateForCurrencies(Currency currencyToBuy, Currency currencyToSell);
+
+    /**
+     * Create exchange order for specified currencies and account GUID (or from user session)
+     * Now it's available to buy only TON crystals
+     *
+     * @param amountToBuy       amount of currencies to buy
+     * @param targetAccountGUID account to transfer bought currency
+     * @param user              current user from session
+     * @return created exchange order with paymentUrl
+     */
+    ExchangeOrderDto createExchangeOrder(Double amountToBuy, Currency currencyToBuy, Currency currencyToSell,
+                                         String targetAccountGUID, User user);
+
+    /**
+     * Approve exchange order by specified GUID and make payment to client Account
+     */
+    ExchangeOrderDto approveExchangeOrder(String exchangeOrderGUID, User user);
 }
