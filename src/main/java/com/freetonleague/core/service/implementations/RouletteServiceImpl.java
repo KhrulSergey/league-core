@@ -146,7 +146,7 @@ public class RouletteServiceImpl implements RouletteService {
                 .sum();
 
         List<RouletteBetDto> betList = bets.stream()
-                .map(entity -> rouletteMapper.toBetDto(entity, (double) (entity.getTonAmount() * 100 / sum)))
+                .map(entity -> rouletteMapper.toBetDto(entity, entity.getTonAmount() * 100D / sum))
                 .collect(Collectors.toList());
 
         return RouletteStatsDto.builder()
@@ -182,13 +182,13 @@ public class RouletteServiceImpl implements RouletteService {
                 .sum();
 
         List<RouletteBetDto> betList = bets.stream()
-                .map(entity -> rouletteMapper.toBetDto(entity, (double) (entity.getTonAmount() * 100 / sum)))
+                .map(entity -> rouletteMapper.toBetDto(entity, entity.getTonAmount() * 100D / sum))
                 .collect(Collectors.toList());
 
         return RouletteMatchStatsDto.builder()
                 .winnerBet(
                         rouletteMapper.toBetDto(matchEntity.getWinnerBet(),
-                                (double) (matchEntity.getWinnerBet().getTonAmount() * 100 / sum))
+                                matchEntity.getWinnerBet().getTonAmount() * 100D / sum)
                 )
                 .betAmount(sum)
                 .betList(betList)
@@ -203,12 +203,12 @@ public class RouletteServiceImpl implements RouletteService {
         return rouletteMatchRepository.findByFinishedFalse();
     }
 
-    private boolean isReadyToStart(RouletteMatchEntity match) {
+    public boolean isReadyToStart(RouletteMatchEntity match) {
         List<RouletteBetEntity> bets = match.getBets();
 
         int playersCount = bets.size();
 
-        if (rouletteProperties.getMinPlayersCount() < playersCount) {
+        if (rouletteProperties.getMinPlayersCount() > playersCount) {
             return false;
         }
 

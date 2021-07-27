@@ -1,5 +1,6 @@
 package com.freetonleague.core.controller.api;
 
+import com.freetonleague.core.config.ApiPageable;
 import com.freetonleague.core.domain.dto.RouletteMatchHistoryItemDto;
 import com.freetonleague.core.domain.dto.RouletteMatchStatsDto;
 import com.freetonleague.core.domain.dto.RouletteStatsDto;
@@ -33,6 +34,7 @@ public interface RouletteApi {
             @PathVariable Long matchId
     );
 
+    @ApiPageable
     @GetMapping(GET_HISTORY_PATH)
     @ApiOperation("Getting roulette matches history")
     Page<RouletteMatchHistoryItemDto> getMatchesHistory(
