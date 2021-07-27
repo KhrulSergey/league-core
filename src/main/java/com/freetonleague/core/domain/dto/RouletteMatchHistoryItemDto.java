@@ -16,6 +16,10 @@ public class RouletteMatchHistoryItemDto {
     private Long id;
     private String randomOrgId;
     private UUID winnerUserLeagueId;
+    private Double winnerChance;
+    private Long winnerTicketNumberFrom;
+    private Long winnerTicketNumberTo;
+    private Long winnerBetAmount;
     private Long betSum;
 
 }
