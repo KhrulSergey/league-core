@@ -64,7 +64,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
     public TournamentTeamProposalDto getProposalFromTeamForTournament(long tournamentId, long teamId, User user) {
         Team team = restTeamFacade.getVerifiedTeamById(teamId, user, false);
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-        TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
+        TournamentTeamProposal teamProposal = tournamentProposalService.getLastProposalByTeamAndTournament(team, tournament);
         return tournamentProposalMapper.toDto(teamProposal);
     }
 
@@ -85,11 +85,8 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         }
         User userParticipant = restUserFacade.getVerifiedUserByLeagueId(leagueId);
         //try to find proposal by user
-        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getProposalByCapitanUserAndTournament(userParticipant, tournament);
-        if (isNotEmpty(teamProposalList)) {
-            return tournamentProposalMapper.toDto(teamProposalList.get(0));
-        }
-        return null;
+        TournamentTeamProposal teamProposal = tournamentProposalService.getLastProposalByCapitanUserAndTournament(userParticipant, tournament);
+        return tournamentProposalMapper.toDto(teamProposal);
     }
 
     /**
@@ -119,8 +116,8 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
 
         //check if proposal already existed
-        TournamentTeamProposal teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
-        if (nonNull(teamProposal)) {
+        TournamentTeamProposal teamProposal = tournamentProposalService.getLastProposalByTeamAndTournament(team, tournament);
+        if (nonNull(teamProposal) && ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
             log.warn("~ forbiddenException for create duplicate proposal from user '{}'. Already existed proposal '{}'.", user, teamProposal);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR,
                     "Duplicate proposal from team to the one tournament is prohibited. Request rejected.");
@@ -205,6 +202,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
      */
     @Override
     public TournamentTeamProposalDto createProposalToTournamentFromUser(long tournamentId, String leagueId, User user) {
+        log.debug("^ try to create proposal from user.id '{}' to tournament.id", leagueId, tournamentId);
         if (isNull(user)) {
             log.debug("^ user is not authenticate. 'createProposalToTournamentFromUser' in RestTournamentProposalFacade request denied");
             throw new UnauthorizedException(ExceptionMessages.AUTHENTICATION_ERROR, "'createProposalToTournamentFromUser' request denied");
@@ -218,13 +216,15 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
 
         //check if proposal already existed
-        List<TournamentTeamProposal> teamProposalList = tournamentProposalService.getProposalByCapitanUserAndTournament(user, tournament);
-        if (isNotEmpty(teamProposalList)) {
+        TournamentTeamProposal teamProposal = tournamentProposalService.getLastProposalByCapitanUserAndTournament(user, tournament);
+        if (nonNull(teamProposal) && ParticipationStateType.activeProposalStateList.contains(teamProposal.getState())) {
             log.warn("~ forbiddenException for create duplicate proposal from user-captain '{}' and team.id {}. " +
-                    "Already existed at least one proposal '{}'.", user.getLeagueId(), teamProposalList.get(0).getTeam().getId(), teamProposalList.get(0));
+                    "Already existed at least one proposal '{}'.", user.getLeagueId(), teamProposal.getTeam().getId(), teamProposal);
             throw new TeamParticipantManageException(ExceptionMessages.TOURNAMENT_TEAM_PROPOSAL_EXIST_ERROR,
                     "Duplicate proposal from user (virtual team) to the one tournament is prohibited. Request rejected.");
         }
+        log.debug("^ proposal from user.id '{}' to tournament.id '{}' is exist '{}' with data '{}'",
+                leagueId, tournamentId, nonNull(teamProposal), teamProposal);
 
         //check status of tournament
         if (tournament.getStatus() != TournamentStatusType.SIGN_UP) {
@@ -248,7 +248,16 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
         }
 
         //create new virtual team for user
-        Team virtualTeamForUser = restTeamFacade.createVirtualTeam(user);
+        Team virtualTeamForUser;
+        if (nonNull(teamProposal)) {
+            virtualTeamForUser = teamProposal.getTeam();
+            log.debug("^ set team.id '{}' for new proposal of user.id '{}' from previous proposal.id '{}' to tournament.id '{}'",
+                    virtualTeamForUser.getId(), leagueId, teamProposal.getId(), tournamentId);
+        } else {
+            log.debug("^ try to create new virtual team for user.id '{}' to participate in tournament.id '{}'",
+                    leagueId, tournamentId);
+            virtualTeamForUser = restTeamFacade.createVirtualTeam(user);
+        }
 
         TournamentTeamProposal newTeamProposal = TournamentTeamProposal.builder()
                 .state(ParticipationStateType.CREATED)
@@ -347,7 +356,7 @@ public class RestTournamentProposalFacadeImpl implements RestTournamentProposalF
 //                        "Only captain can apply and modify proposals to tournaments from team.");
 //            }
             Tournament tournament = restTournamentFacade.getVerifiedTournamentById(tournamentId);
-            teamProposal = tournamentProposalService.getProposalByTeamAndTournament(team, tournament);
+            teamProposal = tournamentProposalService.getLastProposalByTeamAndTournament(team, tournament);
         } else {
             log.warn("~ forbiddenException for modify proposal to tournament for user '{}'. " +
                     "No valid parameters of team proposal was specified", user.getLeagueId());
