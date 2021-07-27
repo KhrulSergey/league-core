@@ -1,10 +1,10 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +16,7 @@ import java.util.UUID;
  * Service interface to interact with Financial unit
  * In future it will call feign-client to interact over api
  */
+//TODO delete and user directly RestFinancialUnitFacade from RestFinanceFacade
 public interface FinancialClientService {
 
     /**

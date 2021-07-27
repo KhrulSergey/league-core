@@ -1,18 +1,21 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.CouponInfoDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.TransactionTemplateType;
-import com.freetonleague.core.domain.enums.TransactionType;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.FinancialClientService;
+import com.freetonleague.core.service.UserService;
 import com.freetonleague.core.service.financeUnit.FinancialCouponService;
 import com.freetonleague.core.service.financeUnit.RestFinancialUnitFacade;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -27,6 +30,7 @@ import java.util.UUID;
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+//TODO delete and user directly RestFinancialUnitFacade from RestFinanceFacade
 /**
  * Service to interact with Financial unit
  * In future it will call feign-client to interact over api
@@ -42,6 +46,10 @@ public class FinancialClientServiceImpl implements FinancialClientService {
     private final FinancialCouponService financialCouponService;
     private final Validator validator;
 
+    @Lazy
+    @Autowired
+    private final UserService userService;
+
     /**
      * Returns account info for requested Holder type and GUID from Finance Unit
      */
@@ -53,7 +61,12 @@ public class FinancialClientServiceImpl implements FinancialClientService {
             return null;
         }
         log.debug("^ trying to get account info by holder id: '{}' and type: '{}'", holderGUID, holderType);
-        return restFinancialUnitFacade.findAccountByHolder(holderGUID, holderType);
+        AccountInfoDto accountInfoDto = restFinancialUnitFacade.findAccountByHolder(holderGUID, holderType);
+        //TODO delete until 01/02/2022. It updated user main account address
+        if (holderType.isUser()) {
+            userService.updateUserAccountInfo(holderGUID, accountInfoDto);
+        }
+        return accountInfoDto;
     }
 
     /**
@@ -254,8 +267,8 @@ public class FinancialClientServiceImpl implements FinancialClientService {
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
                 .status(AccountTransactionStatusType.FINISHED)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.DOCKET_ENTRANCE_FEE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.DOCKET_ENTRANCE_FEE)
                 .build();
     }
 

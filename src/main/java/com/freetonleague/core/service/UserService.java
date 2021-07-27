@@ -2,6 +2,7 @@ package com.freetonleague.core.service;
 
 
 import com.freetonleague.core.domain.dto.UserExternalInfo;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import com.freetonleague.core.domain.model.User;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -54,6 +55,15 @@ public interface UserService extends UserDetailsService {
      * @return Edited user
      */
     User edit(User user);
+
+    /**
+     * Update user bank account info
+     *
+     * @param leagueId       identifier of user to update data
+     * @param accountInfoDto bank account data
+     * @return updated user
+     */
+    User updateUserAccountInfo(UUID leagueId, AccountInfoDto accountInfoDto);
 
     /**
      * Returns list of all initiated users on portal

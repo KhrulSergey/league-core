@@ -1,14 +1,21 @@
 package com.freetonleague.core.service.implementations;
 
 import com.freetonleague.core.cloudclient.TelegramClientService;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
 import com.freetonleague.core.domain.dto.EventDto;
-import com.freetonleague.core.domain.dto.ProductPurchaseNotificationDto;
-import com.freetonleague.core.domain.enums.*;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseNotificationDto;
+import com.freetonleague.core.domain.enums.EventOperationType;
+import com.freetonleague.core.domain.enums.EventProducerModelType;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionTemplateType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import com.freetonleague.core.exception.ProductManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
 import com.freetonleague.core.mapper.ProductPurchaseMapper;
@@ -73,14 +80,14 @@ public class ProductEventServiceImpl implements ProductEventService {
      * Process product purchase payment
      */
     @Override
-    public void processProductPurchaseStateChange(ProductPurchase productPurchase, PurchaseStateType state) {
+    public void processProductPurchaseStateChange(ProductPurchase productPurchase, ProductPurchaseStateType state) {
         log.debug("^ state of product purchase was changed from '{}' to '{}'. Process user state change in Product Event Service.",
                 productPurchase.getPrevState(), productPurchase.getState());
         if (state.isApproved()) {
             ProductPurchaseNotificationDto notification = purchaseMapper.toNotification(productPurchase);
             boolean result = telegramClientService.sendNewPurchaseNotification(notification);
             if (!result) {
-                this.handleProductPurchaseStateChange(productPurchase, PurchaseStateType.FROZEN);
+                this.handleProductPurchaseStateChange(productPurchase, ProductPurchaseStateType.FROZEN);
             }
         }
     }
@@ -90,9 +97,9 @@ public class ProductEventServiceImpl implements ProductEventService {
      */
     private boolean needToPaidPurchaseAmount(ProductPurchase productPurchase) {
         return (isNull(productPurchase.getPrevState())
-                || PurchaseStateType.disabledProposalStateList
+                || ProductPurchaseStateType.disabledProposalStateList
                 .contains(productPurchase.getPrevState()))
-                && PurchaseStateType.activeProposalStateList.contains(productPurchase.getState());
+                && ProductPurchaseStateType.activeProposalStateList.contains(productPurchase.getState());
     }
 
     /**
@@ -137,13 +144,13 @@ public class ProductEventServiceImpl implements ProductEventService {
                 .amount(purchaseAmount)
                 .sourceAccount(accountSourceDto)
                 .targetAccount(accountTargetDto)
-                .transactionType(TransactionType.PAYMENT)
-                .transactionTemplateType(TransactionTemplateType.PRODUCT_PURCHASE)
+                .transactionType(AccountTransactionType.PAYMENT)
+                .transactionTemplateType(AccountTransactionTemplateType.PRODUCT_PURCHASE)
                 .status(AccountTransactionStatusType.FINISHED)
                 .build();
     }
 
-    private void handleProductPurchaseStateChange(ProductPurchase productPurchase, PurchaseStateType newState) {
+    private void handleProductPurchaseStateChange(ProductPurchase productPurchase, ProductPurchaseStateType newState) {
         log.debug("^ handle changing state '{}' of purchase.id to '{}' in Product Event Service.", productPurchase.getId(), newState);
         Map<String, Object> updateFields = Map.of(
                 "state", newState
@@ -163,8 +170,8 @@ public class ProductEventServiceImpl implements ProductEventService {
         } catch (Exception exc) {
             log.error("Error in handleStatusChange: '{}'", exc.getMessage());
         }
-        //TODO удалить непосредственный вызов изменения данных и разработать обработчик сообщений из Kafka до 01/10/21
-        // или удалить коммент
+        // TODO remove direct data change invocation and message designer from Kafka before 01/10/21
+        //or remove comment
         productPurchase.setState(newState);
         productPurchaseService.editPurchase(productPurchase);
     }

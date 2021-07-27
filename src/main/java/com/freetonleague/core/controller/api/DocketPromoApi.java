@@ -1,7 +1,7 @@
 package com.freetonleague.core.controller.api;
 
 import com.freetonleague.core.domain.filter.DocketPromoCreationFilter;
-import com.freetonleague.core.domain.model.DocketPromoEntity;
+import com.freetonleague.core.domain.model.docket.DocketPromoEntity;
 import com.freetonleague.core.security.permissions.CanManageDocket;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

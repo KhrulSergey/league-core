@@ -1,19 +1,19 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
-import com.freetonleague.core.domain.dto.AccountExternalInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionExternalInfoDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.AccountType;
-import com.freetonleague.core.domain.enums.TransactionType;
-import com.freetonleague.core.domain.model.Account;
-import com.freetonleague.core.domain.model.AccountHolder;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.dto.finance.AccountExternalInfoDto;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionExternalInfoDto;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionType;
+import com.freetonleague.core.domain.enums.finance.AccountType;
+import com.freetonleague.core.domain.model.finance.Account;
+import com.freetonleague.core.domain.model.finance.AccountHolder;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.exception.FinancialUnitManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
-import com.freetonleague.core.repository.AccountHolderRepository;
-import com.freetonleague.core.repository.AccountRepository;
-import com.freetonleague.core.repository.AccountTransactionRepository;
+import com.freetonleague.core.repository.finance.AccountHolderRepository;
+import com.freetonleague.core.repository.finance.AccountRepository;
+import com.freetonleague.core.repository.finance.AccountTransactionRepository;
 import com.freetonleague.core.service.financeUnit.FinanceEventService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +58,6 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     @Autowired
     private FinanceEventService financeEventService;
 
-
     @Value("${freetonleague.service.league-finance.service-token:Pu6ThMMkF4GFTL5Vn6F45PHSaC193232HGdsQ}")
     private String leagueFinanceServiceToken;
 
@@ -75,7 +74,6 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
     private Boolean autoAbortTransaction;
 
     //region Accounts
-
     /**
      * Get account by GUID.
      */
@@ -248,7 +246,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         }
         Account sourceAccount = transaction.getSourceAccount();
         // check if source account is defined BUT there is no fund of transaction amount
-        if (TransactionType.withdrawTransactionTypeList.contains(transaction.getTransactionType())) {
+        if (AccountTransactionType.withdrawTransactionTypeList.contains(transaction.getTransactionType())) {
             if (isNull(sourceAccount)) {
                 log.error("!!> requesting saveTransaction for 'withdraw' transaction '{}' with NULL source account. Request denied. Check evoking clients",
                         transaction);
@@ -399,7 +397,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
                 log.error("!!> requesting edit source Account in saveTransaction '{}' cause error while saving in DB. Request denied. Check evoking clients",
                         transaction);
                 throw new FinancialUnitManageException(ExceptionMessages.FINANCE_UNIT_TRANSACTION_CREATION_ERROR,
-                        "Specified source financial account can't be modified in DB. ");
+                        "Specified source financial account can't be modified in DB.");
             }
         }
         transaction.setAbortedAt(LocalDateTime.now());
@@ -547,6 +545,7 @@ public class FinancialUnitServiceImpl implements FinancialUnitService {
         transaction.setPrevStatus(transaction.getStatus());
     }
 
+    //TODO delete until 01/12/21
 //    /** Update account balance from external provider */
 //    private Account updateAccountBalanceFromExternalBank(Account account){
 //        if (isNull(account)) {

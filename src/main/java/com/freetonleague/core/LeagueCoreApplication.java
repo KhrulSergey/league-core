@@ -1,6 +1,8 @@
 package com.freetonleague.core;
 
 import com.freetonleague.core.domain.enums.EventProducerModelType;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
@@ -35,5 +37,10 @@ public class LeagueCoreApplication {
     public String[] kafkaTopicList() {
         return Arrays.stream(EventProducerModelType.values())
                 .map(EventProducerModelType::getTopicName).toArray(String[]::new);
+    }
+
+    @Bean
+    public Gson gsonSerializer() {
+        return new GsonBuilder().serializeNulls().enableComplexMapKeySerialization().create();
     }
 }

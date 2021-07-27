@@ -1,8 +1,8 @@
 package com.freetonleague.core.controller;
 
 import com.freetonleague.core.config.ApiPageable;
-import com.freetonleague.core.domain.dto.ProductPurchaseDto;
-import com.freetonleague.core.domain.enums.PurchaseStateType;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.service.RestProductPurchaseFacade;
 import io.swagger.annotations.Api;
@@ -50,8 +50,8 @@ public class ProductPurchaseController {
     public ResponseEntity<Page<ProductPurchaseDto>> getProductPurchaseList(@PageableDefault Pageable pageable,
                                                                            @RequestParam(value = "league_id", required = false) String leagueId,
                                                                            @RequestParam(value = "product_id", required = false) Long productId,
-                                                                           @RequestParam(value = "statuses", required = false) PurchaseStateType... statuses) {
-        List<PurchaseStateType> statusList = nonNull(statuses) ? List.of(statuses) : null;
+                                                                           @RequestParam(value = "statuses", required = false) ProductPurchaseStateType... statuses) {
+        List<ProductPurchaseStateType> statusList = nonNull(statuses) ? List.of(statuses) : null;
         return new ResponseEntity<>(productPurchaseFacade.getPurchaseList(pageable, leagueId, productId, statusList), HttpStatus.OK);
     }
 
@@ -65,7 +65,7 @@ public class ProductPurchaseController {
     @ApiOperation("Change product purchase by purchaseId (available edit only state and comment, for orgs)")
     @PutMapping(path = PATH_EDIT_PRODUCT_PURCHASE)
     public ResponseEntity<ProductPurchaseDto> editProductPurchase(@RequestParam(value = "purchase_id") long purchaseId,
-                                                                  @RequestParam(value = "purchase_state") PurchaseStateType purchaseState,
+                                                                  @RequestParam(value = "purchase_state") ProductPurchaseStateType purchaseState,
                                                                   @RequestParam(value = "manager_comment", required = false) String managerComment,
                                                                   @ApiIgnore @AuthenticationPrincipal User user) {
         return new ResponseEntity<>(productPurchaseFacade.editPurchase(purchaseId, purchaseState, managerComment, user), HttpStatus.OK);

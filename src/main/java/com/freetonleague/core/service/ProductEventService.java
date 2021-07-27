@@ -1,10 +1,10 @@
 package com.freetonleague.core.service;
 
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.ProductStatusType;
-import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.dto.finance.AccountTransactionInfoDto;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
+import com.freetonleague.core.domain.enums.product.ProductStatusType;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 
 import java.util.List;
 
@@ -24,5 +24,5 @@ public interface ProductEventService {
     /**
      * Process product purchase status changing
      */
-    void processProductPurchaseStateChange(ProductPurchase productPurchase, PurchaseStateType state);
+    void processProductPurchaseStateChange(ProductPurchase productPurchase, ProductPurchaseStateType state);
 }

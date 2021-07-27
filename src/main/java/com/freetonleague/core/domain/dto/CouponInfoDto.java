@@ -1,5 +1,6 @@
 package com.freetonleague.core.domain.dto;
 
+import com.freetonleague.core.domain.dto.finance.AccountInfoDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;

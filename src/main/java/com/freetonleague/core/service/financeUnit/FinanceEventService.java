@@ -1,9 +1,9 @@
 package com.freetonleague.core.service.financeUnit;
 
-import com.freetonleague.core.domain.enums.AccountStatusType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.model.Account;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.enums.finance.AccountStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.model.finance.Account;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 
 
 public interface FinanceEventService {

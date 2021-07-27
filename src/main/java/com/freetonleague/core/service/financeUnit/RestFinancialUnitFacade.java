@@ -1,11 +1,10 @@
 package com.freetonleague.core.service.financeUnit;
 
-import com.freetonleague.core.domain.dto.AccountDepositFinUnitDto;
-import com.freetonleague.core.domain.dto.AccountInfoDto;
-import com.freetonleague.core.domain.dto.AccountTransactionInfoDto;
-import com.freetonleague.core.domain.enums.AccountHolderType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
-import com.freetonleague.core.domain.enums.BankProviderType;
+import com.freetonleague.core.domain.dto.finance.*;
+import com.freetonleague.core.domain.enums.finance.AccountHolderType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.enums.finance.BankProviderType;
+import com.freetonleague.core.domain.enums.finance.Currency;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -78,6 +77,13 @@ public interface RestFinancialUnitFacade {
     Page<AccountTransactionInfoDto> findTransactionListByAccountAndStatusList(Pageable pageable, List<AccountTransactionStatusType> statusList, AccountInfoDto accountDto);
 
     /**
+     * Get exchange rate for specified currencies
+     *
+     * @return exchange rate data or specified currencies
+     */
+    ExchangeRatioDto getExchangeRateForCurrencies(Currency currencyToBuy, Currency currencyToSell);
+
+    /**
      * Returns created transaction info for specified data
      *
      * @param accountTransactionInfoDto specified transaction data to process
@@ -86,9 +92,23 @@ public interface RestFinancialUnitFacade {
     AccountTransactionInfoDto createTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto);
 
     /**
+     * Approve exchange order by specified GUID and make payment to client Account
+     */
+    ExchangeOrderDto approveExchangeOrder(String GUID);
+
+    /**
+     * Create exchange order and transaction for specified currencies and account
+     *
+     * @param amountToBuy                amount of currencies to buy
+     * @param userAccountExternalAddress external address of account to transfer bought currency or to withdraw currency
+     * @return created exchange transaction with paymentUrl
+     */
+    ExchangeOrderDto createExchangeCurrencyOrder(Double amountToBuy, Currency currencyToBuy,
+                                                 Currency currencyToSell, String userAccountExternalAddress);
+
+    /**
      * Returns modified transaction info for specified data
      *
-     * @param accountTransactionInfoDto specified transaction data to modify
      * @return transaction info
      */
     AccountTransactionInfoDto editTransferTransaction(AccountTransactionInfoDto accountTransactionInfoDto);

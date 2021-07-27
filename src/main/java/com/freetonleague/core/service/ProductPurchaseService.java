@@ -1,10 +1,10 @@
 package com.freetonleague.core.service;
 
 
-import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -27,7 +27,7 @@ public interface ProductPurchaseService {
      * @param product  params to search product purchases
      * @return list of product purchases
      */
-    Page<ProductPurchase> getPurchaseListForProduct(Pageable pageable, User user, Product product, List<PurchaseStateType> statusList);
+    Page<ProductPurchase> getPurchaseListForProduct(Pageable pageable, User user, Product product, List<ProductPurchaseStateType> statusList);
 
     /**
      * Returns saved new product purchase.

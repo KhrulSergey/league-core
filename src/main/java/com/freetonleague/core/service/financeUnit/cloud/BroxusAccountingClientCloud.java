@@ -1,6 +1,6 @@
 package com.freetonleague.core.service.financeUnit.cloud;
 
-import com.freetonleague.core.domain.dto.AccountBroxusResponseDto;
+import com.freetonleague.core.domain.dto.finance.AccountBroxusResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 /**
  * Rest client for interact with Third-party Bank Accounting Provider "Broxus"
  */
-@FeignClient(name = "broxus-client", url = "${config.broxus-client.url}")
+@FeignClient(name = "broxus-interlayer-client", url = "${config.broxus-client.url}")
 public interface BroxusAccountingClientCloud {
 
     String AUTH_TOKEN = "token";

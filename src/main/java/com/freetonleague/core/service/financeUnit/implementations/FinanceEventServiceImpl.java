@@ -1,11 +1,11 @@
 package com.freetonleague.core.service.financeUnit.implementations;
 
 import com.freetonleague.core.domain.dto.NotificationDto;
-import com.freetonleague.core.domain.enums.AccountStatusType;
-import com.freetonleague.core.domain.enums.AccountTransactionStatusType;
 import com.freetonleague.core.domain.enums.NotificationType;
-import com.freetonleague.core.domain.model.Account;
-import com.freetonleague.core.domain.model.AccountTransaction;
+import com.freetonleague.core.domain.enums.finance.AccountStatusType;
+import com.freetonleague.core.domain.enums.finance.AccountTransactionStatusType;
+import com.freetonleague.core.domain.model.finance.Account;
+import com.freetonleague.core.domain.model.finance.AccountTransaction;
 import com.freetonleague.core.service.NotificationService;
 import com.freetonleague.core.service.financeUnit.FinanceEventService;
 import com.freetonleague.core.service.financeUnit.FinancialUnitService;

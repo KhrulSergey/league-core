@@ -6,10 +6,12 @@ import com.freetonleague.core.domain.enums.TeamParticipantStatusType;
 import com.freetonleague.core.domain.enums.TeamStateType;
 import com.freetonleague.core.domain.model.Team;
 import com.freetonleague.core.domain.model.TeamParticipant;
-import com.freetonleague.core.domain.model.TournamentTeamProposal;
+import com.freetonleague.core.domain.model.tournament.TournamentTeamProposal;
 import com.freetonleague.core.domain.model.User;
 import com.freetonleague.core.repository.TeamRepository;
 import com.freetonleague.core.service.*;
+import com.freetonleague.core.service.tournament.TournamentProposalService;
+import com.freetonleague.core.service.tournament.TournamentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -192,7 +194,7 @@ public class TeamServiceImpl implements TeamService {
         // from all active tournament
         return tournamentService.getAllActiveTournament().parallelStream()
                 // find team proposal if exists
-                .map(t -> tournamentProposalService.getProposalByTeamAndTournament(team, t))
+                .map(t -> tournamentProposalService.getLastProposalByTeamAndTournament(team, t))
                 .filter(Objects::nonNull)
                 // check if any of proposal is approved (active)
                 .map(TournamentTeamProposal::getState)

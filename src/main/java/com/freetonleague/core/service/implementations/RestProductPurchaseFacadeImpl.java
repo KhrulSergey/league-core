@@ -1,10 +1,10 @@
 package com.freetonleague.core.service.implementations;
 
-import com.freetonleague.core.domain.dto.ProductPurchaseDto;
-import com.freetonleague.core.domain.enums.PurchaseStateType;
-import com.freetonleague.core.domain.model.Product;
-import com.freetonleague.core.domain.model.ProductPurchase;
+import com.freetonleague.core.domain.dto.product.ProductPurchaseDto;
+import com.freetonleague.core.domain.enums.product.ProductPurchaseStateType;
 import com.freetonleague.core.domain.model.User;
+import com.freetonleague.core.domain.model.product.Product;
+import com.freetonleague.core.domain.model.product.ProductPurchase;
 import com.freetonleague.core.exception.ProductManageException;
 import com.freetonleague.core.exception.TeamManageException;
 import com.freetonleague.core.exception.config.ExceptionMessages;
@@ -53,7 +53,7 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
      */
     @Override
     public Page<ProductPurchaseDto> getPurchaseList(Pageable pageable, String leagueId, Long productId,
-                                                    List<PurchaseStateType> statusList) {
+                                                    List<ProductPurchaseStateType> statusList) {
         Product product = nonNull(productId) ? restProductFacade.getVerifiedProductById(productId) : null;
         User user = isBlank(leagueId) ? null : restUserFacade.getVerifiedUserByLeagueId(leagueId);
         return productPurchaseService.getPurchaseListForProduct(pageable, user, product, statusList)
@@ -66,7 +66,7 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
     @Override
     public ProductPurchaseDto createPurchase(ProductPurchaseDto productPurchaseDto, User currentUser) {
         productPurchaseDto.setId(null);
-        productPurchaseDto.setState(PurchaseStateType.APPROVE);
+        productPurchaseDto.setState(ProductPurchaseStateType.APPROVE);
         productPurchaseDto.setManagerComment(null);
         ProductPurchase newProductPurchase = this.getVerifiedProductPurchaseByDto(productPurchaseDto);
 
@@ -128,7 +128,7 @@ public class RestProductPurchaseFacadeImpl implements RestProductPurchaseFacade 
      */
     @CanManageProduct
     @Override
-    public ProductPurchaseDto editPurchase(Long purchaseId, PurchaseStateType currentProductPurchaseState, String managerComment, User currentUser) {
+    public ProductPurchaseDto editPurchase(Long purchaseId, ProductPurchaseStateType currentProductPurchaseState, String managerComment, User currentUser) {
         ProductPurchase userPurchase = this.getVerifiedProductPurchaseById(purchaseId);
 
         if (isNull(userPurchase)) {

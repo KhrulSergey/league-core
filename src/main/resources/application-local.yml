@@ -17,18 +17,38 @@ spring:
 
 app:
   common:
-    settings-refresh-rate: 1000
+    settings-refresh-rate: 10000000000
   user:
     utm-source-register-bonus-map:
       test-source: 0
     import: false
-    import-test-data: true
+    import-test-data: false
+  roulette:
+    min-bet-amount: 1
+    max-bet-amount: 500
+    start-bet-amount: 500
+    start-delay-seconds: 600
+    min-players-count: 2
+    max-players-count: 50
+    commission-factor: 0.95
+    random-org-api-key:
 
 config:
   broxus-client:
     debug: false # change to true for mock Client use
     url: http://49.12.10.52:3383
     token: XXXXXXXXXXXXXXXXXXXXXXXXX
+  broxus-native-client:
+    url: https://api.broxus.com
+    token: e6403d45-9ac4-4c07-b5fd-a4a20c2f9f9e
+    mock: true
+  kuna-client:
+    url: https://kuna.io/api
+    mock: false
+  u-kassa:
+    url: https://kuna.io/api
+    token: e6403d45-9ac4-4c07-b5fd-a4a20c2f9f9e
+    mock: false
   kafka:
     bootstrap-address: localhost:9092
     notifications:
@@ -52,6 +72,7 @@ freetonleague:
       service-token: QPhMMkF4GFEL5Vn6F45PHSaC1496
       balance-update-timeout-in-sec: 300
       product-billing-account-guid: 4cd64ee5-5f54-3eee-a9bb-f19164ef2ac2
+      exchange-order-billing-account-guid: 4cd64ee5-5f54-3eee-a9bb-f19164ef2ac2
       system-bonus-user-login: KdnIgwRY0qzedOZ6R2X6T9GtNDz # name of similar service-user from V025__fin_service_user_and_role.sql
       first-ton-bonus-name: first_ton_2021 # name bonus advertisement company (equals utm_source)
       auto-abort-transaction: true
