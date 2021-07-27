@@ -128,6 +128,7 @@ public class RouletteServiceImpl implements RouletteService {
     }
 
     @Override
+    @Transactional
     public RouletteStatsDto getStats() {
         return getStatsForMatch(getCurrentMatch());
     }

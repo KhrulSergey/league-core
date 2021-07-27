@@ -24,4 +24,9 @@ public class RouletteServiceImplTest extends IntegrationTest {
         Assertions.assertFalse(rouletteService.isReadyToStart(match));
     }
 
+    @Test
+    public void rouletteStatsShouldReturned() {
+        Assertions.assertNotNull(rouletteService.getStats());
+    }
+
 }
