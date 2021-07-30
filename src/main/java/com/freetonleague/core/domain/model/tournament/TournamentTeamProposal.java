@@ -8,10 +8,7 @@ import com.freetonleague.core.domain.enums.tournament.TournamentTeamType;
 import com.freetonleague.core.domain.model.BaseEntity;
 import com.freetonleague.core.domain.model.Team;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
@@ -62,8 +59,9 @@ public class TournamentTeamProposal extends BaseEntity {
     /**
      * Confirmation of tournament participation from team (check-in)
      */
+    @Builder.Default
     @Column(name = "confirmed")
-    private Boolean confirmed;
+    private Boolean confirmed = false;
 
     @Type(type = "jsonb")
     @Column(name = "participate_payment_list", columnDefinition = "jsonb")
