@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -70,9 +71,12 @@ public class RouletteServiceImpl implements RouletteService {
     }
 
     private void createNewMatch() {
+        LocalDateTime startTime = LocalDateTime.now().plus(rouletteProperties.getStartDelaySeconds(), ChronoUnit.SECONDS);
+
         rouletteMatchRepository.save(
                 RouletteMatchEntity.builder()
                         .finished(false)
+                        .shouldStartedAfter(startTime)
                         .build()
         );
     }
