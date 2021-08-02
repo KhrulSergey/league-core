@@ -11,7 +11,7 @@ public interface RouletteService {
 
     void update();
 
-    void makeBet(User authUser, Long betAmount);
+    RouletteStatsDto makeBet(User authUser, Long betAmount);
 
     RouletteStatsDto getStats();
 
