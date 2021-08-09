@@ -13,6 +13,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import springfox.documentation.annotations.ApiIgnore;
 
@@ -41,7 +42,7 @@ public interface RouletteApi {
             @PageableDefault Pageable pageable
     );
 
-    @GetMapping(POST_MAKE_BET_PATH)
+    @PostMapping(POST_MAKE_BET_PATH)
     @ApiOperation("Make bet by user")
     RouletteStatsDto makeBet(
             @RequestBody @Valid RouletteBetFilter filter,
