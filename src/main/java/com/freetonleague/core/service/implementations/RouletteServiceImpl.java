@@ -100,7 +100,7 @@ public class RouletteServiceImpl implements RouletteService {
 
         List<RouletteBetEntity> bets = currentMatch.getBets();
 
-        long ticketNumberFrom = currentMatch.getLastTicketNumber() + 1;
+        long ticketNumberFrom = currentMatch.getLastTicketNumber() != null ? currentMatch.getLastTicketNumber() + 1 : 0;
         long ticketNumberTo = ticketNumberFrom + betAmount;
 
         bets.add(RouletteBetEntity.builder()
